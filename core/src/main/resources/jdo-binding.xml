@@ -1,0 +1,628 @@
+<binding xmlns:ns1="http://java.sun.com/xml/ns/jdo/jdo" name="binding" package="com.sun.java.xml.ns.jdo.jdo" trim-whitespace="true">
+  <namespace uri="http://java.sun.com/xml/ns/jdo/jdo" default="elements"/>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Jdo" name="jdo" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Jdo$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo._Package" test-method="ifPackage" get-method="getPackage" set-method="setPackage" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Query" test-method="ifQuery" get-method="getQuery" set-method="setQuery" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.FetchPlan" test-method="ifFetchPlan" get-method="getFetchPlan" set-method="setFetchPlan" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.jdo-AttributeGroup" get-method="getAttlistJdo" set-method="setAttlistJdo" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.jdo-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistJdo">
+    <value style="attribute" name="catalog" get-method="getCatalog" set-method="setCatalog" usage="optional"/>
+    <value style="attribute" name="schema" get-method="getSchema" set-method="setSchema" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.FetchPlan" name="fetch-plan" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection item-type="com.sun.java.xml.ns.jdo.jdo.FetchGroup" get-method="getFetchGroupList" set-method="setFetchGroupList" create-type="java.util.ArrayList"/>
+    <structure map-as="ns1:attlist.fetch-plan-AttributeGroup" get-method="getAttlistFetchPlan" set-method="setAttlistFetchPlan" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.fetch-plan-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistFetchPlan">
+    <value style="attribute" name="name" get-method="getName" set-method="setName" usage="optional"/>
+    <value style="attribute" name="max-fetch-depth" get-method="getMaxFetchDepth" set-method="setMaxFetchDepth" usage="optional"/>
+    <value style="attribute" name="fetch-size" get-method="getFetchSize" set-method="setFetchSize" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo._Package" name="package" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo._Package$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Interface" test-method="ifInterface" get-method="getInterface" set-method="setInterface" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo._Class" test-method="if_Class" get-method="get_Class" set-method="set_Class" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Sequence" test-method="ifSequence" get-method="getSequence" set-method="setSequence" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.package-AttributeGroup" get-method="getAttlistPackage" set-method="setAttlistPackage" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.package-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistPackage">
+    <value style="attribute" name="name" get-method="getName" set-method="setName" usage="optional"/>
+    <value style="attribute" name="catalog" get-method="getCatalog" set-method="setCatalog" usage="optional"/>
+    <value style="attribute" name="schema" get-method="getSchema" set-method="setSchema" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Interface" name="interface" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Interface$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.DatastoreIdentity" test-method="ifDatastoreIdentity" get-method="getDatastoreIdentity" set-method="setDatastoreIdentity" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.PrimaryKey" test-method="ifPrimaryKey" get-method="getPrimaryKey" set-method="setPrimaryKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Inheritance" test-method="ifInheritance" get-method="getInheritance" set-method="setInheritance" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Version" test-method="ifVersion" get-method="getVersion" set-method="setVersion" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Join" test-method="ifJoin" get-method="getJoin" set-method="setJoin" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifProperty" get-method="getProperty" set-method="setProperty" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Query" test-method="ifQuery" get-method="getQuery" set-method="setQuery" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.FetchGroup" test-method="ifFetchGroup" get-method="getFetchGroup" set-method="setFetchGroup" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.interface-AttributeGroup" get-method="getAttlistInterface" set-method="setAttlistInterface"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.interface-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistInterface">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistInterface$IdentityType" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistInterface$RequiresExtent" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistInterface$Detachable" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistInterface$EmbeddedOnly" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistInterface$Cacheable" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistInterface$SerializeRead" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="identity-type" get-method="getIdentityType" set-method="setIdentityType" usage="optional"/>
+    <value style="attribute" name="objectid-class" get-method="getObjectidClass" set-method="setObjectidClass" usage="optional"/>
+    <value style="attribute" name="requires-extent" get-method="getRequiresExtent" set-method="setRequiresExtent" usage="optional"/>
+    <value style="attribute" name="detachable" get-method="getDetachable" set-method="setDetachable" usage="optional"/>
+    <value style="attribute" name="embedded-only" get-method="getEmbeddedOnly" set-method="setEmbeddedOnly" usage="optional"/>
+    <value style="attribute" name="catalog" get-method="getCatalog" set-method="setCatalog" usage="optional"/>
+    <value style="attribute" name="schema" get-method="getSchema" set-method="setSchema" usage="optional"/>
+    <value style="attribute" name="cacheable" get-method="getCacheable" set-method="setCacheable" usage="optional"/>
+    <value style="attribute" name="serialize-read" get-method="getSerializeRead" set-method="setSerializeRead" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Property" name="property" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Property$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure test-method="ifChoice" get-method="getChoice" set-method="setChoice" usage="optional" ordered="false" choice="true">
+          <structure type="com.sun.java.xml.ns.jdo.jdo.Array" test-method="ifArray" get-method="getArray" set-method="setArray" usage="optional"/>
+          <structure type="com.sun.java.xml.ns.jdo.jdo.Collection" test-method="ifCollection" get-method="getCollection" set-method="setCollection" usage="optional"/>
+          <structure type="com.sun.java.xml.ns.jdo.jdo.Map" test-method="ifMap" get-method="getMap" set-method="setMap" usage="optional"/>
+        </structure>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Join" test-method="ifJoin" get-method="getJoin" set-method="setJoin" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Embedded" test-method="ifEmbedded" get-method="getEmbedded" set-method="setEmbedded" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Element" test-method="ifElement" get-method="getElement" set-method="setElement" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Key" test-method="ifKey" get-method="getKey" set-method="setKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Value" test-method="ifValue" get-method="getValue" set-method="setValue" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Order" test-method="ifOrder" get-method="getOrder" set-method="setOrder" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.property-AttributeGroup" get-method="getAttlistProperty" set-method="setAttlistProperty"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.property-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistProperty">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$PersistenceModifier" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$DefaultFetchGroup" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$NullValue" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$Dependent" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$Embedded" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$PrimaryKey" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$Serialized" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$DeleteAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$Indexed" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$Unique" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistProperty$Cacheable" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+    <value style="attribute" name="persistence-modifier" get-method="getPersistenceModifier" set-method="setPersistenceModifier" usage="optional"/>
+    <value style="attribute" name="default-fetch-group" get-method="getDefaultFetchGroup" set-method="setDefaultFetchGroup" usage="optional"/>
+    <value style="attribute" name="load-fetch-group" get-method="getLoadFetchGroup" set-method="setLoadFetchGroup" usage="optional"/>
+    <value style="attribute" name="null-value" get-method="getNullValue" set-method="setNullValue" usage="optional"/>
+    <value style="attribute" name="dependent" get-method="getDependent" set-method="setDependent" usage="optional"/>
+    <value style="attribute" name="embedded" get-method="getEmbedded" set-method="setEmbedded" usage="optional"/>
+    <value style="attribute" name="primary-key" get-method="getPrimaryKey" set-method="setPrimaryKey" usage="optional"/>
+    <value style="attribute" name="value-strategy" get-method="getValueStrategy" set-method="setValueStrategy" usage="optional"/>
+    <value style="attribute" name="sequence" get-method="getSequence" set-method="setSequence" usage="optional"/>
+    <value style="attribute" name="serialized" get-method="getSerialized" set-method="setSerialized" usage="optional"/>
+    <value style="attribute" name="field-type" get-method="getFieldType" set-method="setFieldType" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="delete-action" get-method="getDeleteAction" set-method="setDeleteAction" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+    <value style="attribute" name="mapped-by" get-method="getMappedBy" set-method="setMappedBy" usage="optional"/>
+    <value style="attribute" name="recursion-depth" get-method="getRecursionDepth" set-method="setRecursionDepth" usage="optional"/>
+    <value style="attribute" name="field-name" get-method="getFieldName" set-method="setFieldName" usage="optional"/>
+    <value style="attribute" name="cacheable" get-method="getCacheable" set-method="setCacheable" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo._Class" name="class" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo._Class$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Implements" test-method="ifImplements" get-method="getImplements" set-method="setImplements" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.DatastoreIdentity" test-method="ifDatastoreIdentity" get-method="getDatastoreIdentity" set-method="setDatastoreIdentity" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.PrimaryKey" test-method="ifPrimaryKey" get-method="getPrimaryKey" set-method="setPrimaryKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Inheritance" test-method="ifInheritance" get-method="getInheritance" set-method="setInheritance" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Version" test-method="ifVersion" get-method="getVersion" set-method="setVersion" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Join" test-method="ifJoin" get-method="getJoin" set-method="setJoin" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Field" test-method="ifField" get-method="getField" set-method="setField" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifProperty" get-method="getProperty" set-method="setProperty" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Query" test-method="ifQuery" get-method="getQuery" set-method="setQuery" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.FetchGroup" test-method="ifFetchGroup" get-method="getFetchGroup" set-method="setFetchGroup" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.class-AttributeGroup" get-method="getAttlistClass" set-method="setAttlistClass"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.class-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistClass">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistClass$IdentityType" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistClass$RequiresExtent" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistClass$Detachable" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistClass$EmbeddedOnly" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistClass$PersistenceModifier" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistClass$Cacheable" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistClass$SerializeRead" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+    <value style="attribute" name="identity-type" get-method="getIdentityType" set-method="setIdentityType" usage="optional"/>
+    <value style="attribute" name="objectid-class" get-method="getObjectidClass" set-method="setObjectidClass" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="requires-extent" get-method="getRequiresExtent" set-method="setRequiresExtent" usage="optional"/>
+    <value style="attribute" name="persistence-capable-superclass" get-method="getPersistenceCapableSuperclass" set-method="setPersistenceCapableSuperclass" usage="optional"/>
+    <value style="attribute" name="detachable" get-method="getDetachable" set-method="setDetachable" usage="optional"/>
+    <value style="attribute" name="embedded-only" get-method="getEmbeddedOnly" set-method="setEmbeddedOnly" usage="optional"/>
+    <value style="attribute" name="persistence-modifier" get-method="getPersistenceModifier" set-method="setPersistenceModifier" usage="optional"/>
+    <value style="attribute" name="catalog" get-method="getCatalog" set-method="setCatalog" usage="optional"/>
+    <value style="attribute" name="schema" get-method="getSchema" set-method="setSchema" usage="optional"/>
+    <value style="attribute" name="cacheable" get-method="getCacheable" set-method="setCacheable" usage="optional"/>
+    <value style="attribute" name="serialize-read" get-method="getSerializeRead" set-method="setSerializeRead" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.PrimaryKey" name="primary-key" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.PrimaryKey$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.primary-key-AttributeGroup" get-method="getAttlistPrimaryKey" set-method="setAttlistPrimaryKey" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.primary-key-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistPrimaryKey">
+    <value style="attribute" name="name" get-method="getName" set-method="setName" usage="optional"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Join" name="join" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Join$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.PrimaryKey" test-method="ifPrimaryKey" get-method="getPrimaryKey" set-method="setPrimaryKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.join-AttributeGroup" get-method="getAttlistJoin" set-method="setAttlistJoin" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.join-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistJoin">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistJoin$Outer" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistJoin$DeleteAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistJoin$Indexed" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistJoin$Unique" enum-value-method="xmlValue"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="outer" get-method="getOuter" set-method="setOuter" usage="optional"/>
+    <value style="attribute" name="delete-action" get-method="getDeleteAction" set-method="setDeleteAction" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Version" name="version" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Version$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.version-AttributeGroup" get-method="getAttlistVersion" set-method="setAttlistVersion" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.version-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistVersion">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistVersion$Indexed" enum-value-method="xmlValue"/>
+    <value style="attribute" name="strategy" get-method="getStrategy" set-method="setStrategy" usage="optional"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.DatastoreIdentity" name="datastore-identity" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.DatastoreIdentity$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.datastore-identity-AttributeGroup" get-method="getAttlistDatastoreIdentity" set-method="setAttlistDatastoreIdentity" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.datastore-identity-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistDatastoreIdentity">
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="strategy" get-method="getStrategy" set-method="setStrategy" usage="optional"/>
+    <value style="attribute" name="sequence" get-method="getSequence" set-method="setSequence" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Implements" name="implements" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Implements$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifProperty" get-method="getProperty" set-method="setProperty" usage="optional"/>
+      </structure>
+    </collection>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Inheritance" name="inheritance" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Inheritance$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Join" test-method="ifJoin" get-method="getJoin" set-method="setJoin" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Discriminator" test-method="ifDiscriminator" get-method="getDiscriminator" set-method="setDiscriminator" usage="optional"/>
+      </structure>
+    </collection>
+    <value style="attribute" name="strategy" get-method="getStrategy" set-method="setStrategy" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Discriminator" name="discriminator" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Discriminator$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.discriminator-AttributeGroup" get-method="getAttlistDiscriminator" set-method="setAttlistDiscriminator" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.discriminator-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistDiscriminator">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistDiscriminator$Indexed" enum-value-method="xmlValue"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="value" get-method="getValue" set-method="setValue" usage="optional"/>
+    <value style="attribute" name="strategy" get-method="getStrategy" set-method="setStrategy" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Column" name="column" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection item-type="com.sun.java.xml.ns.jdo.jdo.Extension" get-method="getExtensionList" set-method="setExtensionList" usage="optional" create-type="java.util.ArrayList"/>
+    <structure map-as="ns1:attlist.column-AttributeGroup" get-method="getAttlistColumn" set-method="setAttlistColumn" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.column-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistColumn">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistColumn$AllowsNull" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName" usage="optional"/>
+    <value style="attribute" name="target" get-method="getTarget" set-method="setTarget" usage="optional"/>
+    <value style="attribute" name="target-field" get-method="getTargetField" set-method="setTargetField" usage="optional"/>
+    <value style="attribute" name="jdbc-type" get-method="getJdbcType" set-method="setJdbcType" usage="optional"/>
+    <value style="attribute" name="sql-type" get-method="getSqlType" set-method="setSqlType" usage="optional"/>
+    <value style="attribute" name="length" get-method="getLength" set-method="setLength" usage="optional"/>
+    <value style="attribute" name="scale" get-method="getScale" set-method="setScale" usage="optional"/>
+    <value style="attribute" name="allows-null" get-method="getAllowsNull" set-method="setAllowsNull" usage="optional"/>
+    <value style="attribute" name="default-value" get-method="getDefaultValue" set-method="setDefaultValue" usage="optional"/>
+    <value style="attribute" name="insert-value" get-method="getInsertValue" set-method="setInsertValue" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Field" name="field" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Field$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure test-method="ifChoice" get-method="getChoice" set-method="setChoice" usage="optional" ordered="false" choice="true">
+          <structure type="com.sun.java.xml.ns.jdo.jdo.Array" test-method="ifArray" get-method="getArray" set-method="setArray" usage="optional"/>
+          <structure type="com.sun.java.xml.ns.jdo.jdo.Collection" test-method="ifCollection" get-method="getCollection" set-method="setCollection" usage="optional"/>
+          <structure type="com.sun.java.xml.ns.jdo.jdo.Map" test-method="ifMap" get-method="getMap" set-method="setMap" usage="optional"/>
+        </structure>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Join" test-method="ifJoin" get-method="getJoin" set-method="setJoin" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Embedded" test-method="ifEmbedded" get-method="getEmbedded" set-method="setEmbedded" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Element" test-method="ifElement" get-method="getElement" set-method="setElement" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Key" test-method="ifKey" get-method="getKey" set-method="setKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Value" test-method="ifValue" get-method="getValue" set-method="setValue" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Order" test-method="ifOrder" get-method="getOrder" set-method="setOrder" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.field-AttributeGroup" get-method="getAttlistField" set-method="setAttlistField"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.field-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistField">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$PersistenceModifier" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$PrimaryKey" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$NullValue" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$DefaultFetchGroup" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$Embedded" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$Serialized" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$Dependent" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$DeleteAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$Indexed" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$Unique" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistField$Cacheable" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+    <value style="attribute" name="persistence-modifier" get-method="getPersistenceModifier" set-method="setPersistenceModifier" usage="optional"/>
+    <value style="attribute" name="field-type" get-method="getFieldType" set-method="setFieldType" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="primary-key" get-method="getPrimaryKey" set-method="setPrimaryKey" usage="optional"/>
+    <value style="attribute" name="null-value" get-method="getNullValue" set-method="setNullValue" usage="optional"/>
+    <value style="attribute" name="default-fetch-group" get-method="getDefaultFetchGroup" set-method="setDefaultFetchGroup" usage="optional"/>
+    <value style="attribute" name="embedded" get-method="getEmbedded" set-method="setEmbedded" usage="optional"/>
+    <value style="attribute" name="serialized" get-method="getSerialized" set-method="setSerialized" usage="optional"/>
+    <value style="attribute" name="dependent" get-method="getDependent" set-method="setDependent" usage="optional"/>
+    <value style="attribute" name="value-strategy" get-method="getValueStrategy" set-method="setValueStrategy" usage="optional"/>
+    <value style="attribute" name="delete-action" get-method="getDeleteAction" set-method="setDeleteAction" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+    <value style="attribute" name="sequence" get-method="getSequence" set-method="setSequence" usage="optional"/>
+    <value style="attribute" name="load-fetch-group" get-method="getLoadFetchGroup" set-method="setLoadFetchGroup" usage="optional"/>
+    <value style="attribute" name="recursion-depth" get-method="getRecursionDepth" set-method="setRecursionDepth" usage="optional"/>
+    <value style="attribute" name="mapped-by" get-method="getMappedBy" set-method="setMappedBy" usage="optional"/>
+    <value style="attribute" name="cacheable" get-method="getCacheable" set-method="setCacheable" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.ForeignKey" name="foreign-key" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure test-method="ifChoice" get-method="getChoice" set-method="setChoice" usage="optional" ordered="false" choice="true">
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumnList" get-method="getColumnList" set-method="setColumnList" usage="optional" create-type="java.util.ArrayList"/>
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Field" test-method="ifFieldList" get-method="getFieldList" set-method="setFieldList" usage="optional" create-type="java.util.ArrayList"/>
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifPropertyList" get-method="getPropertyList" set-method="setPropertyList" usage="optional" create-type="java.util.ArrayList"/>
+        </structure>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.foreign-key-AttributeGroup" get-method="getAttlistForeignKey" set-method="setAttlistForeignKey" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.foreign-key-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistForeignKey">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistForeignKey$Deferred" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistForeignKey$DeleteAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistForeignKey$UpdateAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistForeignKey$Unique" enum-value-method="xmlValue"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="deferred" get-method="getDeferred" set-method="setDeferred" usage="optional"/>
+    <value style="attribute" name="delete-action" get-method="getDeleteAction" set-method="setDeleteAction" usage="optional"/>
+    <value style="attribute" name="update-action" get-method="getUpdateAction" set-method="setUpdateAction" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Collection" name="collection" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection item-type="com.sun.java.xml.ns.jdo.jdo.Extension" get-method="getExtensionList" set-method="setExtensionList" usage="optional" create-type="java.util.ArrayList"/>
+    <structure map-as="ns1:attlist.collection-AttributeGroup" get-method="getAttlistCollection" set-method="setAttlistCollection" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.collection-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistCollection">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistCollection$EmbeddedElement" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistCollection$DependentElement" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistCollection$SerializedElement" enum-value-method="xmlValue"/>
+    <value style="attribute" name="element-type" get-method="getElementType" set-method="setElementType" usage="optional"/>
+    <value style="attribute" name="embedded-element" get-method="getEmbeddedElement" set-method="setEmbeddedElement" usage="optional"/>
+    <value style="attribute" name="dependent-element" get-method="getDependentElement" set-method="setDependentElement" usage="optional"/>
+    <value style="attribute" name="serialized-element" get-method="getSerializedElement" set-method="setSerializedElement" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Map" name="map" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection item-type="com.sun.java.xml.ns.jdo.jdo.Extension" get-method="getExtensionList" set-method="setExtensionList" usage="optional" create-type="java.util.ArrayList"/>
+    <structure map-as="ns1:attlist.map-AttributeGroup" get-method="getAttlistMap" set-method="setAttlistMap" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.map-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistMap">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistMap$EmbeddedKey" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistMap$DependentKey" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistMap$SerializedKey" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistMap$EmbeddedValue" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistMap$DependentValue" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistMap$SerializedValue" enum-value-method="xmlValue"/>
+    <value style="attribute" name="key-type" get-method="getKeyType" set-method="setKeyType" usage="optional"/>
+    <value style="attribute" name="embedded-key" get-method="getEmbeddedKey" set-method="setEmbeddedKey" usage="optional"/>
+    <value style="attribute" name="dependent-key" get-method="getDependentKey" set-method="setDependentKey" usage="optional"/>
+    <value style="attribute" name="serialized-key" get-method="getSerializedKey" set-method="setSerializedKey" usage="optional"/>
+    <value style="attribute" name="value-type" get-method="getValueType" set-method="setValueType" usage="optional"/>
+    <value style="attribute" name="embedded-value" get-method="getEmbeddedValue" set-method="setEmbeddedValue" usage="optional"/>
+    <value style="attribute" name="dependent-value" get-method="getDependentValue" set-method="setDependentValue" usage="optional"/>
+    <value style="attribute" name="serialized-value" get-method="getSerializedValue" set-method="setSerializedValue" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Key" name="key" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Key$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Embedded" test-method="ifEmbedded" get-method="getEmbedded" set-method="setEmbedded" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.key-AttributeGroup" get-method="getAttlistKey" set-method="setAttlistKey" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.key-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistKey">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistKey$DeleteAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistKey$UpdateAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistKey$Indexed" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistKey$Unique" enum-value-method="xmlValue"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="delete-action" get-method="getDeleteAction" set-method="setDeleteAction" usage="optional"/>
+    <value style="attribute" name="update-action" get-method="getUpdateAction" set-method="setUpdateAction" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+    <value style="attribute" name="mapped-by" get-method="getMappedBy" set-method="setMappedBy" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Value" name="value" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Value$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Embedded" test-method="ifEmbedded" get-method="getEmbedded" set-method="setEmbedded" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.value-AttributeGroup" get-method="getAttlistValue" set-method="setAttlistValue" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.value-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistValue">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistValue$DeleteAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistValue$UpdateAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistValue$Indexed" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistValue$Unique" enum-value-method="xmlValue"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="delete-action" get-method="getDeleteAction" set-method="setDeleteAction" usage="optional"/>
+    <value style="attribute" name="update-action" get-method="getUpdateAction" set-method="setUpdateAction" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+    <value style="attribute" name="mapped-by" get-method="getMappedBy" set-method="setMappedBy" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Array" name="array" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection item-type="com.sun.java.xml.ns.jdo.jdo.Extension" get-method="getExtensionList" set-method="setExtensionList" usage="optional" create-type="java.util.ArrayList"/>
+    <structure map-as="ns1:attlist.array-AttributeGroup" get-method="getAttlistArray" set-method="setAttlistArray" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.array-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistArray">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistArray$EmbeddedElement" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistArray$DependentElement" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistArray$SerializedElement" enum-value-method="xmlValue"/>
+    <value style="attribute" name="element-type" get-method="getElementType" set-method="setElementType" usage="optional"/>
+    <value style="attribute" name="embedded-element" get-method="getEmbeddedElement" set-method="setEmbeddedElement" usage="optional"/>
+    <value style="attribute" name="dependent-element" get-method="getDependentElement" set-method="setDependentElement" usage="optional"/>
+    <value style="attribute" name="serialized-element" get-method="getSerializedElement" set-method="setSerializedElement" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Element" name="element" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Element$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Embedded" test-method="ifEmbedded" get-method="getEmbedded" set-method="setEmbedded" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.ForeignKey" test-method="ifForeignKey" get-method="getForeignKey" set-method="setForeignKey" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Unique" test-method="ifUnique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.element-AttributeGroup" get-method="getAttlistElement" set-method="setAttlistElement" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.element-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistElement">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistElement$DeleteAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistElement$UpdateAction" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistElement$Indexed" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistElement$Unique" enum-value-method="xmlValue"/>
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="delete-action" get-method="getDeleteAction" set-method="setDeleteAction" usage="optional"/>
+    <value style="attribute" name="update-action" get-method="getUpdateAction" set-method="setUpdateAction" usage="optional"/>
+    <value style="attribute" name="indexed" get-method="getIndexed" set-method="setIndexed" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+    <value style="attribute" name="mapped-by" get-method="getMappedBy" set-method="setMappedBy" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Order" name="order" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Order$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumn" get-method="getColumn" set-method="setColumn" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Index" test-method="ifIndex" get-method="getIndex" set-method="setIndex" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.order-AttributeGroup" get-method="getAttlistOrder" set-method="setAttlistOrder" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.order-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistOrder">
+    <value style="attribute" name="column" get-method="getColumn" set-method="setColumn" usage="optional"/>
+    <value style="attribute" name="mapped-by" get-method="getMappedBy" set-method="setMappedBy" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.FetchGroup" name="fetch-group" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.FetchGroup$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.FetchGroup" test-method="ifFetchGroup" get-method="getFetchGroup" set-method="setFetchGroup" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Field" test-method="ifField" get-method="getField" set-method="setField" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifProperty" get-method="getProperty" set-method="setProperty" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.fetch-group-AttributeGroup" get-method="getAttlistFetchGroup" set-method="setAttlistFetchGroup"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.fetch-group-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistFetchGroup">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistFetchGroup$PostLoad" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+    <value style="attribute" name="post-load" get-method="getPostLoad" set-method="setPostLoad" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Embedded" name="embedded" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Embedded$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Field" test-method="ifField" get-method="getField" set-method="setField" usage="optional"/>
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifProperty" get-method="getProperty" set-method="setProperty" usage="optional"/>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.embedded-AttributeGroup" get-method="getAttlistEmbedded" set-method="setAttlistEmbedded" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.embedded-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistEmbedded">
+    <value style="attribute" name="owner-field" get-method="getOwnerField" set-method="setOwnerField" usage="optional"/>
+    <value style="attribute" name="null-indicator-column" get-method="getNullIndicatorColumn" set-method="setNullIndicatorColumn" usage="optional"/>
+    <value style="attribute" name="null-indicator-value" get-method="getNullIndicatorValue" set-method="setNullIndicatorValue" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Sequence" name="sequence" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection item-type="com.sun.java.xml.ns.jdo.jdo.Extension" get-method="getExtensionList" set-method="setExtensionList" usage="optional" create-type="java.util.ArrayList"/>
+    <structure map-as="ns1:attlist.sequence-AttributeGroup" get-method="getAttlistSequence" set-method="setAttlistSequence"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.sequence-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistSequence">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistSequence$Strategy" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+    <value style="attribute" name="datastore-sequence" get-method="getDatastoreSequence" set-method="setDatastoreSequence" usage="optional"/>
+    <value style="attribute" name="factory-class" get-method="getFactoryClass" set-method="setFactoryClass" usage="optional"/>
+    <value style="attribute" name="strategy" get-method="getStrategy" set-method="setStrategy"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Index" name="index" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Index$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure test-method="ifChoice" get-method="getChoice" set-method="setChoice" usage="optional" ordered="false" choice="true">
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumnList" get-method="getColumnList" set-method="setColumnList" usage="optional" create-type="java.util.ArrayList"/>
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Field" test-method="ifFieldList" get-method="getFieldList" set-method="setFieldList" usage="optional" create-type="java.util.ArrayList"/>
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifPropertyList" get-method="getPropertyList" set-method="setPropertyList" usage="optional" create-type="java.util.ArrayList"/>
+        </structure>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.index-AttributeGroup" get-method="getAttlistIndex" set-method="setAttlistIndex" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.index-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistIndex">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistIndex$Unique" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Query" name="query" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection item-type="com.sun.java.xml.ns.jdo.jdo.Extension" get-method="getExtensionList" set-method="setExtensionList" usage="optional" create-type="java.util.ArrayList"/>
+    <structure map-as="ns1:attlist.query-AttributeGroup" get-method="getAttlistQuery" set-method="setAttlistQuery"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.query-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistQuery">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistQuery$Unmodifiable" enum-value-method="xmlValue"/>
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistQuery$Unique" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName"/>
+    <value style="attribute" name="language" get-method="getLanguage" set-method="setLanguage" usage="optional"/>
+    <value style="attribute" name="unmodifiable" get-method="getUnmodifiable" set-method="setUnmodifiable" usage="optional"/>
+    <value style="attribute" name="unique" get-method="getUnique" set-method="setUnique" usage="optional"/>
+    <value style="attribute" name="result-class" get-method="getResultClass" set-method="setResultClass" usage="optional"/>
+    <value style="attribute" name="fetch-plan" get-method="getFetchPlan" set-method="setFetchPlan" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Unique" name="unique" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <collection get-method="getChoiceList" set-method="setChoiceList" usage="optional" create-type="java.util.ArrayList">
+      <structure type="com.sun.java.xml.ns.jdo.jdo.Unique$Choice" ordered="false" choice="true">
+        <structure type="com.sun.java.xml.ns.jdo.jdo.Extension" test-method="ifExtension" get-method="getExtension" set-method="setExtension" usage="optional"/>
+        <structure test-method="ifChoice" get-method="getChoice" set-method="setChoice" usage="optional" ordered="false" choice="true">
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Column" test-method="ifColumnList" get-method="getColumnList" set-method="setColumnList" usage="optional" create-type="java.util.ArrayList"/>
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Field" test-method="ifFieldList" get-method="getFieldList" set-method="setFieldList" usage="optional" create-type="java.util.ArrayList"/>
+          <collection item-type="com.sun.java.xml.ns.jdo.jdo.Property" test-method="ifPropertyList" get-method="getPropertyList" set-method="setPropertyList" usage="optional" create-type="java.util.ArrayList"/>
+        </structure>
+      </structure>
+    </collection>
+    <structure map-as="ns1:attlist.unique-AttributeGroup" get-method="getAttlistUnique" set-method="setAttlistUnique" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.unique-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistUnique">
+    <format type="com.sun.java.xml.ns.jdo.jdo.AttlistUnique$Deferred" enum-value-method="xmlValue"/>
+    <value style="attribute" name="name" get-method="getName" set-method="setName" usage="optional"/>
+    <value style="attribute" name="table" get-method="getTable" set-method="setTable" usage="optional"/>
+    <value style="attribute" name="deferred" get-method="getDeferred" set-method="setDeferred" usage="optional"/>
+  </mapping>
+  <mapping class="com.sun.java.xml.ns.jdo.jdo.Extension" name="extension" ns="http://java.sun.com/xml/ns/jdo/jdo">
+    <structure map-as="ns1:any"/>
+    <structure map-as="ns1:attlist.extension-AttributeGroup" get-method="getAttlistExtension" set-method="setAttlistExtension"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:attlist.extension-AttributeGroup" class="com.sun.java.xml.ns.jdo.jdo.AttlistExtension">
+    <value style="attribute" name="vendor-name" get-method="getVendorName" set-method="setVendorName"/>
+    <value style="attribute" name="key" get-method="getKey" set-method="setKey" usage="optional"/>
+    <value style="attribute" name="value" get-method="getValue" set-method="setValue" usage="optional"/>
+  </mapping>
+  <mapping abstract="true" type-name="ns1:any" class="com.sun.java.xml.ns.jdo.jdo.Any">
+    <structure get-method="getAnyList" set-method="setAnyList" usage="optional" marshaller="org.jibx.extras.DomListMapper" unmarshaller="org.jibx.extras.DomListMapper"/>
+  </mapping>
+</binding>
