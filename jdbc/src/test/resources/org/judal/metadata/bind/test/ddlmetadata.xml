@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database xmlns="http://db.apache.org/ddlutils/schema/1.1" name="clocialdev">
+  <table name="k_accounts">
+    <column name="id_account" primaryKey="false" required="true" type="CHAR" size="10" autoIncrement="false"></column>
+    <column name="tp_account" primaryKey="false" required="true" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="bo_active" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_trial" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="max_users" primaryKey="false" required="false" type="INTEGER" size="10" default="1" autoIncrement="false"></column>
+    <column name="sn_passport" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="tp_passport" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="tp_billing" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="gu_billing_addr" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_cancel" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nu_bank" primaryKey="false" required="false" type="CHAR" size="20" autoIncrement="false"></column>
+    <column name="nu_card" primaryKey="false" required="false" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="tp_card" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="tx_expire" primaryKey="false" required="false" type="VARCHAR" size="10" autoIncrement="false"></column>
+    <column name="nu_cvv2" primaryKey="false" required="false" type="VARCHAR" size="7" autoIncrement="false"></column>
+    <column name="tx_comments" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_avatar_sentences">
+    <column name="id_avtsent" primaryKey="false" required="true" type="VARCHAR" size="52" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="tp_sentence" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="id_avatar" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="bo_active" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tx_intro" primaryKey="false" required="false" type="VARCHAR" size="140" autoIncrement="false"></column>
+    <column name="tx_literal" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nu_pictures" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="id_gender" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="dt_birth" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="id_zodiac" primaryKey="false" required="false" type="VARCHAR" size="12" autoIncrement="false"></column>
+    <column name="marital_status" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="id_religion" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="nu_height" primaryKey="false" required="false" type="DOUBLE" size="17,17" autoIncrement="false"></column>
+    <column name="id_shape" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="id_ethnic" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="bo_smoker" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="nu_children" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_country" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="pt_geography" primaryKey="false" required="false" type="OTHER" autoIncrement="false"></column>
+    <column name="id_language1" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_language2" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_language3" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="tp_job" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="de_title" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="lv_year_income" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="lv_education" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_visits" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="dt_last_login" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+  </table>
+  <table name="k_avatar_tags_preferences">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="id_tag" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_likes" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_searches" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_clicks" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_event_visits" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_event_attend" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_total_score" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+  </table>
+  <table name="k_avatar_visits">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_visitor" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_visit" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="false" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_referer" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_avatar_visits_count">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nu_visits" primaryKey="false" required="false" type="BIGINT" size="19" default="0" autoIncrement="false"></column>
+  </table>
+  <table name="k_connection_stats">
+    <column name="nm_cn" primaryKey="false" required="true" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="dt_op" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="tp_op" primaryKey="false" required="true" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="tx_pa" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_deleted_user_avatars">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="true" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_deleted" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="nm_validator" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nu_pictures" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="tx_intro" primaryKey="false" required="false" type="VARCHAR" size="140" autoIncrement="false"></column>
+    <column name="tx_desc" primaryKey="false" required="false" type="VARCHAR" size="1000" autoIncrement="false"></column>
+    <column name="tx_email" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_deleted_users">
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="true" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_deleted" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="tx_main_email" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_alt_email" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nm_user" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_surname1" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_surname2" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="id_gender" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="dt_birth" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="marital_status" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="id_religion" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="nu_height" primaryKey="false" required="false" type="DOUBLE" size="17,17" autoIncrement="false"></column>
+    <column name="nu_weight" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_shape" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="id_ethnic" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="bo_smoker" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="nu_children" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nm_company" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="tp_job" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="de_title" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="lv_year_income" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="lv_education" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="tp_location" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="tp_street" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_street" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nu_street" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="tx_addr1" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_addr2" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_country" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="zipcode" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mov_phone" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="other_phone" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="pt_geography" primaryKey="false" required="false" type="OTHER" autoIncrement="false"></column>
+    <column name="dt_last_update" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_cancel" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_last_login" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="nu_login_total" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_login_attempts" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_reminders" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="dt_last_reminder" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_last_new_usrs" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="bo_on_new_msgs" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="bo_on_new_usrs" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="bo_promotions" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="bo_parties" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="nu_connections" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+  </table>
+  <table name="k_event_attendants">
+    <column name="gu_event" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_session" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="nu_probability" primaryKey="false" required="false" type="SMALLINT" size="5" default="100" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_event_hidden">
+    <column name="gu_event" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_event_pictures">
+    <column name="gu_picture" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_event" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_avatar" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tp_picture" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_validated" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="nm_validator" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="nu_width" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_height" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="tx_alt" primaryKey="false" required="false" type="VARCHAR" size="140" autoIncrement="false"></column>
+    <column name="tp_mime" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nm_file" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_event_sessions">
+    <column name="gu_session" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_event" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tl_event" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_language" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="nu_attendants" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_candidates" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_visits" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_amount" primaryKey="false" required="false" type="NUMERIC" size="8,2" autoIncrement="false"></column>
+    <column name="id_currency" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_cancelled" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_start" primaryKey="false" required="true" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_end" primaryKey="false" required="true" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="duration" primaryKey="false" required="true" type="OTHER" size="49,6" autoIncrement="false"></column>
+    <column name="gu_location" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nm_location" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_country" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="zipcode" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="tx_addr1" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_addr2" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_locator" primaryKey="false" required="false" type="VARCHAR" size="55" autoIncrement="false"></column>
+    <column name="pt_geography" primaryKey="false" required="false" type="OTHER" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tp_mime" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="url_website" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_event_visits">
+    <column name="gu_event" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_visitor" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_visit" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="id_referer" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_events">
+    <column name="gu_event" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tl_event" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="gu_owner" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="nu_rating" primaryKey="false" required="false" type="DOUBLE" size="17,17" autoIncrement="false"></column>
+    <column name="gu_location" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nm_location" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_language" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_tag" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="bo_private" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="nu_position" primaryKey="false" required="false" type="SMALLINT" size="5" default="10000" autoIncrement="false"></column>
+    <column name="nu_attendants" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_candidates" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_visits" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_amount" primaryKey="false" required="false" type="NUMERIC" size="8,2" autoIncrement="false"></column>
+    <column name="id_currency" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_cancelled" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_start" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_end" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="nu_min_age" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="nu_max_age" primaryKey="false" required="false" type="SMALLINT" size="5" default="120" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_country" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="zipcode" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="tx_addr1" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_addr2" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_locator" primaryKey="false" required="false" type="VARCHAR" size="55" autoIncrement="false"></column>
+    <column name="pt_geography" primaryKey="false" required="false" type="OTHER" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tp_mime" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_desc" primaryKey="false" required="false" type="VARCHAR" size="1000" autoIncrement="false"></column>
+    <column name="url_website" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_group_members">
+    <column name="gu_group" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_groups">
+    <column name="gu_group" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nm_group" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="gu_owner" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="bo_private" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="bo_moderated" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="nu_members" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_country" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tx_desc" primaryKey="false" required="false" type="VARCHAR" size="1000" autoIncrement="false"></column>
+    <column name="url_website" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_invitations_per_day">
+    <column name="year_month_day" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_invitations" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+  </table>
+  <table name="k_ip_info">
+    <column name="ip_addr" primaryKey="false" required="true" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="nm_city" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="nm_point" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="nu_coord1" primaryKey="false" required="false" type="DOUBLE" size="17,17" autoIncrement="false"></column>
+    <column name="nu_coord2" primaryKey="false" required="false" type="DOUBLE" size="17,17" autoIncrement="false"></column>
+  </table>
+  <table name="k_likes">
+    <column name="id_like" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="nm_category" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="nm_like" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="id_tag1" primaryKey="false" required="false" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_tag2" primaryKey="false" required="false" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_tag3" primaryKey="false" required="false" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_tag4" primaryKey="false" required="false" type="BIGINT" size="19" autoIncrement="false"></column>
+  </table>
+  <table name="k_locationnames">
+    <column name="id_sequence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="nu_start" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_end" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_references" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="tx_sequence" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_lu_cities">
+    <column name="id_country" primaryKey="false" required="true" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="true" type="CHAR" size="9" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_city" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="zipcode" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+  </table>
+  <table name="k_lu_countries">
+    <column name="id_country" primaryKey="false" required="true" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="tr_country_en" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_es" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_fr" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_de" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_it" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_pt" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_ca" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_eu" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_ja" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_cn" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_tw" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_fi" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_ru" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_pl" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_nl" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_th" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_cs" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_uk" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_country_no" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+  </table>
+  <table name="k_lu_currencies">
+    <column name="alpha_code" primaryKey="false" required="true" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="numeric_code" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="char_code" primaryKey="false" required="false" type="VARCHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_entity" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="id_entity" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nu_conversion" primaryKey="false" required="false" type="NUMERIC" size="20,8" autoIncrement="false"></column>
+    <column name="tr_currency_en" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_es" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_fr" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_de" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_it" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_pt" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_eu" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_ca" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_ja" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_cn" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_tw" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_fi" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_ru" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_nl" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_th" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_cs" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_uk" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_no" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_sk" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_u1" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_u2" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_u3" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_currency_u4" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_lu_languages">
+    <column name="id_language" primaryKey="false" required="true" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="tr_lang_en" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_es" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_fr" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_de" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_it" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_pt" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_ca" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_eu" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_ja" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_cn" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_tw" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_fi" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_ru" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_pl" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_nl" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_th" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_cs" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_uk" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_lang_no" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+  </table>
+  <table name="k_lu_states">
+    <column name="id_state" primaryKey="false" required="true" type="CHAR" size="9" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="true" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_region" primaryKey="false" required="false" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="id_parent" primaryKey="false" required="false" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="zip_code" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="tr_state_en" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_es" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_de" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_it" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_fr" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_pt" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_eu" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_gl" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_ca" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_ja" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_cn" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_tw" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_fi" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_ru" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tr_state_nl" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_state_th" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_state_cs" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_state_uk" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_state_no" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tr_state_sk" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_nounsnverbs">
+    <column name="id_taggedtoken" primaryKey="false" required="true" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="id_token" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="nu_position" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_language" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_universaltag" primaryKey="false" required="true" type="VARCHAR" size="4" autoIncrement="false"></column>
+    <column name="nu_references" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_nounsnverbs_en">
+    <column name="id_taggedtoken" primaryKey="false" required="true" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_universaltag" primaryKey="false" required="true" type="VARCHAR" size="4" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_nounsnverbs_es">
+    <column name="id_taggedtoken" primaryKey="false" required="true" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_universaltag" primaryKey="false" required="true" type="VARCHAR" size="4" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_personnames">
+    <column name="id_sequence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="nu_start" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_end" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_references" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="tx_sequence" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_related_tokens">
+    <column name="id_relation" primaryKey="false" required="true" type="VARCHAR" size="40" autoIncrement="false"></column>
+    <column name="tp_relation" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_token" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_related" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="tx_related" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_sentence_searches">
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="dt_search" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_sentence_searches_count">
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="nu_searches" primaryKey="false" required="false" type="BIGINT" size="19" default="0" autoIncrement="false"></column>
+    <column name="tx_literal" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_sentence_tags">
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_tag" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+  </table>
+  <table name="k_sentences">
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="id_language" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="bo_validated" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="nm_validator" primaryKey="false" required="false" type="VARCHAR" size="100" default="0" autoIncrement="false"></column>
+    <column name="nu_references" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="tx_literal" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="jv_serialized" primaryKey="false" required="true" type="LONGVARBINARY" autoIncrement="false"></column>
+  </table>
+  <table name="k_sentences_en">
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_sentences_es">
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_sequence_searches">
+    <column name="id_sequence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="dt_search" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_taggedtokens">
+    <column name="id_taggedtoken" primaryKey="false" required="true" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="id_token" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="nu_position" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_language" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_universaltag" primaryKey="false" required="true" type="VARCHAR" size="4" autoIncrement="false"></column>
+    <column name="nu_references" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="tx_literal" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_taggedtokens_en">
+    <column name="id_taggedtoken" primaryKey="false" required="true" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="id_token" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_universaltag" primaryKey="false" required="true" type="VARCHAR" size="4" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_taggedtokens_es">
+    <column name="id_taggedtoken" primaryKey="false" required="true" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="id_token" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_sentence" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_universaltag" primaryKey="false" required="true" type="VARCHAR" size="4" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_tags_tree">
+    <column name="id_tag" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_parent" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nm_tag" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="nu_avatars" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="tr_es" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_en" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_de" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_it" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_fr" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_pt" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_ca" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_gl" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_eu" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_ja" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_cn" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_tw" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_fi" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_ru" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_nl" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_th" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_cs" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_uk" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_no" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_ko" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_sk" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_pl" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_vn" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_text_to_query">
+    <column name="id_mapping" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="true"></column>
+    <column name="bo_active" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="id_priority" primaryKey="false" required="false" type="INTEGER" size="10" default="1000" autoIncrement="false"></column>
+    <column name="id_language" primaryKey="false" required="true" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="lst_expr" primaryKey="false" required="true" type="ARRAY" autoIncrement="false"></column>
+    <column name="tx_predicate" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_token_searches">
+    <column name="id_token" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="dt_search" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_tokens">
+    <column name="id_token" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="id_language" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="tx_literal" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tx_normalized" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_translations">
+    <column name="tx_directory" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tx_filename" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tx_tag" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_es" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="tr_en" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_avatar_conns">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_avatar_picture_keys">
+    <column name="gu_authorization" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_authorized" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_avatar_pictures">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tp_picture" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_private" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="bo_validated" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="nm_validator" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="nu_width" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_height" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="tx_alt" primaryKey="false" required="false" type="VARCHAR" size="140" autoIncrement="false"></column>
+    <column name="tp_mime" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nm_file" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_avatars">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="id_avatar" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="bo_active" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_anonymous" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_validated" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="nm_validator" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nu_pictures" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tx_intro" primaryKey="false" required="false" type="VARCHAR" size="140" autoIncrement="false"></column>
+    <column name="tx_desc" primaryKey="false" required="false" type="VARCHAR" size="1000" autoIncrement="false"></column>
+    <column name="tx_email" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="url_website" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="url_blog" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="id_facebook" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="id_twitter" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="id_linkedin" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="id_gender" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="dt_birth" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="id_zodiac" primaryKey="false" required="false" type="VARCHAR" size="12" autoIncrement="false"></column>
+    <column name="marital_status" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="id_religion" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="nu_height" primaryKey="false" required="false" type="DOUBLE" size="17,17" autoIncrement="false"></column>
+    <column name="id_shape" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="id_ethnic" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="bo_smoker" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="nu_children" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_country" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="pt_geography" primaryKey="false" required="false" type="OTHER" autoIncrement="false"></column>
+    <column name="id_language1" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_language2" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_language3" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="tp_job" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="de_title" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="lv_year_income" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="lv_education" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_visits" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nu_karma" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="dt_last_login" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="jv_sentences" primaryKey="false" required="false" type="LONGVARBINARY" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_billings">
+    <column name="nu_billing" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tp_billing" primaryKey="false" required="true" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="nu_amount" primaryKey="false" required="true" type="NUMERIC" size="8,2" autoIncrement="false"></column>
+    <column name="id_currency" primaryKey="false" required="true" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="gu_product" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nm_product" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_confirmed" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="nu_card" primaryKey="false" required="false" type="VARCHAR" size="32" autoIncrement="false"></column>
+    <column name="tp_card" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="tx_expire" primaryKey="false" required="false" type="VARCHAR" size="10" autoIncrement="false"></column>
+    <column name="nu_cvv2" primaryKey="false" required="false" type="VARCHAR" size="7" autoIncrement="false"></column>
+    <column name="mov_phone" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="id_payment" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tx_email" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_favourites">
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="id_gender" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_friends">
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_friend" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="full_name" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+    <column name="id_facebook" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_hidden">
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_invitations">
+    <column name="gu_invitation" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="lst_avatars" primaryKey="false" required="true" type="ARRAY" autoIncrement="false"></column>
+    <column name="tx_guest_email" primaryKey="false" required="true" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="gu_guest" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_sent" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="bo_readed" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="bo_accepted" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="nu_credits" primaryKey="false" required="false" type="NUMERIC" size="8,2" default="0" autoIncrement="false"></column>
+    <column name="tx_status" primaryKey="false" required="false" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_likes">
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="id_like" primaryKey="false" required="true" type="BIGINT" size="19" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="nm_category" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="nm_like" primaryKey="false" required="true" type="VARCHAR" size="254" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_list_members">
+    <column name="gu_list" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="tx_nickname" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="gu_picture" primaryKey="false" required="false" type="CHAR" size="32" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_lists">
+    <column name="gu_list" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nm_list" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="nu_members" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_pwd_changes">
+    <column name="gu_change" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tx_main_email" primaryKey="false" required="true" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="dt_sent" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="tx_former_pwd" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="tx_new_pwd" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="dt_updated" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="ip_addr" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_queries">
+    <column name="gu_query" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="nm_query" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="jv_predicate" primaryKey="false" required="true" type="LONGVARBINARY" autoIncrement="false"></column>
+    <column name="jv_matches" primaryKey="false" required="false" type="LONGVARBINARY" autoIncrement="false"></column>
+    <column name="tx_sentences" primaryKey="false" required="false" type="LONGVARCHAR" autoIncrement="false"></column>
+    <column name="tx_keywords" primaryKey="false" required="false" type="LONGVARCHAR" autoIncrement="false"></column>
+    <column name="id_tag" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+  </table>
+  <table name="k_user_queries_history">
+    <column name="gu_query" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="jv_query" primaryKey="false" required="true" type="LONGVARBINARY" autoIncrement="false"></column>
+  </table>
+  <table name="k_users">
+    <column name="gu_user" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="tx_pwd" primaryKey="false" required="true" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="gu_default_avatar" primaryKey="false" required="true" type="CHAR" size="32" autoIncrement="false"></column>
+    <column name="tx_challenge" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_reply" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="dt_pwd_expires" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="bo_change_pwd" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_searchable" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_active" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_confirmed" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="bo_complete" primaryKey="false" required="false" type="SMALLINT" size="5" default="0" autoIncrement="false"></column>
+    <column name="tp_account" primaryKey="false" required="false" type="CHAR" size="1" default="P" autoIncrement="false"></column>
+    <column name="id_account" primaryKey="false" required="false" type="CHAR" size="10" autoIncrement="false"></column>
+    <column name="tx_main_email" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_alt_email" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nm_user" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_surname1" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_surname2" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="id_gender" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="dt_birth" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="id_zodiac" primaryKey="false" required="false" type="VARCHAR" size="12" autoIncrement="false"></column>
+    <column name="marital_status" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="id_religion" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="nu_height" primaryKey="false" required="false" type="DOUBLE" size="17,17" autoIncrement="false"></column>
+    <column name="nu_weight" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_shape" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="id_ethnic" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="bo_smoker" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="nu_children" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="nm_company" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="tp_job" primaryKey="false" required="false" type="CHAR" size="1" autoIncrement="false"></column>
+    <column name="de_title" primaryKey="false" required="false" type="VARCHAR" size="70" autoIncrement="false"></column>
+    <column name="lv_year_income" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="lv_education" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="tp_location" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="tp_street" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_street" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="nu_street" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="tx_addr1" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="tx_addr2" primaryKey="false" required="false" type="VARCHAR" size="100" autoIncrement="false"></column>
+    <column name="id_country" primaryKey="false" required="false" type="CHAR" size="3" autoIncrement="false"></column>
+    <column name="nm_country" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="id_state" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="nm_state" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mn_city" primaryKey="false" required="false" type="VARCHAR" size="50" autoIncrement="false"></column>
+    <column name="zipcode" primaryKey="false" required="false" type="VARCHAR" size="30" autoIncrement="false"></column>
+    <column name="mov_phone" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="other_phone" primaryKey="false" required="false" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="pt_geography" primaryKey="false" required="false" type="OTHER" autoIncrement="false"></column>
+    <column name="id_language1" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_language2" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="id_language3" primaryKey="false" required="false" type="CHAR" size="2" autoIncrement="false"></column>
+    <column name="dt_last_update" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_cancel" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_last_login" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="nu_login_total" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_login_attempts" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_reminders" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="dt_last_reminder" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="dt_last_new_usrs" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+    <column name="bo_on_new_msgs" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_on_new_usrs" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_promotions" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_parties" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="bo_chat_enabled" primaryKey="false" required="false" type="SMALLINT" size="5" default="1" autoIncrement="false"></column>
+    <column name="nu_invitations" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_connections" primaryKey="false" required="false" type="INTEGER" size="10" default="0" autoIncrement="false"></column>
+    <column name="nu_credits" primaryKey="false" required="false" type="NUMERIC" size="8,2" default="0" autoIncrement="false"></column>
+    <column name="pct_filled" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="nu_avatars" primaryKey="false" required="false" type="SMALLINT" size="5" autoIncrement="false"></column>
+    <column name="nu_pictures" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+  </table>
+  <table name="k_version">
+    <column name="vs_stamp" primaryKey="false" required="true" type="VARCHAR" size="16" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" default="now()" autoIncrement="false"></column>
+    <column name="dt_modified" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" autoIncrement="false"></column>
+  </table>
+  <table name="spatial_ref_sys">
+    <column name="srid" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="auth_name" primaryKey="false" required="false" type="VARCHAR" size="256" autoIncrement="false"></column>
+    <column name="auth_srid" primaryKey="false" required="false" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="srtext" primaryKey="false" required="false" type="VARCHAR" size="2048" autoIncrement="false"></column>
+    <column name="proj4text" primaryKey="false" required="false" type="VARCHAR" size="2048" autoIncrement="false"></column>
+  </table>
+</database>
