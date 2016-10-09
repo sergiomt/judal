@@ -38,6 +38,24 @@
       <groupId>org.judal</groupId>
       <artifactId>core</artifactId>
       <version>1.0</version>
+      <exclusions>
+      	<exclusion>
+      		<artifactId>poi</artifactId>
+      		<groupId>org.apache.poi</groupId>
+      	</exclusion>
+      	<exclusion>
+      		<artifactId>jibx-run</artifactId>
+      		<groupId>org.jibx</groupId>
+      	</exclusion>
+      	<exclusion>
+      		<artifactId>xercesImpl</artifactId>
+      		<groupId>xerces</groupId>
+      	</exclusion>
+      	<exclusion>
+      		<artifactId>xmlParserAPIs</artifactId>
+      		<groupId>xml-apis</groupId>
+      	</exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>javax.jms</groupId>
