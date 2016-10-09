@@ -13,7 +13,10 @@ package org.judal.storage.java;
  */
 
 import java.io.Serializable;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,6 +24,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 import javax.jdo.JDOUnsupportedOptionException;
 
 import org.judal.metadata.TableDef;
@@ -32,20 +36,37 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	private static final long serialVersionUID = 10000l;
 
+	private ArrayList<Field> persistentFields;
+	
 	public PojoRecord(TableDef tableDefinition) {
 		this(tableDefinition, null);
 	}
 	
 	public PojoRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
 		super(tableDefinition, constraintsChecker);
+		persistentFields =  null;
 	}
 	
 	public PojoRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		super(dataSource, tableName, null);
+		this(dataSource, tableName, null);
 	}
 
 	public PojoRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
 		super(dataSource, tableName, constraintsChecker);
+		persistentFields =  null;
+	}
+
+	private ArrayList<Field> getPersistentFields() {
+		if (null==persistentFields) {
+			Field[] declaredFields = getClass().getDeclaredFields();
+			persistentFields = new ArrayList<Field>(declaredFields.length);
+			for (Field fld : getPersistentFields()) {
+				final int mods = fld.getModifiers();
+				if (!Modifier.isFinal(mods) && ! Modifier.isTransient(mods) && !Modifier.isStatic(mods))
+					persistentFields.add(fld);
+			}
+		}
+		return persistentFields;
 	}
 
 	/**
@@ -57,7 +78,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	 */	
 	@Override
 	public Object put(int colpos, Object obj) throws IllegalArgumentException {
-		Field fld = getClass().getDeclaredFields()[colpos-1];
+		Field fld = getPersistentFields().get(colpos-1);
 		Object formerValue = null;
 		try {
 			formerValue = fld.get(this);
@@ -69,7 +90,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	@Override
 	public Object put(String colname, byte[] bytearray) throws IllegalArgumentException {
 		Object formerValue = null;
-		for (Field fld : getClass().getDeclaredFields()) {
+		for (Field fld : getPersistentFields()) {
 			if (fld.getName().equalsIgnoreCase(colname)) {
 				try {
 					formerValue = fld.get(this);
@@ -82,7 +103,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	@Override
 	public int size() {
-		return getClass().getDeclaredFields().length;
+		return getPersistentFields().size();
 	}
 
 	@Override
@@ -103,7 +124,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	@Override
 	public boolean containsKey(Object colname) {
 		String columnName = (String) colname;
-		for (Field fld : getClass().getDeclaredFields())
+		for (Field fld : getPersistentFields())
 			if (fld.getName().equalsIgnoreCase(columnName))
 				return true;
 		return false;
@@ -127,7 +148,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 		String columnName = (String) colname;
 		Field col = null;
 		
-		for (Field fld : getClass().getDeclaredFields()) {
+		for (Field fld : getPersistentFields()) {
 			if (fld.getName().equalsIgnoreCase(columnName)) {
 				col = fld;
 				break;
@@ -156,7 +177,9 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 					retval = col.getByte(this);
 				else
 					retval = col.get(this);
-			} catch (IllegalArgumentException | IllegalAccessException e) { }
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new JDOUserException("PojoRecord.get("+colname+")");
+			}
 		}
 		return retval;
 	}
@@ -169,7 +192,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	@Override
 	public Set<String> keySet() {
 		TreeSet<String> keys = new TreeSet<String>();
-		for (Field fld : getClass().getDeclaredFields())
+		for (Field fld : getPersistentFields())
 			keys.add(fld.getName());
 		return keys;
 	}
@@ -181,15 +204,9 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	@Override
-	public Object remove(Object obj) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public Collection<Object> values() {
-		Field[] fields = getClass().getDeclaredFields();
-		ArrayList<Object> vals = new ArrayList<Object>(fields.length);
+		ArrayList<Field> fields = getPersistentFields();
+		ArrayList<Object> vals = new ArrayList<Object>(fields.size());
 		for (Field fld : fields)
 			vals.add(get(fld.getName()));
 		return vals;
@@ -204,12 +221,13 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	public Object put(String colname, Object value) {
 		Object retval = null;
 		String columnName = (String) colname;
-		for (Field fld : getClass().getDeclaredFields()) {
+		for (Field fld : getPersistentFields()) {
 			if (fld.getName().equalsIgnoreCase(columnName)) {
 				retval = get(colname);
 				try {
 					fld.set(this, value);
 				} catch (IllegalArgumentException | IllegalAccessException e) {
+					throw new JDOUserException("PojoRecord.put("+colname+","+value+")");
 				}
 				break;
 			}
@@ -219,14 +237,16 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	@Override
 	public Object remove(String colname) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new JDOUnsupportedOptionException("PojoRecord.remove()");	
 	}
 
 	@Override
-	public void clear() {
-		// TODO Auto-generated method stub
-		
+	public Object remove(Object obj) {
+		throw new JDOUnsupportedOptionException("PojoRecord.remove()");	
 	}
-
+	
+	@Override
+	public void clear() {
+		throw new JDOUnsupportedOptionException("PojoRecord.clear()");	
+	}
 }
