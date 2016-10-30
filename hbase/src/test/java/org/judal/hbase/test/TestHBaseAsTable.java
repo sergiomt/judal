@@ -19,11 +19,10 @@ import org.junit.Ignore;
 
 import org.judal.hbase.HBEngine;
 import org.judal.hbase.HBTableDataSource;
-import org.judal.metadata.SchemaMetaData;
+
 import org.judal.storage.java.test.MapRecord1;
 import org.judal.storage.java.test.MapRecord2;
 import org.judal.storage.java.test.AbstractTableTest;
-import org.judal.transaction.DataSourceTransactionManager;
 
 
 public class TestHBaseAsTable extends AbstractTableTest {
@@ -77,7 +76,7 @@ public class TestHBaseAsTable extends AbstractTableTest {
 
 	@Test
 	public void test05Metadata() throws JDOException, IOException, InstantiationException, IllegalAccessException {
-		super.test05Metadata("org/judal/bdb/test", "metadata.xml");
+		super.test05Metadata("org/judal/hbase/test", "metadata.xml");
 	}
 	
 }
