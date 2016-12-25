@@ -112,7 +112,7 @@ public class SQLQuery extends AbstractQuery {
 	}
 
 	@Override
-	public Object execute() {
+	public RecordSet<? extends Record> execute() {
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
 		RecordSet<? extends Record> retval;

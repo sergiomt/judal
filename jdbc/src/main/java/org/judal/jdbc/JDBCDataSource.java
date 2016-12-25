@@ -61,13 +61,13 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	// *****************
 	// Private Variables
 
-	private String databaseProductName;
-	private RDBMS databaseProductId;
 	private Exception connectXcpt;
 	public SQLFunctions Functions;
 	private HashMap<String,String> props;
 	private TransactionManager transactMan;
 
+	protected String databaseProductName;
+	protected RDBMS databaseProductId;
 	protected SchemaMetaData metaData;
 	protected boolean useDatabaseMetadata;
 

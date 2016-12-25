@@ -32,6 +32,10 @@ public class SQLFunctions {
     setForDBMS(dbms);
   }
 
+  public SQLFunctions(int dbmsId) {
+	  setForDBMS(RDBMS.valueOf(dbmsId));
+  }
+
   private static HashMap<RDBMS,SQLFunctions> init() {
     HashMap<RDBMS,SQLFunctions> dbs = new HashMap<RDBMS,SQLFunctions>(17);
     for (RDBMS rdbms : RDBMS.values()) {
@@ -196,6 +200,17 @@ public class SQLFunctions {
 	}
 
   } // setForDBMS
+
+  // -------------------------------------------------------------------------
+
+  public String apply(String func, String... values) throws IllegalArgumentException, UnsupportedOperationException {
+	  if (func.equalsIgnoreCase(LENGTH)) {
+		  if (values==null || values.length!=1)
+			  throw new IllegalArgumentException("SQLFunctions.apply("+LENGTH+", ...) needs exactly one value");
+		  return LENGTH + "(" + values[0] + ")";
+	  }
+	  throw new UnsupportedOperationException("Unrecognized function "+func);
+  }
 
   // -------------------------------------------------------------------------
 

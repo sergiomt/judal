@@ -28,4 +28,9 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 		return new JDBCRelationalView(this, viewRecord);
 	}
 
+	@Override
+	public int getRdbmsId() {
+		return databaseProductId.intValue();
+	}
+
 }
