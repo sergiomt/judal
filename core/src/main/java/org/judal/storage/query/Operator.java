@@ -9,6 +9,7 @@ public class Operator {
 	public static final String ISNULL = "IS NULL";
 	public static final String ISNOTNULL = "IS NOT NULL";
 	public static final String EQ = "=";
+	public static final String NEQ = "<>";
 	public static final String LT = "<";
 	public static final String GT = ">";
 	public static final String LTE = "<=";

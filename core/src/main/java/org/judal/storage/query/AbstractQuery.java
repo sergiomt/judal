@@ -27,6 +27,7 @@ import javax.jdo.PersistenceManager;
 
 import org.judal.storage.Param;
 import org.judal.storage.Record;
+import org.judal.storage.RecordSet;
 
 import com.knowgate.typeutils.ObjectFactory;
 
@@ -102,7 +103,7 @@ public abstract class AbstractQuery implements Query {
 	public abstract Object source() throws JDOException;
 
 	@Override
-	public abstract Object execute() throws JDOException;
+	public abstract RecordSet<? extends Record> execute() throws JDOException;
 	
 	@Override
 	public void addExtension(String key, Object value) {
@@ -216,7 +217,7 @@ public abstract class AbstractQuery implements Query {
 	}
 
 	@Override
-	public Object execute(Object param1) {
+	public RecordSet<? extends Record> execute(Object param1) {
 		if (null==parameters)
 			throw new JDOException("There are no declared parameters");
 		else if (parameters.size()!=1)
@@ -227,7 +228,7 @@ public abstract class AbstractQuery implements Query {
 	}
 
 	@Override
-	public Object execute(Object param1, Object param2) {
+	public RecordSet<? extends Record> execute(Object param1, Object param2) {
 		if (null==parameters)
 			throw new JDOException("There are no declared parameters");
 		else if (parameters.size()!=2)
@@ -240,7 +241,7 @@ public abstract class AbstractQuery implements Query {
 	}
 
 	@Override
-	public Object execute(Object param1, Object param2, Object param3) {
+	public RecordSet<? extends Record> execute(Object param1, Object param2, Object param3) {
 		if (null==parameters)
 			throw new JDOException("There are no declared parameters");
 		else if (parameters.size()!=2)
@@ -254,7 +255,7 @@ public abstract class AbstractQuery implements Query {
 	}
 
 	@Override
-	public Object executeWithArray(Object... params) {
+	public RecordSet<? extends Record> executeWithArray(Object... params) {
 		if (null==parameters)
 			throw new JDOException("There are no declared parameters");
 		else if (parameters.size()!=2)
@@ -266,7 +267,7 @@ public abstract class AbstractQuery implements Query {
 	}
 
 	@Override
-	public Object executeWithMap(Map params) {
+	public RecordSet<? extends Record> executeWithMap(Map params) {
 		if (null==parameters)
 			throw new JDOException("There are no declared parameters");
 		else if (parameters.size()!=2)

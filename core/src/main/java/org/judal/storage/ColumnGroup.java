@@ -2,6 +2,7 @@ package org.judal.storage;
 
 import java.util.Set;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import javax.jdo.FetchGroup;
@@ -13,7 +14,7 @@ import org.judal.metadata.ColumnDef;
 * @author Sergio Montoro Ten
 * @version 1.0
 */
-public class ColumnGroup implements FetchGroup {
+public class ColumnGroup implements FetchGroup, Iterable<String> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -26,7 +27,7 @@ public class ColumnGroup implements FetchGroup {
 	public ColumnGroup(String... columns) {
 		rec = null;
 		postLoad = false;
-		recursion = null;		
+		recursion = null;
 		unmodifiable = false;
 		members = new LinkedHashSet<String>();
 		for (String column : columns)
@@ -157,6 +158,11 @@ public class ColumnGroup implements FetchGroup {
 			throw new JDOUserException("FetchGroup is unmodifiable");
 		unmodifiable = true;
 		return this;
+	}
+
+	@Override
+	public Iterator<String> iterator() {
+		return members.iterator();
 	}
 
 }

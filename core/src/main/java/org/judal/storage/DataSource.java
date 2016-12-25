@@ -60,6 +60,7 @@ public interface DataSource extends AutoCloseable {
 	
 	boolean inTransaction() throws JDOException;
 	
+    public static final String CONFIG = "config";
     public static final String DRIVER = "driver";
     public static final String URI = "uri";
     public static final String SCHEMA = "schema";
@@ -81,7 +82,7 @@ public interface DataSource extends AutoCloseable {
     public static String DEFAULT_CONNECTIONTIMEOUT = "60000";
     public static String DEFAULT_REGION = "eu-west-1";
 	
-    public static final String[] PropertyNames = new String[]{DRIVER,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS};
+    public static final String[] PropertyNames = new String[]{CONFIG,DRIVER,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS};
 
     public static final String[][] DefaultValues = new String[][]{
     	new String[]{CONNECTIONTIMEOUT,DEFAULT_CONNECTIONTIMEOUT},
