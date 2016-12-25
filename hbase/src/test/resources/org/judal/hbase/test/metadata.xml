@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jdo xmlns="http://java.sun.com/xml/ns/jdo/jdo" schema="public">
+  <package name="org.judal.hbase.test">
+    <class name="ArrayRecord1" table="unittest_table1">
+      <column name="id" jdbc-type="INTEGER" allows-null="false" />
+      <column name="created" jdbc-type="TIMESTAMP" allows-null="false" />
+      <column name="name" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="description" jdbc-type="VARCHAR" length="255" />
+      <column name="location" jdbc-type="VARCHAR" length="255" />
+      <column name="image" jdbc-type="LONGVARBINARY" />
+      <column name="amount" jdbc-type="DECIMAL" length="8" scale="2"/>
+      <primary-key name="pk_unittest_table1" column="id" />
+    </class>
+    <class name="ArrayRecord2" table="unittest_table2">
+      <column name="code" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="name" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="created" jdbc-type="TIMESTAMP" allows-null="false" />
+      <column name="description" jdbc-type="VARCHAR" length="255" />
+      <primary-key name="pk_unittest_table2" column="code" />
+    </class>
+  </package>
+</jdo>
