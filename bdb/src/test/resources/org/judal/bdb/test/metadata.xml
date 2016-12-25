@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jdo xmlns="http://java.sun.com/xml/ns/jdo/jdo" schema="public">
-  <package name="org.judal.storage.test">
+  <package name="org.judal.bdb.test">
     <class name="ArrayRecord1" table="unittest_table1">
       <column name="id" jdbc-type="INTEGER" allows-null="false" />
       <column name="created" jdbc-type="TIMESTAMP" allows-null="false" />
