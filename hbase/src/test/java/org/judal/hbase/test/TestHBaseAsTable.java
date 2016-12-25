@@ -22,6 +22,7 @@ import org.judal.hbase.HBTableDataSource;
 
 import org.judal.storage.java.test.MapRecord1;
 import org.judal.storage.java.test.MapRecord2;
+import org.judal.storage.DataSource;
 import org.judal.storage.java.test.AbstractTableTest;
 
 
@@ -36,8 +37,8 @@ public class TestHBaseAsTable extends AbstractTableTest {
 
 	@BeforeClass
 	public static void init() throws ClassNotFoundException, JDOException, IOException {
-		System.out.println("Before TestBDBAsTable");
 		properties = new TestHBase().getTestProperties();
+		System.out.println("config="+properties.get(DataSource.CONFIG));
 		HBEngine eng = new HBEngine();
 		dts = eng.getDataSource(properties);
 	}
@@ -59,14 +60,9 @@ public class TestHBaseAsTable extends AbstractTableTest {
 		super.test00Pks();
 	}
 
-	@Ignore
+	@Test
 	public void test01Table() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException {		
 		super.test01Table();
-	}
-
-	@Ignore
-	public void test02Transaction() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
-		super.test02Transaction();
 	}
 
 	@Ignore
@@ -74,7 +70,7 @@ public class TestHBaseAsTable extends AbstractTableTest {
 		super.test03Recordset();
 	}
 
-	@Test
+	@Ignore
 	public void test05Metadata() throws JDOException, IOException, InstantiationException, IllegalAccessException {
 		super.test05Metadata("org/judal/hbase/test", "metadata.xml");
 	}

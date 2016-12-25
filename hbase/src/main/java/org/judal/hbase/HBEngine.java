@@ -41,16 +41,16 @@ public class HBEngine implements Engine<HBTableDataSource> {
 		try {
 			String metadataFilePath = Env.getString(properties, DataSource.METADATA, "metadata.xml");
 			String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
-			if (metadataPackage.length()==0) {
+			if (metadataPackage.length()>0) {
+				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);
+				metadata = packMeta.readMetadata(packMeta.openStream());
+				return new HBTableDataSource(properties.get(DataSource.CONFIG), metadata);
+			} else if (metadataFilePath.length()>0) {
 				FileInputStream fin = new FileInputStream(new File(metadataFilePath));
 				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(null);
 				metadata = xmlMeta.readMetadata(fin);
 				fin.close();
-				return new HBTableDataSource(properties.get("hbconfig"), metadata);
-			} else if (metadataPackage.length()>0) {
-				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);
-				metadata = packMeta.readMetadata(packMeta.openStream());
-				return new HBTableDataSource(properties.get("hbconfig"), metadata);
+				return new HBTableDataSource(properties.get(DataSource.CONFIG), metadata);
 			} else {
 				throw new JDOException("Either "+DataSource.PACKAGE+" or "+DataSource.METADATA+" property is required");
 			}

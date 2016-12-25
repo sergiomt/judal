@@ -168,6 +168,14 @@ public class HBTable implements Table {
 				if (oKvl!=null)
 					if (oKvl.getValue()!=null)
 						oRow.put(oCol.getName(), BytesConverter.fromBytes(oKvl.getValue(), oCol.getType()));
+				if (DebugFile.trace) {
+					if (oKvl==null)
+						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+") == null");
+					else if (oKvl.getValue()==null)
+						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() == null");
+					else
+						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() == "+oKvl.getValue().toString());
+				}
 			}
 			if (DebugFile.trace) {
 				DebugFile.decIdent();
@@ -203,7 +211,14 @@ public class HBTable implements Table {
 			for (ColumnDef oCol : columns()) {
 				Object oObj = oRow.apply(oCol.getName());
 				if (oObj!=null) {
+					if (DebugFile.trace) {
+						DebugFile.writeln("Put.add("+oCol.getFamily()+","+oCol.getName()+",toBytes("+oRow.getClass().getName()+".apply("+oCol.getName()+"),"+oCol.getType()+"))");
+						DebugFile.writeln(oCol.getName()+"="+oObj.toString());
+					}
 					oPut.add(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()), BytesConverter.toBytes(oObj, oCol.getType()));
+				} else {
+					if (DebugFile.trace)
+						DebugFile.writeln(oRow.getClass().getName()+".apply("+oCol.getName()+") == null");
 				}
 			}
 			oTbl.put(oPut);

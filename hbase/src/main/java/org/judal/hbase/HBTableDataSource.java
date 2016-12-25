@@ -51,6 +51,7 @@ import java.util.Set;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
+import javax.jdo.JDOUserException;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 
@@ -64,6 +65,7 @@ import javax.transaction.TransactionManager;
 public class HBTableDataSource implements TableDataSource {
 
 	// a constant to convert a fraction to a percentage
+	// HBaseAdmin.getTableDescriptor
 	private static final int CONVERT_TO_PERCENTAGE = 100;
 
 	private StringBufferInputStream oInStrm1, oInStrm2;
@@ -256,30 +258,35 @@ public class HBTableDataSource implements TableDataSource {
 			oAdm = new HBaseAdmin(getConfig());
 			if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+tableName+")");
 			oTds = oAdm.getTableDescriptor(Bytes.toBytes(tableName));
-			throw new JDOException("HBConfig.createTable() Table "+tableName+" already exists");
+			throw new JDOException("HBTableDataSource.createTable() Table "+tableName+" already exists");
 		} catch (TableNotFoundException tnfe) {
 			if (DebugFile.trace) DebugFile.writeln("Creating table "+tableName);
 			oTds = new HTableDescriptor(tableName);
-			for (ColumnDef oCol : oSmd.getColumns(tableName)) {
+			for (ColumnDef oCol : tableDef.getColumns()) {
 				String sFamily = oCol.getFamily();
+				if (null==sFamily) 
+					throw new JDOUserException("Family for column "+oCol.getName()+" cannot be null");
 				if (null==sFamily) sFamily = "default";
+				if (sFamily.length()==0) 
+					throw new JDOUserException("Family for column "+oCol.getName()+" cannot be empty");
 				if (sFamily.length()==0) sFamily = "default";
 				if (!oTds.hasFamily(Bytes.toBytes(oCol.getFamily())))
 					oTds.addFamily(new HColumnDescriptor(Bytes.toBytes(oCol.getFamily())));
 			} // next
 			try {
-	      oAdm.createTable(oTds);
-      } catch (IOException ioe) {
-  			throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
-      }
+				oAdm.createTable(oTds);
+				oSmd.addTable(tableDef);
+			} catch (IOException ioe) {
+				throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
+			}
 			if (DebugFile.trace) DebugFile.writeln("Table "+tableName+" created");
 		} catch (IOException ioe) {
 			throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
-	  } finally {
+	    } finally {
 			try {
 				if (oAdm!=null) oAdm.close();
 			} catch (IOException e) { }
-	  }
+	    }
 	}
 
 	@Override

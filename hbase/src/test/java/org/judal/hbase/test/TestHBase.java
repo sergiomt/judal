@@ -13,5 +13,4 @@ public class TestHBase {
 		return Env.getDataSourceProperties(inStrm, "test");
 	}
 
-	
 }
