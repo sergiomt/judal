@@ -12,8 +12,6 @@ import org.judal.metadata.IndexDef.Type;
 import org.judal.storage.TableDataSource;
 import org.judal.storage.java.ArrayRecord;
 
-import com.knowgate.debug.DebugFile;
-
 public class ArrayRecord1 extends ArrayRecord implements TestRecord1 {
 
 	public static String tableName = "unittest_table1";
@@ -30,7 +28,7 @@ public class ArrayRecord1 extends ArrayRecord implements TestRecord1 {
 			tbl = new TableDef(tableName);
 		else
 			tbl = ds.createTableDef(tableName, null);
-		tbl.addPrimaryKeyColumn(null, "id", Types.INTEGER);
+		tbl.addPrimaryKeyColumn("default", "id", Types.INTEGER);
 		tbl.addColumnMetadata("default", "created", Types.TIMESTAMP, false);
 		tbl.addColumnMetadata("default", "name", Types.VARCHAR, 100, false, Type.MANY_TO_ONE);
 		tbl.addColumnMetadata("default", "description", Types.VARCHAR, 255, true);

@@ -79,7 +79,11 @@ public abstract class AbstractTableTest {
 	
 	public void createTable1(TableDataSource ds) throws JDOException {
 		System.out.println("Creating table "+ArrayRecord1.getTableDef(ds).getName());
-		ds.createTable(ArrayRecord1.getTableDef(ds), null);
+		TableDef tdef = ArrayRecord1.getTableDef(ds);
+		for (ColumnDef cdef : tdef.getColumns()) {
+			assertEquals("default", cdef.getFamily());
+		}
+		ds.createTable(tdef, null);
 	}
 
 	public void createTable2(TableDataSource ds) throws JDOException {
@@ -172,15 +176,15 @@ public abstract class AbstractTableTest {
 
 		TableDataSource ds = getTableDataSource();
 
-		System.out.println("Transaction status after getting table data source = "+ statusString(ds.getTransactionManager().getStatus()));
-
 		ArrayRecord1.dataSource = ds;
 		ArrayRecord2.dataSource = ds;
 		MapRecord1.dataSource = ds;
 		MapRecord2.dataSource = ds;
-
+		boolean created = false;
+		
 		try {
 			createTable1(ds);
+			created = true;
 			TestRecord1 rec = recordClass1.newInstance();
 			rec.put("id", new Integer(1));
 			rec.put("created", new Timestamp(System.currentTimeMillis()));
@@ -209,8 +213,7 @@ public abstract class AbstractTableTest {
 			assertArrayEquals(new byte[]{1,2,3,4,5,6,7,8,9}, ret.getBytes("image"));
 			assertEquals(new BigDecimal("334267.87").toString(), ret.getDecimal("amount").toString());
 		} finally {
-			System.out.println("Transaction before dropping table = "+ statusString(ds.getTransactionManager().getStatus()));
-			if (ds!=null) ds.dropTable(ArrayRecord1.tableName, false);
+			if (ds!=null && created) ds.dropTable(ArrayRecord1.tableName, false);
 		}
 		assertFalse(ds.exists(ArrayRecord1.tableName, "U"));
 		System.out.println("End test01Table()");
