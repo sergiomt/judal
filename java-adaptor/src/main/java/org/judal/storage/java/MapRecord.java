@@ -42,6 +42,8 @@ import org.judal.metadata.TableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.serialization.BytesConverter;
 import org.judal.storage.AbstractRecord;
+import org.judal.storage.ConstraintsChecker;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.TableDataSource;
 
 /**
@@ -83,33 +85,110 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * Constructor
 	 */
 	public MapRecord(TableDef tableDefinition) {
-		super(tableDefinition);
+		this(tableDefinition,null,null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public MapRecord(TableDef tableDefinition, FieldHelper fieldHelper) {
+		this(tableDefinition, fieldHelper, null);
+	}
+
+	/**
+	 * Constructor
+	 */
+	public MapRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
+		this(tableDefinition, null, constraintsChecker);
+	}
+	
+	/**
+	 * Constructor
+	 */
+	public MapRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
+		super(tableDefinition, fieldHelper, constraintsChecker);
 		values = new CaseInsensitiveValuesMap();
 		columnIndexes = new HashMap<Integer, String>();
 		int i = 0;
 		for (ColumnDef cdef: tableDefinition.getColumns())
 			columnIndexes.put(++i, cdef.getName());
 	}
-
+	
 	/**
 	 * Constructor
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		super(dataSource, tableName);
+		super(dataSource, tableName, null, null);
 		values = new CaseInsensitiveValuesMap();
 		columnIndexes = new HashMap<Integer, String>();
 	}
 
+	/**
+	 * Constructor
+	 * @throws JDOException 
+	 */
+	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
+		super(dataSource, tableName, fieldHelper, null);
+		values = new CaseInsensitiveValuesMap();
+		columnIndexes = new HashMap<Integer, String>();
+	}
+
+	/**
+	 * Constructor
+	 * @throws JDOException 
+	 */
+	public MapRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
+		this(dataSource, tableName, null, constraintsChecker);
+	}
+	
+	/**
+	 * Constructor
+	 * @throws JDOException 
+	 */
+	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
+		super(dataSource, tableName, fieldHelper, constraintsChecker);
+		values = new CaseInsensitiveValuesMap();
+		columnIndexes = new HashMap<Integer, String>();
+	}
+	
+	/**
+	 * Constructor
+	 * @throws JDOException 
+	 */
 	public MapRecord(TableDataSource dataSource, String tableName, String... columnNames) throws JDOException {
-		super(new TableDef(tableName, dataSource.getTableDef(tableName).filterColumns(columnAliases(columnNames))));
+		this(dataSource, tableName, null, null, columnNames);
+	}
+
+	/**
+	 * Constructor
+	 * @throws JDOException 
+	 */
+	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, String... columnNames) throws JDOException {
+		this(dataSource, tableName, fieldHelper, null, columnNames);
+	}
+
+	/**
+	 * Constructor
+	 * @throws JDOException 
+	 */
+	public MapRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker, String... columnNames) throws JDOException {
+		this(dataSource, tableName, null, constraintsChecker, columnNames);
+	}
+	
+	/**
+	 * Constructor
+	 * @throws JDOException 
+	 */
+	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker, String... columnNames) throws JDOException {
+		super(new TableDef(tableName, dataSource.getTableDef(tableName).filterColumns(columnAliases(columnNames))), fieldHelper, constraintsChecker);
 		values = new CaseInsensitiveValuesMap();
 		columnIndexes = new HashMap<Integer, String>();
 		int c = 0;
 		for (String columnName : columnNames)
 			columnIndexes.put(new Integer(++c), getColumnAlias(columnName));
 	}
-
+	
 	private static String[] columnAliases(String... columnNames) {
 		final int colCount = columnNames.length;
 		String[] aliases = new String[colCount];
@@ -202,7 +281,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	
 	@Override
 	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-		return MapFieldHelper.getMap(this, sKey);
+		return (Map<String,String>) super.getMap(sKey);
 	} // getMap
 
 	@Override

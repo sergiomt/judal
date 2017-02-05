@@ -31,6 +31,7 @@ import javax.jdo.JDOUnsupportedOptionException;
 import org.judal.metadata.TableDef;
 import org.judal.storage.AbstractRecord;
 import org.judal.storage.ConstraintsChecker;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.TableDataSource;
 
 public class PojoRecord extends AbstractRecord implements JavaRecord {
@@ -40,23 +41,39 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	private ArrayList<Field> persistentFields;
 	
 	public PojoRecord(TableDef tableDefinition) {
-		this(tableDefinition, null);
+		this(tableDefinition, null, null);
 	}
 	
 	public PojoRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
-		super(tableDefinition, constraintsChecker);
+		this(tableDefinition, null, constraintsChecker);
+	}
+
+	public PojoRecord(TableDef tableDefinition, FieldHelper fieldHelper) {
+		this(tableDefinition, fieldHelper, null);
+	}
+	
+	public PojoRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
+		super(tableDefinition, fieldHelper, constraintsChecker);
 		persistentFields =  null;
 	}
 	
 	public PojoRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		this(dataSource, tableName, null);
+		this(dataSource, tableName, null, null);
 	}
 
+	public PojoRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
+		this(dataSource, tableName, fieldHelper, null);
+	}
+	
 	public PojoRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
-		super(dataSource, tableName, constraintsChecker);
+		this(dataSource, tableName, null, constraintsChecker);
+	}
+
+	public PojoRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
+		super(dataSource, tableName, fieldHelper, constraintsChecker);
 		persistentFields =  null;
 	}
-
+	
 	private ArrayList<Field> getPersistentFields() {
 		if (null==persistentFields) {
 			Field[] declaredFields = getClass().getDeclaredFields();
@@ -187,7 +204,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	@Override
 	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-		return MapFieldHelper.getMap(this, sKey);
+		return (Map<String,String>) getMap(sKey);
 	} // getMap
 	
 	@Override
