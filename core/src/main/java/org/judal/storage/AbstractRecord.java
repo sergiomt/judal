@@ -33,6 +33,7 @@ import org.judal.storage.TableDataSource;
 
 import com.knowgate.currency.Money;
 import com.knowgate.debug.DebugFile;
+import com.knowgate.gis.LatLong;
 import com.knowgate.stringutils.Html;
 
 import static com.knowgate.typeutils.TypeResolver.ClassLangString;
@@ -43,6 +44,7 @@ import static com.knowgate.typeutils.TypeResolver.ClassUtilDate;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.text.DecimalFormat;
@@ -67,31 +69,50 @@ public abstract class AbstractRecord implements Record {
 	protected boolean hasLongVarBinaryData;
 	protected HashMap<String,Long> longVarBinariesLengths;
 	protected ConstraintsChecker checker;
+	protected FieldHelper fhelper;
 
 	public AbstractRecord(TableDef tableDefinition) {
-		this(tableDefinition, null);
+		this(tableDefinition, null, null);
 	}
 
 	public AbstractRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
+		this(tableDefinition, null, constraintsChecker);
+	}
+
+	public AbstractRecord(TableDef tableDefinition, FieldHelper fieldHelper) {
+		this(tableDefinition, fieldHelper, null);
+	}
+
+	public AbstractRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
 		if (null==tableDefinition)
 			throw new NullPointerException("Table definition cannot be null");
 		tableDef = tableDefinition;
+		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
 		clearLongData();
 	}
-
+	
 	public AbstractRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		this(dataSource, tableName, null);
+		this(dataSource, tableName, null, null);
+	}
+
+	public AbstractRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
+		this(dataSource, tableName, fieldHelper, null);
 	}
 	
 	public AbstractRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
+		this(dataSource, tableName, null, constraintsChecker);
+	}
+
+	public AbstractRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
 		tableDef = dataSource.getTableDef(tableName);
 		if (null==tableDef)
 			throw new JDOException("Table "+tableName+" does not exist or could not be read from the data source");
+		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
 		clearLongData();
 	}
-
+	
 	@Override
 	public abstract Object apply(String columnName);
 
@@ -115,7 +136,11 @@ public abstract class AbstractRecord implements Record {
 	public void setConstraintsChecker(ConstraintsChecker checker) {
 		this.checker = checker;
 	}
-	
+
+	public void setFieldHelper(FieldHelper helper) {
+		this.fhelper = helper;
+	}
+
 	@Override
 	public Object replace(String sColName, Object oValue) {
 		Object retval = apply(sColName);
@@ -351,6 +376,20 @@ public abstract class AbstractRecord implements Record {
 	} // getDateShort
 
 	@Override
+	public int getIntervalPart(String sColName, String sPart) throws ClassCastException, ClassNotFoundException, NullPointerException, NumberFormatException, IllegalArgumentException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getIntervalPart(this, sColName, sPart);
+	}
+
+	@Override
+	public LatLong getLatLong(String sColName) throws ClassCastException, ClassNotFoundException, NumberFormatException, ArrayIndexOutOfBoundsException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getLatLong(this, sColName);
+	}
+	
+	@Override
 	public byte[] getBytes(String sColName) {
 		if (isNull(sColName))
 			return null;
@@ -486,6 +525,13 @@ public abstract class AbstractRecord implements Record {
 	}
 
 	@Override
+	public Object getMap(String sColName) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getMap(this, sColName);
+	}
+	
+	@Override
 	public Integer getInteger(String sColName) throws NumberFormatException {
 		if (!isNull(sColName)) {
 			Object oInt = apply(sColName);
@@ -502,6 +548,20 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
+	@Override
+	public Integer[] getIntegerArray(String sColName) throws ClassCastException, ClassNotFoundException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getIntegerArray(this, sColName);
+	}
+
+	@Override
+	public String[] getStringArray(String sColName) throws ClassCastException, ClassNotFoundException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getStringArray(this, sColName);
+	}
+	
 	/**
 	 * <p>Get value of a VARCHAR field that holds a money+currency amount<p>
 	 * Money values are stored with its currency sign embedded inside,

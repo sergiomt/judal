@@ -27,6 +27,7 @@ import javax.jdo.FetchGroup;
 import org.judal.metadata.ColumnDef;
 
 import com.knowgate.currency.Money;
+import com.knowgate.gis.LatLong;
 
 /**
  * 
@@ -92,10 +93,18 @@ public interface Record extends Serializable, Stored {
 
 	String getDateShort(String colname) throws ClassCastException;
 
+	int getIntervalPart(String colname, String part) throws ClassCastException, ClassNotFoundException, NullPointerException, NumberFormatException, IllegalArgumentException;
+	
+	Integer[] getIntegerArray(String colname) throws ClassCastException, ClassNotFoundException;
+
+	LatLong getLatLong(String columname) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, ClassNotFoundException;
+	
 	String getString(String colname) throws ClassCastException;
 
 	String getString(String colname, String defvalue) throws ClassCastException;
 
+	String[] getStringArray(String colname) throws ClassCastException, ClassNotFoundException;
+	
 	String getStringHtml(String colname, String defvalue);
 
 	boolean getBoolean(String colname, boolean defvalue) throws ClassCastException;
