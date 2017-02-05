@@ -1,4 +1,4 @@
-package org.judal.storage.java
+package org.judal.storage.scala
 
 /**
  * © Copyright 2016 the original author.
@@ -38,7 +38,7 @@ import scala.collection.JavaConversions.asJavaCollection
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinition: TableDef) with Map[String,AnyRef] {
+class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinition: TableDef) with ScalaRecord {
 
   /**
    * Column names are case insensitive, so specialize a HashMap to implement case insensitive lookups
@@ -170,6 +170,11 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
    */	
 	override def values() : Iterable[AnyRef] = valuesMap.values
 
+  /**
+   * {@inheritDoc}
+   */	
+	def getMap(key: String) : Map[String,String] = MapFieldHelper.getMap(this, key)
+	
   /**
    * {@inheritDoc}
    */	

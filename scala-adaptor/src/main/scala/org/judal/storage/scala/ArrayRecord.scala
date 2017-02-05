@@ -43,7 +43,7 @@ import scala.collection.mutable.HashMap
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinition: TableDef) with Map[String,AnyRef] {
+class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinition: TableDef) with ScalaRecord {
 
 	var valuesArray = new Array[AnyRef](getTableDef.getNumberOfColumns)
 	var columnsMap : HashMap[String,Int] = null
@@ -118,7 +118,9 @@ class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinit
 	 */
 	def getColumnIndex(columnName: String) : Int =
 	  if (null==columnsMap) getTableDef.getColumnIndex(columnName) else columnsMap.get(columnName).get
-	
+
+	def getMap(key: String) : Map[String,String] = MapFieldHelper.getMap(this, key)
+	  
 	/**
 	 * @return AnyRef if this instance isBucket() or Array[AnyRef] otherwise
 	 */
