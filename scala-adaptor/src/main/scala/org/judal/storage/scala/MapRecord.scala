@@ -173,7 +173,7 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
   /**
    * {@inheritDoc}
    */	
-	def getMap(key: String) : Map[String,String] = MapFieldHelper.getMap(this, key)
+	override def getMap(key: String) : Map[String,String] = super.getMap(key).asInstanceOf[Map[String,String]]
 	
   /**
    * {@inheritDoc}
