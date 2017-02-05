@@ -12,7 +12,7 @@ package org.judal.storage;
  */
 
 import java.io.Serializable;
-
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 
 import java.text.DecimalFormat;
@@ -100,6 +100,8 @@ public interface Record extends Serializable, Stored {
 
 	boolean getBoolean(String colname, boolean defvalue) throws ClassCastException;
 
+	Object getMap(String colname) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException;
+	
 	Object put(int colpos, Object obj) throws IllegalArgumentException;
 
 	Object put(String colname, Object obj) throws IllegalArgumentException;

@@ -1,6 +1,7 @@
 package org.judal.storage;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -501,6 +502,14 @@ public class JDOPersistenceCapable implements JDORecord {
 	public void delete(DataSource dataSource) throws JDOException {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public Object getMap(String colname)
+			throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException,
+			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
