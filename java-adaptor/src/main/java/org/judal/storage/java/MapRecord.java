@@ -13,6 +13,7 @@ package org.judal.storage.java;
  */
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -199,6 +200,11 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 		return values.get(key);
 	}
 	
+	@Override
+	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+		return MapFieldHelper.getMap(this, sKey);
+	} // getMap
+
 	@Override
 	public boolean isEmpty() {
 		return values.isEmpty();

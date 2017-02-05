@@ -15,6 +15,7 @@ package org.judal.storage.java;
 import java.io.Serializable;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 import java.util.Map;
@@ -184,6 +185,11 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 		return retval;
 	}
 
+	@Override
+	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+		return MapFieldHelper.getMap(this, sKey);
+	} // getMap
+	
 	@Override
 	public boolean isEmpty() {
 		return false;
