@@ -1,8 +1,5 @@
 package org.judal.cassandra;
 
-import java.io.File;
-import java.io.FileInputStream;
-
 /**
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -14,17 +11,14 @@ import java.io.FileInputStream;
  * KIND, either express or implied.
  */
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.LinkedList;
+import java.io.File;
+import java.io.FileInputStream;
+
 import java.util.Map;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.transaction.TransactionManager;
-
-import com.knowgate.debug.DebugFile;
 
 import org.judal.storage.DataSource;
 import org.judal.storage.Engine;

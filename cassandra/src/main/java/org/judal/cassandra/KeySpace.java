@@ -356,7 +356,6 @@ public class KeySpace implements TableDataSource {
 	@Override
 	public void dropTable(String tableName, boolean cascade) throws JDOException {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -367,47 +366,40 @@ public class KeySpace implements TableDataSource {
 
 	@Override
 	public IndexableTable openIndexedTable(Record recordInstance) throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		return new ColumnFamily(this, recordInstance.getTableName());
 	}
 
 	@Override
 	public View openView(Record recordInstance) throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		return new ColumnFamily(this, recordInstance.getTableName());
 	}
 
 	@Override
 	public IndexableView openIndexedView(Record recordInstance) throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		return new ColumnFamily(this, recordInstance.getTableName());
 	}
 
 	@Override
 	public IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String, String> column)
 			throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		  throw new JDOUnsupportedOptionException("Cassandra does not support joins");
 	}
 
 	@Override
 	public IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String, String> column)
 			throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		  throw new JDOUnsupportedOptionException("Cassandra does not support joins");
 	}
 
 	@Override
 	public IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName,
 			Entry<String, String>[] columns) throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		  throw new JDOUnsupportedOptionException("Cassandra does not support joins");
 	}
 
 	@Override
 	public IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName,
 			Entry<String, String>[] columns) throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		  throw new JDOUnsupportedOptionException("Cassandra does not support joins");
 	}
 }
