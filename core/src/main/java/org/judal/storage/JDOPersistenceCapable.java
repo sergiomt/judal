@@ -18,6 +18,7 @@ import javax.jdo.spi.StateManager;
 import org.judal.metadata.ColumnDef;
 
 import com.knowgate.currency.Money;
+import com.knowgate.gis.LatLong;
 
 public class JDOPersistenceCapable implements JDORecord {
 
@@ -508,6 +509,56 @@ public class JDOPersistenceCapable implements JDORecord {
 	public Object getMap(String colname)
 			throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException,
 			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int getIntervalPart(String colname, String part) throws ClassCastException, ClassNotFoundException,
+			NullPointerException, NumberFormatException, IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public Integer[] getIntegerArray(String colname) throws ClassCastException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LatLong getLatLong(String columname)
+			throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String[] getStringArray(String colname) throws ClassCastException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long[] getLongArray(String colname) throws ClassCastException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Float[] getFloatArray(String colname) throws ClassCastException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Double[] getDoubleArray(String colname) throws ClassCastException, ClassNotFoundException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Date[] getDateArray(String colname) throws ClassCastException, ClassNotFoundException {
 		// TODO Auto-generated method stub
 		return null;
 	}

@@ -111,6 +111,7 @@ public abstract class AbstractRecord implements Record {
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
 		clearLongData();
+		System.out.println("End AbstractRecord("+dataSource+", "+tableName+", "+fieldHelper+", "+constraintsChecker+")");
 	}
 	
 	@Override
@@ -555,6 +556,34 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getIntegerArray(this, sColName);
 	}
 
+	@Override
+	public Long[] getLongArray(String sColName) throws ClassCastException, ClassNotFoundException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getLongArray(this, sColName);
+	}
+
+	@Override
+	public Float[] getFloatArray(String sColName) throws ClassCastException, ClassNotFoundException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getFloatArray(this, sColName);
+	}
+
+	@Override
+	public Double[] getDoubleArray(String sColName) throws ClassCastException, ClassNotFoundException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getDoubleArray(this, sColName);
+	}
+
+	@Override
+	public Date[] getDateArray(String sColName) throws ClassCastException, ClassNotFoundException {
+		if (null==fhelper)
+			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
+		return fhelper.getDateArray(this, sColName);
+	}
+	
 	@Override
 	public String[] getStringArray(String sColName) throws ClassCastException, ClassNotFoundException {
 		if (null==fhelper)

@@ -97,6 +97,14 @@ public interface Record extends Serializable, Stored {
 	
 	Integer[] getIntegerArray(String colname) throws ClassCastException, ClassNotFoundException;
 
+	Long[] getLongArray(String colname) throws ClassCastException, ClassNotFoundException;
+
+	Float[] getFloatArray(String colname) throws ClassCastException, ClassNotFoundException;
+
+	Double[] getDoubleArray(String colname) throws ClassCastException, ClassNotFoundException;
+
+	Date[] getDateArray(String colname) throws ClassCastException, ClassNotFoundException;
+	
 	LatLong getLatLong(String columname) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, ClassNotFoundException;
 	
 	String getString(String colname) throws ClassCastException;

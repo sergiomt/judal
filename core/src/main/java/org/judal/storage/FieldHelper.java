@@ -12,6 +12,7 @@ package org.judal.storage;
  */
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Date;
 
 import com.knowgate.gis.LatLong;
 
@@ -21,6 +22,14 @@ public interface FieldHelper {
 	
 	Integer[] getIntegerArray(Record rec, String colname) throws ClassCastException;
 
+	Long[] getLongArray(Record rec, String colname) throws ClassCastException;
+
+	Float[] getFloatArray(Record rec, String colname) throws ClassCastException;
+
+	Double[] getDoubleArray(Record rec, String colname) throws ClassCastException;
+
+	Date[] getDateArray(Record rec, String colname) throws ClassCastException;
+	
 	String[] getStringArray(Record rec, String colname) throws ClassCastException, ClassNotFoundException;
 	
 	LatLong getLatLong(Record rec, String columname) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException;
