@@ -827,6 +827,10 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 			return "VARCHAR";
 		case Types.ARRAY:
 			return "ARRAY";
+		case Types.STRUCT:
+			return "STRUCT";
+		case Types.SQLXML:
+			return "SQLXML";
 		case Types.JAVA_OBJECT:
 			return "JAVA_OBJECT";
 		default:
@@ -887,6 +891,10 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 			iSQLType = Types.CLOB;
 		else if (sToken.equalsIgnoreCase("ARRAY"))
 			iSQLType = Types.ARRAY;
+		else if (sToken.equalsIgnoreCase("STRUCT"))
+			iSQLType = Types.STRUCT;
+		else if (sToken.equalsIgnoreCase("SQLXML"))
+			iSQLType = Types.SQLXML;
 		else if (sToken.equalsIgnoreCase("JAVA_OBJECT"))
 			iSQLType = Types.JAVA_OBJECT;
 		else
