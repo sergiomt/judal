@@ -14,9 +14,12 @@ import java.util.Map;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.*;
 
 import javax.sql.PooledConnection;
@@ -27,6 +30,7 @@ import javax.transaction.xa.XAResource;
 import javax.jdo.datastore.JDOConnection;
 import javax.sql.ConnectionEvent;
 
+import com.knowgate.arrayutils.Arr;
 import com.knowgate.debug.DebugFile;
 import com.knowgate.gis.LatLong;
 
@@ -795,6 +799,9 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 				else
 					oStmt.setObject(iParamIndex, oParamValue, iSQLType);
 			}
+			else if ((Types.ARRAY==iSQLType) && (oParamValue!=null)) {
+				oStmt.setArray(iParamIndex, toArray(oParamValue));
+			}
 			else if (1111==iSQLType) { // PostgreSQL PGObject (may be interval, geoposition or hstore)
 				if (oParamValue!=null) {
 					if (oParamValue instanceof LatLong) {
@@ -1052,4 +1059,48 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		return false;
 	}
 	
+	// ---------------------------------------------------------------------------
+
+	private Array toArray(Object oObj) throws SQLException {
+		if (oObj instanceof Array)
+			return (Array) oObj;
+		if (oObj instanceof Boolean[])
+			return createArrayOf("boolean", (Boolean[]) oObj);
+		if (oObj instanceof Short[])
+			return createArrayOf("smallint", (Short[]) oObj);
+		if (oObj instanceof Integer[])
+			return createArrayOf("integer", (Integer[]) oObj);
+		if (oObj instanceof Long[])
+			return createArrayOf("bigint", (Long[]) oObj);
+		if (oObj instanceof Float[])
+			return createArrayOf("float", (Float[]) oObj);
+		if (oObj instanceof Double[])
+			return createArrayOf("double", (Double[]) oObj);
+		if (oObj instanceof BigDecimal[])
+			return createArrayOf("decimal", (BigDecimal[]) oObj);
+		if (oObj instanceof String[])
+			return createArrayOf("varchar", (String[]) oObj);
+		if (oObj instanceof boolean[])
+			return createArrayOf("boolean", Arr.toObject((boolean[]) oObj));
+		if (oObj instanceof short[])
+			return createArrayOf("smallint", Arr.toObject((short[]) oObj));
+		if (oObj instanceof int[])
+			return createArrayOf("integer", Arr.toObject((int[]) oObj));
+		if (oObj instanceof long[])
+			return createArrayOf("bigint", Arr.toObject((long[]) oObj));
+		if (oObj instanceof float[])
+			return createArrayOf("float", Arr.toObject((float[]) oObj));
+		if (oObj instanceof double[])
+			return createArrayOf("double", Arr.toObject((double[]) oObj));
+		if (oObj instanceof Date[]) {
+			Date[] oDts = (Date[]) oObj;
+			Timestamp[] oTms = new Timestamp[oDts.length];
+			for (int d=0; d<oDts.length; d++)
+				oTms[d] = new Timestamp(oDts[d].getTime());
+			return createArrayOf("timestamp", oTms);
+		}
+		if (oObj instanceof Timestamp[])
+			return createArrayOf("timestamp", (Timestamp[]) oObj);
+		throw new ClassCastException("Cannot cast from "+oObj.getClass().getName()+" to java.sql.Array");
+	}
 }
