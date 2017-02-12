@@ -58,23 +58,26 @@ public class TableDef extends ViewDef {
 	}
 
 	public void autoSetPrimaryKey() {
-		getPrimaryKeyMetadata().clear();
-		for (ColumnDef c : getColumns())
-			if (c.isPrimaryKey()) {
-				ColumnDef newPkCol = getPrimaryKeyMetadata().newColumnMetadata();
-				newPkCol.setFamily(c.getFamily());
-				newPkCol.setName(c.getName());
-				newPkCol.setType(c.getType());
-				newPkCol.setJDBCType(c.getJDBCType());
-				newPkCol.setSQLType(c.getSQLType());
-				newPkCol.setPosition(c.getPosition());
-				newPkCol.setLength(c.getLength());
-				newPkCol.setScale(c.getScale());
-				newPkCol.setAllowsNull(c.getAllowsNull());
-				newPkCol.setAutoIncrement(c.getAutoIncrement());
+		if (getPrimaryKeyMetadata()!=null) {
+			getPrimaryKeyMetadata().clear();
+			for (ColumnDef c : getColumns()) {
+				if (c.isPrimaryKey()) {
+					ColumnDef newPkCol = getPrimaryKeyMetadata().newColumnMetadata();
+					newPkCol.setFamily(c.getFamily());
+					newPkCol.setName(c.getName());
+					newPkCol.setType(c.getType());
+					newPkCol.setJDBCType(c.getJDBCType());
+					newPkCol.setSQLType(c.getSQLType());
+					newPkCol.setPosition(c.getPosition());
+					newPkCol.setLength(c.getLength());
+					newPkCol.setScale(c.getScale());
+					newPkCol.setAllowsNull(c.getAllowsNull());
+					newPkCol.setAutoIncrement(c.getAutoIncrement());
+				}
 			}
+		}
 	}
-	
+
 	public String getCreationTimestampColumnName() {
 		return creationTimestampColumnName;
 	}
