@@ -909,7 +909,7 @@ public class SQLTableDef extends TableDef implements Scriptable {
 		int colPos;
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDCTableDef.readCols(Connection, DatabaseMetaData)" );
+			DebugFile.writeln("Begin SQLTableDef.readCols(Connection, DatabaseMetaData)" );
 			DebugFile.incIdent();
 			DebugFile.writeln("DatabaseMetaData.getColumns(" + getCatalog() + "," + getSchema() + "," + getName() + ",%)");
 		}
@@ -921,19 +921,23 @@ public class SQLTableDef extends TableDef implements Scriptable {
 		stmt = conn.createStatement();
 
 		try {
-			if (DebugFile.trace) DebugFile.writeln("Statement.executeQuery(SELECT * FROM " + getName() + " WHERE 1=0)");
+			String ssql;
 
 			if (iDBMS==RDBMS.POSTGRESQL.intValue()) {
-				if (getSchema()==null)
-					rset = stmt.executeQuery("SELECT * FROM " + getName() + " WHERE 1=0");
-				else if (getSchema().length()==0)
-					rset = stmt.executeQuery("SELECT * FROM " + getName() + " WHERE 1=0");
-				else
-					rset = stmt.executeQuery("SELECT * FROM \"" + getSchema() + "\"." + getName() + " WHERE 1=0");
+				if (getSchema()==null) {
+					ssql = "SELECT * FROM " + getName() + " WHERE 1=0";
+				} else if (getSchema().length()==0) {
+					 ssql= "SELECT * FROM " + getName() + " WHERE 1=0";
+				} else {
+					ssql = "SELECT * FROM \"" + getSchema() + "\"." + getName() + " WHERE 1=0";
+				}
 			} else {
-				rset = stmt.executeQuery("SELECT * FROM " + getName() + " WHERE 1=0");
+				ssql = "SELECT * FROM " + getName() + " WHERE 1=0";
 			}
 
+			if (DebugFile.trace) DebugFile.writeln("Statement.executeQuery("+ssql+")");
+			rset = stmt.executeQuery(ssql);
+			
 			errCode = 0;
 		}
 		catch (SQLException sqle) {
@@ -1059,7 +1063,9 @@ public class SQLTableDef extends TableDef implements Scriptable {
 
 				rset.close();
 				rset = null;
-			} // fi (oRSet)
+			} else {
+				if (DebugFile.trace) DebugFile.writeln("no primary key found");
+			}// fi (oRSet)
 
 			if (null!=stmt) { stmt.close(); stmt = null; }
 
@@ -1072,7 +1078,7 @@ public class SQLTableDef extends TableDef implements Scriptable {
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCTableDef.readCols()");
+			DebugFile.writeln("End SQLTableDef.readCols()");
 		}
 
 		return columns;
