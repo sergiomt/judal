@@ -1,5 +1,7 @@
 package org.judal.storage.java.postgresql;
 
+import java.util.Date;
+
 /**
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -16,37 +18,113 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Array;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 
+import com.knowgate.arrayutils.Arr;
 import com.knowgate.gis.LatLong;
 import com.knowgate.stringutils.Str;
 
 import org.judal.storage.Record;
 import org.judal.storage.FieldHelper;
+/**
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
 
-class PostgreSQLFieldHelper implements FieldHelper {
+public class PostgreSQLFieldHelper implements FieldHelper {
 
 	private Constructor<?> oCnr = null;
 
-	public Integer[] getIntegerArray(Record oRec, String sKey) throws ClassCastException {
-		Array oArr = (Array) oRec.apply(sKey);
-		if (null!=oArr) {
-			try {
-				return (Integer[]) oArr.getArray();
-			} catch (SQLException e) {
-				throw new ClassCastException(e.getMessage());
+	@SuppressWarnings("unchecked")
+	private <T> T[] getArray(Object oObj) throws ClassCastException {
+		if (null!=oObj) {
+			if (oObj instanceof Array) {
+				Array oArr = (Array) oObj;
+				try {
+					return (T[]) oArr.getArray();
+				} catch (SQLException e) {
+					throw new ClassCastException(e.getMessage());
+				}				
+			} else {
+				return (T[]) oObj;
 			}
 		} else {
 			return null;
 		}		  
 	}
+	
+	public Integer[] getIntegerArray(Record oRec, String sKey) throws ClassCastException {
+		Object oObj = oRec.apply(sKey);
+		return oObj instanceof int[] ? Arr.toObject((int[]) oObj) : (Integer[]) getArray(oObj);
+	}
 
-	public String[] getStringArray(Record oRec, String sKey) throws ClassCastException {
-		Array oArr = (Array) oRec.apply(sKey);
-		if (null!=oArr) {
+	public Long[] getLongArray(Record oRec, String sKey) throws ClassCastException {
+		Object oObj = oRec.apply(sKey);
+		return oObj instanceof long[] ? Arr.toObject((long[]) oObj) : (Long[]) getArray(oObj);
+	}
+
+	public Float[] getFloatArray(Record oRec, String sKey) throws ClassCastException {
+		Object oObj = oRec.apply(sKey);
+		return oObj instanceof float[] ? Arr.toObject((float[]) oObj) : (Float[]) getArray(oObj);
+	}
+
+	public Double[] getDoubleArray(Record oRec, String sKey) throws ClassCastException {
+		Object oObj = oRec.apply(sKey);
+		return oObj instanceof double[] ? Arr.toObject((double[]) oObj) : (Double[]) getArray(oObj);
+	}
+
+	public Date[] getDateArray(Record oRec, String sKey) throws ClassCastException {
+		Object oObj = oRec.apply(sKey);
+		if (null==oObj)
+			return null;
+		if (oObj instanceof Date[])
+			return (Date[]) oObj;
+		if (oObj instanceof Array) {
+			Object oArr;
 			try {
-				return (String[]) oArr.getArray();
+				oArr = ((Array) oObj).getArray();
 			} catch (SQLException e) {
 				throw new ClassCastException(e.getMessage());
+			}
+			if (oArr instanceof Date[]) {
+				return (Date[]) oArr;
+			}
+			if (oArr instanceof Timestamp[]) {
+				Timestamp[] oTms = (Timestamp[]) oArr;
+				Date[] oDte = new Date[oTms.length];
+				for (int t=0; t<oTms.length; t++)
+					oDte[t] = new Date(oTms[t].getTime());
+				return oDte;
+			}
+			if (oArr instanceof java.sql.Date[]) {
+				java.sql.Date[] oSdt = (java.sql.Date[]) oArr;
+				Date[] oDte = new Date[oSdt.length];
+				for (int t=0; t<oSdt.length; t++)
+					oDte[t] = new Date(oSdt[t].getYear(), oSdt[t].getMonth(), oSdt[t].getDate());
+				return oDte;
+			}
+		}
+		throw new ClassCastException("PostgreSQLFieldHelper.getDateArray() cannot cast from "+oObj.getClass().getName()+" to Date[]");
+	}
+	
+	public String[] getStringArray(Record oRec, String sKey) throws ClassCastException {
+		Object oObj = oRec.apply(sKey);
+		if (null!=oObj) {
+			if (oObj instanceof Array) {
+				Array oArr = (Array) oRec.apply(sKey);
+				try {
+					return (String[]) oArr.getArray();
+				} catch (SQLException e) {
+					throw new ClassCastException(e.getMessage());
+				}
+			} else {
+				return (String[]) oObj;
 			}
 		} else {
 			return null;
@@ -61,7 +139,7 @@ class PostgreSQLFieldHelper implements FieldHelper {
 	   * @param sPart String Currently, only "days" is allowed as interval part
 	   * @return int Number of days in the given interval
 	   * @throws NullPointerException if interval is <b>null</b>
-	   * @throws IllegalArgumentException is sPart is not "days"
+	   * @throws IllegalArgumentException if sPart is not "days"
 	   * @throws NumberFormatException if interval has no days
 	   */
 	public int getIntervalPart(Record oRec, String sKey, String sPart)
