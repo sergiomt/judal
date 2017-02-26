@@ -65,6 +65,11 @@ public class DBStored implements Stored {
   }
 
   @Override
+  public void setContent(byte[] bytes, String contentType) throws JDOException {
+	  this.value = bytes;
+  }
+  
+  @Override
   public Object getValue() throws JDOException {
 	return value;
   }
