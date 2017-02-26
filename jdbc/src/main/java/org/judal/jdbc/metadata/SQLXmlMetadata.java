@@ -2,19 +2,18 @@ package org.judal.jdbc.metadata;
 
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.sql.SQLException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.JDOException;
 import javax.jdo.metadata.ColumnMetadata;
 
 import org.judal.jdbc.JDBCTableDataSource;
-import org.judal.jdbc.RDBMS;
-import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.ForeignKeyDef;
 import org.judal.metadata.NonUniqueIndexDef;
@@ -22,7 +21,6 @@ import org.judal.metadata.MetadataScanner;
 import org.judal.metadata.PrimaryKeyDef;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.UniqueIndexDef;
-import org.judal.storage.TableDataSource;
 import org.judal.metadata.IndexDef.Type;
 
 import com.pureperfect.ferret.ScanFilter;
@@ -72,15 +70,10 @@ public class SQLXmlMetadata implements MetadataScanner {
 		InputStreamReader rdr = new InputStreamReader(in);
 		db = dio.read(rdr);
 		rdr.close();
-		RDBMS dbms = null;
-		try {
-			dbms = dts.getDatabaseProductId();
-		} catch (SQLException sqle) {
-			throw new JDOException(sqle.getClass().getName()+" "+sqle.getMessage(), sqle);
-		}
+		Map<String,Object> opts = new HashMap<>();
 		for (int t = 0; t < db.getTableCount(); t++) {
 			Table tbl = db.getTable(t);
-			SQLTableDef tdef = new SQLTableDef(dbms, tbl.getName());
+			SQLTableDef tdef = dts.createTableDef(tbl.getName(), opts);
 			PrimaryKeyDef pdef = new PrimaryKeyDef();
 			tdef.setSchema(tbl.getSchema());
 			tdef.setCatalog(tbl.getCatalog());
