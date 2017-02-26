@@ -303,7 +303,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	public Collection<Object> values() {
 		return values.values();
 	}
-
+	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void setValue(Serializable value) throws JDOException {
