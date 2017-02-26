@@ -14,15 +14,14 @@ package org.judal.hbase;
 import java.io.IOException;
 import java.sql.Types;
 import java.util.Iterator;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
@@ -389,7 +388,7 @@ public class HBTable implements Table {
 	}
 
 	@Override
-	public void setClass(Class<Stored> candidateClass) {
+	public void setClass(Class<? extends Stored> candidateClass) {
 		oCls = (Class<? extends Record>) candidateClass;
 	}
 
@@ -488,11 +487,14 @@ public class HBTable implements Table {
 
 		ArrayListRecordSet<R> rst = new ArrayListRecordSet<R>((Class<R>) oCls);
 		TableDef tdef = getDataSource().getMetaData().getTable(name());
+		ColumnDef[] fetchCols = new ColumnDef[cols.getMembers().size()];
 		Scan scn = new Scan();
 		scn.setStartRow(BytesConverter.toBytes(valueFrom));
-		scn.setStopRow (BytesConverter.toBytes(valueTo));
+		scn.setStopRow (BytesConverter.toBytes(valueTo));		
+		int c = 0;
 		for (Object colName : cols.getMembers()) {
 			ColumnDef cdef = getColumnByName((String) colName);
+			fetchCols[c++] = cdef;
 			scn.addColumn(BytesConverter.toBytes(cdef.getFamily()), BytesConverter.toBytes(cdef.getName()));
 		}
 		ResultScanner rsc = null;
@@ -508,7 +510,7 @@ public class HBTable implements Table {
 					} catch (NoSuchMethodException nsme) {
 						throw new JDOException(nsme.getMessage(), nsme);
 					}
-					for (ColumnDef oCol : columns()) {
+					for (ColumnDef oCol : fetchCols) {
 						KeyValue oKvl = res.getColumnLatest(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
 						if (oKvl!=null) {
 							if (oKvl.getValue()!=null)
@@ -526,4 +528,22 @@ public class HBTable implements Table {
 		return rst;
 	}
 
+	public int update(Param[] aValues, Param[] aWhere) throws JDOException {
+		if (aWhere==null) throw new NullPointerException("HBTable.update() where clause cannot be null");
+		if (aWhere.length!=1) throw new IllegalArgumentException("HBTable updates must use exactly one parameter");
+		Put oPut = new Put(BytesConverter.toBytes((String) aWhere[0].getValue()));
+		try {
+			for (Param v : aValues) {
+				if (v.getValue()==null)
+					oPut.add(BytesConverter.toBytes(v.getFamily()), BytesConverter.toBytes(v.getName()), new byte[0]);
+				else
+					oPut.add(BytesConverter.toBytes(v.getFamily()), BytesConverter.toBytes(v.getName()), BytesConverter.toBytes(v.getValue(), v.getType()));
+			}
+			oTbl.put(oPut);
+		} catch (IOException ioe) {
+			throw new JDOException(ioe.getMessage(), ioe);
+		}
+		return 1;
+	}
+	
 }
