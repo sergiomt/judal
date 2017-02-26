@@ -1,5 +1,8 @@
 package org.judal.storage;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 /**
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -13,6 +16,8 @@ package org.judal.storage;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.PersistenceManager;
@@ -46,6 +51,20 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 				ensureCapacity(capacity>128 ? 128 : capacity);
 			else
 				ensureCapacity(capacity>16384 ? 16384 : capacity);
+	}
+
+	@Override
+	public List<R> filter(final Object predicate) {
+		LinkedList<R> filtered = new LinkedList<R> ();
+		try {
+			Method m = predicate.getClass().getMethod("test", candidateClass);
+			for (R record : this)
+				if ((boolean) m.invoke(predicate, record))
+					filtered.add(record);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new NullPointerException("Cannot invoke method test() of predicate class "+predicate.getClass().getName());
+		}
+		return filtered;
 	}
 
 	@Override

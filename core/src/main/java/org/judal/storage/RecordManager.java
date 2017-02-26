@@ -16,6 +16,8 @@ import javax.jdo.JDOUserException;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 
+import org.judal.metadata.PrimaryKeyDef;
+import org.judal.metadata.TableDef;
 import org.judal.storage.queue.RecordQueueProducer;
 
 import com.knowgate.debug.DebugFile;
@@ -51,6 +53,20 @@ public class RecordManager {
 		storageQueue.delete(rec, new String[]{(String) rec.getKey()}, properties);
 	}
 
+	public void updatePersistent(Object obj, Param... params) {
+		Record rec = (Record) obj;
+		evict(rec);
+		TableDef tdef = dataSource.getMetaData().getTable(rec.getTableName());
+		PrimaryKeyDef pk = tdef.getPrimaryKeyMetadata();
+		if (pk.getNumberOfColumns()<1) {
+			throw new JDOException("Cannot update table "+rec.getTableName()+" because it lacks of a primary key");
+		} else {
+			Param[] values = new Param[pk.getNumberOfColumns()];
+			for (int p=0; p<pk.getNumberOfColumns(); p++)
+				values[p] = new Param(tdef.getColumnByName(pk.getColumns()[p].getName()), rec.apply(pk.getColumns()[p].getName()));
+			storageQueue.update(rec, params, values);
+		}
+	}
 
 	public void deletePersistentAll(Object... objs) {
 		String[] keys = new String[objs.length];
@@ -118,11 +134,13 @@ public class RecordManager {
 		evictAll(evicted);
 	}
 
+	public TableDataSource getDataSource() {
+		return dataSource;
+	}
 
 	public JDOConnection getDataStoreConnection() {
 		return dataSource.getJdoConnection();
 	}
-
 
 	public boolean getIgnoreCache() {
 		return false;
@@ -211,7 +229,6 @@ public class RecordManager {
 		}
 	}
 
-
 	public void retrieve(Object obj) {
 		Record rec = (Record) obj;
 		if (rec.getKey()==null)
@@ -232,6 +249,8 @@ public class RecordManager {
 						if (DebugFile.trace)
 							DebugFile.writeln("TableManager.retrieve("+rec.getKey()+") " + xcpt.getClass().getName() + " " + xcpt.getMessage());
 					}
+				else
+					rec.setKey(null);
 			} finally {
 				tbl.close();
 			}			

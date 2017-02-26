@@ -563,4 +563,10 @@ public class JDOPersistenceCapable implements JDORecord {
 		return null;
 	}
 
+	@Override
+	public void setContent(byte[] bytes, String contentType) throws JDOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

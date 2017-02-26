@@ -24,7 +24,7 @@ public interface ReadOnlyBucket extends AutoCloseable, Extent<Stored> {
 
 	void close() throws JDOException;
 
-	void setClass(Class<Stored> candidateClass);
+	void setClass(Class<? extends Stored> candidateClass);
 
 	public static final int MAX_ROWS = 2147483647;
 }

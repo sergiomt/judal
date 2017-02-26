@@ -16,9 +16,8 @@ import org.judal.metadata.ColumnDef;
 */
 public class ColumnGroup implements FetchGroup, Iterable<String> {
 
-	private static final long serialVersionUID = 1L;
-
 	private Record rec;
+	private String name;
 	private boolean unmodifiable;
 	private boolean postLoad;
 	private HashMap<String,Integer> recursion;
@@ -77,9 +76,13 @@ public class ColumnGroup implements FetchGroup, Iterable<String> {
 
 	@Override
 	public String getName() {
-		return null;
+		return name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	@Override
 	public boolean getPostLoad() {
 		return postLoad;

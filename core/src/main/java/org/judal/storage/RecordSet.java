@@ -17,6 +17,13 @@ import javax.jdo.Extent;
 public interface RecordSet<R extends Record> extends Extent<R>, List<R> {
 
   /**
+   * Return a list of all the Record elements for which the given Predicate evaluates to <b>true</b>.
+   * @param predicate Object
+   * @return List<R>
+   */
+  List<R> filter (final Object predicate);
+
+  /**
    * Find the first row which value at columnName is equal to the given value
    * @param columnName String
    * @param value Object

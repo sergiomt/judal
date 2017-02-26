@@ -28,6 +28,8 @@ public interface Stored extends Serializable {
 
 	void setValue(Serializable value) throws JDOException;
 
+	void setContent(byte[] bytes, String contentType) throws JDOException;
+
 	Object getValue() throws JDOException;
 
 	String getBucketName();

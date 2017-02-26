@@ -152,9 +152,10 @@ public abstract class AbstractRecord implements Record {
 	
 	@Override
 	public boolean load(DataSource oDts, Object oKey) throws JDOException {
-		Table oTbl = ((TableDataSource) oDts).openTable(this);
+		Table oTbl = null;
 		boolean bLoaded = false;
 		try {
+			oTbl = ((TableDataSource) oDts).openTable(this);
 			bLoaded = oTbl.load(oKey, this);
 		} finally {
 			if (oTbl!=null) oTbl.close();
@@ -166,8 +167,9 @@ public abstract class AbstractRecord implements Record {
 	public void store(DataSource oDts) throws JDOException {
 		if (getConstraintsChecker()!=null)
 			getConstraintsChecker().check(oDts, this);
-		Table oTbl = ((TableDataSource) oDts).openTable(this);
+		Table oTbl = null;
 		try {
+			oTbl = ((TableDataSource) oDts).openTable(this);
 			oTbl.store(this);
 		} finally {
 			if (oTbl!=null) oTbl.close();
@@ -267,6 +269,21 @@ public abstract class AbstractRecord implements Record {
 				throw new JDOException("AbstractRecord.setKey() Key value bust be either a basic type or and Object[] but was "+value.getClass().getName()+" for ("+pkcols.substring(1)+")", cce);
 			}
 		}
+	}
+
+	@Override
+	/**
+	 * <p>Set value of content, contentType and contentLength fields.</p>
+	 * @param bytes byte[] Value of content field
+	 * @param contentType String Value of contentType field
+	 */
+	public void setContent(byte[] bytes, String contentType) throws JDOException {
+		put("content", bytes);
+		put("contentType", contentType);
+		if (bytes==null)
+			put("contentLength", new Long(0l));
+		else
+			put("contentLength", new Long(bytes.length));			
 	}
 
 	/**

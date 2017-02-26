@@ -26,6 +26,28 @@ import com.knowgate.typeutils.ObjectFactory;
 public class StorageObjectFactory extends ObjectFactory {
 
 	/**
+	 * <p>Create instance of a class that implements Stored interface.</p>
+	 * @param recordConstructor Constructor&lt;R extends Stored&gt;
+	 * @param constructorParameters Object[] Parameters for the given constructor
+	 * @return R extends Stored
+	 * @throws NoSuchMethodException If constructor parameter classes do not match the classes of constructorParameters
+	 */
+	public static <R extends Stored> R newStored(Constructor<R> storedConstructor, Object... constructorParameters) {
+		R retval = null;
+		final int parameterCount = storedConstructor.getParameterCount();
+		try {
+			if (parameterCount==0)
+				retval = storedConstructor.newInstance();
+			else
+				retval = storedConstructor.newInstance(filterParameters(storedConstructor.getParameters(), constructorParameters));
+		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | IllegalArgumentException xcpt) {
+			if (DebugFile.trace)
+				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" StorageObjectFactory.newStored(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
+		}
+		return retval;
+	}
+
+	/**
 	 * <p>Create instance of a class that implements Record interface.</p>
 	 * @param recordConstructor Constructor&lt;R extends Record&gt;
 	 * @param constructorParameters Object[] Parameters for the given constructor
@@ -45,6 +67,23 @@ public class StorageObjectFactory extends ObjectFactory {
 				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" StorageObjectFactory.newRecord(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
 		}
 		return retval;
+	}
+
+	/**
+	 * <p>Create instance of a class that implements Stored interface.</p>
+	 * @param recordClass Class&lt;R extends Stored&gt;
+	 * @param constructorParameters Object[] Parameters for the class constructor
+	 * @return R extends Stored
+	 * @throws NoSuchMethodException If no constructor was found allowing the given parameters
+	 */
+	@SuppressWarnings("unchecked")
+	public static <R extends Stored> R newStored(Class<R> storedClass, Object... constructorParameters) throws NoSuchMethodException {
+		if (DebugFile.trace)
+			DebugFile.writeln("StorageObjectFactory.newRecord("+storedClass.getName()+","+constructorParameters+")");
+		Constructor<R> storedConstructor = (Constructor<R>) getConstructor(storedClass, getParameterClasses(constructorParameters));
+		if (null==storedConstructor)
+			throw new NoSuchMethodException("No suitable constructor found for "+storedClass.getName());
+		return newStored(storedConstructor, constructorParameters);
 	}
 
 	/**
