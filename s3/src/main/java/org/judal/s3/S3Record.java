@@ -97,6 +97,7 @@ public class S3Record extends MapRecord {
 			setContent(BytesConverter.toBytes(value, Types.JAVA_OBJECT), null);
 	}
 
+	@Override
 	public void setContent(byte[] bytes, String contentType) {
 		if (bytes==null) {
 			put(content, new byte[0]);
