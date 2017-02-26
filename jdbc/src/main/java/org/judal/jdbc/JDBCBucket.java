@@ -32,6 +32,7 @@ import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
 import org.judal.storage.Bucket;
 import org.judal.storage.Param;
+import org.judal.storage.Record;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
@@ -47,7 +48,7 @@ public class JDBCBucket implements Bucket {
 	protected JDBCBucketDataSource dataSource;
 	protected SQLTableDef tableDef;
 	protected JDCConnection jdcConn;
-	protected Class<Stored> candidateClass;
+	protected Class<? extends Stored> candidateClass;
 	protected Collection<JDBCIterator> iterators;
 
 	public JDBCBucket(JDBCBucketDataSource dataSource, String bucketName) throws JDOException {
@@ -287,7 +288,7 @@ public class JDBCBucket implements Bucket {
 
 	@Override
 	public Class<Stored> getCandidateClass() {
-		return candidateClass;
+		return (Class<Stored>) candidateClass;
 	}
 
 	public void setCandidateClass(Class<Stored> candidateClass) {
@@ -318,7 +319,8 @@ public class JDBCBucket implements Bucket {
 		ResultSet rset = null;
 		try {
 			stmt = getConnection().prepareStatement("SELECT * FROM "+name(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			retval = new JDBCIterator(candidateClass!=null ? candidateClass : ArrayRecord.class, tableDef, stmt, rset);			
+			retval = new JDBCIterator((Class<? extends Record>) (candidateClass!=null ? candidateClass : ArrayRecord.class), tableDef, stmt, rset);
+			iterators.add(retval);
 		} catch (SQLException | NoSuchMethodException | SecurityException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
@@ -326,7 +328,7 @@ public class JDBCBucket implements Bucket {
 	}
 
 	@Override
-	public void setClass(Class<Stored> candidateClass) {
+	public void setClass(Class<? extends Stored> candidateClass) {
 		this.candidateClass = candidateClass;		
 	}
 

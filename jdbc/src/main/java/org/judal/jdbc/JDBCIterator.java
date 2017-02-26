@@ -35,7 +35,7 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 	private ResultSet rset;
 	private Record nextRow;
 
-	public JDBCIterator(Class resultClass, SQLTableDef tableDef, PreparedStatement stmt, ResultSet rset)
+	public JDBCIterator(Class<? extends Record> resultClass, SQLTableDef tableDef, PreparedStatement stmt, ResultSet rset)
 		throws NoSuchMethodException, SecurityException {
 		this.stmt = stmt;
 		this.rset = rset;
@@ -65,7 +65,7 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 	}
 
 	@Override
-	public Stored next() {
+	public Record next() {
 		return nextRow;
 	}
 

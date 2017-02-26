@@ -19,6 +19,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -86,10 +88,32 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		initialize();
 	}
 
+	private Object resultSetToListOfMap(Object result) throws SQLException {
+		if (result instanceof ResultSet) {
+			List<HashMap<String,Object>> results = new LinkedList<HashMap<String,Object>>();
+			ResultSet rset = (ResultSet) result;
+			ResultSetMetaData mdata = rset.getMetaData();
+			int colCount = mdata.getColumnCount();
+			String[] colNames = new String[colCount];
+			for (int c=0; c<colCount;  c++)
+				colNames[c] = mdata.getColumnName(c+1);
+			while (rset.next()) {
+				HashMap<String,Object> row = new HashMap<String,Object>(colCount*2);
+				for (int c=0; c<colCount;  c++)
+					row.put(colNames[c], rset.getObject(c+1));
+				results.add(row);
+			}
+			rset.close();
+			return results;
+		} else {
+			return result;
+		}
+	}
+	
 	@Override
 	public Object call(String statement, Param... parameters) throws JDOException {
 		JDCConnection conn = null;
-		boolean retval;
+		Object retval;
 		try {
 			conn = getConnection("JDBCDataSource.call");
 			String paramHolders = "";
@@ -104,7 +128,10 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		        	for (int p=0; p<parameters.length; p++)
 		        		stmt.setObject(p+1, parameters[p].getValue(), parameters[p].getType());
 		        	ResultSet rset = stmt.executeQuery();
-		        	retval = rset.next();
+		        	if (rset.next())
+		        		retval = resultSetToListOfMap(rset.getObject(1));
+		        	else
+		        		retval = null;
 		        	rset.close();
 		        	stmt.close();
 			} else {
@@ -112,7 +139,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		        if (paramHolders.length()>0)
 		        	for (int p=0; p<parameters.length; p++)
 		        		call.setObject(p+1, parameters[p].getValue(), parameters[p].getType());
-		        	retval = call.execute();
+		        	retval = resultSetToListOfMap(call.execute());
 		        	call.close();				
 			}
 		} catch (SQLException sqle) {
@@ -120,9 +147,9 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		} finally {
 			try { if (conn!=null) conn.close(); } catch (Exception ignore) { }
 		}		
-		return new Boolean(retval);
+		return retval;
 	}
-	
+
 	@Override
 	public TransactionManager getTransactionManager() {
 		return transactMan;

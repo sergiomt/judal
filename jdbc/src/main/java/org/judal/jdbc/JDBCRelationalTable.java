@@ -14,12 +14,17 @@ package org.judal.jdbc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Iterator;
+import java.util.LinkedList;
 
+import org.apache.poi.hssf.record.ArrayRecord;
 import org.judal.jdbc.metadata.SQLIndex;
 import org.judal.metadata.IndexDef.Using;
 import org.judal.storage.RelationalTable;
+import org.judal.storage.Stored;
 import org.judal.storage.Param;
 import org.judal.storage.Record;
 import org.judal.storage.query.AbstractQuery;
@@ -253,5 +258,5 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
 	}
-
+	
 }
