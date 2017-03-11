@@ -21,7 +21,6 @@ import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
-import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
@@ -168,12 +167,13 @@ public class HBTable implements Table {
 					if (oKvl.getValue()!=null)
 						oRow.put(oCol.getName(), BytesConverter.fromBytes(oKvl.getValue(), oCol.getType()));
 				if (DebugFile.trace) {
+					DebugFile.writeln("KeyValue == "+oKvl);					
 					if (oKvl==null)
 						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+") == null");
 					else if (oKvl.getValue()==null)
-						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() == null");
-					else
-						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() == "+oKvl.getValue().toString());
+						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() is null");
+					else						
+						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() == "+BytesConverter.fromBytes(oKvl.getValue(), oCol.getType()));
 				}
 			}
 			if (DebugFile.trace) {
@@ -405,6 +405,7 @@ public class HBTable implements Table {
 		oItr.clear();		
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Class<Stored> getCandidateClass() {
 		return (Class<Stored>) oCls;
