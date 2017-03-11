@@ -15,15 +15,44 @@ import java.util.Hashtable;
 
 public class EngineFactory {
 	
+	public static ThreadLocal<DataSource> DefaultThreadDataSource;
+	
 	private static Hashtable<String, Class<Engine<? extends DataSource>>> engines = new Hashtable<String, Class<Engine<? extends DataSource>>>();
 	
 	@SuppressWarnings("unchecked")
-	public static void registerEngine(String engineName, String engineClassName) throws ClassNotFoundException {
-		engines.put(engineName, (Class<Engine<? extends DataSource>>) Class.forName(engineClassName));
+	/**
+	 * <p>Register an Engine implementation under a given name</p>
+	 * @param engineName String Engine name.
+	 * @param engineClassName String Name of an implementation of org.judal.storage.Engine
+	 * @throws ClassNotFoundException
+	 * @throws IllegalArgumentException If another Engine implementation is already registered under the same name
+	 */
+	public static void registerEngine(String engineName, String engineClassName) throws ClassNotFoundException, IllegalArgumentException {
+		Class<Engine<? extends DataSource>> engineClass = engines.get(engineName);
+		if (engineClass==null)
+			engines.put(engineName, (Class<Engine<? extends DataSource>>) Class.forName(engineClassName));
+		else if (engineClass.getName().equals(engineClassName))
+			throw new IllegalArgumentException("EngineFactory.registerEngine() Engine " + engineName + " is already registered for class " + engineClassName);
 	}
 	
-	public static Engine<? extends DataSource> getEngine(String engineName) throws InstantiationException, IllegalAccessException {
-		return engines.get(engineName).newInstance();
+	/**
+	 * <p>Get implementation for a given named Engine</p>
+	 * @param engineName String
+	 * @return Engine&lt;? extends DataSource&gt;
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws NullPointerException If engineName is <b>null</b> or empty String
+	 * @throws IllegalArgumentException If no Engine has been previously registered with the given name
+	 */
+	public static Engine<? extends DataSource> getEngine(String engineName) throws InstantiationException, IllegalAccessException, NullPointerException, IllegalArgumentException {
+		if (null==engineName)
+			throw new NullPointerException("EngineFactory.getEngine() Engine name cannot be null");
+		else if (engineName.length()==0)
+			throw new NullPointerException("EngineFactory.getEngine() Engine name is required");
+		Class<Engine<? extends DataSource>> engineClass = engines.get(engineName);
+		if (null==engineClass)
+			throw new IllegalArgumentException("EngineFactory.getEngine() Cannot find any Engine with name " + engineName);
+		return engineClass.newInstance();
 	}
 
 	/*
