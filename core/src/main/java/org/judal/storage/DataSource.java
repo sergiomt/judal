@@ -62,6 +62,8 @@ public interface DataSource extends AutoCloseable {
 	
     public static final String CONFIG = "config";
     public static final String DRIVER = "driver";
+    public static final String DBENV = "dbenvironment";
+    public static final String BUCKET = "bucket";
     public static final String URI = "uri";
     public static final String SCHEMA = "schema";
     public static final String METADATA = "metadata";
@@ -69,6 +71,8 @@ public interface DataSource extends AutoCloseable {
     public static final String USER = "user";
     public static final String PASSWORD = "password";
     public static final String REGION = "region";
+    public static final String STORED = "stored";
+    public static final String EXTURL = "exturl";
     public static final String LOGINTIMEOUT = "logintimeout";
     public static final String CONNECTIONTIMEOUT = "connectiontimeout";
     public static final String POOLSIZE = "poolsize";
@@ -82,7 +86,7 @@ public interface DataSource extends AutoCloseable {
     public static String DEFAULT_CONNECTIONTIMEOUT = "60000";
     public static String DEFAULT_REGION = "eu-west-1";
 	
-    public static final String[] PropertyNames = new String[]{CONFIG,DRIVER,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS};
+    public static final String[] PropertyNames = new String[]{CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS};
 
     public static final String[][] DefaultValues = new String[][]{
     	new String[]{CONNECTIONTIMEOUT,DEFAULT_CONNECTIONTIMEOUT},
