@@ -220,7 +220,6 @@ public class BytesConverter {
 	 */
 	public static Object fromBytes(byte[] aBytes, int iType) throws IOException {
 		if (aBytes==null) return null;
-		if (aBytes.length==0) return null;
 		switch (iType) {
 		case Types.CHAR:
 		case Types.NCHAR:
@@ -281,18 +280,22 @@ public class BytesConverter {
 		case Types.BLOB:
 			return aBytes;
 		case Types.JAVA_OBJECT:
-			ByteArrayInputStream byIn = new ByteArrayInputStream(aBytes);
-			ObjectInputStream oIn = new ObjectInputStream (byIn);
-			Object oRetVal;
-			try {
-				oRetVal = oIn.readObject();
-			} catch (ClassNotFoundException cnf) {
-				throw new IOException ("BytesConverter.fromBytes() ClassNotFoundException "+cnf.getMessage());
-			} finally {
-				oIn.close();
-				byIn.close();      	
+			if (aBytes.length==0) {
+				return null;
+			} else {
+				ByteArrayInputStream byIn = new ByteArrayInputStream(aBytes);
+				ObjectInputStream oIn = new ObjectInputStream (byIn);
+				Object oRetVal;
+				try {
+					oRetVal = oIn.readObject();
+				} catch (ClassNotFoundException cnf) {
+					throw new IOException ("BytesConverter.fromBytes() ClassNotFoundException "+cnf.getMessage());
+				} finally {
+					oIn.close();
+					byIn.close();      	
+				}
+				return oRetVal;
 			}
-			return oRetVal;			
 		default:
 			return aBytes;
 		}
