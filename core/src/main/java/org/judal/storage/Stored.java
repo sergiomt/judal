@@ -34,11 +34,16 @@ public interface Stored extends Serializable {
 
 	String getBucketName();
 
+	boolean load(Object key) throws JDOException;
+
 	boolean load(DataSource dataSource, Object key) throws JDOException;
+
+	void store() throws JDOException;
 
 	void store(DataSource dataSource) throws JDOException;
 
 	void delete(DataSource dataSource) throws JDOException;
 	
+	void delete() throws JDOException;
 	
 }

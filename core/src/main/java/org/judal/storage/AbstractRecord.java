@@ -164,6 +164,11 @@ public abstract class AbstractRecord implements Record {
 	}
 
 	@Override
+	public final boolean load(Object oKey) throws JDOException {
+		return load(EngineFactory.DefaultThreadDataSource.get());
+	}
+
+	@Override
 	public void store(DataSource oDts) throws JDOException {
 		if (getConstraintsChecker()!=null)
 			getConstraintsChecker().check(oDts, this);
@@ -177,6 +182,11 @@ public abstract class AbstractRecord implements Record {
 	}
 
 	@Override
+	public final void store() throws JDOException {
+		store(EngineFactory.DefaultThreadDataSource.get());
+	}
+	
+	@Override
 	public void delete(DataSource oDts) throws JDOException {
 		Table oTbl = ((TableDataSource) oDts).openTable(this);
 		try {
@@ -186,6 +196,11 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
+	@Override
+	public final void delete() throws JDOException {
+		delete(EngineFactory.DefaultThreadDataSource.get());
+	}
+	
 	public TableDef getTableDef() {
 		return tableDef;
 	}

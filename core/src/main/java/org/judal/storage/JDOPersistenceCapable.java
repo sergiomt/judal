@@ -569,4 +569,22 @@ public class JDOPersistenceCapable implements JDORecord {
 		
 	}
 
+	@Override
+	public boolean load(Object key) throws JDOException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public void store() throws JDOException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void delete() throws JDOException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
