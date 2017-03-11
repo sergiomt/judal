@@ -38,7 +38,6 @@ public abstract class AbstractBucketTest {
 		boolean created = false;
 		try {
 			ds = getBucketDataSource();
-			System.out.println("Transaction status after getting bucket data source = "+ statusString(ds.getTransactionManager().getStatus()));
 
 			if (ds.exists(bucketName, "U")) {
 				System.out.println("Bucket "+bucketName+" already exists");
@@ -81,7 +80,6 @@ public abstract class AbstractBucketTest {
 			assertFalse(bc.load(pk, retrieved));
 			System.out.println("not reloaded");
 		} finally {
-			System.out.println("Transaction status before closing bucket data source = "+ statusString(ds.getTransactionManager().getStatus()));
 			if (bc!=null) bc.close();
 			if ((ds!=null) && created) ds.dropBucket(bucketName);
 		}
