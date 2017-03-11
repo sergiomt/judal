@@ -13,9 +13,11 @@ package org.judal.storage;
 
 import java.io.IOException;
 import java.io.InputStream;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import static java.nio.file.StandardOpenOption.READ;
+
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
@@ -24,6 +26,9 @@ import javax.servlet.ServletConfig;
 
 import com.knowgate.stringutils.Str;
 import com.knowgate.debug.DebugFile;
+
+import static org.judal.storage.DataSource.PropertyNames;
+import static org.judal.storage.DataSource.DefaultValues;
 
 /**
  * <p>Read properties from environment to create data sources and other objects.</p>
@@ -38,7 +43,7 @@ public class Env {
 	 * @return String Default property value or <b>null</b> if property has no default value.
 	 */
 	public static String getDataSourceDefault(String propertyName) {
-		for (String[] nameValue : DataSource.DefaultValues)
+		for (String[] nameValue : DefaultValues)
 			if (nameValue[0].equalsIgnoreCase(propertyName))
 				return nameValue[1];
 		return null;
@@ -56,8 +61,13 @@ public class Env {
 		Hashtable<String,String> props = new Hashtable<String,String>();
 		if (namespace==null) namespace = "";
 		String prefix = namespace.length()==0 ? "" : namespace + ".";
-		for (String propName : DataSource.PropertyNames)
-			setProperty(props, propName, cfg.getInitParameter(prefix + propName));
+		for (String propName : PropertyNames) {
+			String prop = cfg.getInitParameter(prefix + propName);
+			if (DebugFile.trace)
+				DebugFile.writeln(prop==null ? "init parameter "+propName+" not found" : "read init parameter "+propName+"="+prop);
+			if (prop!=null) setProperty(props, propName, prop);
+			setProperty(props, propName, prop);
+		}
 		return props;
 	}
 
@@ -71,12 +81,24 @@ public class Env {
 	 */
 	public static Map<String,String> getDataSourceProperties(InputStream inStrm, String namespace) throws IOException {
 		Hashtable<String,String> props = new Hashtable<String,String>();
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin Env.getDataSourceProperties(InputStream, namespace=\""+namespace+"\")");
+			DebugFile.incIdent();
+		}
 		if (namespace==null) namespace = "";
 		String prefix = namespace.length()==0 ? "" : namespace + ".";
 		Properties reader = new Properties();
 		reader.load(inStrm);
-		for (String propName : DataSource.PropertyNames)
-			setProperty(props, propName, reader.getProperty(prefix + propName));
+		for (String propName : PropertyNames) {
+			String prop = reader.getProperty(prefix + propName);
+			if (DebugFile.trace)
+				DebugFile.writeln(prop==null ? "property "+propName+" not found" : "read "+propName+"="+prop);
+			if (prop!=null) setProperty(props, propName, prop);
+		}
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End Env.getDataSourceProperties()");
+		}
 		return props;
 	}
 
