@@ -18,6 +18,8 @@ package org.judal.metadata;
  */
 public class TriggerDef extends CallableDef {
 
+	private static final long serialVersionUID = 10000l;
+
 	public enum Action {
 		INSERT, UPDATE, DELETE, UNDEFINED;
 	}

@@ -40,6 +40,8 @@ import javax.jdo.annotations.IdentityType;
 
 public class TypeDef extends BaseDef implements TypeMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	@SuppressWarnings("serial")
 	private class CaseInsensitiveColumnMap extends HashMap<String,Integer> {
 		@Override

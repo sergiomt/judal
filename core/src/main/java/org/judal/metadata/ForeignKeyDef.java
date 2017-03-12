@@ -28,6 +28,8 @@ import javax.jdo.metadata.PropertyMetadata;
  */
 public class ForeignKeyDef extends ExtendableDef implements ForeignKeyMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	private boolean unique;
 	private boolean deferred;
 	private String name, table;

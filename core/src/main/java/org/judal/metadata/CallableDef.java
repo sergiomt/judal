@@ -21,6 +21,8 @@ import org.judal.storage.Param;
  */
 public abstract class CallableDef extends ExtendableDef implements Scriptable {
 
+	private static final long serialVersionUID = 10000l;
+
 	private String name;
 	private String source;
 	private String drop;

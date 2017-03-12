@@ -26,6 +26,8 @@ import javax.jdo.metadata.UniqueMetadata;
  */
 public class JoinDef extends ExtendableDef implements JoinMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	private String table;
 	private Indexed indexed;
 	private boolean outer;

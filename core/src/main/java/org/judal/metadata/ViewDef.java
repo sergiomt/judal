@@ -26,6 +26,8 @@ import com.knowgate.debug.DebugFile;
  */
 public class ViewDef extends TypeDef {
 
+	private static final long serialVersionUID = 10000l;
+
 	private Class recordClass;
 	private String recordClassName;
 	private String alias;

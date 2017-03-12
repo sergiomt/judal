@@ -21,6 +21,8 @@ import javax.jdo.metadata.QueryMetadata;
  */
 public class QueryDef extends ExtendableDef implements QueryMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	private String name;
 	private String query;
 	private String language;

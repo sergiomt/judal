@@ -20,6 +20,8 @@ import java.util.Collection;
  */
 public class TableDef extends ViewDef {
 
+	private static final long serialVersionUID = 10000l;
+
 	private String creationTimestampColumnName;
 
 	public TableDef(String name) {

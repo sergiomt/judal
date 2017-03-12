@@ -36,6 +36,8 @@ import javax.jdo.metadata.ColumnMetadata;
  */
 public class NonUniqueIndexDef extends IndexDef {
 
+	private static final long serialVersionUID = 10000l;
+
 	public NonUniqueIndexDef () {
 		super(null, null, new LinkedList<ColumnMetadata>(), IndexDef.Type.ONE_TO_MANY);
 	}

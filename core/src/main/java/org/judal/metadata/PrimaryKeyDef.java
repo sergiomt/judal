@@ -24,6 +24,8 @@ import javax.jdo.metadata.PrimaryKeyMetadata;
  */
 public class PrimaryKeyDef extends ExtendableDef implements PrimaryKeyMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	private String name;
 	private ColumnMetadata[] columns;
 

@@ -95,11 +95,23 @@ public class StorageObjectFactory extends ObjectFactory {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <R extends Record> R newRecord(Class<R> recordClass, Object... constructorParameters) throws NoSuchMethodException {
-		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newRecord("+recordClass.getName()+","+constructorParameters+")");
+		if (DebugFile.trace) {
+			String constParams = "";
+			if (constructorParameters!=null && constructorParameters.length!=0)
+				for (int p=0; p<constructorParameters.length; p++)
+					constParams += constructorParameters.getClass()==null ? "null," : constructorParameters[p].getClass().getName() + ",";
+			DebugFile.writeln("StorageObjectFactory.newRecord("+recordClass.getName()+",["+constParams+"])");
+		}
 		Constructor<R> recordConstructor = (Constructor<R>) getConstructor(recordClass, getParameterClasses(constructorParameters));
-		if (null==recordConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+recordClass.getName());
+		if (null==recordConstructor) {
+			recordConstructor = (Constructor<R>) tryConstructor(recordClass);
+			if (null==recordConstructor) {
+				throw new NoSuchMethodException("StorageObjectFactory.newRecord() No suitable constructor found for "+recordClass.getName());
+			} else {
+				if (DebugFile.trace)
+					DebugFile.writeln("no matching constructor found for "+recordClass.getName()+" using default constructor");				
+			}
+		}
 		return newRecord(recordConstructor, constructorParameters);
 	}
 

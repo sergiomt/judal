@@ -14,4 +14,6 @@ package org.judal.metadata;
 
 public class ProcedureDef extends CallableDef {
 
+	private static final long serialVersionUID = 10000l;
+
 }

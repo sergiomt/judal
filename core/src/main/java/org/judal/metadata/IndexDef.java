@@ -28,6 +28,8 @@ import javax.jdo.metadata.PropertyMetadata;
  */
 public abstract class IndexDef extends ExtendableDef implements IndexMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	public enum Type {
 		ONE_TO_ONE,
 		MANY_TO_ONE,

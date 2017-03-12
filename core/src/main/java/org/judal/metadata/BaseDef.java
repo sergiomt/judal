@@ -27,6 +27,8 @@ import com.knowgate.debug.DebugFile;
  */
 public abstract class BaseDef extends ExtendableDef implements Cloneable {
 
+	private static final long serialVersionUID = 10000l;
+
 	protected String name;
 	protected String table;
 	protected ArrayList<ColumnDef> columns;

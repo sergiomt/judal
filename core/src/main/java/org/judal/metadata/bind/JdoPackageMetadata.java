@@ -48,9 +48,13 @@ public class JdoPackageMetadata implements MetadataScanner {
 		Scanner scn = new Scanner();
  		ClassLoader cl = Thread.currentThread().getContextClassLoader();
 		Enumeration<URL> urls = cl.getResources(getPackagePath()+"/"+(getFileName()==null ? "metadata.xml" : getFileName()));
-		scn.add(urls.nextElement());
-		PathElement xml = scn.scan(any).iterator().next();
-		return xml.openStream();
+		if (urls.hasMoreElements()) {
+			scn.add(urls.nextElement());
+			PathElement xml = scn.scan(any).iterator().next();
+			return xml.openStream();
+		}  else {
+			return null;
+		}
  	}
 
 	@Override

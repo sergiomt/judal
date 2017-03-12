@@ -65,11 +65,11 @@ public abstract class AbstractRecord implements Record {
 
 	private static final long serialVersionUID = 10000l;
 
-	protected TableDef tableDef;
+	protected transient TableDef tableDef;
+	protected transient ConstraintsChecker checker;
+	protected transient FieldHelper fhelper;
 	protected boolean hasLongVarBinaryData;
 	protected HashMap<String,Long> longVarBinariesLengths;
-	protected ConstraintsChecker checker;
-	protected FieldHelper fhelper;
 
 	public AbstractRecord(TableDef tableDefinition) {
 		this(tableDefinition, null, null);
@@ -136,6 +136,10 @@ public abstract class AbstractRecord implements Record {
 
 	public void setConstraintsChecker(ConstraintsChecker checker) {
 		this.checker = checker;
+	}
+
+	public FieldHelper getFieldHelper() {
+		return fhelper;
 	}
 
 	public void setFieldHelper(FieldHelper helper) {
@@ -205,6 +209,10 @@ public abstract class AbstractRecord implements Record {
 		return tableDef;
 	}
 
+	public void setTableDef(TableDef tableDef) {
+		this.tableDef = tableDef;
+	}
+	
 	public void clearLongData() {
 		hasLongVarBinaryData = false;
 		longVarBinariesLengths = null;

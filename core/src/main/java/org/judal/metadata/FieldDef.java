@@ -41,6 +41,8 @@ import javax.jdo.metadata.ValueMetadata;
  */
 public class FieldDef extends BaseDef implements FieldMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	private boolean serialized;
 	private boolean defaultFetchGroup;
 

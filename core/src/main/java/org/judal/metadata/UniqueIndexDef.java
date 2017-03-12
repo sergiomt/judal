@@ -32,6 +32,7 @@ import javax.jdo.metadata.UniqueMetadata;
 
 public class UniqueIndexDef extends NonUniqueIndexDef implements UniqueMetadata {
 
+	private static final long serialVersionUID = 10000l;
 	private boolean deferred;
 	
 	public UniqueIndexDef () {

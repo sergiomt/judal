@@ -27,7 +27,7 @@ import javax.jdo.metadata.PropertyMetadata;
 */
 public class MemberGroupDef extends ExtendableDef implements FetchGroupMetadata {
 
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 10000l;
 
 	private String name;
 	private boolean postLoad;

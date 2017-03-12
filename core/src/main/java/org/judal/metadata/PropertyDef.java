@@ -21,6 +21,8 @@ import javax.jdo.metadata.PropertyMetadata;
  */
 public class PropertyDef extends FieldDef implements PropertyMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	private String fieldName;
 
 	public PropertyDef() {

@@ -53,6 +53,11 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 				ensureCapacity(capacity>16384 ? 16384 : capacity);
 	}
 
+	@SuppressWarnings("unchecked")
+	public boolean add(Record rec) {
+		return super.add((R) rec);
+	}
+	
 	@Override
 	public List<R> filter(final Object predicate) {
 		LinkedList<R> filtered = new LinkedList<R> ();

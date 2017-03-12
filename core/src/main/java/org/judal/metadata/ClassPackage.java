@@ -23,6 +23,8 @@ import java.util.Collections;
  */
 public class ClassPackage extends ExtendableDef {
 
+	private static final long serialVersionUID = 10000l;
+
 	LinkedHashMap<String, TableDef> classes;
 
 	private String name; 

@@ -23,6 +23,8 @@ import javax.jdo.metadata.SequenceMetadata;
  */
 public class SequenceDef extends ExtendableDef implements SequenceMetadata {
 
+	private static final long serialVersionUID = 10000l;
+
 	private Integer initialValue;
 	private Integer allocationSize;
 	private String datastoreSequence;

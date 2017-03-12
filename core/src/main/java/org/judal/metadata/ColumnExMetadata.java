@@ -1,5 +1,7 @@
 package org.judal.metadata;
 
+import java.io.Serializable;
+
 /**
  * © Copyright 2016 the original author. 
  * This file is licensed under the Apache License version 2.0.
@@ -19,7 +21,9 @@ import javax.jdo.metadata.ExtensionMetadata;
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public class ColumnExMetadata implements ExtensionMetadata {
+public class ColumnExMetadata implements ExtensionMetadata, Serializable {
+
+	private static final long serialVersionUID = 10000l;
 
 	public String key, value, vendor;
 	
