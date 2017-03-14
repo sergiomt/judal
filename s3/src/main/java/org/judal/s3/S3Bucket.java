@@ -47,7 +47,7 @@ public class S3Bucket implements Bucket {
 
 	private String bucketName;
 	private S3DataSource s3dts;
-	protected Class<Stored> candidateClass;
+	protected Class<? extends Stored> candidateClass;
 	protected Collection<S3Iterator> iterators;
 
 	public S3Bucket(S3DataSource oDts, String sBucketName) {
@@ -220,7 +220,11 @@ public class S3Bucket implements Bucket {
 	public void store(Stored record) throws JDOException {
 		S3Record s3rec = (S3Record) record;
 		ByteArrayInputStream oIn = new ByteArrayInputStream(s3rec.getValue());
-		getClient().putObject(name(), s3rec.getKey(), oIn, s3rec.getMetadata());
+		try {
+			getClient().putObject(name(), s3rec.getKey(), oIn, s3rec.getMetadata());
+		} catch (AmazonS3Exception s3e) {
+			throw new JDOException("AmazonS3Exception at S3Bucket.store(Stored) "+s3e.getMessage(), s3e);
+		}
 	}
 
 	/**
@@ -235,14 +239,18 @@ public class S3Bucket implements Bucket {
 			keyval = (String) key;
 		else 
 			keyval = key.toString();
-		getClient().deleteObject(name(), keyval);
+		try {
+			getClient().deleteObject(name(), keyval);
+		} catch (AmazonS3Exception s3e) {
+			throw new JDOException("AmazonS3Exception at S3Bucket.delete(Object) "+s3e.getMessage(), s3e);
+		}
 	}
 
 	/**
 	 * @param candidateClass Class&lt;Stored&gt;
 	 */
 	@Override
-	public void setClass(Class<Stored> candidateClass) {
+	public void setClass(Class<? extends Stored> candidateClass) {
 		this.candidateClass = candidateClass;
 	}
 
@@ -254,7 +262,7 @@ public class S3Bucket implements Bucket {
 
 	@Override
 	public Class<Stored> getCandidateClass() {
-		return candidateClass;
+		return (Class<Stored>) candidateClass;
 	}
 
 	/**
