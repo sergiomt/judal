@@ -66,6 +66,8 @@ public class StorageObjectFactory extends ObjectFactory {
 			if (DebugFile.trace)
 				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" StorageObjectFactory.newRecord(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
 		}
+		if (DebugFile.trace)
+			DebugFile.writeln("StorageObjectFactory.newRecord() : " + retval.getClass().getName());
 		return retval;
 	}
 
