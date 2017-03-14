@@ -873,8 +873,6 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 			iSQLType = Types.NCHAR;
 		else if (sToken.equalsIgnoreCase("NVARCHAR") || sToken.equalsIgnoreCase("UTF8Type"))
 			iSQLType = Types.NVARCHAR;
-		else if (sToken.equalsIgnoreCase("VARCHAR2"))
-			iSQLType = Types.VARCHAR;
 		else if (sToken.equalsIgnoreCase("LONGVARCHAR"))
 			iSQLType = Types.LONGVARCHAR;
 		else if (sToken.equalsIgnoreCase("LONG"))

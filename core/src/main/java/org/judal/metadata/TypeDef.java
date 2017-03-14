@@ -388,6 +388,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		colDef.setFamily(columnFamilyName);
 		colDef.setName(columnName);
 		colDef.setType(columnType);
+		colDef.setJDBCType(ColumnDef.typeName(columnType));
 		colDef.setLength(maxLength);
 		colDef.setScale(decimalDigits);
 		colDef.setAllowsNull(isNullable);
