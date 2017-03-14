@@ -78,6 +78,7 @@ public interface DataSource extends AutoCloseable {
     public static final String POOLSIZE = "poolsize";
     public static final String MAXPOOLSIZE = "maxpoolsize";
     public static final String MAXCONNECTIONS = "maxconnections";
+    public static final String TRANSACTIONAL = "transactional";
     
     public static String DEFAULT_POOLSIZE = "10";
     public static String DEFAULT_MAXPOOLSIZE = "100";
@@ -85,17 +86,19 @@ public interface DataSource extends AutoCloseable {
     public static String DEFAULT_LOGINTIMEOUT = "20";
     public static String DEFAULT_CONNECTIONTIMEOUT = "60000";
     public static String DEFAULT_REGION = "eu-west-1";
+    public static String DEFAULT_TRANSACTIONAL = "true";
 	
-    public static final String[] PropertyNames = new String[]{CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS};
+    public static final String[] PropertyNames = new String[]{CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL};
 
     public static final String[][] DefaultValues = new String[][]{
     	new String[]{CONNECTIONTIMEOUT,DEFAULT_CONNECTIONTIMEOUT},
     	new String[]{LOGINTIMEOUT,DEFAULT_LOGINTIMEOUT},
+    	new String[]{TRANSACTIONAL,DEFAULT_TRANSACTIONAL},
     	new String[]{MAXCONNECTIONS,DEFAULT_MAXCONNECTIONS},
     	new String[]{MAXPOOLSIZE,DEFAULT_MAXPOOLSIZE},
     	new String[]{POOLSIZE,DEFAULT_POOLSIZE},
     	new String[]{REGION,DEFAULT_REGION}
     };
-    
+
     void close() throws JDOException;
 }
