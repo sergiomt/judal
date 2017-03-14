@@ -27,6 +27,8 @@ import org.judal.storage.RecordColumnValueComparatorAsc;
 import org.judal.storage.RecordColumnValueComparatorDesc;
 import org.judal.storage.RecordSet;
 
+import com.knowgate.debug.DebugFile;
+
 /**
 *
 * <p>An array representing data read from a database table or view.</p>
@@ -55,7 +57,16 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 
 	@SuppressWarnings("unchecked")
 	public boolean add(Record rec) {
-		return super.add((R) rec);
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin ArrayListRecordSet.add(Record)");
+			DebugFile.incIdent();
+		}
+		boolean retval = super.add((R) rec);
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End ArrayListRecordSet.add() : " + String.valueOf(retval));
+		}
+		return retval;
 	}
 	
 	@Override
