@@ -1,5 +1,7 @@
 package org.judal.bdb;
 
+import java.io.File;
+
 /**
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
@@ -18,6 +20,7 @@ import java.sql.Types;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.ArrayList;
 
 import javax.jdo.FetchGroup;
@@ -59,7 +62,6 @@ import com.sleepycat.db.DatabaseEntry;
 import com.sleepycat.db.SecondaryConfig;
 import com.sleepycat.db.SecondaryCursor;
 import com.sleepycat.db.SecondaryDatabase;
-import com.sleepycat.db.Transaction;
 import com.sleepycat.db.DatabaseException;
 import com.sleepycat.db.DeadlockException;
 import com.sleepycat.bind.EntryBinding;
@@ -75,7 +77,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 	private TableDef oTbl;
 	private HashMap<String, DBIndex> oInd;
 	private ConstraintsChecker oChk;
-	private Class cRecCls;
+	private Class<? extends Record> cRecCls;
 
 	// --------------------------------------------------------------------------
 
@@ -90,6 +92,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 		oTbl = oTableDef;
 		oInd = oIndexes;
 		cRecCls = cRecordClass;
+		setClass(cRecordClass);
 
 		if (!isReadOnly() && oInd != null && oInd.keySet() != null) {
 			for (String sColumnName : oInd.keySet()) {
@@ -114,9 +117,21 @@ public class DBTable extends DBBucket implements IndexableTable {
 	// --------------------------------------------------------------------------
 
 	protected void closeIndexes() throws DatabaseException {
-		if (oInd != null && oInd.keySet() != null)
-			for (String sColumnName : oInd.keySet())
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin DBTable.closeIndexes()");
+			DebugFile.incIdent();
+		}
+		if (oInd != null && oInd.keySet() != null) {
+			for (String sColumnName : oInd.keySet()) {
+				if (DebugFile.trace)
+					DebugFile.writeln("closing index on "+sColumnName);
 				oInd.get(sColumnName).close();
+			}
+		}
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End DBTable.closeIndexes()");
+		}
 	}
 
 	// --------------------------------------------------------------------------
@@ -151,6 +166,16 @@ public class DBTable extends DBBucket implements IndexableTable {
 		return oLst;
 	}
 
+	// --------------------------------------------------------------------------
+
+	public DBIndex[] indexes() {
+		DBIndex[] retval = new DBIndex[oInd.size()];
+		int n = 0;
+		for (Map.Entry<String,DBIndex> e :  oInd.entrySet())
+			retval[n++] = e.getValue();
+		return retval;
+	}
+	
 	// --------------------------------------------------------------------------
 
 	/*
@@ -372,12 +397,12 @@ public class DBTable extends DBBucket implements IndexableTable {
 			switch (eType) {
 			case ONE_TO_ONE:
 			case MANY_TO_ONE:
-				oSec.setKeyCreator(getDataSource().getKeyCreator(cRecCls, oTbl, sIndexName,
+				oSec.setKeyCreator(getDataSource().getKeyCreator(getResultClass(), oTbl, sIndexName,
 						          ((ColumnDef) getPrimaryKey().getColumns()[0]).getType()));
 				break;
 			case ONE_TO_MANY:
 			case MANY_TO_MANY:
-				oSec.setMultiKeyCreator(getDataSource().getMultiKeyCreator(cRecCls, oTbl, sIndexName));
+				oSec.setMultiKeyCreator(getDataSource().getMultiKeyCreator(getResultClass(), oTbl, sIndexName));
 				break;
 			default:
 				throw new JDOException("Unrecognized index type " + eType);
@@ -457,14 +482,20 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 	// --------------------------------------------------------------------------
 
-	private Record makeRecord(Class<? extends Record> recordClass, DBEntityBinding oDbeb, DatabaseEntry oDbKey, DatabaseEntry oDbDat) {
-		Record oRec = null;
-		try {
-			oRec = StorageObjectFactory.newRecord(recordClass, oTbl);
-			DBEntityWrapper oWrp = oDbeb.entryToObject(oDbKey, oDbDat);
-			oRec.setKey(oWrp.getKey());
-			oRec.setValue(oWrp.getWrapped());
-		} catch (NoSuchMethodException neverthrown) { }
+	private <R extends Record> R makeRecord(Class<R> recordClass, DBEntityBinding oDbeb, DatabaseEntry oDbKey, DatabaseEntry oDbDat) throws NoSuchMethodException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin DBTable.makeRecord("+recordClass.getClass().getName()+")");
+			DebugFile.incIdent();
+		}
+		R oRec = null;
+		oRec = StorageObjectFactory.newRecord(recordClass, oTbl);
+		DBEntityWrapper oWrp = oDbeb.entryToObject(oDbKey, oDbDat);
+		oRec.setKey(oWrp.getKey());
+		oRec.setValue(oWrp.getWrapped());
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End DBTable.makeRecord() : "+oRec);
+		}
 		return oRec;
 	}
 
@@ -491,7 +522,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 					"DBTable.fetch() Column " + indexColumnName + " is not a primary key nor a secondary index");
 				
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DBTable.fetch(" + String.valueOf(maxRows) + "," + String.valueOf(offset) + "," + indexColumnName + "," + indexValue + ")");
+			DebugFile.writeln("Begin DBTable.fetch(" + indexColumnName + "," + indexValue + "," + String.valueOf(maxRows) + "," + String.valueOf(offset) + ")");
 			DebugFile.incIdent();
 			DebugFile.writeln(usingPk ? "using primary key" : "using secondary index");
 		}
@@ -509,9 +540,9 @@ public class DBTable extends DBBucket implements IndexableTable {
 			throw new JDOException("Invalid value for max rows parameter " + String.valueOf(maxRows));
 
 		if (DebugFile.trace)
-			DebugFile.writeln("new ArrayListRecordSet<R>(" + cRecCls.getName() + ")");
+			DebugFile.writeln("new ArrayListRecordSet<R>(" + getResultClass().getName() + ")");
 
-		ArrayListRecordSet<R> oEst = new ArrayListRecordSet<R>(cRecCls);
+		ArrayListRecordSet<? extends Record> oEst = new ArrayListRecordSet<>(getResultClass());
 		Cursor oPur = null;
 		SecondaryCursor oCur = null;
 		OperationStatus oOst;
@@ -537,9 +568,9 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oOst = oPur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
 					if (fetched+skipped>=offset) {
-						Record oRec = makeRecord(cRecCls, oDbeb, oDbKey, oDbDat);
+						Record oRec = (R) makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 						if (!oRec.isNull(indexColumnName)) {
-							oEst.add((R) oRec);
+							oEst.add(oRec);
 							fetched++;
 						}
 					} else {
@@ -559,7 +590,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oOst = oPur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
 					if (fetched+skipped>=offset) {
-						Record oRec = makeRecord(cRecCls, oDbeb, oDbKey, oDbDat);
+						Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 						if (oRec.isNull(indexColumnName)) {
 							oEst.add((R) oRec);
 							fetched++;
@@ -595,7 +626,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 						oOst = oCur.getSearchKeyRange(oDbKey, oDbDat, LockMode.DEFAULT);
 
 					while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
-						Record oRec = makeRecord(cRecCls, oDbeb, oDbKey, oDbDat);
+						Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 						try {
 							oRec.getColumn(indexColumnName);
 							if (oRec.getString(indexColumnName, "").startsWith(sIndexValue)) {
@@ -638,8 +669,11 @@ public class DBTable extends DBBucket implements IndexableTable {
 						if (DebugFile.trace)
 							DebugFile.writeln("get return status was "+oOst);
 						if (oOst == OperationStatus.SUCCESS) {
-							oEst.add((R) makeRecord(cRecCls, oDbeb, oDbKey, oDbDat));
-							fetched++;							
+							Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
+							if (DebugFile.trace) DebugFile.writeln("made record");
+							oEst.add(oRec);
+							fetched++;
+							if (DebugFile.trace) DebugFile.writeln("fetched row "+String.valueOf(fetched)+" using pk");
 						}
 					} else {
 						if (DebugFile.trace)
@@ -649,12 +683,12 @@ public class DBTable extends DBBucket implements IndexableTable {
 							DebugFile.writeln("getSearchKey return status was "+oOst);
 						while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
 							if (fetched+skipped>=offset) {
-								oEst.add((R) makeRecord(cRecCls, oDbeb, oDbKey, oDbDat));
+								oEst.add(makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat));
 								fetched++;
 								if (DebugFile.trace) DebugFile.writeln("fetched "+String.valueOf(fetched));
 							} else {
 								skipped++;
-								if (DebugFile.trace) DebugFile.writeln("fetched "+String.valueOf(skipped));
+								if (DebugFile.trace) DebugFile.writeln("skipped "+String.valueOf(skipped));
 							}
 							oOst = oCur.getNextDup(oDbKey, oDbDat, LockMode.DEFAULT);
 							if (DebugFile.trace)
@@ -665,10 +699,14 @@ public class DBTable extends DBBucket implements IndexableTable {
 				} // fi
 
 				if (oPur != null) {
+					if (DebugFile.trace)
+						DebugFile.writeln("closing primary index");
 					oPur.close();
 					oPur = null;
 				}
 				if (oCur != null) {
+					if (DebugFile.trace)
+						DebugFile.writeln("closing cursor index");
 					oCur.close();
 					oCur = null;
 				}
@@ -696,13 +734,19 @@ public class DBTable extends DBBucket implements IndexableTable {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		} finally {
 			try {
-				if (oPur != null)
+				if (oPur != null) {
+					if (DebugFile.trace)
+						DebugFile.writeln("finally closing primary index");
 					oPur.close();
+				}
 			} catch (Exception ignore) {
 			}
 			try {
-				if (oCur != null)
+				if (oCur != null) {
+					if (DebugFile.trace)
+						DebugFile.writeln("finally closing cursor index");
 					oCur.close();
+				}
 			} catch (Exception ignore) {
 			}
 		}
@@ -751,7 +795,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 		if (!oInd.containsKey(sIndexColumn))
 			throw new JDOException("DBTable.fetch() Column " + sIndexColumn + " is not indexed");
 
-		ArrayListRecordSet<R> oEst = new ArrayListRecordSet<R>(cRecCls);
+		ArrayListRecordSet<? extends Record> oEst = new ArrayListRecordSet<>(getResultClass());
 		Cursor oPur = null;
 		SecondaryCursor oCur = null;
 		OperationStatus oOst;
@@ -792,7 +836,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oDbKey = new DatabaseEntry(byMin);
 				oOst = oCur.getSearchKey(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS) {
-					Record oRec = StorageObjectFactory.newRecord(cRecCls, oTbl);
+					Record oRec = StorageObjectFactory.newRecord(getResultClass(), oTbl);
 					oDbEnt = oDbeb.entryToObject(oDbKey, oDbDat);
 					oRec.setKey(oDbEnt.getKey());
 					oRec.setValue(oDbEnt.getWrapped());
@@ -813,7 +857,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oOst = oPur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
 
 				while (oOst == OperationStatus.SUCCESS) {
-					Record oRec = StorageObjectFactory.newRecord(cRecCls, oTbl);
+					Record oRec = StorageObjectFactory.newRecord(getResultClass(), oTbl);
 					oDbEnt = oDbeb.entryToObject(oDbKey, oDbDat);
 					oRec.setKey(oDbEnt.getKey());
 					oRec.setValue(oDbEnt.getWrapped());
@@ -829,7 +873,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 				oOst = oPur.getNext(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS) {
-					Record oRec = StorageObjectFactory.newRecord(cRecCls, oTbl);
+					Record oRec = StorageObjectFactory.newRecord(getResultClass(), oTbl);
 					oDbEnt = oDbeb.entryToObject(oDbKey, oDbDat);
 					oRec.setKey(oDbEnt.getKey());
 					oRec.setValue(oDbEnt.getWrapped());
@@ -879,7 +923,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 			}
 		}
 
-		return oEst;
+		return (RecordSet<R>) oEst;
 	} // fetch
 
 	// --------------------------------------------------------------------------
@@ -964,7 +1008,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 			DBEntityBinding oDbeb = new DBEntityBinding(getCatalog());
 			DatabaseEntry oDbDat = new DatabaseEntry();
 			DatabaseEntry oDbKey = new DatabaseEntry();
-			ArrayListRecordSet<R> oEst = new ArrayListRecordSet<R>(cRecCls);
+			ArrayListRecordSet<? extends Record> oEst = new ArrayListRecordSet<>(getResultClass());
 			JoinCursor oJur = null;
 
 			OperationStatus[] aOst = new OperationStatus[nValues];
@@ -1003,7 +1047,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				} else {
 					while (oJur.getNext(oDbKey, oDbDat, LockMode.DEFAULT) == OperationStatus.SUCCESS) {
 						if (fetched+skipped>=offset) {
-							Record oRec = makeRecord(cRecCls, oDbeb, oDbKey, oDbDat);
+							Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 							oEst.add((R) oRec);
 							fetched++;
 						} else {
@@ -1125,7 +1169,6 @@ public class DBTable extends DBBucket implements IndexableTable {
 			}
 		}
 
-		Transaction oTxn = null;
 		try {
 
 			final String sSecDbPath = getDataSource().getPath() + getDatabase().getDatabaseName() + "." + sColumnName + ".db";
@@ -1135,11 +1178,10 @@ public class DBTable extends DBBucket implements IndexableTable {
 				DebugFile.writeln("DBIndex.open(openSecondaryDatabase(" + getTransaction() + ", " + sSecDbPath + ", "
 						+ sSecIdxName + ", " + getDatabase() + ", " + oSec + ", " + String.valueOf(isReadOnly())
 						+ "))");
-			oTxn = getDataSource().getEnvironment().beginTransaction(null, null);
-			oIdx.open(getDataSource().getEnvironment().openSecondaryDatabase(oTxn, sSecDbPath, sSecIdxName, getDatabase(), oSec));
+			
+			oIdx.open(getDataSource().getEnvironment().openSecondaryDatabase(getDataSource().getTransaction(), sSecDbPath, sSecIdxName, getDatabase(), oSec));
 			if (DebugFile.trace)
 				DebugFile.writeln("opened index " + sSecIdxName);
-			oTxn.commit();
 
 		} catch (DeadlockException dle) {
 			if (DebugFile.trace)
@@ -1163,15 +1205,24 @@ public class DBTable extends DBBucket implements IndexableTable {
 	// --------------------------------------------------------------------------
 
 	public void dropIndex(final String sIndexColumn) throws JDOException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin DBTable.dropIndex("+sIndexColumn+")");
+			DebugFile.incIdent();
+		}
 		try {
 
 			if (oInd.containsKey(sIndexColumn)) {
 				DBIndex oIdx = oInd.get(sIndexColumn);
 				oIdx.close();
 				oInd.remove(sIndexColumn);
-				Database.remove(
-						getDataSource().getPath() + getDatabase().getDatabaseName() + "." + oIdx.getName() + ".db",
-						getDatabase().getDatabaseName() + "_" + oIdx.getName(), null);
+				if (DebugFile.trace)
+					DebugFile.writeln("Database.remove("+
+						getDataSource().getPath() + getDatabase().getDatabaseName() + "." + oIdx.getName() + ".db, " + 
+						getDatabase().getDatabaseName() + "_" + oIdx.getName() +")");
+				getDataSource().getEnvironment().removeDatabase(getTransaction(), getDataSource().getPath() + getDatabase().getDatabaseName() + "." + oIdx.getName() + ".db", getDatabase().getDatabaseName() + "_" + oIdx.getName());
+				File oDbf = new File(getDataSource().getPath() + getDatabase().getDatabaseName() + "." + oIdx.getName() + ".db");
+				if (oDbf.exists()) oDbf.delete();
+				// Database.remove(getDataSource().getPath() + getDatabase().getDatabaseName() + "." + oIdx.getName() + ".db", getDatabase().getDatabaseName() + "_" + oIdx.getName(), null);
 			} else {
 				throw new JDOException("Index not found " + sIndexColumn);
 			}
@@ -1180,6 +1231,10 @@ public class DBTable extends DBBucket implements IndexableTable {
 			throw new JDOException(dbe.getMessage(), dbe);
 		} catch (FileNotFoundException fnf) {
 			throw new JDOException(fnf.getMessage(), fnf);
+		}
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End DBTable.dropIndex()");
 		}
 	} // dropIndex
 
@@ -1317,7 +1372,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 				oOst = oPur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS) {
-					Record oRec = makeRecord(cRecCls, oDbeb, oDbKey, oDbDat);
+					Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 					if (!oRec.isNull(indexColumnName))
 						fetched++;
 					oOst = oPur.getNext(oDbKey, oDbDat, LockMode.DEFAULT);						
@@ -1333,7 +1388,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oPur = getDatabase().openCursor(getTransaction(), null);
 				oOst = oPur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS) {
-					Record oRec = makeRecord(cRecCls, oDbeb, oDbKey, oDbDat);
+					Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 					if (oRec.isNull(indexColumnName))
 						fetched++;
 					oOst = oPur.getNext(oDbKey, oDbDat, LockMode.DEFAULT);
@@ -1364,7 +1419,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 						oOst = oCur.getSearchKeyRange(oDbKey, oDbDat, LockMode.DEFAULT);
 
 					while (oOst == OperationStatus.SUCCESS) {
-						Record oRec = makeRecord(cRecCls, oDbeb, oDbKey, oDbDat);
+						Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 						try {
 							oRec.getColumn(indexColumnName);
 							if (oRec.getString(indexColumnName, "").startsWith(sIndexValue)) {

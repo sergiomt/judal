@@ -46,6 +46,10 @@ class DBEntityBinding extends SerialSerialBinding<byte[],byte[],DBEntityWrapper>
 
 	@Override
 	public DBEntityWrapper entryToObject(byte[] byKey, byte[] aBytes) {
+  		if (DebugFile.trace) {
+  			DebugFile.writeln("Begin DBEntityBinding.entryToObject(byte[],byte[])");
+  			DebugFile.incIdent();
+  		}
 		DBEntityWrapper oEnt = null;
 		try {
 			FastInputStream oByIn = new FastInputStream(aBytes);
@@ -60,6 +64,10 @@ class DBEntityBinding extends SerialSerialBinding<byte[],byte[],DBEntityWrapper>
 		} catch (ClassNotFoundException xcpt) {
 	 	  if (DebugFile.trace) DebugFile.writeln("entryToObject("+byKey+", byte[]) ClassNotFoundException "+xcpt.getMessage());
 		}
+  		if (DebugFile.trace) {
+  			DebugFile.decIdent();
+  			DebugFile.writeln("End DBEntityBinding.entryToObject()");
+  		}
   		return oEnt;
 	}
 	
@@ -86,12 +94,22 @@ class DBEntityBinding extends SerialSerialBinding<byte[],byte[],DBEntityWrapper>
   	}	
   	
   	public DBEntityWrapper entryToObject(DatabaseEntry oKey, DatabaseEntry oDat) {
+  		if (DebugFile.trace) {
+  			DebugFile.writeln("Begin DBEntityBinding.entryToObject(DatabaseEntry,DatabaseEntry)");
+  			DebugFile.incIdent();
+  		}
+  		DBEntityWrapper retval;
   		if (null==oKey)
-  		  return entryToObject(null, oDat.getData());
+  			retval = entryToObject(null, oDat.getData());
   		else if (null==oKey.getData())
-  		  return entryToObject(null, oDat.getData());
+  			retval = entryToObject(null, oDat.getData());
   		else
-  		  return entryToObject(oKey.getData(), oDat.getData());
+  			retval = entryToObject(oKey.getData(), oDat.getData());
+  		if (DebugFile.trace) {
+  			DebugFile.decIdent();
+  			DebugFile.writeln("End DBEntityBinding.entryToObject(DatabaseEntry,DatabaseEntry)");
+  		}
+  		return retval;
   	}
 
 }

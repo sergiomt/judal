@@ -8,7 +8,7 @@
       <column name="description" jdbc-type="VARCHAR" length="255" />
       <column name="location" jdbc-type="VARCHAR" length="255" />
       <column name="image" jdbc-type="LONGVARBINARY" />
-      <column name="amount" jdbc-type="DECIMAL" length="8" scale="2"/>
+      <column name="amount" jdbc-type="NUMERIC" length="8" scale="2"/>
       <primary-key name="pk_unittest_table1" column="id" />
     </class>
     <class name="ArrayRecord2" table="unittest_table2">

@@ -18,6 +18,7 @@ import javax.jdo.JDOException;
 
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
+import org.judal.storage.EngineFactory;
 import org.judal.storage.Stored;
 
 /**
@@ -112,6 +113,21 @@ public class DBStored implements Stored {
 		} finally {
 			if (bck!=null) bck.close();
 		}
+  }
+
+  @Override
+  public boolean load(Object key) throws JDOException {
+	  return load(EngineFactory.DefaultThreadDataSource.get(), key);
+  }
+
+  @Override
+  public void store() throws JDOException {
+	  store(EngineFactory.DefaultThreadDataSource.get());
+  }
+
+  @Override
+  public void delete() throws JDOException {
+	  delete(EngineFactory.DefaultThreadDataSource.get());
   }
   
 }

@@ -14,6 +14,7 @@ package org.judal.bdb;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Map;
 
 import org.judal.metadata.SchemaMetaData;
@@ -46,8 +47,15 @@ public class DBEngine implements Engine<DBDataSource> {
 				return new DBTableDataSource(properties, transactManager, metadata);
 			} else if (metadataPackage.length()>0) {
 				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);
-				metadata = packMeta.readMetadata(packMeta.openStream());
-				return new DBTableDataSource(properties, transactManager, metadata);
+				InputStream instrm = packMeta.openStream();
+				if (instrm!=null) {
+					metadata = packMeta.readMetadata(instrm);
+					DBDataSource retval = new DBTableDataSource(properties, transactManager, metadata);
+					instrm.close();
+					return retval;
+				} else {
+					return new DBBucketDataSource(properties, transactManager);					
+				}
 			} else {
 				return new DBBucketDataSource(properties, transactManager);
 			}

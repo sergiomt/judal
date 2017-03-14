@@ -223,16 +223,23 @@ public class DBBucket implements Bucket {
 	public void close() throws JDOException {
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DBTable.close()");
+			DebugFile.writeln("Begin DBBucket.close(" + name() + ")");
 			DebugFile.incIdent();
 		}
 
 		try {
+			closeAll();
 			closeIndexes();
 			oRep.ungetConnection(sCnm);
-			if (oFdb!=null) oFdb.close();
+			if (oFdb!=null) {
+				if (DebugFile.trace) DebugFile.writeln(oFdb.getDatabaseName()+".close()");
+				oFdb.close();
+			}
 			oFdb = null;
-			if (oPdb!=null) oPdb.close();
+			if (oPdb!=null) {
+				if (DebugFile.trace) DebugFile.writeln(oPdb.getDatabaseName()+".close()");
+				oPdb.close();
+			}
 			oPdb = null;
 		} catch (DatabaseException dbe) {
 			if (DebugFile.trace) DebugFile.decIdent();
@@ -241,17 +248,21 @@ public class DBBucket implements Bucket {
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBTable.close()");
+			DebugFile.writeln("End DBBucket.close()");
 		}
 	} // close
 
 	@Override
-	public void setClass(Class<Stored> candidateClass) {
+	public void setClass(Class<? extends Stored> candidateClass) {
 		oClass = candidateClass;
 	}
 
 	@Override
-	public void close(Iterator<Stored> oIter) {
+	public void close(Iterator<Stored> oIter) throws IllegalStateException,IllegalArgumentException {
+		if (null==oItr)
+			throw new IllegalStateException("No iterators have been created for this Berkeley DB table");
+		if (null==oItr)
+			throw new IllegalArgumentException("The Iterator does not belong to this table or it has been already closed");
 		if (oItr.contains(oIter))
 			oItr.remove(oIter);
 		((DBIterator) oIter).close();
@@ -259,9 +270,11 @@ public class DBBucket implements Bucket {
 
 	@Override
 	public void closeAll() {
-		for (DBIterator oIter : oItr)
-			oIter.close();
-		oItr.clear();
+		if (oItr!=null) {
+			for (DBIterator oIter : oItr)
+				oIter.close();
+			oItr.clear();
+		}
 	}
 
 	@Override
@@ -336,9 +349,11 @@ public class DBBucket implements Bucket {
 			DatabaseEntry oDbDat = new DatabaseEntry(oDbeb.objectToData(oEwrp));
 
 			if (DebugFile.trace) DebugFile.writeln("Database.put("+(getTransaction()==null ? "null" : getTransaction())+","+oRec.getKey()+",byte["+oDbDat.getSize()+"]="+oDbDat.getData()+")");
-			
+
 			oPdb.put(getTransaction(), oDbKey, oDbDat);
-			
+
+			if (DebugFile.trace) DebugFile.writeln("successfully put "+oRec.getKey()+" into "+name());
+
 		} catch (DeadlockException dlxc) {
 			if (DebugFile.trace) {
 				DebugFile.writeln("DeadlockException "+dlxc.getMessage());

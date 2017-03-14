@@ -1,5 +1,6 @@
 package org.judal.bdb;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -184,13 +185,33 @@ public class DBTableDataSource extends DBDataSource implements TableDataSource {
 	
 	@Override
 	public void dropTable(String sDbk, boolean cascade) throws JDOException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin DBTableDataSource.dropTable("+sDbk+", "+String.valueOf(cascade)+")");
+			DebugFile.incIdent();
+		}
 		try {
+			Properties oProps = getTableProperties(sDbk, getMetaData().getTable(sDbk).getColumns());
+			oProps.put("readonly","false");
+			DBTable oTbl = (DBTable) openTableOrBucket(oProps, getMetaData().getTable(sDbk), Record.class);
+			for (DBIndex oInd : oTbl.indexes())
+				oTbl.dropIndex(oInd.getName());
+			oTbl.close();
+			if (DebugFile.trace)
+				DebugFile.writeln("removeDatabase("+getPath()+sDbk+".db, "+sDbk+")");
 			getEnvironment().removeDatabase(getTransaction(), getPath()+sDbk+".db", sDbk);
+			File oDbf = new File(getPath()+sDbk+".db");
+			if (oDbf.exists()) oDbf.delete();
 		} catch (FileNotFoundException | DatabaseException e) {
 			throw new JDOException(e.getMessage(), e);
 		}
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End DBTableDataSource.dropTable()");
+		}
 	}
 
+	// --------------------------------------------------------------------------
+	
 	@Override
 	public void truncateTable(String tableName, boolean cascade) throws JDOException {
 		DBTable tbl = (DBTable) openTableOrBucket(getTableProperties(tableName, getMetaData().getColumns(tableName)), getMetaData().getTable(tableName), MapRecord.class);

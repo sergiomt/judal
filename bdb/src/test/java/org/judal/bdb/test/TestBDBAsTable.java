@@ -41,7 +41,8 @@ public class TestBDBAsTable extends AbstractTableTest {
 		SchemaMetaData metaData = new SchemaMetaData();
 		metaData.addTable(MapRecord1.getTableDef(null));
 		metaData.addTable(MapRecord2.getTableDef(null));
-		dts = new DBTableDataSource(properties, DataSourceTransactionManager.Transact, metaData);
+		// dts = new DBTableDataSource(properties, DataSourceTransactionManager.Transact, metaData);
+		dts = new DBTableDataSource(properties, null, metaData);
 	}
 
 	@AfterClass
@@ -56,17 +57,17 @@ public class TestBDBAsTable extends AbstractTableTest {
 		return dts;
 	}
 
-	@Ignore
+	@Test
 	public void test00Pks() throws JDOException, IOException, InstantiationException, IllegalAccessException {
 		super.test00Pks();
 	}
 
-	@Ignore
+	@Test
 	public void test01Table() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException {		
 		super.test01Table();
 	}
 
-	@Ignore
+	@Test
 	public void test02Transaction() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 		super.test02Transaction();
 	}
@@ -76,7 +77,7 @@ public class TestBDBAsTable extends AbstractTableTest {
 		super.test03Recordset();
 	}
 
-	@Ignore
+	@Test
 	public void test05Metadata() throws JDOException, IOException, InstantiationException, IllegalAccessException {
 		super.test05Metadata("org/judal/bdb/test", "metadata.xml");
 	}

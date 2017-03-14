@@ -63,8 +63,7 @@ public class DBDataSource implements DataSource {
 
 	// --------------------------------------------------------------------------
 
-	private final boolean TRANSACTIONAL = true;
-
+	private boolean bTransactional;
 	private boolean bReadOnly;
 	private boolean bResetLSNOnClose;
 	private String sPath;
@@ -83,9 +82,10 @@ public class DBDataSource implements DataSource {
 
 	public DBDataSource(Map<String,String> properties, TransactionManager transactManager, SchemaMetaData metaData) throws JDOException {
 		oTmn = transactManager;
-		bResetLSNOnClose = true;
-		if (DebugFile.trace) DebugFile.writeln("open("+properties.get(DataSource.URI)+", null, null, false)");
-		open (properties.get(DataSource.URI), null, null, false);
+		bTransactional = (oTmn!=null);
+		bResetLSNOnClose = bTransactional;
+		if (DebugFile.trace) DebugFile.writeln("open("+properties.get(DataSource.DBENV)+", null, null, false)");
+		open (properties.get(DataSource.DBENV), null, null, false);
 	}
 
 	protected void finalize() {
@@ -109,18 +109,21 @@ public class DBDataSource implements DataSource {
 	} // getEnvironment
 
 	public boolean isTransactional() {
-		return TRANSACTIONAL;
+		return bTransactional;
 	}
 
-	public void open(String sDbEnv, String sUser, String sPassw, boolean bReadOnlyMode) throws JDOException {
+	public void open(String sDbEnv, String sUser, String sPassw, boolean bReadOnlyMode) throws JDOException,IllegalStateException,IllegalArgumentException {
 
+		if (oEnv!=null)
+			throw new IllegalStateException("Berkeley DB Environment is already open");
+			
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin DBEnvironment.open("+sDbEnv+", "+sUser+", ..., "+String.valueOf(bReadOnlyMode)+")");
 			DebugFile.incIdent();
 		}
 
 		try {
-			if (null==sDbEnv) throw new DatabaseException("DBEnvironment location may not be null");
+			if (null==sDbEnv) throw new IllegalArgumentException(DataSource.DBENV+" property may not be null");
 			sPath = sDbEnv.endsWith(java.io.File.separator) ? sDbEnv : sDbEnv + java.io.File.separator;
 
 			oRnd = new Random();
@@ -134,7 +137,7 @@ public class DBDataSource implements DataSource {
 
 			oCfg.setInitializeCache(true);
 
-			if (TRANSACTIONAL) {
+			if (bTransactional) {
 				oCfg.setInitializeLocking(true);
 				oCfg.setTransactional(true);
 			} else {
@@ -154,7 +157,7 @@ public class DBDataSource implements DataSource {
 			// String sDbEnv = getProperty("dbenvironment");
 
 			oDfg = new DatabaseConfig();
-			oDfg.setTransactional(TRANSACTIONAL);
+			oDfg.setTransactional(bTransactional);
 			oDfg.setSortedDuplicates(false);
 			oDfg.setAllowCreate(true);
 			oDfg.setReadOnly(false);
@@ -163,7 +166,7 @@ public class DBDataSource implements DataSource {
 			oDfg.setType(DatabaseType.BTREE);
 
 			oDro = new DatabaseConfig();
-			oDro.setTransactional(TRANSACTIONAL);
+			oDro.setTransactional(bTransactional);
 			oDro.setSortedDuplicates(false);
 			oDro.setAllowCreate(true);
 			oDro.setReadOnly(true);
@@ -175,10 +178,11 @@ public class DBDataSource implements DataSource {
 
 			oEnv = new Environment(new File(sDbEnv), oCfg);	  
 
-			oEnv.removeOldLogFiles();
+			if (bTransactional)
+				oEnv.removeOldLogFiles();
 
 			DatabaseConfig oCtf = new DatabaseConfig();
-			oCtf.setTransactional(TRANSACTIONAL);
+			oCtf.setTransactional(bTransactional);
 			oCtf.setAllowCreate(true);
 			oCtf.setType(DatabaseType.BTREE);
 
@@ -187,7 +191,7 @@ public class DBDataSource implements DataSource {
 
 			if (DebugFile.trace) DebugFile.writeln("Environment.openDatabase("+getPath()+CLASS_CATALOG+".db"+")");
 
-			Database  oJcc = oEnv.openDatabase(null, getPath()+CLASS_CATALOG+".db", CLASS_CATALOG, oCtf);
+			Database oJcc = oEnv.openDatabase(null, getPath()+CLASS_CATALOG+".db", CLASS_CATALOG, oCtf);
 
 			oCtg = new StoredClassCatalog(oJcc);
 			try {
@@ -233,8 +237,11 @@ public class DBDataSource implements DataSource {
 							break;
 						}
 				}
-				if (!bEnlisted)
+				if (!bEnlisted) {
+					if (DebugFile.trace)
+						DebugFile.writeln("Transaction.enlistResource(Environment)");
 					getTransactionManager().getTransaction().enlistResource(new DBTransactionalResource(getEnvironment()));
+				}
 			}
 		} catch (IllegalStateException | RollbackException | SystemException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
@@ -246,7 +253,7 @@ public class DBDataSource implements DataSource {
 	}
 
 	protected synchronized DBBucket openTableOrBucket(Properties oConnectionProperties, TableDef oTblDef, Class<? extends Record> recordClass)
-			throws JDOException,IllegalArgumentException {
+			throws JDOException,IllegalArgumentException,IllegalStateException {
 		DBBucket oDbc = null;
 		Database oPdb = null;
 		Database oFdb = null;
@@ -258,6 +265,9 @@ public class DBDataSource implements DataSource {
 		boolean bRo = false;
 		HashMap<String,DBIndex> oIdxs = new HashMap<String,DBIndex>();
 
+		if (null==oEnv)
+			throw new IllegalStateException("Berkeley DB Environment has not been initialized or has been closed");
+		
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin DBDataSource.openTableOrBucket("+oConnectionProperties+")");
 			DebugFile.incIdent();
@@ -389,7 +399,7 @@ public class DBDataSource implements DataSource {
 
 	public void resetLSN() throws DatabaseException {
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DBEnvironment.reset()");
+			DebugFile.writeln("Begin DBEnvironment.resetLSN()");
 			DebugFile.incIdent();
 		}
 
@@ -407,7 +417,7 @@ public class DBDataSource implements DataSource {
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBEnvironment.reset()");
+			DebugFile.writeln("End DBEnvironment.resetLSN()");
 		}
 	} // reset
 
@@ -417,24 +427,31 @@ public class DBDataSource implements DataSource {
 	public void close() throws JDOException {
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DBEnvironment.close()");
+			DebugFile.writeln("Begin DBDataSource.close()");
 			DebugFile.incIdent();
 		}
 
 		try {
 			if (!isClosed()) {  	  
 
+				if (inTransaction())
+					getTransaction().abort();
+
 				closeTables();
 
 				if (oCtg!=null) {
+					if (DebugFile.trace) DebugFile.writeln("Closing StoredClassCatalog");
+					// Closing the StoredClassCatalog will close its underlying database as a side effect
 					oCtg.close();
-					oCtg=null;
+					oCtg = null;
 				}
 
-				if (bResetLSNOnClose)
+			    if (bResetLSNOnClose)
 					resetLSN();
 
+				if (DebugFile.trace) DebugFile.writeln("Closing Environment");
 				oEnv.close();
+				if (DebugFile.trace) DebugFile.writeln("Environment Closed");
 				oEnv = null;
 			}
 		} catch (DatabaseException dbe) {
@@ -443,11 +460,17 @@ public class DBDataSource implements DataSource {
 				DebugFile.decIdent();
 			}
 			throw new JDOException(dbe.getMessage(),dbe);
+		} catch (Exception xcpt) {
+			if (DebugFile.trace) {
+				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage());
+				DebugFile.decIdent();
+			}
+			throw new JDOException(xcpt.getMessage(),xcpt);
 		}
-
+		
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBEnvironment.close()");
+			DebugFile.writeln("End DBDataSource.close()");
 		}
 	} // close
 
@@ -478,6 +501,7 @@ public class DBDataSource implements DataSource {
 	}
 
 	public Transaction getTransaction() throws JDOException {
+		if (null==oTmn) return null;
 		try {
 			if (oTmn.getStatus()==Status.STATUS_NO_TRANSACTION) {
 				return null;
