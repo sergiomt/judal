@@ -3,6 +3,7 @@ package org.judal.storage.java.test;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
@@ -161,6 +162,7 @@ public abstract class AbstractTableTest {
 		System.out.println("check name 2 is Paul Browm");
 		assertEquals("Paul Browm", rec1.getName());
 		tb1.close();
+		System.out.println("table closed");
 	}
 
 	public void test00Pks() throws JDOException, IOException, InstantiationException, IllegalAccessException {
@@ -225,6 +227,8 @@ public abstract class AbstractTableTest {
 		
 		TableDataSource ds = getTableDataSource();
 		
+		if (ds.getTransactionManager()!=null) {
+
 		ArrayRecord1.dataSource = ds;
 		ArrayRecord2.dataSource = ds;
 		MapRecord1.dataSource = ds;
@@ -377,6 +381,8 @@ public abstract class AbstractTableTest {
 		}
 		assertFalse(ds.exists(ArrayRecord1.tableName, "U"));
 		assertFalse(ds.exists(ArrayRecord2.tableName, "U"));
+		}
+
 		System.out.println("End test02Transaction()");
 	}
 
@@ -399,19 +405,31 @@ public abstract class AbstractTableTest {
 
 			createRecords1(ds);
 
+			System.out.println("Opening indexed view "+recordClass1.getName());
+
 			tb1 = ds.openIndexedView(recordClass1.newInstance());
+
+			System.out.println("Indexed view "+recordClass1.getName()+" opened");
 
 			assertTrue(tb1.exists(one));
 
+			System.out.println("one exists");
+
 			assertTrue(tb1.load(one, recordClass1.newInstance()));
 
+			System.out.println("one loaded");
+
 			FetchGroup group1 = new ArrayRecord1().fetchGroup();
+
+			System.out.println("fetching one");
 
 			RecordSet<? extends Record> recs1 = tb1.fetch(group1, "id", one, 1, 0);
 
 			System.out.println("Checking result set size 1 vs "+recs1.size());
 
 			assertEquals(1, recs1.size());
+			
+			assertNotNull(recs1.get(0));
 			
 			for (Record rec : recs1)
 				assertEquals("John Smith", rec.apply("name"));
@@ -434,12 +452,25 @@ public abstract class AbstractTableTest {
 			System.out.println("Checking result set size 1 vs "+recs1.size());
 			assertEquals(1, recs1.size());
 
+			if (ds.inTransaction()) {
+				System.out.println("Committing any pending transactions");
+				ds.getTransactionManager().commit();
+				System.out.println("Transactions committed");
+			} else if (ds.getTransactionManager()!=null) {
+				System.out.println("Transaction status is "+statusString(ds.getTransactionManager().getStatus()));
+			} else {
+				System.out.println("No active transaction manager");
+			}
+			
 			System.out.println("Closing table "+tb1.name());
 			
 			tb1.close();
 
+			System.out.println("Table "+tb1.name()+" successfully closed");
+			
 		} catch (Exception xcpt) {
 
+			System.out.println("test03Recordset failed!");
 			System.out.println(xcpt.getClass().getName()+" "+xcpt.getMessage());
 			System.out.println(com.knowgate.debug.StackTraceUtil.getStackTrace(xcpt));
 
@@ -447,6 +478,7 @@ public abstract class AbstractTableTest {
 			if (ds!=null) {
 				System.out.println("Dropping table "+ArrayRecord1.tableName);
 				ds.dropTable(ArrayRecord1.tableName, false);
+				System.out.println("Table "+ArrayRecord1.tableName+" dropped");
 			}
 		}
 		assertFalse(ds.exists(ArrayRecord1.tableName, "U"));
@@ -537,6 +569,5 @@ public abstract class AbstractTableTest {
 			assertEquals(hdef.getAllowsNull(), xdef.getAllowsNull());
 		}
 
-		ds.close();
 	}
 }
