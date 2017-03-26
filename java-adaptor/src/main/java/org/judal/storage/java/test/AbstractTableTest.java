@@ -41,6 +41,8 @@ import org.judal.storage.query.Connective;
 import org.judal.storage.query.Operator;
 import org.judal.storage.query.Predicate;
 
+import com.knowgate.debug.DebugFile;
+
 public abstract class AbstractTableTest {
 	
 	public Class<? extends TestRecord1> recordClass1;
@@ -79,7 +81,7 @@ public abstract class AbstractTableTest {
 	public abstract TableDataSource getTableDataSource() throws JDOException;
 	
 	public void createTable1(TableDataSource ds) throws JDOException {
-		System.out.println("Creating table "+ArrayRecord1.getTableDef(ds).getName());
+		DebugFile.writeln("*** AbtractTableTest Creating table "+ArrayRecord1.getTableDef(ds).getName());
 		TableDef tdef = ArrayRecord1.getTableDef(ds);
 		for (ColumnDef cdef : tdef.getColumns()) {
 			assertEquals("default", cdef.getFamily());
@@ -88,14 +90,14 @@ public abstract class AbstractTableTest {
 	}
 
 	public void createTable2(TableDataSource ds) throws JDOException {
-		System.out.println("Creating table "+ArrayRecord2.getTableDef(ds).getName());
+		DebugFile.writeln("*** AbtractTableTest Creating table "+ArrayRecord2.getTableDef(ds).getName());
 		ds.createTable(ArrayRecord2.getTableDef(ds), null);
 	}
 
 	public void createRecords1(TableDataSource ds) throws JDOException, InstantiationException, IllegalAccessException {
 		Table tb1 = null;
 		TestRecord1 rec1, rec2, rec3, rec4, rec5;
-		System.out.println("Creating records");
+		DebugFile.writeln("*** AbtractTableTest Creating records");
 
 		rec1 = recordClass1.newInstance();
 		rec1.setId(new Integer(1));
@@ -133,7 +135,7 @@ public abstract class AbstractTableTest {
 		rec5.setLocation("Back of Beyond");
 		rec5.setAmount(new BigDecimal("-101"));
 
-		System.out.println("Opening table "+ArrayRecord1.tableName);
+		DebugFile.writeln("*** AbtractTableTest Opening table "+ArrayRecord1.tableName);
 
 		tb1 = ds.openIndexedTable(recordClass1.newInstance());
 		tb1.store(rec1);
@@ -141,28 +143,28 @@ public abstract class AbstractTableTest {
 		tb1.store(rec3);
 		tb1.store(rec4);
 		tb1.store(rec5);
-		System.out.println("Closing table "+ArrayRecord1.tableName);
+		DebugFile.writeln("*** AbtractTableTest Closing table "+ArrayRecord1.tableName);
 		tb1.close();
 		
-		System.out.println("Records created");
+		DebugFile.writeln("*** AbtractTableTest Records created");
 		
 		tb1 = ds.openIndexedTable(recordClass1.newInstance());
 		rec1 = recordClass1.newInstance();
-		System.out.println("check exists 1");
+		DebugFile.writeln("*** AbtractTableTest check exists 1");
 		assertTrue(tb1.exists(new Param[]{new Param("id", 1, new Integer(1))}));
-		System.out.println("check load 1");
+		DebugFile.writeln("*** AbtractTableTest check load 1");
 		assertTrue(tb1.load(new Integer(1), rec1));
-		System.out.println("check name 1 is John Smith");
+		DebugFile.writeln("*** AbtractTableTest check name 1 is John Smith");
 		assertEquals("John Smith", rec1.getName());
 		rec2 = recordClass1.newInstance();
-		System.out.println("check exists 2");
+		DebugFile.writeln("*** AbtractTableTest check exists 2");
 		assertTrue(tb1.exists(new Param[]{new Param("id", 1, new Integer(2))}));
-		System.out.println("check load 2");
+		DebugFile.writeln("*** AbtractTableTest check load 2");
 		assertTrue(tb1.load(new Integer(2), rec1));
-		System.out.println("check name 2 is Paul Browm");
+		DebugFile.writeln("*** AbtractTableTest check name 2 is Paul Browm");
 		assertEquals("Paul Browm", rec1.getName());
 		tb1.close();
-		System.out.println("table closed");
+		DebugFile.writeln("*** AbtractTableTest table closed");
 	}
 
 	public void test00Pks() throws JDOException, IOException, InstantiationException, IllegalAccessException {
@@ -174,7 +176,7 @@ public abstract class AbstractTableTest {
 	}
 
 	public void test01Table() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException {
-		System.out.println("Begin test01Table()");
+		DebugFile.writeln("*** AbtractTableTest Begin test01Table()");
 
 		TableDataSource ds = getTableDataSource();
 
@@ -218,12 +220,12 @@ public abstract class AbstractTableTest {
 			if (ds!=null && created) ds.dropTable(ArrayRecord1.tableName, false);
 		}
 		assertFalse(ds.exists(ArrayRecord1.tableName, "U"));
-		System.out.println("End test01Table()");
+		DebugFile.writeln("*** AbtractTableTest End test01Table()");
 	}
 
 	public void test02Transaction() throws JDOException, IOException, NotSupportedException, SystemException, SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 
-		System.out.println("Begin test02Transaction()");
+		DebugFile.writeln("*** AbtractTableTest Begin test02Transaction()");
 		
 		TableDataSource ds = getTableDataSource();
 		
@@ -258,45 +260,52 @@ public abstract class AbstractTableTest {
 			rec2.put("created", new Timestamp(System.currentTimeMillis()));
 			rec2.put("description", "... ... ...");
 			
-			System.out.println("Transaction status before begin (1) = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
+			DebugFile.writeln("*** AbtractTableTest Transaction status before begin (1) = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
 			getTableDataSource().getTransactionManager().begin();
 			assertEquals(Status.STATUS_ACTIVE, ds.getTransactionManager().getStatus());
+
 			tb1 = ds.openTable(rec1);
 			tb2 = ds.openTable(rec2);
 			tb1.store(rec1);
 			tb2.store(rec2);
-			System.out.println("Transaction status before commit = "+ statusString(ds.getTransactionManager().getStatus()));
+
+			DebugFile.writeln("*** AbtractTableTest Transaction status before commit = "+ statusString(ds.getTransactionManager().getStatus()));
 			ds.getTransactionManager().commit();
-			System.out.println("Transaction status after commit = "+ statusString(ds.getTransactionManager().getStatus()));
+			DebugFile.writeln("*** AbtractTableTest Transaction status after commit = "+ statusString(ds.getTransactionManager().getStatus()));
+
 			tb2.close();
-			System.out.println("After close table 2");
+			DebugFile.writeln("*** AbtractTableTest After close table 2");
 			tb1.close();
-			System.out.println("After close table 1");
+			DebugFile.writeln("*** AbtractTableTest After close table 1");
+
+			DebugFile.writeln("*** AbtractTableTest Transaction status after closing tables = "+ statusString(ds.getTransactionManager().getStatus()));
 			
 			tb1 = ds.openTable(rec1);
-			System.out.println("After re-open table 1");
+			DebugFile.writeln("*** AbtractTableTest After re-open table 1");
 			assertTrue(tb1.exists(new Param("id",1,1)));
 			assertTrue(tb1.load(new Integer(1), rec1));
 			tb1.close();
-			System.out.println("After close table 1");
+			DebugFile.writeln("*** AbtractTableTest After close table 1");
 
+			DebugFile.writeln("*** AbtractTableTest Transaction status before truncate table = "+ statusString(ds.getTransactionManager().getStatus()));
+			
 			ds.truncateTable(ArrayRecord1.tableName, false);
-
-			System.out.println("After truncate table 1");
+			
+			DebugFile.writeln("*** AbtractTableTest After truncate table 1");
 
 			tb1 = ds.openTable(rec1);
-			System.out.println("After re-open table 1");
+			DebugFile.writeln("*** AbtractTableTest After re-open table 1");
 			assertFalse(tb1.exists(new Param("id",1,1)));
 			assertFalse(tb1.load(new Integer(1), rec1));
 			tb1.close();
-			System.out.println("After close table 1");
+			DebugFile.writeln("*** AbtractTableTest After close table 1");
 			
 			tb2 = ds.openTable(rec2);
-			System.out.println("After re-open table 2");
+			DebugFile.writeln("*** AbtractTableTest After re-open table 2");
 			assertTrue(tb2.exists(new Param("code",1,"1234")));
 			assertTrue(tb2.load("1234", rec2));
 			tb2.close();
-			System.out.println("After close table 2");
+			DebugFile.writeln("*** AbtractTableTest After close table 2");
 
 			ds.truncateTable(ArrayRecord2.tableName, false);
 
@@ -319,75 +328,85 @@ public abstract class AbstractTableTest {
 			rec2.put("created", new Timestamp(System.currentTimeMillis()));
 			rec2.put("description", "... ... ...");
 
-			System.out.println("Transaction status before begin (2) = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
+			DebugFile.writeln("*** AbtractTableTest Transaction status before begin (2) = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
 			ds.getTransactionManager().begin();
-			System.out.println("Transaction status after begin (2) = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
+			DebugFile.writeln("*** AbtractTableTest Transaction status after begin (2) = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
 			assertEquals(Status.STATUS_ACTIVE, ds.getTransactionManager().getStatus());
 			tb1 = ds.openTable(rec1);
 			tb2 = ds.openTable(rec2);
 			tb1.store(rec1);
 			tb2.store(rec2);
-			System.out.println("Transaction status before rollback (2) = "+ statusString(ds.getTransactionManager().getStatus()));
+			DebugFile.writeln("*** AbtractTableTest Transaction status before rollback (2) = "+ statusString(ds.getTransactionManager().getStatus()));
 			ds.getTransactionManager().rollback();
-			System.out.println("Transaction status after rollback (2) = "+ statusString(ds.getTransactionManager().getStatus()));
+			DebugFile.writeln("*** AbtractTableTest Transaction status after rollback (2) = "+ statusString(ds.getTransactionManager().getStatus()));
 			tb2.close();
-			System.out.println("Closed 2");
+			DebugFile.writeln("*** AbtractTableTest Closed 2");
 			tb1.close();
-			System.out.println("Closed 1");
+			DebugFile.writeln("*** AbtractTableTest Closed 1");
 
-			System.out.println("Reopen "+ ArrayRecord1.tableName);
-			System.out.println("Transaction status before open table "+rec1.getTableName()+" = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
+			DebugFile.writeln("*** AbtractTableTest Reopen "+ ArrayRecord1.tableName);
+			DebugFile.writeln("*** AbtractTableTest Transaction status before open table "+rec1.getTableName()+" = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
 			tb1 = ds.openTable(rec1);
 			assertFalse(tb1.exists(new Param("id",1,1)));
 			assertFalse(tb1.load(new Integer(1), rec1));
-			System.out.println("Reloaded  1");
-			System.out.println("Close "+ ArrayRecord1.tableName);
+			DebugFile.writeln("*** AbtractTableTest Reloaded  1");
+			DebugFile.writeln("*** AbtractTableTest Close "+ ArrayRecord1.tableName);
 			tb1.close();
-			System.out.println("Before truncate"+ ArrayRecord1.tableName);
+			DebugFile.writeln("*** AbtractTableTest Before truncate"+ ArrayRecord1.tableName);
 			ds.truncateTable(ArrayRecord1.tableName, false);
-			System.out.println("After truncate"+ ArrayRecord1.tableName);
+			DebugFile.writeln("*** AbtractTableTest After truncate"+ ArrayRecord1.tableName);
 			
-			System.out.println("Reopen "+ ArrayRecord2.tableName);
+			DebugFile.writeln("*** AbtractTableTest Reopen "+ ArrayRecord2.tableName);
 			tb2 = ds.openTable(rec2);
 			assertFalse(tb2.exists(new Param("code",1,"1234")));
 			assertFalse(tb2.load("1234", rec2));
-			System.out.println("Reloaded  2");
-			System.out.println("Close "+ ArrayRecord1.tableName);
+			DebugFile.writeln("*** AbtractTableTest Reloaded  2");
+			DebugFile.writeln("*** AbtractTableTest Close "+ ArrayRecord1.tableName);
 			tb2.close();
-			System.out.println("Before truncate"+ ArrayRecord1.tableName);
+			DebugFile.writeln("*** AbtractTableTest Before truncate"+ ArrayRecord2.tableName);
 			ds.truncateTable(ArrayRecord2.tableName, false);
-			System.out.println("After truncate"+ ArrayRecord2.tableName);
+			DebugFile.writeln("*** AbtractTableTest After truncate"+ ArrayRecord2.tableName);
 
+		} catch (Exception e) {
+			DebugFile.writeln(e.getClass().getName()+" "+e.getMessage()+" at AbtractTableTest.test02Transaction()");
+			DebugFile.writeStackTrace(e);
 		} finally {
 			if (ds!=null) {
-				System.out.println("Transaction status while finalizing = "+ statusString(ds.getTransactionManager().getStatus()));
+				DebugFile.writeln("*** AbtractTableTest Transaction status while finalizing = "+ statusString(ds.getTransactionManager().getStatus()));
 				try {
 					if (ds.getTransactionManager().getStatus()!=Status.STATUS_NO_TRANSACTION &&
 						ds.getTransactionManager().getStatus()!=Status.STATUS_COMMITTED &&
 						ds.getTransactionManager().getStatus()!=Status.STATUS_ROLLEDBACK) {
 						ds.getTransactionManager().getTransaction().rollback();
-						System.out.println("Transaction status after finallyzing rollback() = "+ statusString(ds.getTransactionManager().getStatus()));
+						DebugFile.writeln("*** AbtractTableTest Transaction status after finallyzing rollback() = "+ statusString(ds.getTransactionManager().getStatus()));
 					}
 				} finally { }
 					if (created2) {
-						System.out.println("Dropping table "+ArrayRecord2.tableName);
+						DebugFile.writeln("*** AbtractTableTest Dropping table "+ArrayRecord2.tableName);
 						ds.dropTable(ArrayRecord2.tableName, false);
+						DebugFile.writeln("*** AbtractTableTest Table "+ArrayRecord2.tableName+" dropped");
 					}
 					if (created1) {
-						System.out.println("Dropping table "+ArrayRecord1.tableName);
+						DebugFile.writeln("*** AbtractTableTest Dropping table "+ArrayRecord1.tableName);
 						ds.dropTable(ArrayRecord1.tableName, false);
+						DebugFile.writeln("*** AbtractTableTest Table "+ArrayRecord1.tableName+" dropped");
 					}
+					DebugFile.writeln("*** AbtractTableTest Transaction status after dropping tables = "+ statusString(ds.getTransactionManager().getStatus()));
 			}
 		}
+		DebugFile.writeln("*** AbtractTableTest Transaction status before exists = "+ statusString(ds.getTransactionManager().getStatus()));
 		assertFalse(ds.exists(ArrayRecord1.tableName, "U"));
 		assertFalse(ds.exists(ArrayRecord2.tableName, "U"));
+		DebugFile.writeln("*** AbtractTableTest Transaction status after exists = "+ statusString(ds.getTransactionManager().getStatus()));
 		}
 
-		System.out.println("End test02Transaction()");
+		DebugFile.writeln("*** AbtractTableTest Transaction final = "+ statusString(ds.getTransactionManager().getStatus()));
+
+		DebugFile.writeln("*** AbtractTableTest End test02Transaction()");
 	}
 
 	public void test03Recordset() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
-		System.out.println("Begin test03Recordset()");
+		DebugFile.writeln("*** AbtractTableTest Begin test03Recordset()");
 
 		TableDataSource ds = getTableDataSource();
 		
@@ -405,27 +424,27 @@ public abstract class AbstractTableTest {
 
 			createRecords1(ds);
 
-			System.out.println("Opening indexed view "+recordClass1.getName());
+			DebugFile.writeln("*** AbtractTableTest Opening indexed view "+recordClass1.getName());
 
 			tb1 = ds.openIndexedView(recordClass1.newInstance());
 
-			System.out.println("Indexed view "+recordClass1.getName()+" opened");
+			DebugFile.writeln("*** AbtractTableTest Indexed view "+recordClass1.getName()+" opened");
 
 			assertTrue(tb1.exists(one));
 
-			System.out.println("one exists");
+			DebugFile.writeln("*** AbtractTableTest one exists");
 
 			assertTrue(tb1.load(one, recordClass1.newInstance()));
 
-			System.out.println("one loaded");
+			DebugFile.writeln("*** AbtractTableTest one loaded");
 
 			FetchGroup group1 = new ArrayRecord1().fetchGroup();
 
-			System.out.println("fetching one");
+			DebugFile.writeln("*** AbtractTableTest fetching one");
 
 			RecordSet<? extends Record> recs1 = tb1.fetch(group1, "id", one, 1, 0);
 
-			System.out.println("Checking result set size 1 vs "+recs1.size());
+			DebugFile.writeln("*** AbtractTableTest Checking result set size 1 vs "+recs1.size());
 
 			assertEquals(1, recs1.size());
 			
@@ -434,60 +453,60 @@ public abstract class AbstractTableTest {
 			for (Record rec : recs1)
 				assertEquals("John Smith", rec.apply("name"));
 			
-			System.out.println("Checking skip 0 maxrows 3");
+			DebugFile.writeln("*** AbtractTableTest Checking skip 0 maxrows 3");
 			BigDecimal zero = new BigDecimal("0");
 			recs1 = tb1.fetch(group1, "amount", zero, 3, 0);
-			System.out.println("Checking result set size 3 vs "+recs1.size());
+			DebugFile.writeln("*** AbtractTableTest Checking result set size 3 vs "+recs1.size());
 			assertEquals(3, recs1.size());
-			System.out.println("Checking skip 0 maxrows 2");
+			DebugFile.writeln("*** AbtractTableTest Checking skip 0 maxrows 2");
 			recs1 = tb1.fetch(group1, "amount", zero, 2, 0);
-			System.out.println("Checking result set size 2 vs "+recs1.size());
+			DebugFile.writeln("*** AbtractTableTest Checking result set size 2 vs "+recs1.size());
 			assertEquals(2, recs1.size());
-			System.out.println("Checking skip 1 maxrows 3");
+			DebugFile.writeln("*** AbtractTableTest Checking skip 1 maxrows 3");
 			recs1 = tb1.fetch(group1, "amount", zero, 2, 1);
-			System.out.println("Checking result set size 2 vs "+recs1.size());
+			DebugFile.writeln("*** AbtractTableTest Checking result set size 2 vs "+recs1.size());
 			assertEquals(2, recs1.size());
-			System.out.println("Checking skip 2 maxrows 3");
+			DebugFile.writeln("*** AbtractTableTest Checking skip 2 maxrows 3");
 			recs1 = tb1.fetch(group1, "amount", zero, 3, 2);
-			System.out.println("Checking result set size 1 vs "+recs1.size());
+			DebugFile.writeln("*** AbtractTableTest Checking result set size 1 vs "+recs1.size());
 			assertEquals(1, recs1.size());
 
 			if (ds.inTransaction()) {
-				System.out.println("Committing any pending transactions");
+				DebugFile.writeln("*** AbtractTableTest Committing any pending transactions");
 				ds.getTransactionManager().commit();
-				System.out.println("Transactions committed");
+				DebugFile.writeln("*** AbtractTableTest Transactions committed");
 			} else if (ds.getTransactionManager()!=null) {
-				System.out.println("Transaction status is "+statusString(ds.getTransactionManager().getStatus()));
+				DebugFile.writeln("*** AbtractTableTest Transaction status is "+statusString(ds.getTransactionManager().getStatus()));
 			} else {
-				System.out.println("No active transaction manager");
+				DebugFile.writeln("*** AbtractTableTest No active transaction manager");
 			}
 			
-			System.out.println("Closing table "+tb1.name());
+			DebugFile.writeln("*** AbtractTableTest Closing table "+tb1.name());
 			
 			tb1.close();
 
-			System.out.println("Table "+tb1.name()+" successfully closed");
+			DebugFile.writeln("*** AbtractTableTest Table "+tb1.name()+" successfully closed");
 			
 		} catch (Exception xcpt) {
 
-			System.out.println("test03Recordset failed!");
-			System.out.println(xcpt.getClass().getName()+" "+xcpt.getMessage());
-			System.out.println(com.knowgate.debug.StackTraceUtil.getStackTrace(xcpt));
+			DebugFile.writeln("*** AbtractTableTest test03Recordset failed!");
+			DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage());
+			DebugFile.writeln(com.knowgate.debug.StackTraceUtil.getStackTrace(xcpt));
 
 		} finally {
 			if (ds!=null) {
-				System.out.println("Dropping table "+ArrayRecord1.tableName);
+				DebugFile.writeln("*** AbtractTableTest Dropping table "+ArrayRecord1.tableName);
 				ds.dropTable(ArrayRecord1.tableName, false);
-				System.out.println("Table "+ArrayRecord1.tableName+" dropped");
+				DebugFile.writeln("*** AbtractTableTest Table "+ArrayRecord1.tableName+" dropped");
 			}
 		}
 		assertFalse(ds.exists(ArrayRecord1.tableName, "U"));
 		assertFalse(ds.exists(ArrayRecord2.tableName, "U"));
-		System.out.println("End test03Recordset()");
+		DebugFile.writeln("*** AbtractTableTest End test03Recordset()");
 	}
 
 	public void test04IndexedRecordset() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException, UnsupportedOperationException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
-		System.out.println("Begin test04IndexedRecordset()");
+		DebugFile.writeln("*** AbtractTableTest Begin test04IndexedRecordset()");
 
 		TableDataSource ds = getTableDataSource();
 		ArrayRecord1.dataSource = ds;
@@ -534,7 +553,7 @@ public abstract class AbstractTableTest {
 				ds.dropTable(ArrayRecord1.tableName, false);
 		}
 		assertFalse(ds.exists(ArrayRecord1.tableName, "U"));
-		System.out.println("End test04IndexedRecordset()");
+		DebugFile.writeln("*** AbtractTableTest End test04IndexedRecordset()");
 	}
 
 	public void test05Metadata(String packagePath, String fileName) throws JDOException, IOException {

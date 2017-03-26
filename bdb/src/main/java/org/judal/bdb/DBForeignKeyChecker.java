@@ -18,7 +18,6 @@ import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
 import org.judal.storage.ForeignKeyChecker;
-import org.judal.storage.java.MapRecord;
 import org.judal.storage.Param;
 
 import com.knowgate.debug.DebugFile;
@@ -45,8 +44,10 @@ public class DBForeignKeyChecker implements ForeignKeyChecker {
 			Properties oProps = new Properties();
 			oProps.put("name", tableName);
 			oProps.put("readonly", "true");
-			target = (DBTable) dataSource.openTableOrBucket(oProps, dataSource.getTableDef(tableName), MapRecord.class);
+			target = (DBTable) dataSource.openTableOrBucket(oProps, dataSource.getTableDef(tableName), dataSource.getMetaData().getTable(tableName).getRecordClass(), true);
 			retval = target.exists(new Param(columnName, ColumnDef.typeForObject(columnValue), 1, columnValue));
+		} catch (IllegalArgumentException | IllegalStateException | ClassNotFoundException e) {
+			throw new JDOException(e.getMessage(), e);
 		} finally {
 			target.close();
 		}

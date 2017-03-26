@@ -252,7 +252,7 @@ public class DBDataSource implements DataSource {
 		}
 	}
 
-	protected synchronized DBBucket openTableOrBucket(Properties oConnectionProperties, TableDef oTblDef, Class<? extends Record> recordClass)
+	protected synchronized DBBucket openTableOrBucket(Properties oConnectionProperties, TableDef oTblDef, Class<? extends Record> recordClass, boolean useTransaction)
 			throws JDOException,IllegalArgumentException,IllegalStateException {
 		DBBucket oDbc = null;
 		Database oPdb = null;
@@ -269,7 +269,7 @@ public class DBDataSource implements DataSource {
 			throw new IllegalStateException("Berkeley DB Environment has not been initialized or has been closed");
 		
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DBDataSource.openTableOrBucket("+oConnectionProperties+")");
+			DebugFile.writeln("Begin DBDataSource.openTableOrBucket("+oConnectionProperties+","+oTblDef.getName()+","+(recordClass==null ? "null" : recordClass.getName())+",useTransaction="+String.valueOf(useTransaction)+")");
 			DebugFile.incIdent();
 		}
 
@@ -281,12 +281,15 @@ public class DBDataSource implements DataSource {
 
 			sFdb = oConnectionProperties.getProperty("foreigndatabase");
 
-			joinTransaction();
+			if (isTransactional() && inTransaction() && useTransaction)
+				joinTransaction();
+
+			final Transaction oTrn = isTransactional() && inTransaction() && useTransaction ? getTransaction() : null;
 
 			if (null!=sFdb) {
 				if (DebugFile.trace)
-					DebugFile.writeln("Environment.openDatabase("+getTransaction()+","+getPath()+sFdb+".db"+","+sFdb+")");
-				oFdb = oEnv.openDatabase(getTransaction(), getPath()+sFdb+".db", sFdb, oDfg);
+					DebugFile.writeln("Environment.openDatabase(getTransaction(),"+getPath()+sFdb+".db"+","+sFdb+")");
+				oFdb = oEnv.openDatabase(oTrn, getPath()+sFdb+".db", sFdb, oDfg);
 			}
 
 			if (oConnectionProperties.containsKey("indexes")) {
@@ -295,10 +298,10 @@ public class DBDataSource implements DataSource {
 				// oPdb = oEnv.openDatabase(null, sDbk, bRo ? oDro : oDfg);
 
 				if (DebugFile.trace) {
-					DebugFile.writeln("Environment.openDatabase("+getTransaction()+","+getPath()+sDbk+".db"+","+sDbk+","+String.valueOf(bRo)+")");
+					DebugFile.writeln("Environment.openDatabase("+oTrn+","+getPath()+sDbk+".db"+","+sDbk+","+String.valueOf(bRo)+")");
 					DebugFile.writeln("with secondary indexes "+oConnectionProperties.getProperty("indexes"));
 				}
-				oPdb = oEnv.openDatabase(getTransaction(), getPath()+sDbk+".db", sDbk, bRo ? oDro : oDfg);
+				oPdb = oEnv.openDatabase(oTrn, getPath()+sDbk+".db", sDbk, bRo ? oDro : oDfg);
 
 				if (recordClass!=null) {
 					aIdxs = oConnectionProperties.getProperty("indexes").split(",");
@@ -330,13 +333,13 @@ public class DBDataSource implements DataSource {
 					DebugFile.writeln("without secondary indexes");
 				}
 				
-				oPdb = oEnv.openDatabase(getTransaction(), getPath()+sDbk+".db", sDbk, bRo ? oDro : oDfg);
+				oPdb = oEnv.openDatabase(oTrn, getPath()+sDbk+".db", sDbk, bRo ? oDro : oDfg);
 			}
 
 			String sCnm = sDbk + (null==sIdx ? ".PrimaryKey:" : "."+sIdx+":") + String.valueOf(new java.util.Date().getTime()) + "#" + String.valueOf(oRnd.nextInt());
 
 			if (recordClass!=null)
-				oDbc = new DBTable(this, oTblDef, sCnm, sDbk, oPdb, oIdxs, oFdb, oCtg, oKey, recordClass);
+				oDbc = new DBTable(this, oTblDef, sCnm, sDbk, oPdb, oIdxs, oFdb, oCtg, oKey, recordClass, isTransactional() && useTransaction);
 			else
 				oDbc = new DBBucket(this, sCnm, sDbk, oPdb, oFdb, oCtg, oKey);
 
@@ -501,6 +504,16 @@ public class DBDataSource implements DataSource {
 	}
 
 	public Transaction getTransaction() throws JDOException {
+		if (DebugFile.trace) {
+			try {
+			if (null==oTmn)
+				DebugFile.writeln("DBDataSource.getTransaction() no transaction manager present");
+			else
+				DebugFile.writeln("DBDataSource.getTransaction() transaction status is "+((DataSourceTransaction) oTmn.getTransaction()).getStatusAsString());
+			} catch (SystemException sx) {
+				DebugFile.writeln("SystemException at DBDataSource.getTransaction() "+sx.getMessage());
+			}
+		}
 		if (null==oTmn) return null;
 		try {
 			if (oTmn.getStatus()==Status.STATUS_NO_TRANSACTION) {

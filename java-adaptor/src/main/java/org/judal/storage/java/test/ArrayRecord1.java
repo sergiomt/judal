@@ -28,6 +28,7 @@ public class ArrayRecord1 extends ArrayRecord implements TestRecord1 {
 			tbl = new TableDef(tableName);
 		else
 			tbl = ds.createTableDef(tableName, null);
+		tbl.setRecordClass(ArrayRecord1.class);
 		tbl.addPrimaryKeyColumn("default", "id", Types.INTEGER);
 		tbl.addColumnMetadata("default", "created", Types.TIMESTAMP, false);
 		tbl.addColumnMetadata("default", "name", Types.VARCHAR, 100, false, Type.MANY_TO_ONE);

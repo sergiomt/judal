@@ -47,11 +47,13 @@ public class DBBucketDataSource extends DBDataSource implements BucketDataSource
 
 	@Override
 	public void createBucket(String bucketName, Map<String, Object> options) throws JDOException {
+		if (inTransaction())
+			throw new JDOException("Cannot create a bucket in the middle of a transaction");
 		Properties props = new Properties();
 		if (null!=options)
 			props.putAll(options);
 		props.put("name",bucketName);
-		DBBucket tbl = openTableOrBucket(props, getKeyValueDef(bucketName), null);
+		DBBucket tbl = openTableOrBucket(props, getKeyValueDef(bucketName), null, false);
 		tbl.close();
 	}
 
@@ -59,11 +61,13 @@ public class DBBucketDataSource extends DBDataSource implements BucketDataSource
 	public DBBucket openBucket(String bucketName) throws JDOException {
 		Properties props = new Properties();
 		props.put("name",bucketName);
-		return openTableOrBucket(props, getKeyValueDef(bucketName), null);
+		return openTableOrBucket(props, getKeyValueDef(bucketName), null, true);
 	}
 
 	@Override
 	public void dropBucket(String bucketName) throws JDOException {		
+		if (inTransaction())
+			throw new JDOException("Cannot drop a bucket in the middle of a transaction");
 		try {
 			getEnvironment().removeDatabase(getTransaction(), getPath()+bucketName+".db", bucketName);
 		} catch (FileNotFoundException | DatabaseException e) {
@@ -73,7 +77,11 @@ public class DBBucketDataSource extends DBDataSource implements BucketDataSource
 
 	@Override
 	public void truncateBucket(String bucketName) throws JDOException {
-		DBBucket tbl = openBucket(bucketName);
+		if (inTransaction())
+			throw new JDOException("Cannot truncate a bucket in the middle of a transaction");
+		Properties props = new Properties();
+		props.put("name",bucketName);
+		DBBucket tbl = openTableOrBucket(props, getKeyValueDef(bucketName), null, false);;
 		try {
 			tbl.truncate();
 		} finally {

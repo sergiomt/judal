@@ -27,6 +27,7 @@ public class MapRecord2 extends MapRecord implements TestRecord2 {
 			tbl = new TableDef(tableName);
 		else
 			tbl = ds.createTableDef(tableName, null);
+		tbl.setRecordClass(MapRecord2.class);
 		tbl.addPrimaryKeyColumn(null, "code", Types.VARCHAR, 100);
 		tbl.addColumnMetadata("default", "name", Types.VARCHAR, 100, false, Type.ONE_TO_ONE);
 		tbl.addColumnMetadata("default", "created", Types.TIMESTAMP, false);

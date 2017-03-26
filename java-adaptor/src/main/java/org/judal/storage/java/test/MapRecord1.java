@@ -28,6 +28,7 @@ public static String tableName = "unittest_table1";
 			tbl = new TableDef(tableName);
 		else
 			tbl = ds.createTableDef(tableName, null);
+		tbl.setRecordClass(MapRecord1.class);
 		tbl.addPrimaryKeyColumn(null, "id", Types.INTEGER);
 		tbl.addColumnMetadata("default", "created", Types.TIMESTAMP, false);
 		tbl.addColumnMetadata("default", "name", Types.VARCHAR, 100, false, Type.MANY_TO_ONE);

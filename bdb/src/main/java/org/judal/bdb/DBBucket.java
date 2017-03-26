@@ -226,18 +226,18 @@ public class DBBucket implements Bucket {
 			DebugFile.writeln("Begin DBBucket.close(" + name() + ")");
 			DebugFile.incIdent();
 		}
-
+		
 		try {
 			closeAll();
 			closeIndexes();
 			oRep.ungetConnection(sCnm);
 			if (oFdb!=null) {
-				if (DebugFile.trace) DebugFile.writeln(oFdb.getDatabaseName()+".close()");
+				if (DebugFile.trace) DebugFile.writeln(sCnm+".close()");
 				oFdb.close();
 			}
 			oFdb = null;
 			if (oPdb!=null) {
-				if (DebugFile.trace) DebugFile.writeln(oPdb.getDatabaseName()+".close()");
+				if (DebugFile.trace) DebugFile.writeln(sCnm+".close()");
 				oPdb.close();
 			}
 			oPdb = null;
@@ -399,12 +399,12 @@ public class DBBucket implements Bucket {
 		delete (oPkv, getTransaction());
 	} // delete
 
-	public void truncate() throws JDOException {
+	public void truncate(boolean useTransaction) throws JDOException {
 
 		if (isReadOnly()) throw new JDOException("DBBucket.truncate() database "+name()+" is in read-only mode");
 
 		try {
-			oPdb.truncate(getTransaction(), false);
+			oPdb.truncate(useTransaction ? getTransaction() : null, false);
 		} catch (DeadlockException dlxc) {
 			throw new JDOException(dlxc.getMessage(), dlxc);
 		} catch (Exception xcpt) {

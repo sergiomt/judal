@@ -56,6 +56,7 @@ import com.sleepycat.db.JoinCursor;
 import com.sleepycat.db.JoinConfig;
 import com.sleepycat.db.Database;
 import com.sleepycat.db.LockMode;
+import com.sleepycat.db.Transaction;
 import com.sleepycat.db.DatabaseType;
 import com.sleepycat.db.OperationStatus;
 import com.sleepycat.db.DatabaseEntry;
@@ -84,11 +85,14 @@ public class DBTable extends DBBucket implements IndexableTable {
 	protected DBTable(DBDataSource oDatabaseEnvironment, TableDef oTableDef, String sConnectionName,
 			String sDatabaseName, Database oPrimaryDatabase, HashMap<String, DBIndex> oIndexes,
 			Database oForeignDatabase, StoredClassCatalog oClassCatalog, EntryBinding oEntryBind,
-			Class<? extends Record> cRecordClass) throws JDOException {
+			Class<? extends Record> cRecordClass, boolean useTransaction) throws JDOException {
 
 		super(oDatabaseEnvironment, sConnectionName, sDatabaseName, oPrimaryDatabase, oForeignDatabase, oClassCatalog,
 				oEntryBind);
 
+		if (DebugFile.trace)
+			DebugFile.writeln("new DBTable() "+ sConnectionName+" at "+sDatabaseName);
+		
 		oTbl = oTableDef;
 		oInd = oIndexes;
 		cRecCls = cRecordClass;
@@ -96,7 +100,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 		if (!isReadOnly() && oInd != null && oInd.keySet() != null) {
 			for (String sColumnName : oInd.keySet()) {
-				openIndex(sColumnName);
+				openIndex(sColumnName, useTransaction);
 			} // next
 		} // fi
 	}
@@ -244,7 +248,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 					DBIndex oIdx;
 					oIdx = oInd.get(sColName);
 					if (oIdx.isClosed())
-						openIndex(sColName);
+						openIndex(sColName, getDataSource().isTransactional());
 					oCur = oIdx.getCursor(getTransaction());
 					if (DebugFile.trace)
 						DebugFile.writeln("SecondaryCursor.getSearchKey(DatabaseEntry, DatabaseEntry, LockMode.DEFAULT)");
@@ -279,7 +283,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 						sValue = params[sc].getValue().toString();
 					aIdxs[sc] = oInd.get(params[sc].getName());
 					if (aIdxs[sc].isClosed())
-						openIndex(params[sc].getName());
+						openIndex(params[sc].getName(), getDataSource().isTransactional());
 					aCurs[sc] = aIdxs[sc].getCursor(getTransaction());
 					aOst[sc] = aCurs[sc].getSearchKey(new DatabaseEntry(BytesConverter.toBytes(sValue, Types.VARCHAR)), new DatabaseEntry(), LockMode.DEFAULT);
 				} // next
@@ -613,7 +617,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 					DBIndex oIdx;
 					oIdx = oInd.get(indexColumnName);
 					if (oIdx.isClosed())
-						openIndex(indexColumnName);
+						openIndex(indexColumnName, getDataSource().isTransactional());
 					oCur = oIdx.getCursor(getTransaction());
 				}
 
@@ -812,7 +816,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 			DBIndex oIdx = oInd.get(sIndexColumn);
 			if (oIdx.isClosed())
-				openIndex(sIndexColumn);
+				openIndex(sIndexColumn, getDataSource().isTransactional());
 
 			oCur = oIdx.getCursor(getTransaction());
 
@@ -1026,7 +1030,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 						sValue = params[sc].getValue().toString();
 					aIdxs[sc] = oInd.get(params[sc].getName());
 					if (aIdxs[sc].isClosed())
-						openIndex(params[sc].getName());
+						openIndex(params[sc].getName(), getDataSource().isTransactional());
 					aCurs[sc] = aIdxs[sc].getCursor(getTransaction());
 					aOst[sc] = aCurs[sc].getSearchKey(new DatabaseEntry(BytesConverter.toBytes(sValue, Types.VARCHAR)),
 							new DatabaseEntry(), LockMode.DEFAULT);
@@ -1126,14 +1130,18 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 	@Override
 	public void createIndex(String indexName, boolean unique, Using indexUsing, String... columns) throws JDOException {
-		DBIndex oIdx = openIndex(columns[0]);
+		DBIndex oIdx = openIndex(columns[0], getDataSource().isTransactional());
 		try {
 			oIdx.close();
 		} catch (DatabaseException e) {
+			if (DebugFile.trace) DebugFile.writeln("DatabaseException "+e.getMessage());
+			throw new JDOException(e.getMessage(), e);
 		}
 	}
 
-	public DBIndex openIndex(String sColumnName) throws JDOException {
+	// --------------------------------------------------------------------------
+	
+	public DBIndex openIndex(String sColumnName, boolean useTransaction) throws JDOException {
 
 		if (DebugFile.trace)
 			DebugFile.writeln("openIndex(" + sColumnName + ")");
@@ -1173,13 +1181,14 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 			final String sSecDbPath = getDataSource().getPath() + getDatabase().getDatabaseName() + "." + sColumnName + ".db";
 			final String sSecIdxName = getDatabase().getDatabaseName() + "_" + oIdx.getName();
-
+			Transaction oTrn = useTransaction ? getTransaction() : null;
+			
 			if (DebugFile.trace)
-				DebugFile.writeln("DBIndex.open(openSecondaryDatabase(" + getTransaction() + ", " + sSecDbPath + ", "
+				DebugFile.writeln("DBIndex.open(openSecondaryDatabase(" + oTrn + ", " + sSecDbPath + ", "
 						+ sSecIdxName + ", " + getDatabase() + ", " + oSec + ", " + String.valueOf(isReadOnly())
 						+ "))");
 			
-			oIdx.open(getDataSource().getEnvironment().openSecondaryDatabase(getDataSource().getTransaction(), sSecDbPath, sSecIdxName, getDatabase(), oSec));
+			oIdx.open(getDataSource().getEnvironment().openSecondaryDatabase(oTrn, sSecDbPath, sSecIdxName, getDatabase(), oSec));
 			if (DebugFile.trace)
 				DebugFile.writeln("opened index " + sSecIdxName);
 
@@ -1406,7 +1415,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 					DBIndex oIdx;
 					oIdx = oInd.get(indexColumnName);
 					if (oIdx.isClosed())
-						openIndex(indexColumnName);
+						openIndex(indexColumnName, getDataSource().isTransactional());
 					oCur = oIdx.getCursor(getTransaction());
 				}
 

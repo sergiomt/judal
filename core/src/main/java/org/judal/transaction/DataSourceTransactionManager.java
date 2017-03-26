@@ -65,13 +65,20 @@ public class DataSourceTransactionManager implements TransactionManager {
 	@Override
 	public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
 			SecurityException, IllegalStateException, SystemException {	
+		
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin DataSourceTransactionManager.commit()");
 			DebugFile.incIdent();
 		}
+		
 		requireTransaction("commit");
 		getTransaction().commit();
 		setNewTransaction();
+
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End DataSourceTransactionManager.commit()");
+		}
 	}
 
 	@Override
@@ -97,9 +104,19 @@ public class DataSourceTransactionManager implements TransactionManager {
 
 	@Override
 	public void rollback() throws IllegalStateException, SecurityException, SystemException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin DataSourceTransactionManager.rollback()");
+			DebugFile.incIdent();
+		}
+
 		requireTransaction("rollback");
 		getTransaction().rollback();
 		setNewTransaction();
+
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End DataSourceTransactionManager.rollback()");
+		}
 	}
 
 	@Override
