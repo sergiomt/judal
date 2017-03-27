@@ -980,10 +980,10 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		case Types.BLOB:
 		case Types.LONGVARCHAR:
 		case Types.LONGVARBINARY:
-			maxLength = 2147483647;
+			maxLength = Integer.MAX_VALUE;
 			break;
 		case Types.LONGNVARCHAR:
-			maxLength = 1073741822;
+			maxLength = Integer.MAX_VALUE/ 2;
 			break;
 		case Types.TIME_WITH_TIMEZONE:
 			maxLength = 14;
@@ -997,6 +997,9 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 			break;
 		case Types.TIMESTAMP_WITH_TIMEZONE:
 			maxLength = 30;
+			break;
+		case Types.JAVA_OBJECT:
+			maxLength = Integer.MAX_VALUE;
 			break;
 		default:
 			throw new IllegalArgumentException("Unrecognized SQL type "+String.valueOf(columnType));
