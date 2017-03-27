@@ -50,7 +50,7 @@ public class S3Engine implements Engine<S3DataSource> {
 				if (properties!=null) {
 					Iterator<String> props = properties.keySet().iterator();
 					String propName = props.next();
-					if (!propName.equalsIgnoreCase(DataSource.PASSWORD))
+					if (!propName.equalsIgnoreCase(DataSource.PASSWORD) && !propName.equalsIgnoreCase(DataSource.SECRETKEY))
 						DebugFile.writeln(propName+"="+properties.get(propName));
 				}
 			}

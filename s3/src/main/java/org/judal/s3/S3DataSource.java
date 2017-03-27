@@ -57,12 +57,13 @@ public class S3DataSource implements BucketDataSource {
 	/**
 	 * 
 	 * @param properties Must contain: region, accessKey, secretKey
-	 * @param transactManager
 	 */
 	public S3DataSource(Map<String,String> properties) {
 		props = new HashMap<String,String>(17);
 		props.putAll(properties);
-		as3cli = new AmazonS3Client(new BasicAWSCredentials(props.get(DataSource.USER),props.get(DataSource.PASSWORD)));
+		final String accessKey = props.getOrDefault(DataSource.ACCESSKEY, props.get(DataSource.USER));
+		final String secretKey = props.getOrDefault(DataSource.SECRETKEY, props.get(DataSource.PASSWORD));
+		as3cli = new AmazonS3Client(new BasicAWSCredentials(accessKey,secretKey));
 		as3cli.setRegion(com.amazonaws.regions.Region.getRegion(Regions.fromName(props.get(DataSource.REGION))));
 	}
 
