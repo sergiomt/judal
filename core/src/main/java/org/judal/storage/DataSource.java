@@ -60,6 +60,8 @@ public interface DataSource extends AutoCloseable {
 	
 	boolean inTransaction() throws JDOException;
 	
+    public static final String ACCESSKEY = "accessKey";
+    public static final String SECRETKEY = "secretKey";
     public static final String CONFIG = "config";
     public static final String DRIVER = "driver";
     public static final String DBENV = "dbenvironment";
@@ -88,7 +90,7 @@ public interface DataSource extends AutoCloseable {
     public static String DEFAULT_REGION = "eu-west-1";
     public static String DEFAULT_TRANSACTIONAL = "true";
 	
-    public static final String[] PropertyNames = new String[]{CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL};
+    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL};
 
     public static final String[][] DefaultValues = new String[][]{
     	new String[]{CONNECTIONTIMEOUT,DEFAULT_CONNECTIONTIMEOUT},
