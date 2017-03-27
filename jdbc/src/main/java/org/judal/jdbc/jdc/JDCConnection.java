@@ -802,7 +802,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			else if ((Types.ARRAY==iSQLType) && (oParamValue!=null)) {
 				oStmt.setArray(iParamIndex, toArray(oParamValue));
 			}
-			else if (1111==iSQLType) { // PostgreSQL PGObject (may be interval, geoposition or hstore)
+			else if (Types.OTHER==iSQLType) { // PostgreSQL PGObject (may be interval, geoposition or hstore)
 				if (oParamValue!=null) {
 					if (oParamValue instanceof LatLong) {
 						LatLong oLatLng = (LatLong) oParamValue;
@@ -826,7 +826,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 						Method oSetValue = cPgObj.getMethod("setValue", new Class[]{String.class});
 						oSetValue.invoke(oPgObj, new Object[]{new HStore((Map<String,String>) oParamValue).getValue()});
 						if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " " + oPgObj + " as HSTORE");
-						oStmt.setObject(iParamIndex, oPgObj, 1111);
+						oStmt.setObject(iParamIndex, oPgObj, Types.OTHER);
 					  } catch (ClassNotFoundException cnf) {
 						throw new SQLException("ClassNotFoundException org.postgresql.util.PGobject");
 					  } catch (IllegalAccessException iae) {
