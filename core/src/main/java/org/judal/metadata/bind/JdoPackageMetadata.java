@@ -13,6 +13,7 @@ import org.judal.metadata.MetadataScanner;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.storage.DataSource;
 
+import com.knowgate.debug.DebugFile;
 import com.pureperfect.ferret.ScanFilter;
 import com.pureperfect.ferret.Scanner;
 import com.pureperfect.ferret.vfs.PathElement;
@@ -45,16 +46,32 @@ public class JdoPackageMetadata implements MetadataScanner {
  	}
 
  	public InputStream openStream() throws IOException {
-		Scanner scn = new Scanner();
- 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		Enumeration<URL> urls = cl.getResources(getPackagePath()+"/"+(getFileName()==null ? "metadata.xml" : getFileName()));
-		if (urls.hasMoreElements()) {
-			scn.add(urls.nextElement());
-			PathElement xml = scn.scan(any).iterator().next();
-			return xml.openStream();
-		}  else {
-			return null;
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JdoPackageMetadata.openStream()");
+			DebugFile.incIdent();
 		}
+		InputStream retval;
+ 		Scanner scn = new Scanner();
+ 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		final String resourcePath = getPackagePath()+"/"+(getFileName()==null ? "metadata.xml" : getFileName());
+		if (DebugFile.trace)
+			DebugFile.writeln("ClassLoader.getResources("+resourcePath+")");
+ 		Enumeration<URL> urls = cl.getResources(resourcePath);
+		if (urls.hasMoreElements()) {
+			URL resUrl = urls.nextElement();
+			if (DebugFile.trace)
+				DebugFile.writeln("Scanner.add("+resUrl.toString()+")");
+			scn.add(resUrl);
+			PathElement xml = scn.scan(any).iterator().next();
+			retval = xml.openStream();
+		}  else {
+			retval = null;
+		}
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End JdoPackageMetadata.openStream() : "+retval);
+		}
+		return retval;
  	}
 
 	@Override

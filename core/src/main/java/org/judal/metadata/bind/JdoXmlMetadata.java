@@ -73,6 +73,12 @@ public class JdoXmlMetadata implements MetadataScanner {
 			DebugFile.writeln("Begin JdoXmlMetadata.readMetadata(InputStream)");
 			DebugFile.incIdent();
 		}
+	
+		if (null==in) {
+			DebugFile.writeln("NullPointerException InputStream cannot be null");
+			DebugFile.decIdent();
+			throw new NullPointerException("JdoXmlMetadata.readMetadata() InputStream cannot be null");
+		}
 		
 		SchemaMetaData metadata = new SchemaMetaData();
 
