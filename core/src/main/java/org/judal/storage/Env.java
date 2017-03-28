@@ -53,11 +53,13 @@ public class Env {
 	 * <p>Read DataSource properties from ServletConfig parameters into a Map
 	 * DataSource property names names are listed at DataSource.PropertyNames</p>
 	 * If namespace is not empty then parameter names will be read as namespace.parameterName
-	 * @param cfg ServletConfig
+	 * @param obj ServletConfig
 	 * @param namespace String
 	 * @return Map containing the property name as key and its value at ServletConfig or a default value taken from DataSource interface static variables
+	 * @throws ClassCastException If obj is not an instance of class javax.servlet.ServletConfig
 	 */
-	public static Map<String,String> getDataSourceProperties(ServletConfig cfg, String namespace) {
+	public static Map<String,String> getDataSourcePropertiesFromServletConfig(Object obj, String namespace) throws ClassCastException {
+		ServletConfig cfg = (ServletConfig) obj;
 		Hashtable<String,String> props = new Hashtable<String,String>();
 		if (namespace==null) namespace = "";
 		String prefix = namespace.length()==0 ? "" : namespace + ".";
