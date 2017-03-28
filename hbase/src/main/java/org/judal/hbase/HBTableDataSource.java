@@ -40,7 +40,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringBufferInputStream;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -64,8 +65,7 @@ import javax.transaction.TransactionManager;
  */
 public class HBTableDataSource implements TableDataSource {
 
-	// a constant to convert a fraction to a percentage
-	// HBaseAdmin.getTableDescriptor
+	// A constant to convert a fraction to a percentage
 	private static final int CONVERT_TO_PERCENTAGE = 100;
 
 	private StringBufferInputStream oInStrm1, oInStrm2;
@@ -257,7 +257,7 @@ public class HBTableDataSource implements TableDataSource {
 		try {
 			oAdm = new HBaseAdmin(getConfig());
 			if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+tableName+")");
-			oTds = oAdm.getTableDescriptor(Bytes.toBytes(tableName));
+			oAdm.getTableDescriptor(Bytes.toBytes(tableName));
 			throw new JDOException("HBTableDataSource.createTable() Table "+tableName+" already exists");
 		} catch (TableNotFoundException tnfe) {
 			if (DebugFile.trace) DebugFile.writeln("Creating table "+tableName);
@@ -270,8 +270,17 @@ public class HBTableDataSource implements TableDataSource {
 				if (sFamily.length()==0) 
 					throw new JDOUserException("Family for column "+oCol.getName()+" cannot be empty");
 				if (sFamily.length()==0) sFamily = "default";
-				if (!oTds.hasFamily(Bytes.toBytes(oCol.getFamily())))
-					oTds.addFamily(new HColumnDescriptor(Bytes.toBytes(oCol.getFamily())));
+				if (!oTds.hasFamily(Bytes.toBytes(oCol.getFamily()))) {
+					try {
+						// This raises a NoSuchMethodError
+						// oTds.addFamily(new HColumnDescriptor(Bytes.toBytes(oCol.getFamily())));
+						HColumnDescriptor coldesc = new HColumnDescriptor(Bytes.toBytes(oCol.getFamily()));
+						Method addf = oTds.getClass().getMethod("addFamily", new Class[]{HColumnDescriptor.class});
+						addf.invoke(oTds, coldesc);
+					} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+						throw new JDOException(e.getClass().getName()+" "+e.getMessage()+" probably a compile vs runtime HBase version mistmatch");
+					}
+				}
 			} // next
 			try {
 				oAdm.createTable(oTds);
