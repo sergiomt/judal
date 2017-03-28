@@ -407,8 +407,8 @@ public class HBTable implements Table {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Class<Stored> getCandidateClass() {
-		return (Class<Stored>) oCls;
+	public Class getCandidateClass() {
+		return oCls;
 	}
 
 	@Override
