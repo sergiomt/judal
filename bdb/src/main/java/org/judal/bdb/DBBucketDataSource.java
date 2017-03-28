@@ -81,9 +81,9 @@ public class DBBucketDataSource extends DBDataSource implements BucketDataSource
 			throw new JDOException("Cannot truncate a bucket in the middle of a transaction");
 		Properties props = new Properties();
 		props.put("name",bucketName);
-		DBBucket tbl = openTableOrBucket(props, getKeyValueDef(bucketName), null, false);;
+		DBBucket tbl = openTableOrBucket(props, getKeyValueDef(bucketName), null, true);
 		try {
-			tbl.truncate();
+			tbl.truncate(true);
 		} finally {
 			if (tbl!=null) tbl.close();
 		}
