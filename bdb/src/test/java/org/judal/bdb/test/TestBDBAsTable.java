@@ -59,7 +59,7 @@ public class TestBDBAsTable extends AbstractTableTest {
 		return dts;
 	}
 
-	@Ignore
+	@Test
 	public void test00Pks() throws JDOException, IOException, InstantiationException, IllegalAccessException {
 		File directory = new File(properties.get(DataSource.DBENV));
 		if (directory.exists())
@@ -73,7 +73,7 @@ public class TestBDBAsTable extends AbstractTableTest {
 		}
 	}
 
-	@Ignore
+	@Test
 	public void test01Table() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException {		
 		File directory = new File(properties.get(DataSource.DBENV));
 		if (directory.exists())
@@ -101,7 +101,7 @@ public class TestBDBAsTable extends AbstractTableTest {
 		}
 	}
 
-	@Ignore
+	@Test
 	public void test03Recordset() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 		File directory = new File(properties.get(DataSource.DBENV));
 		if (directory.exists())
@@ -115,7 +115,7 @@ public class TestBDBAsTable extends AbstractTableTest {
 		}
 	}
 
-	@Ignore
+	@Test
 	public void test05Metadata() throws JDOException, IOException, InstantiationException, IllegalAccessException {
 		File directory = new File(properties.get(DataSource.DBENV));
 		if (directory.exists())
