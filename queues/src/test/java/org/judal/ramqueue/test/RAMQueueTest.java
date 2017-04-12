@@ -1,11 +1,11 @@
 package org.judal.ramqueue.test;
 
-import org.junit.Test;
-
 import com.knowgate.debug.Chronometer;
 import org.judal.storage.Env;
 
 import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.Ignore;
 
 import static org.junit.Assert.assertTrue;
 
@@ -22,7 +22,6 @@ import org.judal.storage.EngineFactory;
 import org.judal.storage.Param;
 import org.judal.storage.Table;
 import org.judal.storage.TableDataSource;
-import org.judal.storage.java.test.ArrayRecord1;
 
 import org.judal.ramqueue.RAMQueueProducer;
 
@@ -73,7 +72,7 @@ public class RAMQueueTest {
 		return new ArrayRecord1[]{rec1,rec2,rec3};
 	}
 
-	@Test
+	@Ignore
 	public void test01RamQueueStore() throws JDOException, IllegalStateException, InstantiationException, IllegalAccessException, InterruptedException {
 
 		TableDataSource dts = (TableDataSource) EngineFactory.getEngine("JDBC").getDataSource(properties);
@@ -101,7 +100,7 @@ public class RAMQueueTest {
 		producer.close();		
 	}
 
-	@Test
+	@Ignore
 	public void test01RamQueueInsert() throws JDOException, IllegalStateException, InstantiationException, IllegalAccessException, InterruptedException {
 		TableDataSource dts = (TableDataSource) EngineFactory.getEngine("JDBC").getDataSource(properties);
 		createTable1(dts);
