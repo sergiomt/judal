@@ -33,7 +33,7 @@
     </plugins>
   </build>
   <properties>
-    <skipTests>false</skipTests>
+    <skipTests>true</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <profiles>
