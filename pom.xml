@@ -7,9 +7,24 @@
     <packaging>pom</packaging>
     <name>JVM Universal Data Access Layer</name>
 
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+      </license>
+    </licenses>
+    <developers>
+      <developer>
+        <name>Sergio Montoro Ten</name>
+        <email>sergiom@knowgate.com</email>
+      </developer>
+    </developers>
+
     <scm>
-        <connection>https://github.com/sergiomt/judal.git</connection>
-        <tag>HEAD</tag>
+      <connection>scm:git:git://github.com/sergiomt/judal.git</connection>
+      <developerConnection>scm:git:ssh://github.com/sergiomt/judal.git</developerConnection>
+      <url>https://github.com/sergiomt/judal</url>
     </scm>
 
     <modules>
@@ -22,8 +37,8 @@
         <module>s3</module>
         <module>hbase</module>
         <!--
-		<module>cassandra</module>
-		-->
+        <module>cassandra</module>
+        -->
     </modules>
 
     <properties>

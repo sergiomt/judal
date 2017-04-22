@@ -14,6 +14,12 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+  <developers>
+    <developer>
+      <name>Sergio Montoro Ten</name>
+      <email>sergiom@knowgate.com</email>
+    </developer>
+  </developers>
   <build>
     <plugins>
       <plugin>
@@ -121,7 +127,7 @@
   <dependencies>
     <dependency>
       <groupId>com.knowgate</groupId>
-      <artifactId>base</artifactId>
+      <artifactId>knowgate-base</artifactId>
       <version>9.0</version>
     </dependency>
     <dependency>
