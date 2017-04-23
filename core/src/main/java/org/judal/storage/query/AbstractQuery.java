@@ -456,7 +456,7 @@ public abstract class AbstractQuery implements Query {
 
 	@SuppressWarnings("unchecked")
 	public void setResultClass(Class<? extends Record> resultClass, Class<?>... constructorParameterClasses) {
-		if (null==recordConstructor || null==constructorParameters) {
+		if (null==recordConstructor || null==constructorParameters || null==constructorParameterClasses) {
 			setResultClass(resultClass);
 		} else {
 			this.resultClass = resultClass;

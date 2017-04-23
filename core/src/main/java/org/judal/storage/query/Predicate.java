@@ -61,12 +61,34 @@ public abstract class Predicate implements Part,Serializable {
 	 * Add query part to predicate
 	 * @param oPart QueryPartQueryPart
 	 * @return this QueryPredicate
+	 * @deprecated Use addPart
 	 */
+	@Deprecated
 	public Predicate add (Part oPart) throws UnsupportedOperationException {
+		return addPart(oPart);
+	}
+
+	/**
+	 * Add query part to predicate
+	 * @param oPart QueryPartQueryPart
+	 * @return this QueryPredicate
+	 */
+	public Predicate addPart (Part oPart) throws UnsupportedOperationException {
 		if (null==connective() || NONE.equals(connective()) )
 			throw new UnsupportedOperationException("Cannot add part to a final predicate");
 		oParts.add(oPart);
 		return this;
+	}
+	
+	/**
+	 * Set connective to AND and add query part to predicate
+	 * @param oPart QueryPartQueryPart
+	 * @return this QueryPredicate
+	 * @deprecated Use addPart
+	 */
+	@Deprecated
+	public Predicate and (Part oPart) throws UnsupportedOperationException {
+		return andPart(oPart);
 	}
 
 	/**
@@ -74,7 +96,7 @@ public abstract class Predicate implements Part,Serializable {
 	 * @param oPart QueryPartQueryPart
 	 * @return this QueryPredicate
 	 */
-	public Predicate and (Part oPart) throws UnsupportedOperationException {
+	public Predicate andPart (Part oPart) throws UnsupportedOperationException {
 		if (oConnective.equals(NONE) || oConnective.equals(AND)) {
 			oConnective = AND;
 			oParts.add(oPart);
@@ -83,13 +105,24 @@ public abstract class Predicate implements Part,Serializable {
 		}
 		return this;
 	}
+	
+	/**
+	 * Set connective to OR and add query part to predicate
+	 * @param oPart QueryPartQueryPart
+	 * @return this QueryPredicate
+	 * @deprecated Use orPart
+	 */
+	@Deprecated
+	public Predicate or (Part oPart) throws UnsupportedOperationException {
+		return orPart(oPart);
+	}
 
 	/**
 	 * Set connective to OR and add query part to predicate
 	 * @param oPart QueryPartQueryPart
 	 * @return this QueryPredicate
 	 */
-	public Predicate or (Part oPart) throws UnsupportedOperationException {
+	public Predicate orPart (Part oPart) throws UnsupportedOperationException {
 		if (oConnective.equals(NONE) || oConnective.equals(OR)) {
 			oConnective = OR;
 			oParts.add(oPart);
@@ -98,7 +131,7 @@ public abstract class Predicate implements Part,Serializable {
 		}
 		return this;
 	}
-
+	
 	/**
 	 * Create a query part and add it to predicate
 	 * @param constructorParameters Object... Parameters for the Part constructor
