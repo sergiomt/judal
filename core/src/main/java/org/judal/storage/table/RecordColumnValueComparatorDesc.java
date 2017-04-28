@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 public class RecordColumnValueComparatorDesc extends RecordColumnValueComparatorAsc {
 

@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -18,6 +18,8 @@ import javax.jdo.datastore.Sequence;
 
 import org.judal.metadata.PrimaryKeyDef;
 import org.judal.metadata.TableDef;
+import org.judal.storage.Param;
+import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.queue.RecordQueueProducer;
 
 import com.knowgate.debug.DebugFile;

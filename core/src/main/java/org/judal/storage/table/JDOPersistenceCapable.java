@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
@@ -16,6 +16,8 @@ import javax.jdo.spi.PersistenceCapable;
 import javax.jdo.spi.StateManager;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.storage.ConstraintsChecker;
+import org.judal.storage.DataSource;
 
 import com.knowgate.currency.Money;
 import com.knowgate.gis.LatLong;

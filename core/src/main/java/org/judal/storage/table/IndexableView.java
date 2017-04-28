@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -12,24 +12,13 @@ package org.judal.storage;
  */
 
 import javax.jdo.JDOException;
-import javax.jdo.metadata.PrimaryKeyMetadata;
 
-/**
- * 
- * @author Sergio Montoro Ten
- * @version 1.0
- */
-public interface Table extends Bucket, View {
+import org.judal.storage.Param;
 
-	String getTimestampColumnName ();
-	
-	void setTimestampColumnName(String columnName) throws IllegalArgumentException;
+import javax.jdo.FetchGroup;
 
-	/**
-	 * @return PrimaryKeyMetadata
-	 */
-	PrimaryKeyMetadata getPrimaryKey();
-	
-	void insert(Param... params) throws JDOException;
+public interface IndexableView extends View {
+
+	<R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, int maxrows, int offset, Param... params) throws JDOException;
 
 }

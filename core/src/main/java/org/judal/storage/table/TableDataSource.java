@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -18,6 +18,7 @@ import javax.jdo.JDOException;
 
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
+import org.judal.storage.DataSource;
 
 /**
  * 

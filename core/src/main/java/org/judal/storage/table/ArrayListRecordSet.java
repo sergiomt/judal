@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,11 +21,6 @@ import java.util.List;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.PersistenceManager;
-
-import org.judal.storage.Record;
-import org.judal.storage.RecordColumnValueComparatorAsc;
-import org.judal.storage.RecordColumnValueComparatorDesc;
-import org.judal.storage.RecordSet;
 
 import com.knowgate.debug.DebugFile;
 

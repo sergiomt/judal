@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table.impl;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -26,10 +26,14 @@ import java.util.Iterator;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.serialization.BytesConverter;
-import org.judal.storage.ColumnGroup;
-import org.judal.storage.Record;
-import org.judal.storage.Table;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.ConstraintsChecker;
+import org.judal.storage.DataSource;
+import org.judal.storage.EngineFactory;
+import org.judal.storage.FieldHelper;
+import org.judal.storage.table.ColumnGroup;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.Table;
+import org.judal.storage.table.TableDataSource;
 
 import com.knowgate.currency.Money;
 import com.knowgate.debug.DebugFile;

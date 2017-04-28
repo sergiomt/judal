@@ -1,8 +1,9 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 import javax.jdo.JDOException;
 
 import org.judal.metadata.IndexDef.Using;
+import org.judal.storage.Param;
 
 public interface IndexableTable extends Table, IndexableView {
 

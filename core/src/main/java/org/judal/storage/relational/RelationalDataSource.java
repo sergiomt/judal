@@ -1,8 +1,11 @@
-package org.judal.storage;
+package org.judal.storage.relational;
 
 import java.util.Map.Entry;
 
 import javax.jdo.JDOException;
+
+import org.judal.storage.table.Record;
+import org.judal.storage.table.TableDataSource;
 
 public interface RelationalDataSource extends TableDataSource {
 

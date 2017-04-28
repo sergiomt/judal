@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -15,6 +15,8 @@ import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.storage.Param;
+import org.judal.storage.keyvalue.ReadOnlyBucket;
 
 public interface View extends ReadOnlyBucket {
 	  

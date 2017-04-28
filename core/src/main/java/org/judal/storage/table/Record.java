@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.table;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -25,6 +25,8 @@ import java.util.Locale;
 import javax.jdo.FetchGroup;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.storage.ConstraintsChecker;
+import org.judal.storage.keyvalue.Stored;
 
 import com.knowgate.currency.Money;
 import com.knowgate.gis.LatLong;
