@@ -22,14 +22,14 @@ import javax.jms.JMSException;
 
 import org.judal.storage.Engine;
 import org.judal.storage.EngineFactory;
-import org.judal.storage.IndexableTable;
 import org.judal.storage.DataSource;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
-import org.judal.storage.Table;
 import org.judal.storage.queue.RecordQueueConsumer;
 import org.judal.storage.queue.RecordQueueProducer;
+import org.judal.storage.table.IndexableTable;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.Table;
+import org.judal.storage.table.TableDataSource;
 
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;

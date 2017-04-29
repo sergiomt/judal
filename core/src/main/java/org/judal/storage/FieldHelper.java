@@ -14,6 +14,8 @@ package org.judal.storage;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
+import org.judal.storage.table.Record;
+
 import com.knowgate.gis.LatLong;
 
 public interface FieldHelper {

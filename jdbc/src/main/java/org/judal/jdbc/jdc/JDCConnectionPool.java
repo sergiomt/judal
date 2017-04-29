@@ -33,13 +33,14 @@ import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 
 import org.judal.jdbc.RDBMS;
-import org.judal.storage.TableDataSource;
+
 import javax.jdo.JDOException;
 
 import com.knowgate.debug.Chronometer;
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;
 import org.judal.storage.Env;
+import org.judal.storage.table.TableDataSource;
 
 
 /**

@@ -23,8 +23,8 @@ import javax.jdo.JDOException
 import org.judal.metadata.TableDef
 import org.judal.metadata.ColumnDef
 import org.judal.serialization.BytesConverter
-import org.judal.storage.AbstractRecord
-import org.judal.storage.TableDataSource
+import org.judal.storage.table.impl.AbstractRecord
+import org.judal.storage.table.TableDataSource
 
 import scala.collection.Set
 import scala.collection.mutable.DefaultEntry

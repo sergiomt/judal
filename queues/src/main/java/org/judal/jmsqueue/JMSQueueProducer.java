@@ -46,8 +46,8 @@ import java.util.Properties;
 
 import org.judal.jms.ObjectMessageImpl;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
 import org.judal.storage.queue.RecordQueueProducer;
+import org.judal.storage.table.Record;
 
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;

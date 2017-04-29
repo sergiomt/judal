@@ -20,9 +20,8 @@ import javax.jdo.JDOException;
 
 import org.judal.storage.EngineFactory;
 import org.judal.storage.Param;
-import org.judal.storage.Table;
-import org.judal.storage.TableDataSource;
-
+import org.judal.storage.table.Table;
+import org.judal.storage.table.TableDataSource;
 import org.judal.ramqueue.RAMQueueProducer;
 
 import static org.junit.Assert.assertTrue;

@@ -14,6 +14,9 @@ package org.judal.storage;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.Record;
+
 import com.knowgate.debug.DebugFile;
 
 import com.knowgate.typeutils.ObjectFactory;

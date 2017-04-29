@@ -5,8 +5,8 @@ import java.sql.Types;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.TableDef;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.java.ArrayRecord;
+import org.judal.storage.table.TableDataSource;
 
 
 public class Job extends ArrayRecord {

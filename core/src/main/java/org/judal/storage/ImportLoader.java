@@ -3,6 +3,7 @@ package org.judal.storage;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnList;
+import org.judal.storage.table.Table;
 
 /**
  * Interface for performing bulk loads into tables

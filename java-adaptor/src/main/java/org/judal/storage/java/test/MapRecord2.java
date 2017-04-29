@@ -8,8 +8,8 @@ import javax.jdo.JDOException;
 
 import org.judal.metadata.TableDef;
 import org.judal.metadata.IndexDef.Type;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.java.MapRecord;
+import org.judal.storage.table.TableDataSource;
 
 public class MapRecord2 extends MapRecord implements TestRecord2 {
 

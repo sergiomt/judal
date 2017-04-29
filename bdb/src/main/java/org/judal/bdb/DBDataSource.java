@@ -35,7 +35,7 @@ import javax.transaction.xa.XAResource;
 
 import org.judal.storage.DataSource;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
+import org.judal.storage.table.Record;
 import org.judal.transaction.DataSourceTransaction;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;

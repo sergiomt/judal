@@ -14,11 +14,11 @@ package org.judal.jms;
 
 import javax.jms.ObjectMessage;
 
-import org.judal.storage.IndexableTable;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
-import org.judal.storage.Table;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.IndexableTable;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.Table;
+import org.judal.storage.table.TableDataSource;
 
 import java.io.IOException;
 import java.io.Serializable;

@@ -1,8 +1,9 @@
 package org.judal.storage.scala.postgresql
 
 import java.lang.Iterable
-import java.util.Date
 import java.lang.reflect.Constructor
+
+import java.util.Date
 
 import java.sql.Timestamp
 import java.sql.SQLException
@@ -13,7 +14,7 @@ import scala.collection.mutable.HashMap
 import com.knowgate.gis.LatLong
 import com.knowgate.stringutils.Str
 
-import org.judal.storage.Record
+import org.judal.storage.table.Record
 import org.judal.storage.FieldHelper
 
 class PostgreSQLFieldHelper extends FieldHelper {

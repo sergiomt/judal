@@ -14,25 +14,19 @@ package org.judal.jdbc;
 
 import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Iterator;
-import java.util.LinkedList;
 
-import org.apache.poi.hssf.record.ArrayRecord;
 import org.judal.jdbc.metadata.SQLIndex;
 import org.judal.metadata.IndexDef.Using;
-import org.judal.storage.RelationalTable;
-import org.judal.storage.Stored;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Operator;
 import org.judal.storage.query.Predicate;
-import org.judal.storage.query.sql.SQLAndPredicate;
 import org.judal.storage.query.sql.SQLQuery;
+import org.judal.storage.relational.RelationalTable;
+import org.judal.storage.table.Record;
 
 import javax.jdo.JDOException;
 import javax.jdo.metadata.PrimaryKeyMetadata;

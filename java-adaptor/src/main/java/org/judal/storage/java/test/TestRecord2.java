@@ -2,7 +2,7 @@ package org.judal.storage.java.test;
 
 import java.util.Date;
 
-import org.judal.storage.Record;
+import org.judal.storage.table.Record;
 
 public interface TestRecord2 extends Record {
 

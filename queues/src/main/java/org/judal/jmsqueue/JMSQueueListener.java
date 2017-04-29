@@ -26,10 +26,10 @@ import javax.jms.TemporaryQueue;
 import javax.jms.MessageProducer;
 import javax.jms.MessageListener;
 
-import org.judal.storage.TableDataSource;
-import org.judal.storage.IndexableTable;
+import org.judal.storage.table.IndexableTable;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.TableDataSource;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
 import org.judal.storage.EngineFactory;
 
 import com.knowgate.debug.DebugFile;

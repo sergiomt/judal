@@ -16,13 +16,13 @@ import java.util.Map;
 import org.judal.jdbc.JDBCBucketDataSource;
 import org.judal.jdbc.JDBCEngine;
 import org.judal.jdbc.JDBCTableDataSource;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.DataSource;
 import javax.jdo.JDOException;
 import javax.transaction.SystemException;
 
-import org.judal.storage.Stored;
 import org.judal.storage.java.test.AbstractBucketTest;
+import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.TableDataSource;
 import org.judal.serialization.BytesConverter;
 
 public class TestJDBCAsBucket extends AbstractBucketTest {

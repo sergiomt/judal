@@ -29,10 +29,10 @@ import javax.jdo.JDOUserException;
 import javax.jdo.JDOUnsupportedOptionException;
 
 import org.judal.metadata.TableDef;
-import org.judal.storage.AbstractRecord;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.FieldHelper;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.TableDataSource;
+import org.judal.storage.table.impl.AbstractRecord;
 
 public class PojoRecord extends AbstractRecord implements JavaRecord {
 

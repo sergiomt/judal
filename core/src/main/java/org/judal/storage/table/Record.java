@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -84,6 +84,8 @@ public interface Record extends Serializable, Stored {
 	double getDouble(String colname) throws NullPointerException, ClassCastException, NumberFormatException;
 
 	String getDoubleFormated(String colname, String sPattern) throws ClassCastException,NumberFormatException,NullPointerException,IllegalArgumentException;
+
+	Calendar getCalendar(String colname);
 
 	Date getDate(String colname);
 

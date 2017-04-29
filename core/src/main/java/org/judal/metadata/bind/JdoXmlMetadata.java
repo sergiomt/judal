@@ -24,7 +24,7 @@ import org.judal.metadata.PrimaryKeyDef;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.TableDataSource;
 
 import com.sun.java.xml.ns.jdo.jdo.Jdo;
 import com.sun.java.xml.ns.jdo.jdo._Class;

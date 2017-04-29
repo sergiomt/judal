@@ -1,4 +1,4 @@
-package org.judal.storage;
+package org.judal.storage.keyvalue;
 
 /**
  * This file is licensed under the Apache License version 2.0.

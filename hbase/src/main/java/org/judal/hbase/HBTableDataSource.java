@@ -24,14 +24,14 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.VersionInfo;
 
 import com.knowgate.debug.DebugFile;
-import com.knowgate.io.LocalFile;
+import com.knowgate.io.FileUtils;
 
-import org.judal.storage.TableDataSource;
-import org.judal.storage.View;
-import org.judal.storage.IndexableTable;
-import org.judal.storage.IndexableView;
+import org.judal.storage.table.IndexableTable;
+import org.judal.storage.table.IndexableView;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.TableDataSource;
+import org.judal.storage.table.View;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
@@ -167,7 +167,8 @@ public class HBTableDataSource implements TableDataSource {
 			File oFle = new File(sPath+"hbase-default.xml");
 			if (oFle.exists()) {
 				if (DebugFile.trace) DebugFile.writeln("parsing hbase-default.xml");
-				String sDefaults = new LocalFile(sPath+"hbase-default.xml").readIntoString("ISO8859_1");
+				
+				String sDefaults = FileUtils.readFileToString(new File(sPath+"hbase-default.xml"), "ISO8859_1");
 				oInStrm1 = new StringBufferInputStream(sDefaults);
 				oCfg.addResource(oInStrm1);
 				if (DebugFile.trace) DebugFile.writeln("checkDefaultsVersion");
@@ -180,7 +181,7 @@ public class HBTableDataSource implements TableDataSource {
 			oFle = new File(sPath+"hbase-site.xml");
 			if (oFle.exists()) {
 				if (DebugFile.trace) DebugFile.writeln("parsing hbase-site.xml");
-				String sConfig = new LocalFile(sPath+"hbase-site.xml").readIntoString("ISO8859_1");
+				String sConfig = FileUtils.readFileToString(new File(sPath+"hbase-site.xml"), "ISO8859_1");
 				oInStrm2 = new StringBufferInputStream(new String(sConfig));
 				oCfg.addResource(oInStrm2);
 				if (DebugFile.trace) DebugFile.writeln("checkForClusterFreeMemoryLimit");

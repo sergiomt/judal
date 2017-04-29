@@ -15,15 +15,15 @@ import org.judal.jdbc.JDBCEngine;
 import org.judal.jdbc.JDBCRelationalView;
 import org.judal.metadata.JoinDef;
 import org.judal.metadata.TableDef;
-import org.judal.storage.ColumnGroup;
-import org.judal.storage.IndexableView;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.java.ArrayRecord;
 import org.judal.storage.java.MapRecord;
 import org.judal.storage.query.*;
 import org.judal.storage.query.sql.SQLAndPredicate;
 import org.judal.storage.query.sql.SQLOrPredicate;
 import org.judal.storage.query.sql.SQLQuery;
+import org.judal.storage.table.ColumnGroup;
+import org.judal.storage.table.IndexableView;
+import org.judal.storage.table.TableDataSource;
 import org.judal.storage.java.test.Job;
 import org.judal.storage.java.test.AdhocMailing;
 

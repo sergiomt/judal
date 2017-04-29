@@ -9,7 +9,7 @@ import javax.jdo.JDOException;
 
 import org.judal.metadata.TableDef;
 import org.judal.metadata.IndexDef.Type;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.TableDataSource;
 
 public class ArrayRecord1 extends ArrayRecord {
 

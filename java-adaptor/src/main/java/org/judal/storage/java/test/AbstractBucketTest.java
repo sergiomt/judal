@@ -10,13 +10,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 import org.judal.serialization.BytesConverter;
-import org.judal.storage.Bucket;
-import org.judal.storage.BucketDataSource;
+
 import javax.jdo.JDOException;
 import javax.transaction.Status;
 import javax.transaction.SystemException;
 
-import org.judal.storage.Stored;
+import org.judal.storage.keyvalue.Bucket;
+import org.judal.storage.keyvalue.BucketDataSource;
+import org.judal.storage.keyvalue.Stored;
 
 public abstract class AbstractBucketTest {
 

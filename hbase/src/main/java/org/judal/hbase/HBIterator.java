@@ -17,9 +17,9 @@ import java.util.Iterator;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
-import org.judal.storage.Record;
 import org.judal.storage.StorageObjectFactory;
-import org.judal.storage.Stored;
+import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.Record;
 import org.judal.serialization.BytesConverter;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;

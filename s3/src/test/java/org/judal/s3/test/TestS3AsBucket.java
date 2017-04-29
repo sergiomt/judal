@@ -14,8 +14,8 @@ import org.judal.storage.DataSource;
 import javax.jdo.JDOException;
 import javax.transaction.SystemException;
 
-import org.judal.storage.Stored;
 import org.judal.storage.java.test.AbstractBucketTest;
+import org.judal.storage.keyvalue.Stored;
 import org.judal.serialization.BytesConverter;
 
 import org.judal.s3.S3Engine;

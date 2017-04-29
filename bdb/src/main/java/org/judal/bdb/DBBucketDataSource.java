@@ -22,8 +22,8 @@ import javax.jdo.JDOException;
 import javax.transaction.TransactionManager;
 
 import org.judal.metadata.IndexDef.Type;
+import org.judal.storage.keyvalue.BucketDataSource;
 import org.judal.metadata.TableDef;
-import org.judal.storage.BucketDataSource;
 
 import com.sleepycat.db.DatabaseException;
 

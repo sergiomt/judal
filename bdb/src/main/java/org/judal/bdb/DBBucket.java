@@ -37,9 +37,9 @@ import com.knowgate.debug.StackTraceUtil;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.PrimaryKeyDef;
 import org.judal.serialization.BytesConverter;
-import org.judal.storage.Bucket;
 import org.judal.storage.Param;
-import org.judal.storage.Stored;
+import org.judal.storage.keyvalue.Bucket;
+import org.judal.storage.keyvalue.Stored;
 
 public class DBBucket implements Bucket {
 

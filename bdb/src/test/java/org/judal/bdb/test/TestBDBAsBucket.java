@@ -16,8 +16,8 @@ import javax.transaction.SystemException;
 import org.judal.bdb.DBBucketDataSource;
 import org.judal.bdb.DBDataSource;
 import org.judal.bdb.DBEngine;
-import org.judal.storage.Stored;
 import org.judal.storage.java.test.AbstractBucketTest;
+import org.judal.storage.keyvalue.Stored;
 import org.judal.serialization.BytesConverter;
 
 public class TestBDBAsBucket extends AbstractBucketTest {

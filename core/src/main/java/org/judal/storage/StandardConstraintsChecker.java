@@ -19,6 +19,7 @@ import javax.jdo.JDOException;
 import javax.jdo.datastore.Sequence;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.storage.table.Record;
 
 import com.knowgate.debug.DebugFile;
 import com.knowgate.stringutils.Slugs;

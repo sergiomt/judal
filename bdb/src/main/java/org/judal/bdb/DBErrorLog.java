@@ -20,10 +20,11 @@ import javax.jms.Message;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef.Type;
 import org.judal.metadata.TableDef;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.ErrorCode;
 import org.judal.storage.java.MapRecord;
-import org.judal.storage.Table;
+import org.judal.storage.table.Table;
+import org.judal.storage.table.TableDataSource;
+
 import com.knowgate.stringutils.Uid;
 
 public class DBErrorLog extends MapRecord {

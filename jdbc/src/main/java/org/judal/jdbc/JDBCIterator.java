@@ -23,8 +23,8 @@ import java.util.Iterator;
 import javax.jdo.JDOException;
 
 import org.judal.jdbc.metadata.SQLTableDef;
-import org.judal.storage.Record;
-import org.judal.storage.Stored;
+import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.Record;
 
 public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 

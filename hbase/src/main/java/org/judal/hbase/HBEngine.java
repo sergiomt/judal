@@ -24,6 +24,7 @@ import org.judal.storage.DataSource;
 import org.judal.storage.Engine;
 import org.judal.storage.EngineFactory;
 import org.judal.storage.Env;
+import org.judal.storage.table.TableDataSource;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.bind.JdoPackageMetadata;
 import org.judal.metadata.bind.JdoXmlMetadata;
@@ -33,7 +34,7 @@ import org.judal.metadata.bind.JdoXmlMetadata;
  * @author Sergio Montoro Ten
  *
  */
-public class HBEngine implements Engine<HBTableDataSource> {
+public class HBEngine implements Engine<TableDataSource> {
 
 	@Override
 	public HBTableDataSource getDataSource(Map<String, String> properties) throws JDOException {

@@ -12,6 +12,8 @@ package org.judal.storage.table.impl;
  */
 
 import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -44,6 +46,7 @@ import static com.knowgate.typeutils.TypeResolver.ClassLangString;
 import static com.knowgate.typeutils.TypeResolver.ClassSQLDate;
 import static com.knowgate.typeutils.TypeResolver.ClassTimestamp;
 import static com.knowgate.typeutils.TypeResolver.ClassUtilDate;
+import static com.knowgate.typeutils.TypeResolver.ClassCalendar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -316,6 +319,45 @@ public abstract class AbstractRecord implements Record {
 	/**
 	 * <p>Get value for a DATETIME field<p>
 	 * @param sKey Field Name
+	 * @return Calendar value or <b>null</b>.
+	 * @throws ClassCastException if sKey field is not of type DATETIME
+	 */
+	@SuppressWarnings("deprecation")
+	@Override
+	public Calendar getCalendar(String sKey) throws ClassCastException {
+		Calendar cDt = null;
+		Object oDt = apply(sKey);
+		if (null!=oDt) {
+			if (oDt.getClass().equals(ClassUtilDate)) {
+				cDt = new GregorianCalendar();
+				cDt.setTime((java.util.Date) oDt);	
+			}
+			else if (oDt.getClass().equals(ClassTimestamp)) {
+				cDt = new GregorianCalendar();
+				cDt.setTimeInMillis(((java.sql.Timestamp) oDt).getTime());
+			}
+			else if (oDt.getClass().equals(ClassSQLDate)) {
+				cDt = new GregorianCalendar();
+				cDt.set(((java.sql.Date) oDt).getYear(), ((java.sql.Date) oDt).getMonth(), ((java.sql.Date) oDt).getDate());
+			}
+			else if (oDt.getClass().equals(ClassCalendar)) {
+				cDt = (java.util.Calendar) oDt;
+			}
+			else if (oDt.getClass().equals(ClassLangString)) {
+				try {
+					cDt = new GregorianCalendar();
+					cDt.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse((String) oDt));
+				} catch (java.text.ParseException pe) {
+					throw new ClassCastException("Cannot parse Date " + oDt);
+				}
+			}
+		}
+		return cDt;
+	} // getCalendar
+
+	/**
+	 * <p>Get value for a DATETIME field<p>
+	 * @param sKey Field Name
 	 * @return Date value or <b>null</b>.
 	 * @throws ClassCastException if sKey field is not of type DATETIME
 	 */
@@ -331,6 +373,8 @@ public abstract class AbstractRecord implements Record {
 				dDt = new java.util.Date(((java.sql.Timestamp) oDt).getTime());
 			else if (oDt.getClass().equals(ClassSQLDate))
 				dDt = new java.util.Date(((java.sql.Date) oDt).getYear(), ((java.sql.Date) oDt).getMonth(), ((java.sql.Date) oDt).getDate());
+			else if (oDt.getClass().equals(ClassCalendar))
+				dDt = ((java.util.Calendar) oDt).getTime();
 			else if (oDt.getClass().equals(ClassLangString)) {
 				try {
 					dDt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse((String) oDt);    	  

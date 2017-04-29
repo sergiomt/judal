@@ -1,6 +1,6 @@
 package org.judal.storage.scala
 
-import org.judal.storage.Record
+import org.judal.storage.table.Record
 
 import scala.collection.mutable.Map
 

@@ -13,11 +13,10 @@ import javax.jdo.JDOUserException;
 import org.judal.jdbc.JDBCEngine;
 import org.judal.jdbc.JDBCTableDataSource;
 import org.judal.jdbc.RDBMS;
-import org.judal.storage.Table;
 import org.judal.storage.java.ArrayRecord;
 import org.judal.storage.java.MapRecord;
 import org.judal.storage.java.postgresql.PostgreSQLFieldHelper;
-
+import org.judal.storage.table.Table;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;

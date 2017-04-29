@@ -37,15 +37,15 @@ import com.knowgate.debug.DebugFile;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
 import org.judal.serialization.BytesConverter;
-import org.judal.storage.TableDataSource;
-import org.judal.storage.ArrayListRecordSet;
+import org.judal.storage.keyvalue.ReadOnlyBucket;
+import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.ArrayListRecordSet;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
+import org.judal.storage.table.Table;
+import org.judal.storage.table.TableDataSource;
 import org.judal.storage.Param;
-import org.judal.storage.ReadOnlyBucket;
-import org.judal.storage.Record;
 import org.judal.storage.StorageObjectFactory;
-import org.judal.storage.RecordSet;
-import org.judal.storage.Stored;
-import org.judal.storage.Table;
 
 public class HBTable implements Table {
 

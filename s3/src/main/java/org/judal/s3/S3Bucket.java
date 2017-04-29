@@ -35,8 +35,8 @@ import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
-import org.judal.storage.Stored;
-import org.judal.storage.Bucket;
+import org.judal.storage.keyvalue.Bucket;
+import org.judal.storage.keyvalue.Stored;
 
 /**
  * Implementation of Bucket interface for Amazon S3

@@ -17,7 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Map;
 
-import org.judal.storage.Record;
+import org.judal.storage.table.Record;
 
 public interface JavaRecord extends Record, Map<String,Object> {
 

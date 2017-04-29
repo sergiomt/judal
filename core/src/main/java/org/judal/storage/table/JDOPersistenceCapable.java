@@ -6,8 +6,10 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+
 import java.util.Date;
 import java.util.Locale;
+import java.util.Calendar;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
@@ -309,6 +311,12 @@ public class JDOPersistenceCapable implements JDORecord {
 	@Override
 	public String getDoubleFormated(String colname, String sPattern)
 			throws ClassCastException, NumberFormatException, NullPointerException, IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Calendar getCalendar(String colname) {
 		// TODO Auto-generated method stub
 		return null;
 	}

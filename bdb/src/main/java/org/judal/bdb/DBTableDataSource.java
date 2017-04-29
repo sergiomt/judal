@@ -18,12 +18,12 @@ import javax.transaction.TransactionManager;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
-import org.judal.storage.IndexableTable;
-import org.judal.storage.IndexableView;
 import org.judal.storage.java.MapRecord;
-import org.judal.storage.Record;
-import org.judal.storage.TableDataSource;
-import org.judal.storage.View;
+import org.judal.storage.table.IndexableTable;
+import org.judal.storage.table.IndexableView;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.TableDataSource;
+import org.judal.storage.table.View;
 
 import com.knowgate.debug.DebugFile;
 import com.sleepycat.db.DatabaseException;

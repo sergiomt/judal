@@ -13,18 +13,18 @@ import org.judal.transaction.DataSourceTransactionManager;
 public class JDBCEngine implements Engine<JDBCTableDataSource> {
 
 	@Override
-	public JDBCTableDataSource getDataSource(Map<String, String> properties) throws JDOException {
+	public JDBCRelationalDataSource getDataSource(Map<String, String> properties) throws JDOException {
 		try {
-			return new JDBCTableDataSource(properties, getTransactionManager());
+			return new JDBCRelationalDataSource(properties, getTransactionManager());
 		} catch (Exception xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
 	}
 
 	@Override
-	public JDBCTableDataSource getDataSource(Map<String, String> properties, TransactionManager transactManager) throws JDOException {
+	public JDBCRelationalDataSource getDataSource(Map<String, String> properties, TransactionManager transactManager) throws JDOException {
 		try {
-			return new JDBCTableDataSource(properties, transactManager);
+			return new JDBCRelationalDataSource(properties, transactManager);
 		} catch (Exception xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}

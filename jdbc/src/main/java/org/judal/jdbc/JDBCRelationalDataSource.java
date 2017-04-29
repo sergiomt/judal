@@ -6,10 +6,10 @@ import java.util.Map;
 import javax.jdo.JDOException;
 import javax.transaction.TransactionManager;
 
-import org.judal.storage.Record;
-import org.judal.storage.RelationalDataSource;
-import org.judal.storage.RelationalTable;
-import org.judal.storage.RelationalView;
+import org.judal.storage.relational.RelationalDataSource;
+import org.judal.storage.relational.RelationalTable;
+import org.judal.storage.relational.RelationalView;
+import org.judal.storage.table.Record;
 
 public class JDBCRelationalDataSource extends JDBCTableDataSource implements RelationalDataSource {
 

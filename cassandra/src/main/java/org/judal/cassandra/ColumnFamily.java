@@ -50,12 +50,12 @@ import static org.judal.cassandra.ColumnConverter.*;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef.Using;
 import org.judal.serialization.BytesConverter;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.IndexableTable;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
+import org.judal.storage.table.TableDataSource;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
-import org.judal.storage.RecordSet;
-import org.judal.storage.Stored;
-import org.judal.storage.IndexableTable;
+import org.judal.storage.keyvalue.Stored;
 
 public class ColumnFamily implements IndexableTable {
 
@@ -67,7 +67,7 @@ public class ColumnFamily implements IndexableTable {
 	private String sName;
 	private String sTimestampColumname;
 	Class<? extends Record> oResultClass;
-	Class<Stored> oCandidateClass;
+	Class<? extends Stored> oCandidateClass;
 	
 	public ColumnFamily(KeySpace oKsp, String sColumnFamily) {
 		sName = sColumnFamily;
@@ -385,11 +385,11 @@ public class ColumnFamily implements IndexableTable {
 
 	@Override
 	public Class<Stored> getCandidateClass() {
-		return oCandidateClass;
+		return (Class<Stored>) oCandidateClass;
 	}
 
 	@Override
-	public void setClass(Class<Stored> candidateClass) {
+	public void setClass(Class<? extends Stored> candidateClass) {
 		oCandidateClass = candidateClass;		
 	}
 

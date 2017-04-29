@@ -17,10 +17,10 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.sql.Types;
 
 import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.knowgate.stringutils.Base64Encoder;
 
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
@@ -185,10 +185,10 @@ public class S3Record extends MapRecord {
 				MessageDigest oMsgd = MessageDigest.getInstance("MD5");
 				Object oCnt = get(content);
 				if (oCnt instanceof byte[]) {
-					oMDat.setContentMD5(Base64Encoder.encode(oMsgd.digest((byte[]) oCnt)));
+					oMDat.setContentMD5(Base64.getEncoder().encodeToString(oMsgd.digest((byte[]) oCnt)));
 				} else if (oCnt instanceof String) {
 					try {
-						oMDat.setContentMD5(Base64Encoder.encode(oMsgd.digest(((String)oCnt).getBytes("UTF8"))));
+						oMDat.setContentMD5(Base64.getEncoder().encodeToString(oMsgd.digest(((String)oCnt).getBytes("UTF8"))));
 					} catch (UnsupportedEncodingException neverthrown) { }
 				} else {
 					oMDat.setContentMD5(null);

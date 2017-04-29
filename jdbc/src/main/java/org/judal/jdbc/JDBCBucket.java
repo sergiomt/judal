@@ -30,16 +30,16 @@ import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
-import org.judal.storage.Bucket;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
-import org.judal.storage.Stored;
-import org.judal.storage.AbstractRecord;
+import org.judal.storage.keyvalue.Bucket;
+import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.impl.AbstractRecord;
 
 import com.knowgate.debug.DebugFile;
 

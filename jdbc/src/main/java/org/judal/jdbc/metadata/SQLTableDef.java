@@ -52,7 +52,7 @@ import org.judal.metadata.Scriptable;
 import org.judal.metadata.IndexDef.Type;
 import org.judal.metadata.TableDef;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
+import org.judal.storage.table.Record;
 
 
 /**

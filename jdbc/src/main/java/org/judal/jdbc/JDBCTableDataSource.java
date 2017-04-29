@@ -18,9 +18,8 @@ import org.judal.metadata.JoinDef;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
-
-import org.judal.storage.Record;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.TableDataSource;
 
 import com.knowgate.debug.DebugFile;
 

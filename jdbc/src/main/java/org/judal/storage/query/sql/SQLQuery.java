@@ -25,13 +25,13 @@ import javax.jdo.JDOException;
 
 import org.judal.jdbc.JDBCRelationalView;
 import org.judal.jdbc.RDBMS;
-import org.judal.storage.ArrayListRecordSet;
-import org.judal.storage.Record;
 import org.judal.storage.StorageObjectFactory;
-import org.judal.storage.RecordSet;
-import org.judal.storage.IndexableView;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
+import org.judal.storage.table.ArrayListRecordSet;
+import org.judal.storage.table.IndexableView;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
 
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;

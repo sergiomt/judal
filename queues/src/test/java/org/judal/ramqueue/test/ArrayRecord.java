@@ -42,11 +42,10 @@ import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
 
 import org.judal.serialization.BytesConverter;
-
-import org.judal.storage.AbstractRecord;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.FieldHelper;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.TableDataSource;
+import org.judal.storage.table.impl.AbstractRecord;
 
 import com.knowgate.typeutils.TypeResolver;
 

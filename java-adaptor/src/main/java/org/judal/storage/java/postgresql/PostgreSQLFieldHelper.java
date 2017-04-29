@@ -24,8 +24,8 @@ import com.knowgate.arrayutils.Arr;
 import com.knowgate.gis.LatLong;
 import com.knowgate.stringutils.Str;
 
-import org.judal.storage.Record;
 import org.judal.storage.FieldHelper;
+import org.judal.storage.table.Record;
 /**
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.

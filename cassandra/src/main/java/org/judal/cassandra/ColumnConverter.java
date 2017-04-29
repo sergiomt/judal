@@ -34,7 +34,7 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.Row;
 
 import org.judal.metadata.ColumnDef;
-import org.judal.storage.Record;
+import org.judal.storage.table.Record;
 
 public class ColumnConverter {
 

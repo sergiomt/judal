@@ -19,8 +19,8 @@ import org.judal.jdbc.test.TestJDBC;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.java.test.ArrayRecord1;
+import org.judal.storage.table.TableDataSource;
 
 public class TestJdcXmlParsing {
 

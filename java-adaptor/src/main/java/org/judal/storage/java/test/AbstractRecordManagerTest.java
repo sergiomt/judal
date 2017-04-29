@@ -7,8 +7,8 @@ import java.rmi.RemoteException;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
 
-import org.judal.storage.RecordManager;
-import org.judal.storage.TableDataSource;
+import org.judal.storage.table.RecordManager;
+import org.judal.storage.table.TableDataSource;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

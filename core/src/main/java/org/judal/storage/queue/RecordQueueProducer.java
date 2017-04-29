@@ -16,7 +16,7 @@ import java.util.Properties;
 import javax.jdo.JDOException;
 
 import org.judal.storage.Param;
-import org.judal.storage.Record;
+import org.judal.storage.table.Record;
 
 public interface RecordQueueProducer extends AutoCloseable {
 		  	

@@ -90,7 +90,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 	private Object resultSetToListOfMap(Object result) throws SQLException {
 		if (result instanceof ResultSet) {
-			List<HashMap<String,Object>> results = new LinkedList<HashMap<String,Object>>();
+			List<Map<String,Object>> results = new LinkedList<Map<String,Object>>();
 			ResultSet rset = (ResultSet) result;
 			ResultSetMetaData mdata = rset.getMetaData();
 			int colCount = mdata.getColumnCount();

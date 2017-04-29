@@ -26,8 +26,8 @@ import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
 import org.judal.storage.Param;
-import org.judal.storage.Record;
-import org.judal.storage.RecordSet;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
 
 import com.knowgate.typeutils.ObjectFactory;
 

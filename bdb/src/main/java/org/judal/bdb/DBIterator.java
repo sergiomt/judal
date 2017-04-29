@@ -16,7 +16,7 @@ import java.util.Iterator;
 
 import javax.jdo.JDOException;
 
-import org.judal.storage.Stored;
+import org.judal.storage.keyvalue.Stored;
 
 import com.knowgate.debug.DebugFile;
 import com.sleepycat.bind.serial.StoredClassCatalog;

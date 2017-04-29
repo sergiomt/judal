@@ -18,11 +18,11 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import org.judal.storage.EngineFactory;
-import org.judal.storage.Record;
-import org.judal.storage.RecordManager;
-import org.judal.storage.TableDataSource;
 import org.judal.storage.java.test.AbstractRecordManagerTest;
 import org.judal.storage.java.test.ArrayRecord2;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordManager;
+import org.judal.storage.table.TableDataSource;
 import org.judal.ramqueue.RAMQueueProducer;
 
 import org.judal.jdbc.JDBCEngine;

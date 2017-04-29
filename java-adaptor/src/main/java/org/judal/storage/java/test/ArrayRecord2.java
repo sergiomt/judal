@@ -8,8 +8,9 @@ import org.judal.metadata.TableDef;
 import org.judal.metadata.IndexDef.Type;
 
 import javax.jdo.JDOException;
-import org.judal.storage.TableDataSource;
+
 import org.judal.storage.java.ArrayRecord;
+import org.judal.storage.table.TableDataSource;
 
 public class ArrayRecord2 extends ArrayRecord implements TestRecord2 {
 

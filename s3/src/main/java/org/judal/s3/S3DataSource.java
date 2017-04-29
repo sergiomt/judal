@@ -38,10 +38,10 @@ import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 
 import org.judal.metadata.SchemaMetaData;
-import org.judal.storage.Bucket;
-import org.judal.storage.BucketDataSource;
 import org.judal.storage.DataSource;
 import org.judal.storage.Param;
+import org.judal.storage.keyvalue.Bucket;
+import org.judal.storage.keyvalue.BucketDataSource;
 
 /**
  * Implementation of BucketDataSource forAmazon S3

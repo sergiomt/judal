@@ -16,8 +16,8 @@ import java.util.Collection;
 import java.util.Set;
 
 import org.judal.metadata.TableDef;
-import org.judal.storage.Record;
 import org.judal.storage.StorageObjectFactory;
+import org.judal.storage.table.Record;
 
 import com.sleepycat.db.DatabaseEntry;
 import com.sleepycat.db.DatabaseException;

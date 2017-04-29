@@ -3,7 +3,7 @@ package org.judal.storage.java.test;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import org.judal.storage.Record;
+import org.judal.storage.table.Record;
 
 public interface TestRecord1 extends Record {
 

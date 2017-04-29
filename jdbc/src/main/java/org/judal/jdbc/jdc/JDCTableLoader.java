@@ -16,8 +16,9 @@ import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.ColumnList;
 import org.judal.storage.ImportLoader;
+import org.judal.storage.table.Table;
+
 import javax.jdo.JDOException;
-import org.judal.storage.Table;
 
 import java.util.HashMap;
 import java.util.Iterator;

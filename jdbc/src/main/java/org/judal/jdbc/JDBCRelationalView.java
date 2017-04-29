@@ -20,15 +20,15 @@ import java.sql.SQLException;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.storage.Param;
-import org.judal.storage.Record;
-import org.judal.storage.RecordSet;
-import org.judal.storage.RelationalView;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
 
 import org.judal.storage.query.sql.SQLAndPredicate;
 import org.judal.storage.query.sql.SQLQuery;
+import org.judal.storage.relational.RelationalView;
+import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Operator;

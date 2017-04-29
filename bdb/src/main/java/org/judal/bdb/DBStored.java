@@ -19,7 +19,7 @@ import javax.jdo.JDOException;
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
-import org.judal.storage.Stored;
+import org.judal.storage.keyvalue.Stored;
 
 /**
  * <p>Core class for persisting Java objects in Berkeley DB.<p>

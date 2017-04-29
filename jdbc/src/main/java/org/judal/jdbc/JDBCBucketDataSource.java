@@ -13,8 +13,9 @@ import javax.transaction.TransactionManager;
 import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.metadata.SQLColumn;
 import org.judal.jdbc.metadata.SQLTableDef;
-import org.judal.storage.Bucket;
-import org.judal.storage.BucketDataSource;
+import org.judal.storage.keyvalue.Bucket;
+import org.judal.storage.keyvalue.BucketDataSource;
+
 import javax.jdo.JDOException;
 
 import com.knowgate.debug.DebugFile;

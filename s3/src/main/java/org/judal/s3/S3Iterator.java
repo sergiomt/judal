@@ -16,9 +16,9 @@ import java.util.Iterator;
 
 import java.lang.reflect.Constructor;
 
-import org.judal.storage.Record;
 import org.judal.storage.StorageObjectFactory;
-import org.judal.storage.Stored;
+import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.Record;
 
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 
