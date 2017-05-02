@@ -10,7 +10,7 @@ import javax.transaction.TransactionManager;
 
 import org.judal.transaction.DataSourceTransactionManager;
 
-public class JDBCEngine implements Engine<JDBCTableDataSource> {
+public class JDBCEngine implements Engine<JDBCRelationalDataSource> {
 
 	@Override
 	public JDBCRelationalDataSource getDataSource(Map<String, String> properties) throws JDOException {

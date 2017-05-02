@@ -22,6 +22,7 @@ import org.judal.metadata.IndexDef.Using;
 import org.judal.storage.Param;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
+import org.judal.storage.query.Expression;
 import org.judal.storage.query.Operator;
 import org.judal.storage.query.Predicate;
 import org.judal.storage.query.sql.SQLQuery;
@@ -76,7 +77,8 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 			oStmt = getConnection().prepareStatement(sSQL);
 			int p = 0;
 			for (Param v : aParams)
-				oStmt.setObject(++p, v.getValue(), v.getType());
+				if (!(v.getValue() instanceof LatLong) && !(v.getValue() instanceof Expression))
+					oStmt.setObject(++p, v.getValue(), v.getType());
 			oStmt.executeUpdate();
 			oStmt.close();
 			oStmt=null;
@@ -113,6 +115,8 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 					if (oVal instanceof LatLong) {
 						LatLong oLl = (LatLong) oVal; 
 						oVals.append(",").append(v.getName()).append("=ST_GeographyFromText('SRID=4326;POINT("+String.valueOf(oLl.getLattitude())+" "+String.valueOf(oLl.getLongitude())+")')");
+					} else if (oVal instanceof Expression) {
+						oVals.append(",").append(v.getName()).append("=").append(oVal.toString());
 					} else {
 						oVals.append(",").append(v.getName()).append("=?");
 					}
@@ -127,7 +131,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 						Object oVal = v.getValue();
 						if (oVal==null)
 							oStmt.setNull(++p, v.getType());
-						else if (!(oVal instanceof LatLong))
+						else if (!(oVal instanceof LatLong) && !(oVal instanceof Expression))
 							oStmt.setObject(++p, v.getValue(), v.getType());
 					}
 					((SQLQuery) oQry).setParameters(oStmt);

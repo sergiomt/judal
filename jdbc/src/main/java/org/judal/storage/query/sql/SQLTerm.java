@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.judal.storage.query.Expression;
 import org.judal.storage.query.Operator;
 import org.judal.storage.query.Part;
 import org.judal.storage.query.Predicate;
@@ -198,32 +199,34 @@ public class SQLTerm extends Term {
 	 */
 	@Override	
 	public String getTextParametrized() {
-		String sTxt;
+		StringBuilder oTxt = new StringBuilder(254);
 		final Object value0 = aValues[0];
 		if (value0 instanceof Term || value0 instanceof Predicate) {
 			if (sNestedColumn==null)
 				throw new NullPointerException("Column name for subquery cannot be null");
 			Part oNested = (Part) value0;
-			return sColumn+" "+sOper +" (SELECT " + sNestedColumn +" FROM "+getTableName()+" WHERE "+oNested.getTextParametrized()+ ")";
+			oTxt.append(sColumn).append(" ").append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getTextParametrized()).append(")");
+		} else if (value0 instanceof Expression) {
+			oTxt.append(sColumn).append(" ").append(sOper).append(" ").append(value0.toString());
 		} else {
 			if (sOper.equalsIgnoreCase(Operator.WITHIN)) {
-				sTxt = Operator.WITHIN+"("+sColumn+", ST_SetSRID(ST_MakePoint(?,?),4326),?)";
+				oTxt.append(Operator.WITHIN).append("(").append(sColumn).append(", ST_SetSRID(ST_MakePoint(?,?),4326),?)");
 			} else if (sOper.equalsIgnoreCase(Operator.BETWEEN)) {
-				sTxt = sColumn+" "+Operator.BETWEEN+" ? AND ? ";
+				oTxt.append(sColumn).append(" ").append(Operator.BETWEEN).append(" ? AND ? ");
 			} else if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS)) {
-				sTxt = sOper+" ("+sColumn+")";
+				oTxt.append(sOper).append(" (").append(sColumn).append(")");
 			} else if (sOper.equalsIgnoreCase(Operator.IS) || sOper.equalsIgnoreCase(Operator.ISNOT)) {
-				sTxt = sColumn+" "+sOper+" "+(aValues[0]==null ? "NULL" : value0);
+				oTxt.append(sColumn).append(" ").append(sOper).append(" ").append((aValues[0]==null ? "NULL" : value0));
 			} else if (sOper.equalsIgnoreCase(Operator.IN) || sOper.equalsIgnoreCase(Operator.NOTIN)) {
-				sTxt = sColumn+" "+sOper+" (?";
+				oTxt.append(sColumn).append(" ").append(sOper).append(" (?");
 				for (int v=1; v<nValues; v++)
-					sTxt += ",?";
-				sTxt += ")";
+					oTxt.append(",?");
+				oTxt.append(")");
 			} else {
-				sTxt = sColumn+" "+sOper+" ?";
+				oTxt.append(sColumn).append(" ").append(sOper).append(" ?");
 			}
-			return sTxt;			
 		}
+		return oTxt.toString();
 	}
-	
+
 }

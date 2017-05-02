@@ -30,7 +30,7 @@ public class SQLPredicate extends Predicate {
 				parameterClasses[p] = Part.class;
 		}
 		Constructor<SQLTerm> constructor = SQLTerm.class.getConstructor(parameterClasses);
-		super.add(constructor.newInstance(constructorParameters));
+		super.addPart(constructor.newInstance(constructorParameters));
 		return this;
 	}
 
@@ -53,7 +53,7 @@ public class SQLPredicate extends Predicate {
 	 */
 	@Override
 	public String getText() {
-		StringBuffer oBuff = new StringBuffer();
+		StringBuilder oBuff = new StringBuilder();
 		final int nParts = size();
 		if (nParts>0) {
 			oBuff.append(" ( ");
@@ -73,7 +73,7 @@ public class SQLPredicate extends Predicate {
 	 */
 	@Override
 	public String getTextParametrized() {
-		StringBuffer oBuff = new StringBuffer();
+		StringBuilder oBuff = new StringBuilder();
 		final int nParts = size();
 		if (nParts>0) {
 			oBuff.append(" ( ");
