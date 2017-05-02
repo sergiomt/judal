@@ -5,6 +5,7 @@ import javax.jdo.JDOException;
 
 import org.judal.storage.DataSource;
 import org.judal.storage.Operation;
+import org.judal.storage.Param;
 import org.judal.storage.table.Record;
 
 public class TableOperation<R extends Record> implements Operation {
@@ -54,6 +55,10 @@ public class TableOperation<R extends Record> implements Operation {
 	  return getTable().fetch(fetchGroup, columnName, valueSearched);
   }
 
+  public void insert(Param... params) throws JDOException {
+	  getTable().insert(params);
+  }
+  
   public Table getTable() {
 	return tbl;  
   }

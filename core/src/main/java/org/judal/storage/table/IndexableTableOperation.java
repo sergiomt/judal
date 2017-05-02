@@ -22,6 +22,10 @@ public class IndexableTableOperation<R extends Record> extends TableOperation<R>
 	return (IndexableTable) tbl;  
   }
   
+  public boolean exists(Param... keys) {
+	  return getTable().exists(keys);
+  }
+
   public int update(Param[] values, Param[] where) {
 	  return getTable().update(values, where);
   }

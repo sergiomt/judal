@@ -81,7 +81,7 @@ public class RecordManager {
 	}
 
 
-	public void deletePersistentAll(Collection objs) {
+	public void deletePersistentAll(@SuppressWarnings("rawtypes") Collection objs) {
 		if (objs.size()>0) {
 			String[] keys = new String[objs.size()];
 			int k = 0;
