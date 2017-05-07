@@ -65,7 +65,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 			if (DebugFile.trace) DebugFile.decIdent();
 			try { if (stmt!=null) stmt.close(); } catch (Exception ignore) { }
 			try { if (conn!=null) conn.close("JDBCBucketDataSource"); } catch (Exception ignore) { }
-			throw new JDOException(sqle.getMessage(), sqle);
+			throw new JDOException(sqle.getMessage()+"\n"+sql, sqle);
 		}		
 		if (DebugFile.trace) {
 			DebugFile.decIdent();

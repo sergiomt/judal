@@ -34,6 +34,13 @@ public class SQLPredicate extends Predicate {
 		return this;
 	}
 
+	@Override
+	public SQLPredicate clone() {
+		SQLPredicate theClone = new SQLPredicate();
+		theClone.clone(this);
+		return theClone;
+	}
+
 	private String logicalConnective() {
 		if (connective()==null)
 			return null;

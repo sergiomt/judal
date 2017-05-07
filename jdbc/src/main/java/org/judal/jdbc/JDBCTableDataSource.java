@@ -165,7 +165,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 				DebugFile.writeln("Begin JDBCTableDataSource.createTable("+tableDef.getName()+")");
 				DebugFile.incIdent();
 			}
-			String ddl = ((SQLTableDef) tableDef).toString();
+			String ddl = ((SQLTableDef) tableDef).getSource();
 			execute(ddl);
 			addTableToCache((SQLTableDef) tableDef);
 			conn = getConnection("JDBCTableDataSource");

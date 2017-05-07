@@ -47,6 +47,7 @@ public class JDBCBucket implements Bucket {
 
 	protected JDBCBucketDataSource dataSource;
 	protected SQLTableDef tableDef;
+	protected String alias;
 	protected JDCConnection jdcConn;
 	protected Class<? extends Stored> candidateClass;
 	protected Collection<JDBCIterator> iterators;
@@ -54,6 +55,7 @@ public class JDBCBucket implements Bucket {
 	public JDBCBucket(JDBCBucketDataSource dataSource, String bucketName) throws JDOException {
 		this.dataSource = dataSource;
 		tableDef = dataSource.getTableDef(bucketName);
+		alias = null;
 		if (null==tableDef)
 			throw new JDOException("Table "+bucketName+" not found");
 		try {
@@ -100,9 +102,20 @@ public class JDBCBucket implements Bucket {
 		}
 	}
 	
+	public String getAlias() {
+		return alias;
+	}
+	
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
 	@Override
 	public String name() {
-		return tableDef.getName();
+		if (null==getAlias())
+			return tableDef.getName();
+		else
+			return tableDef.getName() + " " + getAlias();
 	}
 
 	public void commit() throws JDOException {

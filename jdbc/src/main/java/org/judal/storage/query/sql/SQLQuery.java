@@ -19,6 +19,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
+import java.util.Arrays;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
@@ -42,20 +43,32 @@ public class SQLQuery extends AbstractQuery {
 	
 	private Constructor<? extends Record> recordConstructor;
 	private Object[] constructorParameters;
-
+	
 	public SQLQuery(IndexableView view) throws JDOException {
 		setCandidates(view);
 		setRange(0, Integer.MAX_VALUE);
-		recordConstructor = null;
+		recordConstructor = null;		
 	}
 
+	@Override
+	public SQLQuery clone() {
+		SQLQuery theClone = new SQLQuery(getView());
+		super.clone(this);
+		theClone.recordConstructor = this.recordConstructor;
+		if (constructorParameters==null)
+			theClone.constructorParameters = null;
+		else
+			theClone.constructorParameters = Arrays.copyOf(constructorParameters, constructorParameters.length);
+		return theClone;
+	}
+	
 	private JDBCRelationalView getView() {
 		return (JDBCRelationalView) getCandidates();
 	}
 	
 	@Override
 	public String getResult() {
-		final String retval = getResult();
+		final String retval = super.getResult();
 		return retval==null ? "*" : retval;
 	}
 	
@@ -210,7 +223,7 @@ public class SQLQuery extends AbstractQuery {
 		query.append("SELECT ");
 		query.append(getResult());
 		query.append(" FROM ");
-		query.append(getView().getTableDef().getTable());
+		query.append(getView().name());
 		if (getFilter()!=null) {
 			if (getFilter().length()>0) {
 				query.append(" WHERE ");

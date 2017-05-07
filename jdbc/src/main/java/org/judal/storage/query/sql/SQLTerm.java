@@ -25,6 +25,10 @@ public class SQLTerm extends Term {
 		super (columnName, operator, columnValue);
 	}
 
+	public SQLTerm(String columnName, String operator, Expression columnExpr) throws ArrayIndexOutOfBoundsException {
+		super (columnName, operator, columnExpr);
+	}
+
 	public SQLTerm(String columnName, String operator, String columnValue) throws ArrayIndexOutOfBoundsException {
 		super (columnName, operator, columnValue);
 	}
@@ -33,6 +37,10 @@ public class SQLTerm extends Term {
 		super (columnName, operator, columnValue);
 	}
 	
+	public SQLTerm(String columnName, String operator, Short columnValue) throws ArrayIndexOutOfBoundsException {
+		super (columnName, operator, columnValue);
+	}
+
 	public SQLTerm(String columnName, String operator, Integer columnValue) throws ArrayIndexOutOfBoundsException {
 		super (columnName, operator, columnValue);
 	}
@@ -145,6 +153,15 @@ public class SQLTerm extends Term {
 		super(columnName, operator, tableName,  joinColumn, joinTerm);
 	}
 	
+	protected SQLTerm() { }
+	
+	@Override
+	public SQLTerm clone() {
+		SQLTerm theClone = new SQLTerm();
+		theClone.clone(this);
+		return theClone;
+	}
+
 	/**
 	 * Get the term as a String including all parameter values
 	 * @return String
@@ -205,28 +222,37 @@ public class SQLTerm extends Term {
 			if (sNestedColumn==null)
 				throw new NullPointerException("Column name for subquery cannot be null");
 			Part oNested = (Part) value0;
-			oTxt.append(sColumn).append(" ").append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getTextParametrized()).append(")");
+			if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS))
+				oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getTextParametrized()).append(")");
+			else
+				oTxt.append(sColumn).append(" ").append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getTextParametrized()).append(")");
 		} else if (value0 instanceof Expression) {
 			oTxt.append(sColumn).append(" ").append(sOper).append(" ").append(value0.toString());
 		} else {
 			if (sOper.equalsIgnoreCase(Operator.WITHIN)) {
-				oTxt.append(Operator.WITHIN).append("(").append(sColumn).append(", ST_SetSRID(ST_MakePoint(?,?),4326),?)");
+				oTxt.append(Operator.WITHIN).append("(").append(sColumn).append(", ST_SetSRID(ST_MakePoint("+q(aValues[0])+","+q(aValues[1])+"),4326),"+q(aValues[2])+")");
 			} else if (sOper.equalsIgnoreCase(Operator.BETWEEN)) {
-				oTxt.append(sColumn).append(" ").append(Operator.BETWEEN).append(" ? AND ? ");
+				oTxt.append(sColumn).append(" ").append(Operator.BETWEEN).append(" ").append(q(aValues[0])).append(" AND ").append(q(aValues[1])+" ");
 			} else if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS)) {
 				oTxt.append(sOper).append(" (").append(sColumn).append(")");
 			} else if (sOper.equalsIgnoreCase(Operator.IS) || sOper.equalsIgnoreCase(Operator.ISNOT)) {
-				oTxt.append(sColumn).append(" ").append(sOper).append(" ").append((aValues[0]==null ? "NULL" : value0));
+				oTxt.append(sColumn).append(" ").append(sOper).append(" ").append((value0==null ? "NULL" : q(value0)));
 			} else if (sOper.equalsIgnoreCase(Operator.IN) || sOper.equalsIgnoreCase(Operator.NOTIN)) {
-				oTxt.append(sColumn).append(" ").append(sOper).append(" (?");
+				oTxt.append(sColumn).append(" ").append(sOper).append(" (").append(q(value0));
 				for (int v=1; v<nValues; v++)
-					oTxt.append(",?");
+					oTxt.append(",").append(q(aValues[v]));
 				oTxt.append(")");
 			} else {
-				oTxt.append(sColumn).append(" ").append(sOper).append(" ?");
+				oTxt.append(sColumn).append(" ").append(sOper).append(" ").append(q(value0));
 			}
 		}
 		return oTxt.toString();
 	}
 
+	private String q(Object exprOrVal) {
+		if (exprOrVal instanceof Expression)
+			return exprOrVal.toString();
+		else
+			return "?";
+	}
 }
