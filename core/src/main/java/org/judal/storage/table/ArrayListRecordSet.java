@@ -22,6 +22,9 @@ import java.util.List;
 import javax.jdo.FetchPlan;
 import javax.jdo.PersistenceManager;
 
+import org.judal.storage.table.comparators.RecordColumnValueComparatorAsc;
+import org.judal.storage.table.comparators.RecordColumnValueComparatorDesc;
+
 import com.knowgate.debug.DebugFile;
 
 /**

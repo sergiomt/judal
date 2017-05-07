@@ -5,7 +5,9 @@ package org.judal.storage.query;
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public interface Part {
+public interface Part extends Cloneable {
+
+	Part clone();
 
 	/**
 	 * @return String The part in plain text including all the parameter values

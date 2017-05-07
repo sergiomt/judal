@@ -11,7 +11,7 @@ import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 
-public abstract class AbstractRelationalQuery<R extends Record> implements AutoCloseable {
+public abstract class AbstractRelationalQuery<R extends Record> implements Cloneable, AutoCloseable {
 
 	  protected RelationalView viw;
 	  protected AbstractQuery qry;
@@ -42,6 +42,11 @@ public abstract class AbstractRelationalQuery<R extends Record> implements AutoC
 		  return this;
 	  }
 
+	  public AbstractRelationalQuery<R> and(String column, String operator, String nestedTable, Part subselect) throws JDOUserException, UnsupportedOperationException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		  prd.and(column, operator, nestedTable, subselect);
+		  return this;
+	  }
+
 	  public AbstractRelationalQuery<R> addPart(Part term) throws JDOUserException, UnsupportedOperationException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		  prd.addPart(term);
 		  return this;
@@ -52,9 +57,28 @@ public abstract class AbstractRelationalQuery<R extends Record> implements AutoC
 		  return this;
 	  }
 
+	  public abstract AbstractRelationalQuery<R> clone();
+
+	  public int count() {
+		  AbstractQuery counter = qry.clone();
+		  counter.setResult("COUNT(*) AS ROWS_COUNT");
+		  counter.setRange(0, 1);
+		  return viw.fetch(counter).get(0).getInt("ROWS_COUNT");
+	  }
+
 	  public RecordSet<R> fetch() {
 	      qry.setFilter(prd);
 		  return viw.fetch(qry);
+	  }
+	  
+	  public boolean eof() {
+		  return qry.eof();
+	  }
+
+	  protected void clone(AbstractRelationalQuery<R> source) {
+		  viw = source.viw;
+		  qry = source.qry.clone();
+		  prd = source.prd.clone();		  
 	  }
 
 	  @Override

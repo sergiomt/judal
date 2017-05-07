@@ -27,4 +27,12 @@ public class InnerJoinQuery<R extends Record, T extends Record> extends Abstract
 		  	prd = qry.newPredicate();
 		  }
 
+	  private InnerJoinQuery() { }
+
+	  @Override
+	  public InnerJoinQuery<R,T> clone() {
+		  InnerJoinQuery<R,T> theClone = new InnerJoinQuery<>();
+		  theClone.clone(this);
+		  return theClone;
+	  }
 }

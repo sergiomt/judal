@@ -14,6 +14,7 @@ package org.judal.storage.query;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -31,12 +32,13 @@ import org.judal.storage.table.RecordSet;
 
 import com.knowgate.typeutils.ObjectFactory;
 
-public abstract class AbstractQuery implements Query {
+public abstract class AbstractQuery implements Cloneable, Query {
 
 	private static final long serialVersionUID = 1L;
 	private static final Long ZERO = new Long(0L);
 	
 	private HashMap<String,Object> extensions;
+	@SuppressWarnings("rawtypes")
 	private Class resultClass;
 	protected Constructor<? extends Record> recordConstructor;
 	protected Object[] constructorParameters;
@@ -51,6 +53,7 @@ public abstract class AbstractQuery implements Query {
 	private Long toExcl;
 	private boolean unique;
 	private boolean unmodifiable;
+	@SuppressWarnings("rawtypes")
 	private Iterable candidates;
 	private HashMap<String,Object> parameters;
 	private HashMap<Integer,String> paramIndexes;
@@ -76,6 +79,55 @@ public abstract class AbstractQuery implements Query {
 		endOfFetch = true;
 	}
 
+	public abstract AbstractQuery clone();
+
+	protected void clone(AbstractQuery source) {
+		if (source.extensions==null) {
+			this.extensions = null;
+		} else {
+			this.extensions = new HashMap<String,Object>();
+			this.extensions.putAll(source.extensions);
+		}
+		this.resultClass = source.resultClass;
+		this.recordConstructor = source.recordConstructor;
+		if (source.constructorParameters==null) {
+			this.constructorParameters = null;
+		} else {
+			this.constructorParameters = Arrays.copyOf(source.constructorParameters, source.constructorParameters.length);
+		}
+		this.candidateClass = source.candidateClass;
+		this.results = source.results;
+		this.filter = source.filter;
+		this.filterPredicate = source.filterPredicate;
+		this.grouping = source.grouping;
+		this.ordering = source.ordering;
+		this.ignoreCache = source.ignoreCache;
+		this.fromIncl = source.fromIncl;
+		this.toExcl = source.toExcl;
+		this.unique = source.unique;
+		this.unmodifiable = false;
+		this.candidates = source.candidates;
+		if (source.parameters==null) {
+			this.parameters = null;
+		} else {
+			this.parameters = new HashMap<String,Object>();
+			this.parameters.putAll(source.parameters);
+		}
+		if (source.paramIndexes==null) {
+			this.paramIndexes = null;
+		} else {
+			this.paramIndexes = new HashMap<Integer,String>();
+			this.paramIndexes.putAll(source.paramIndexes);
+		}
+		if (source.subqueries==null) {
+			this.subqueries = null;
+		} else {
+			this.subqueries = new ArrayList<AbstractQuery>(source.subqueries.size());
+			this.subqueries.addAll(source.subqueries);
+		}
+		this.endOfFetch = source.endOfFetch;
+	}
+	
 	public abstract Record newRecord() throws NullPointerException, NoSuchMethodException, JDOException;
 
 	public abstract Predicate newPredicate(Connective logicalConnective) throws JDOException;

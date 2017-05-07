@@ -3,6 +3,7 @@ package org.judal.storage.query;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.jdo.JDOUserException;
 
@@ -44,7 +45,7 @@ import static org.judal.storage.query.Connective.*;
 * @version 1.0
 *
 */
-public abstract class Predicate implements Part,Serializable {
+public abstract class Predicate implements Cloneable, Part, Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -55,6 +56,18 @@ public abstract class Predicate implements Part,Serializable {
 	public Predicate() {
 		oParts = new ArrayList<Part>();
 		oConnective = NONE;
+	}
+
+	public abstract Predicate clone();
+	
+	protected void clone(Predicate source) {
+		if (source.oParts==null)
+			oParts = null;
+		else
+			oParts = new ArrayList<Part>(source.oParts.size());
+			for (Part p: source.oParts)
+				oParts.add(p.clone());
+			oConnective = source.oConnective;
 	}
 
 	/**

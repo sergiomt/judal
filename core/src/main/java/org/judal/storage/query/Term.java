@@ -1,5 +1,6 @@
 package org.judal.storage.query;
 
+import java.util.Arrays;
 import java.util.Date;
 
 import java.io.Serializable;
@@ -26,7 +27,7 @@ public abstract class Term implements Part,Serializable {
 	/**
 	 * Create term.
 	 * @param sColumnName String Column Name
-	 * @param sOperator String Operator. Must be one of {"=","<>",">=","<=","IS","IS NOT","LIKE","ILIKE","BETWEEN"}
+	 * @param sOperator String Operator. Must be one of {"=","<>",">=","<=","IS","IS NOT","IS NULL","IS NOT NULL","LIKE","ILIKE","BETWEEN","EXISTS","NOT EXISTS"}
 	 * @param oColumnValue Object column value
 	 * @throws ArrayIndexOutOfBoundsException if oColumnValue is an array
 	 */
@@ -313,6 +314,22 @@ public abstract class Term implements Part,Serializable {
 		  aValues[v] = aColumnValues[v];
 	}
 	
+	protected Term() { }
+	
+	public abstract Term clone();
+	
+	protected void clone(Term source) {
+		sTable = source.sTable;
+		sColumn = source.sColumn;
+		sNestedColumn = source.sNestedColumn;
+		sOper = source.sOper;
+		nValues = source.nValues;		
+		if (source.aValues==null)
+			aValues = null;
+		else
+			aValues = Arrays.copyOf(aValues, aValues.length);
+	}
+
 	public String getTableName() {
 		return sTable;
 	}
@@ -490,6 +507,9 @@ public abstract class Term implements Part,Serializable {
 			objValues = new Object[stringValues.length];
 			for (int v=0; v<stringValues.length; v++)
 				objValues[v] = stringValues[v];
+		}
+		else if (objClass.equals(Expression.class)) {
+			objValues = (Expression[]) values;
 		}
 		else if (objClass.equals(Object[].class)) {
 			objValues = (Object[]) values;

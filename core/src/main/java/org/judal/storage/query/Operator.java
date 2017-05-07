@@ -17,8 +17,11 @@ public class Operator {
 	public static final String EXISTS = "EXISTS";
 	public static final String NOTEXISTS = "NOT EXISTS";
 	public static final String BETWEEN = "BETWEEN";
+	public static final String NOTBETWEEN = "NOT BETWEEN";
 	public static final String LIKE = "LIKE";
+	public static final String NOTLIKE = "NOT LIKE";
 	public static final String ILIKE = "ILIKE";
 	public static final String WITHIN = "ST_DWithin";
+	public static final String NOTWITHIN = "NOT ST_DWithin";
 	
 }
