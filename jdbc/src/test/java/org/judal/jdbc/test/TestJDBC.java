@@ -13,5 +13,4 @@ public class TestJDBC {
 		return Env.getDataSourceProperties(inStrm, "test");
 	}
 
-	
 }
