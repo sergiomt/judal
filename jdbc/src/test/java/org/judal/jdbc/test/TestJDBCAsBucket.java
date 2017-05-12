@@ -42,7 +42,7 @@ public class TestJDBCAsBucket extends AbstractBucketTest {
 		if (dts!=null) dts.close();
 	}
 
-	@Test
+	@Ignore
 	public void test00Driver() throws ClassNotFoundException, SQLException  {
 		Class.forName(properties.get(DataSource.DRIVER));
 		Connection conn = DriverManager.getConnection(properties.get(DataSource.URI), properties.get(DataSource.USER), properties.get(DataSource.PASSWORD));
@@ -50,7 +50,7 @@ public class TestJDBCAsBucket extends AbstractBucketTest {
 		conn.close();
 	}
 	
-	@Test
+	@Ignore
 	public void test01Bucket() throws JDOException, IOException, SystemException {
 		super.test01Bucket();
 	}

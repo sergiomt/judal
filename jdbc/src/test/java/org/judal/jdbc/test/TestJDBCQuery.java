@@ -70,7 +70,7 @@ public class TestJDBCQuery {
 		MapRecord jobAtomByDay = new MapRecord(jobsTable);
 	}
 
-	@Test
+	@Ignore
 	public void test01Subselect() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException, UnsupportedOperationException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
 	
 	AdhocMailing.dataSource = dts;
@@ -91,7 +91,7 @@ public class TestJDBCQuery {
 
     Predicate subselect = new SQLAndPredicate();
     subselect.add("gu_workarea", Operator.EQ, Uid.createUniqueKey());
-    subselect.add(datefilter);
+    subselect.addPart(datefilter);
     
     Predicate where = new SQLAndPredicate();
     where.add("gu_mailing", Operator.IN, "k_jobs", "gu_job_group", subselect);
@@ -147,4 +147,34 @@ public class TestJDBCQuery {
     */
 
 	}
+
+	@Test
+	public void test02Exists() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException, UnsupportedOperationException, NoSuchMethodException, SecurityException, IllegalArgumentException, InvocationTargetException {
+
+	    Predicate userIs = new SQLAndPredicate();
+	    userIs.add("gu_user", Operator.EQ, new Expression("gu_owner"));
+
+	    Predicate userExists = new SQLAndPredicate();
+	    userExists.add("gu_avatar", Operator.EXISTS, "k_users", userIs);
+	    
+	    Predicate where = new SQLAndPredicate();
+	    where.add("bo_private", Operator.EQ, new Short((short) 1));
+	    where.addPart(userExists);
+
+		AdhocMailing.dataSource = dts;
+
+		dts.createTable(AdhocMailing.getTableDef(dts), new HashMap<String,Object>());
+
+		ArrayRecord mailingsRec = new ArrayRecord(dts.getTableDef(AdhocMailing.tableName));
+	    
+	    IndexableView mailingsTbl = dts.openIndexedView(mailingsRec);
+	    SQLQuery qry = new SQLQuery(mailingsTbl);
+	    qry.setFilter(where);
+	    
+	    System.out.println(qry.source());
+
+	    dts.dropTable(AdhocMailing.tableName, false);
+	    
+	}
+	
 }

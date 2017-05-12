@@ -3,6 +3,7 @@ package org.judal.metadata.bind.test;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -41,7 +42,7 @@ public class TestJdcXmlParsing {
 		dts.close();
 	}
 	
-	@Test
+	@Ignore
 	public void testSchemaParsing() throws NumberFormatException, ClassNotFoundException, NullPointerException, UnsatisfiedLinkError, SQLException, JDOException, IOException {
 		TableDataSource ds = new JDBCTableDataSource(new TestJDBC().getTestProperties(),new JDBCEngine().getTransactionManager());
 

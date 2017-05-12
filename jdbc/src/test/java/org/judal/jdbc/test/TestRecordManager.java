@@ -55,7 +55,7 @@ public class TestRecordManager extends AbstractRecordManagerTest {
 		dts.close();
 	}
 	
-	@Test
+	@Ignore
 	public void test01Manager() throws InstantiationException, IllegalAccessException, InterruptedException, RemoteException {
 		TableDataSource dts = jdbc.getDataSource(properties);
 		RAMQueueProducer que = new RAMQueueProducer(jdbc.name(), properties);
@@ -63,7 +63,7 @@ public class TestRecordManager extends AbstractRecordManagerTest {
 		super.test01Manager();
 	}
 
-	// @Test(expected=JDOUserException.class)
+	// @Ignore(expected=JDOUserException.class)
 	// public void test02Cache() throws JDOUserException {
 	//	super.test02Cache();
 	// }	

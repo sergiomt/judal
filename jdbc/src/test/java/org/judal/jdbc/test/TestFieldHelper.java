@@ -17,9 +17,11 @@ import org.judal.storage.java.ArrayRecord;
 import org.judal.storage.java.MapRecord;
 import org.judal.storage.java.postgresql.PostgreSQLFieldHelper;
 import org.judal.storage.table.Table;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.Ignore;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
@@ -67,7 +69,7 @@ public class TestFieldHelper {
 		return (JDBCTableDataSource) dts;
 	}
 
-	@Test
+	@Ignore
 	public void test01() throws JDOException, SQLException, ClassCastException, ClassNotFoundException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
 		HashMap<String,String> s1 = new HashMap<>();
 		s1.put("name", "John");

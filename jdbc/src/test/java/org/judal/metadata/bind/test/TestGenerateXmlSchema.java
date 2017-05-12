@@ -43,7 +43,7 @@ public class TestGenerateXmlSchema {
 		dts.close();
 	}
 	
-	@Test
+	@Ignore
 	public void test01GenerateXmlSchema() throws IOException {
 		  Platform platform = PlatformFactory.createNewPlatformInstance(dts);
 		  Database db = platform.readModelFromDatabase(dbName);
@@ -54,7 +54,7 @@ public class TestGenerateXmlSchema {
 		  fos.close();
 	}
 
-	@Test
+	@Ignore
 	public void test02GenerateJdoSchema() throws JDOException, IOException {
 		SchemaMetaData metadata = dts.getMetaData();
 		JdoXmlMetadata xmlmeta = new JdoXmlMetadata(dts);
