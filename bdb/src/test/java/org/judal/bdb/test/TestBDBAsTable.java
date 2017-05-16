@@ -43,8 +43,8 @@ public class TestBDBAsTable extends AbstractTableTest {
 		System.out.println("Before TestBDBAsTable");
 		properties = new TestBDB().getTestProperties();
 		metaData = new SchemaMetaData();
-		metaData.addTable(MapRecord1.getTableDef(null));
-		metaData.addTable(MapRecord2.getTableDef(null));
+		metaData.addTable(MapRecord1.getTableDef(null), null);
+		metaData.addTable(MapRecord2.getTableDef(null), null);
 	}
 
 	@AfterClass
