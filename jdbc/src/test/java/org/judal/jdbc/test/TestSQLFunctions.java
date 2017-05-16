@@ -12,16 +12,20 @@ import javax.jdo.JDOException;
 import org.judal.jdbc.JDBCEngine;
 import org.judal.jdbc.metadata.SQLFunctions;
 import org.judal.metadata.TableDef;
+import org.judal.storage.java.ArrayRecord;
 import org.judal.storage.java.MapRecord;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
+import org.judal.storage.query.Expression;
 import org.judal.storage.query.Operator;
 import org.judal.storage.relational.RelationalDataSource;
 import org.judal.storage.relational.RelationalTable;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.IndexableTable;
+import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
-
+import org.judal.storage.table.impl.SingleIntColumnRecord;
+import org.judal.storage.table.impl.SingleLongColumnRecord;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -66,31 +70,40 @@ public class TestSQLFunctions extends TestJDBC {
 			rec.put("name", "Name of #1");
 			rec.put("desc", "Description of #1");
 			tbl.store(rec);
+			rec.clear();
 			rec.put("pk", 2);
 			rec.put("dt", new Timestamp(System.currentTimeMillis()));
-			rec.put("name", "Name of #2");
+			rec.put("name", "The Name of #1");
 			rec.put("desc", "Description of #2");
 			tbl.store(rec);
+			rec.clear();
 			rec.put("pk", 3);
 			rec.put("dt", new Timestamp(System.currentTimeMillis()));
-			rec.put("name", "The Name of #3");
+			rec.put("name", "The Name of #1");
 			tbl.store(rec);
-			rec.put("pk", 3);
+			rec.clear();
+			rec.put("pk", 4);
 			rec.put("dt", new Timestamp(System.currentTimeMillis()));
-			rec.put("name", "The Name of #3");
+			rec.put("name", "The Name of #1");
 			tbl.store(rec);
+			rec.clear();
 
 			RecordSet<MapRecord> rst = tbl.fetch(new ColumnGroup(fn.LENGTH+"(name) AS NameLength"), "pk", new Integer(1));
 			assertEquals(1, rst.size());
 			assertEquals(10, rst.get(0).getInt("NameLength"));			
 		}
 		
-		try (RelationalTable tbl = dts.openRelationalTable(rec)) {
+		SingleLongColumnRecord sir = new SingleLongColumnRecord("test_sql_funcs", "RecCount");
+		try (RelationalTable tbl = dts.openRelationalTable(sir)) {
 			AbstractQuery qry = tbl.newQuery();
 			qry.setResult("COUNT(*) AS RecCount");
-			qry.setFilter(qry.newPredicate(Connective.AND).add("desc", Operator.EQ, fn.ISNULL+"(desc,'Description of #1')"));
-			RecordSet<MapRecord> rst = tbl.fetch(qry);
-			assertEquals(3, rst.size());
+			qry.setResultClass(SingleLongColumnRecord.class);
+			qry.setFilter(qry.newPredicate(Connective.AND).add("desc", Operator.ISNULL));
+			RecordSet<SingleLongColumnRecord> ast = tbl.fetch(qry);
+			assertEquals(2, ast.get(0).getValue().intValue());
+			qry.setFilter(qry.newPredicate(Connective.AND).add(fn.ISNULL+"(desc,'Description of #1')", Operator.EQ, "Description of #1"));
+			ast = tbl.fetch(qry);
+			assertEquals(3, ast.get(0).getValue().intValue());
 		}
 
 		dts.dropTable("test_sql_funcs", false);
