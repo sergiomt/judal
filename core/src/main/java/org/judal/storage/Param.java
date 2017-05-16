@@ -14,6 +14,7 @@ package org.judal.storage;
 import java.util.Date;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.storage.query.Expression;
 
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -116,6 +117,12 @@ public class Param extends ColumnDef {
 		oDir = Direction.IN;
 	}
 	
+	public Param(String sColName, int iType, int iPos, Expression eVal) {
+		super(sColName, iType, iPos);
+		oVal = eVal;
+		oDir = Direction.IN;
+	}
+
 	public Param(ColumnDef oCol, Object oObj) {
 		super(oCol);
 		oVal = oObj;

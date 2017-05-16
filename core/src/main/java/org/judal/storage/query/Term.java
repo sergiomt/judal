@@ -27,6 +27,21 @@ public abstract class Term implements Part,Serializable {
 	/**
 	 * Create term.
 	 * @param sColumnName String Column Name
+	 * @param sOperator String Operator. Must be one of {"IS NULL","IS NOT NULL"}
+	 * @throws ArrayIndexOutOfBoundsException if oColumnValue is an array
+	 */
+	public Term(String sColumnName, String sOperator) throws IllegalArgumentException {
+		if (!sOperator.equalsIgnoreCase(Operator.ISNULL) && !sOperator.equalsIgnoreCase(Operator.ISNOTNULL))
+			throw new IllegalArgumentException("Operator must be either "+Operator.ISNULL+" or "+Operator.ISNOTNULL);
+		sTable = null;
+		sColumn = sColumnName;
+		sNestedColumn = null;
+		sOper = sOperator;	
+	}
+
+	/**
+	 * Create term.
+	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be one of {"=","<>",">=","<=","IS","IS NOT","IS NULL","IS NOT NULL","LIKE","ILIKE","BETWEEN","EXISTS","NOT EXISTS"}
 	 * @param oColumnValue Object column value
 	 * @throws ArrayIndexOutOfBoundsException if oColumnValue is an array

@@ -15,7 +15,7 @@ import java.util.Hashtable;
 
 public class EngineFactory {
 	
-	public static ThreadLocal<DataSource> DefaultThreadDataSource;
+	public static ThreadLocal<DataSource> DefaultThreadDataSource = new ThreadLocal<DataSource>();
 	
 	private static Hashtable<String, Class<Engine<? extends DataSource>>> engines = new Hashtable<String, Class<Engine<? extends DataSource>>>();
 	

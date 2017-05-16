@@ -1,6 +1,7 @@
 package org.judal.storage.table;
 
 /**
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -21,40 +22,141 @@ import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
 
 /**
- * 
+ * Interface for DataSource implementations that support tables
  * @author Sergio Montoro Ten
  * @version 1.0
  */
 public interface TableDataSource extends DataSource {
 
+	/**
+	 * Get table definition
+	 * @param tableName String Table Name
+	 * @return TableDef
+	 * @throws JDOException
+	 */
 	TableDef getTableDef(String tableName) throws JDOException;
 
+	/**
+	 * Get schema meta data
+	 * @return SchemaMetaData
+	 * @throws JDOException
+	 */
 	SchemaMetaData getMetaData() throws JDOException;
 	
-	void setMetaData(SchemaMetaData oSmd) throws JDOException;
+	/**
+	 * Set schema meta data
+	 * @param smd SchemaMetaData
+	 * @throws JDOException
+	 */
+	void setMetaData(SchemaMetaData smd) throws JDOException;
 	
+	/**
+	 * Create new table definition
+	 * @param tableName String
+	 * @param options Map&lt;String,Object&gt;
+	 * @return TableDef
+	 * @throws JDOException
+	 */
 	TableDef createTableDef(String tableName, Map<String,Object> options) throws JDOException;
 
+	/**
+	 * Create a new Table using the given definition
+	 * @param tableDef TableDef
+	 * @param options Map&lt;String,Object&gt;
+	 * @throws JDOException
+	 */
 	void createTable(TableDef tableDef, Map<String,Object> options) throws JDOException;
 
+	/**
+	 * Drop a Table
+	 * @param tableName String Table Name
+	 * @param cascade boolean Delete cascade dependent objects
+	 * @throws JDOException
+	 */
 	void dropTable(String tableName, boolean cascade) throws JDOException;
 
+	/**
+	 * Truncate a table
+	 * @param tableName String Table Name
+	 * @param cascade boolean Delete cascade rows at other tables referencing any row of this table by mean of a foreign key
+	 * @throws JDOException
+	 */
 	void truncateTable(String tableName, boolean cascade) throws JDOException;
 
+	/**
+	 * Open Table for Read/Write.
+	 * Basic tables only support seeking records by primary key.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the Table
+	 * @return Table
+	 * @throws JDOException
+	 */
 	Table openTable(Record recordInstance) throws JDOException;
 
+	/**
+	 * Open Indexed Table for Read/Write
+	 * Indexed tables support secondary indexes for seeking records.
+	 * @param recordInstance Instance of the Record subclass that will be used to read/write the Table
+	 * @return IndexableTable
+	 * @throws JDOException
+	 */
 	IndexableTable openIndexedTable(Record recordInstance) throws JDOException;
 	
+	/**
+	 * Open View for Read-Only.
+	 * Basic views only support seeking records by primary key.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read the View
+	 * @return View
+	 * @throws JDOException
+	 */
 	View openView(Record recordInstance) throws JDOException;
 
+	/**
+	 * Open Indexed View for Read-Only.
+	 * Indexed views support secondary indexes for seeking records.
+	 * @param recordInstance Instance of the Record subclass that will be used to read the View
+	 * @return IndexableView
+	 * @throws JDOException
+	 */
 	IndexableView openIndexedView(Record recordInstance) throws JDOException;
 
+	/**
+	 * Open Indexed View for Read-Only of two inner joined views.
+	 * @param recordInstance1 Record subclass that will be used to read the joined pair
+	 * @param joinedTableName String Joined table name
+	 * @param column Entry&lt;String,String&gt; Column name at base table and column name at the joined table
+	 * @return IndexableView
+	 * @throws JDOException
+	 */
 	IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String,String> column) throws JDOException;
 
+	/**
+	 * Open Indexed View for Read-Only of two outer joined views.
+	 * @param recordInstance1 Record subclass that will be used to read the joined pair
+	 * @param joinedTableName String Joined table name
+	 * @param column Entry&lt;String,String&gt; Column name at base table and column name at the joined table
+	 * @return IndexableView
+	 * @throws JDOException
+	 */
 	IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String,String> column) throws JDOException;
 
+	/**
+	 * Open Indexed View for Read-Only of two inner joined views.
+	 * @param recordInstance1 Record subclass that will be used to read the joined pair
+	 * @param joinedTableName String Joined table name
+	 * @param columns Entry&lt;String,String&gt;[] Array of pairs {base_column_name, joined_column_name}
+	 * @return IndexableView
+	 * @throws JDOException
+	 */
 	IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String,String>[] columns) throws JDOException;
 
+	/**
+	 * Open Indexed View for Read-Only of two outer joined views.
+	 * @param recordInstance1 Record subclass that will be used to read the joined pair
+	 * @param joinedTableName String Joined table name
+	 * @param columns Entry&lt;String,String&gt;[] Array of pairs {base_column_name, joined_column_name}
+	 * @return IndexableView
+	 * @throws JDOException
+	 */
 	IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String,String>[] columns) throws JDOException;
 	
 }
