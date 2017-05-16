@@ -21,6 +21,10 @@ public class SQLTerm extends Term {
 
 	private static final long serialVersionUID = 1L;
 
+	public SQLTerm(String columnName, String operator) throws ArrayIndexOutOfBoundsException {
+		super (columnName, operator);
+	}
+
 	public SQLTerm(String columnName, String operator, Object columnValue) throws ArrayIndexOutOfBoundsException {
 		super (columnName, operator, columnValue);
 	}
@@ -169,7 +173,7 @@ public class SQLTerm extends Term {
 	@Override
 	public String getText() {
 		String sTxt;
-		final Object value0 = aValues[0];
+		final Object value0 = (aValues==null ? null : aValues[0]);
 		if (value0 instanceof Term || value0 instanceof Predicate) {
 			if (sNestedColumn==null)
 				throw new NullPointerException("Column name for subquery cannot be null");
@@ -182,6 +186,8 @@ public class SQLTerm extends Term {
 				sTxt = sColumn+" "+Operator.BETWEEN+" "+value0.toString()+" AND "+value0.toString()+" ";
 			} else if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS)) {
 				sTxt = sOper+" ("+replaceParamaters(sColumn)+")";
+			} else if (sOper.equalsIgnoreCase(Operator.ISNULL) || sOper.equalsIgnoreCase(Operator.ISNOTNULL)) {
+				sTxt = sColumn+" "+sOper;
 			} else if (sOper.equalsIgnoreCase(Operator.IS) || sOper.equalsIgnoreCase(Operator.ISNOT)) {
 				sTxt = sColumn+" "+sOper+" "+(value0==null ? "NULL" : value0);
 			} else if (sOper.equalsIgnoreCase(Operator.IN) || sOper.equalsIgnoreCase(Operator.NOTIN)) {
@@ -217,7 +223,7 @@ public class SQLTerm extends Term {
 	@Override	
 	public String getTextParametrized() {
 		StringBuilder oTxt = new StringBuilder(254);
-		final Object value0 = aValues[0];
+		final Object value0 = (aValues==null ? null : aValues[0]);
 		if (value0 instanceof Term || value0 instanceof Predicate) {
 			if (sNestedColumn==null)
 				throw new NullPointerException("Column name for subquery cannot be null");
@@ -235,6 +241,8 @@ public class SQLTerm extends Term {
 				oTxt.append(sColumn).append(" ").append(Operator.BETWEEN).append(" ").append(q(aValues[0])).append(" AND ").append(q(aValues[1])+" ");
 			} else if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS)) {
 				oTxt.append(sOper).append(" (").append(sColumn).append(")");
+			} else if (sOper.equalsIgnoreCase(Operator.ISNULL) || sOper.equalsIgnoreCase(Operator.ISNOTNULL)) {
+				oTxt.append(sColumn).append(" ").append(sOper);
 			} else if (sOper.equalsIgnoreCase(Operator.IS) || sOper.equalsIgnoreCase(Operator.ISNOT)) {
 				oTxt.append(sColumn).append(" ").append(sOper).append(" ").append((value0==null ? "NULL" : q(value0)));
 			} else if (sOper.equalsIgnoreCase(Operator.IN) || sOper.equalsIgnoreCase(Operator.NOTIN)) {

@@ -6,6 +6,8 @@ import java.lang.reflect.InvocationTargetException;
 import org.judal.storage.query.Part;
 import org.judal.storage.query.Predicate;
 
+import com.knowgate.typeutils.ObjectFactory;
+
 public class SQLPredicate extends Predicate {
 
 	private static final long serialVersionUID = 1L;
@@ -18,6 +20,7 @@ public class SQLPredicate extends Predicate {
 	 * @return this QueryPredicate
 	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public SQLPredicate add(Object... constructorParameters)
 		throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		Class<?>[] parameterClasses = new Class<?>[constructorParameters.length];
@@ -29,7 +32,7 @@ public class SQLPredicate extends Predicate {
 			if (Part.class.isAssignableFrom(parameterClasses[p]))
 				parameterClasses[p] = Part.class;
 		}
-		Constructor<SQLTerm> constructor = SQLTerm.class.getConstructor(parameterClasses);
+		Constructor<SQLTerm> constructor = (Constructor<SQLTerm>) ObjectFactory.getConstructor(SQLTerm.class, parameterClasses);
 		super.addPart(constructor.newInstance(constructorParameters));
 		return this;
 	}

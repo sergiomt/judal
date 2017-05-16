@@ -12,6 +12,7 @@ package org.judal.storage.query.sql;
  */
 
 import java.lang.reflect.Constructor;
+
 import java.sql.ParameterMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,20 +20,24 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Types;
+
 import java.util.Arrays;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 
-import org.judal.jdbc.JDBCRelationalView;
-import org.judal.jdbc.RDBMS;
 import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
+import org.judal.storage.query.Expression;
 import org.judal.storage.table.ArrayListRecordSet;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
+import org.judal.storage.table.SingleColumnRecord;
+
+import org.judal.jdbc.RDBMS;
+import org.judal.jdbc.JDBCRelationalView;
 
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;
@@ -41,6 +46,20 @@ public class SQLQuery extends AbstractQuery {
 
 	private static final long serialVersionUID = 1L;
 	
+	@SuppressWarnings("rawtypes")
+	private static Class ArrayRecordJava;
+	@SuppressWarnings("rawtypes")
+	private static Class ArrayRecordScala;
+
+	static {
+		try {
+			ArrayRecordJava = Class.forName("org.judal.storage.java.ArrayRecord");
+		} catch (ClassNotFoundException ignore) { }
+		try {
+			ArrayRecordScala = Class.forName("org.judal.storage.scala.ArrayRecord");
+		} catch (ClassNotFoundException ignore) { }
+	}
+
 	private Constructor<? extends Record> recordConstructor;
 	private Object[] constructorParameters;
 	
@@ -80,7 +99,14 @@ public class SQLQuery extends AbstractQuery {
 			try {
 				constructorParameters = StorageObjectFactory.filterParameters(recordConstructor.getParameters(), new Object[]{getView().getDataSource(), getView().getTableDef()});
 			} catch (InstantiationException e) {
-				throw new JDOException(e.getMessage(), e);
+				StringBuilder constructorSignature = new StringBuilder();
+				constructorSignature.append(getResultClass()==null ? "null" : getResultClass().getName());
+				constructorSignature.append("(");
+				constructorSignature.append(getView().getDataSource().getClass().getName());
+				constructorSignature.append(",");
+				constructorSignature.append(getView().getTableDef().getClass().getName());
+				constructorSignature.append(")");
+				throw new JDOException(e.getMessage() + " getting constructor " + constructorSignature.toString(), e);
 			}
 		}
 		return StorageObjectFactory.newRecord(recordConstructor, constructorParameters);
@@ -117,6 +143,9 @@ public class SQLQuery extends AbstractQuery {
 				}
 				if (DebugFile.trace) DebugFile.writeln("PreparedStatement.setNull("+String.valueOf(p)+","+String.valueOf(pType)+")");
 				stmt.setNull(p++, pType);
+			} else if (oParam instanceof Expression) {
+				if (DebugFile.trace) DebugFile.writeln("acknowledge expression "+oParam.toString());
+				p++;
 			} else {
 				if (DebugFile.trace) DebugFile.writeln("PreparedStatement.setObject("+String.valueOf(p)+","+oParam.toString()+")");
 				stmt.setObject(p++, oParam);
@@ -265,17 +294,19 @@ public class SQLQuery extends AbstractQuery {
 		return getView().getConnection().prepareStatement(sql, ctype, ResultSet.CONCUR_READ_ONLY);
 	}
 	
-	private <R extends Record> int fetchRowsAsArrays(Constructor<? extends Record> recordConstructor, ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
+	@SuppressWarnings("unchecked")
+	private <R extends Record> int fetchRowsAsArrays(ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
 		int iRetVal = 0;
 		boolean bHasNext = true;
 		
 		R oRow = (R) newRecord();
-		final int iColCount = oRow.columns().length;
+		final int iColCount = Math.min(oRow.columns().length, oRSet.getMetaData().getColumnCount());
 		if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" maxrows="+String.valueOf(iMaxRow));			
 		while (bHasNext && iRetVal<iMaxRow) {
 			iRetVal++;
 			for (int iCol=1; iCol<=iColCount; iCol++) {
 				Object oFieldValue = oRSet.getObject(iCol);
+				if (DebugFile.trace) DebugFile.writeln("ResultSet.getObject("+iCol+") = "+oFieldValue);				
 				oRow.put (iCol, oRSet.wasNull() ? null : oFieldValue);
 			} // next
 
@@ -283,12 +314,13 @@ public class SQLQuery extends AbstractQuery {
 
 			if (bHasNext = oRSet.next())
 				oRow = (R) newRecord();
-			if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" has next="+String.valueOf(bHasNext));
+			// if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" has next="+String.valueOf(bHasNext));
 		} // wend			
 		return iRetVal;
 	}
 
-	private <R extends Record> int fetchRowsAsMaps(Constructor<? extends Record> recordConstructor, ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
+	@SuppressWarnings("unchecked")
+	private <R extends Record> int fetchRowsAsMaps(ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
 		int iRetVal = 0;
 		boolean bHasNext = true;
 		
@@ -313,11 +345,35 @@ public class SQLQuery extends AbstractQuery {
 
 			if (bHasNext = oRSet.next())
 				oRow = (R) newRecord();
-			if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" has next="+String.valueOf(bHasNext));
+			// if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" has next="+String.valueOf(bHasNext));
 		} // wend			
 		return iRetVal;
 	}
 	
+	@SuppressWarnings("unchecked")
+	private <R extends Record> int fetchRowsAsSingleColumn(ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
+		int iRetVal = 0;
+		boolean bHasNext = true;
+		String viewName = getView().getAlias();
+		if (null==viewName) viewName =  getView().name();
+		String colName = oRSet.getMetaData().getColumnName(1);
+		
+		recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(getResultClass(), new Class<?>[]{String.class.asSubclass(String.class)});
+		R oRow = (R) StorageObjectFactory.newRecord(recordConstructor, viewName, colName);
+
+		while (bHasNext && iRetVal<iMaxRow) {
+			iRetVal++;
+			oRow.setKey(oRSet.getObject(1));
+
+			recordSet.add(oRow);
+
+			if (bHasNext = oRSet.next())
+				oRow = (R) (R) StorageObjectFactory.newRecord(recordConstructor, viewName, colName);
+		} // wend			
+		return iRetVal;
+	}
+
+	@SuppressWarnings("unchecked")
 	private <R extends Record> ArrayListRecordSet<R> fetchResultSet (ResultSet oRSet)
 			throws SQLException, SQLFeatureNotSupportedException, ArrayIndexOutOfBoundsException, InstantiationException, IllegalAccessException
 	{
@@ -346,10 +402,13 @@ public class SQLQuery extends AbstractQuery {
 		if (DebugFile.trace) DebugFile.writeln("has next " + String.valueOf(bHasNext));
 
 		if (bHasNext) {
-			if (newRecord().getClass().getName().endsWith("ArrayRecord"))
-				iRetVal = fetchRowsAsArrays(recordConstructor, oRSet, recordSet, iMaxRow);
+			if ((ArrayRecordJava!=null && ArrayRecordJava.isAssignableFrom(getResultClass())) ||
+				(ArrayRecordScala!=null && ArrayRecordScala.isAssignableFrom(getResultClass())))
+				iRetVal = fetchRowsAsArrays(oRSet, recordSet, iMaxRow);
+			else if (SingleColumnRecord.class.isAssignableFrom(getResultClass()))
+				iRetVal = fetchRowsAsSingleColumn(oRSet, recordSet, iMaxRow);				
 			else
-				iRetVal = fetchRowsAsMaps(recordConstructor, oRSet, recordSet, iMaxRow);				
+				iRetVal = fetchRowsAsMaps(oRSet, recordSet, iMaxRow);				
 		} // fi
 
 		if (0==iRetVal || iRetVal<iMaxRow) {
