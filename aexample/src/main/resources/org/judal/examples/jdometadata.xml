@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jdo xmlns="http://java.sun.com/xml/ns/jdo/jdo" schema="public">
+  <package name="org.judal.examples">
+    <class name="Student" table="student">
+      <column name="id_student" jdbc-type="INTEGER" allows-null="false" />
+      <column name="dt_created" jdbc-type="TIMESTAMP" allows-null="false" default-value="NOW" />
+      <column name="first_name" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="last_name" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="date_of_birth" jdbc-type="DATE" allows-null="true" />
+      <column name="photo" jdbc-type="LONGVARBINARY" allows-null="true" />
+      <primary-key name="pk_student" column="id_student"/>
+    </class>
+    <class name="Course" table="course">
+      <column name="id_course" jdbc-type="INTEGER" allows-null="false" primary-key="true" />
+      <column name="code" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="nm_course" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="dt_created" jdbc-type="TIMESTAMP" allows-null="false" default-value="NOW" />
+      <column name="dt_start" jdbc-type="TIMESTAMP" allows-null="true" />
+      <column name="dt_end" jdbc-type="TIMESTAMP" allows-null="true" />
+      <column name="price" jdbc-type="DECIMAL" length="8" scale="2"/>
+      <column name="description" jdbc-type="LONGVARCHAR" />
+      <primary-key name="pk_course" column="id_course"/>
+    </class>
+    <class name="StudentCourse" table="student_x_course">
+      <column name="id_student" target="student" target-field="id_student" jdbc-type="INTEGER" allows-null="false"  />
+      <column name="id_course" target="course" target-field="id_course" jdbc-type="INTEGER" allows-null="false"  />
+      <primary-key name="pk_student_x_course">
+        <column name="id_student" />
+        <column name="id_course" />
+      </primary-key>
+      <foreign-key table="student" name="f1_student_x_course">
+        <column name="id_student" />
+      </foreign-key>
+      <foreign-key table="course" name="f2_student_x_course">
+        <column name="id_course" />
+      </foreign-key>
+    </class>
+  </package>
+</jdo>

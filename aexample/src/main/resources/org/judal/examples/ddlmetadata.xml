@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<database xmlns="http://db.apache.org/ddlutils/schema/1.1" name="StudentCourses">
+  <table name="student">
+    <column name="id_student" primaryKey="true" required="true" type="INTEGER" size="10" autoIncrement="true"></column>
+    <column name="dt_created" primaryKey="false" type="TIMESTAMP" size="29,6" default="now()" ></column>
+    <column name="first_name" primaryKey="false" required="true" type="VARCHAR" size="100" ></column>
+    <column name="last_name" primaryKey="false" required="true" type="VARCHAR" size="100" ></column>
+    <column name="date_of_birth" primaryKey="false" required="false" type="DATE" ></column>
+    <column name="photo" primaryKey="false" required="false" type="LONGVARBINARY" ></column>
+  </table>
+  <table name="course">
+    <column name="id_course" primaryKey="true" required="true" type="INTEGER" size="10" autoIncrement="true"></column>
+    <column name="dt_created" primaryKey="false" type="TIMESTAMP" size="29,6" default="now()" ></column>
+    <column name="code" primaryKey="false" required="true" type="VARCHAR" size="100" ></column>
+    <column name="nm_course" primaryKey="false" required="true" type="VARCHAR" size="100" ></column>
+    <column name="dt_start" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" ></column>
+    <column name="dt_end" primaryKey="false" required="false" type="TIMESTAMP" size="29,6" ></column>
+    <column name="price" primaryKey="false" required="false" type="DECIMAL" size="8,2" ></column>
+    <column name="description" primaryKey="false" required="false" type="LONGVARCHAR" ></column>
+    <unique name="u1_course" ><unique-column name="code" /></unique>
+  </table>
+  <table name="student_x_course">
+    <column name="id_student" primaryKey="true" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_course" primaryKey="true" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <foreign-key foreignTable="student">
+      <reference local="id_student" foreign="id_student"/>
+    </foreign-key>
+    <foreign-key foreignTable="course">
+      <reference local="id_course" foreign="id_course"/>
+    </foreign-key>
+  </table>
+</database>
