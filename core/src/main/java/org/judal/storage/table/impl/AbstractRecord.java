@@ -20,6 +20,7 @@ import java.util.Map;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
@@ -112,6 +113,8 @@ public abstract class AbstractRecord implements Record {
 	}
 
 	public AbstractRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
+		if (null==dataSource)
+			throw new JDOUserException("No DataSource specified and no one provided by EngineFactory neither");
 		tableDef = dataSource.getTableDef(tableName);
 		if (null==tableDef)
 			throw new JDOException("Table "+tableName+" does not exist or could not be read from the data source");
@@ -953,7 +956,6 @@ public abstract class AbstractRecord implements Record {
 	public BigDecimal put(String sColName, String sDecVal, DecimalFormat oPattern) throws ParseException {
 		return (BigDecimal) put(sColName, oPattern.parse(sDecVal));
 	}
-
 
 	public String toXML(String sIdent, Map<String,String> oAttrs, Locale oLoc) {
 		if (oLoc.getLanguage().equals("es"))
