@@ -40,6 +40,7 @@ import javax.transaction.Status;
 import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
+import org.judal.jdbc.hsql.HsqlSequenceGenerator;
 import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.jdc.JDCConnectionPool;
 import org.judal.jdbc.metadata.SQLFunctions;
@@ -58,6 +59,11 @@ import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;
 import com.knowgate.stringutils.Str;
 
+/**
+ * Abstract base class for JDBC DataSource implementations
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public abstract class JDBCDataSource extends JDCConnectionPool implements DataSource, javax.sql.DataSource {
 
 	// *****************
@@ -75,13 +81,24 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 	private static final String VERSION = "1.0.0";
 
+	/**
+	 * 
+	 * @param properties Map&lt;String,String&gt; Valid property names are listed at DataSource.PropertyNames
+	 * @param transactManager TransactionManager
+	 * @throws SQLException
+	 * @throws AccessControlException
+	 * @throws NumberFormatException
+	 * @throws ClassNotFoundException
+	 * @throws NullPointerException
+	 * @throws UnsatisfiedLinkError
+	 */
 	public JDBCDataSource(Map<String,String> properties, TransactionManager transactManager)
 			throws SQLException, AccessControlException, NumberFormatException,
 			ClassNotFoundException, NullPointerException, UnsatisfiedLinkError {
 		super(properties);
 		props = new HashMap<String,String>(17);
 		props.putAll(properties);
-		String metaDataFromDb = props.getOrDefault("useDatabaseMetadata", "true");
+		String metaDataFromDb = props.getOrDefault(USE_DATABASE_METADATA, DEFAULT_USE_DATABASE_METADATA);
 		useDatabaseMetadata = metaDataFromDb.equalsIgnoreCase("true") || metaDataFromDb.equalsIgnoreCase("yes") || metaDataFromDb.equalsIgnoreCase("1") || metaDataFromDb.equalsIgnoreCase("");
 		transactMan = transactManager;
 		metaData = new SchemaMetaData();
@@ -110,8 +127,18 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		}
 	}
 	
+	/**
+	 * <p>Call a stored procedure or PL/pgSQL function in the case of PostgreSQL</p>.
+	 * The procedure will be invoked using JDBC syntax { call procedureName('param1.,.'para2') }
+	 * except when using PostgreSQL in which case a SELECT procedureName('param1.,.'para2')
+	 * will be performed.
+	 * @param procedureName String Procedure name
+	 * @param parameters Param...
+	 * @return Object Procedure return value.
+	 * If the procedure returns a ResultSet then it will be converted to List&lt;Map&lt;String,Object&gt;&gt;
+	 */
 	@Override
-	public Object call(String statement, Param... parameters) throws JDOException {
+	public Object call(String procedureName, Param... parameters) throws JDOException {
 		JDCConnection conn = null;
 		Object retval;
 		try {
@@ -123,7 +150,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 				paramHolders = String.join(",", qMarks);
 			}
 			if (conn.getDataBaseProduct()==RDBMS.POSTGRESQL.intValue()) {
-				PreparedStatement stmt = conn.prepareStatement("SELECT "+statement+"("+paramHolders+")");
+				PreparedStatement stmt = conn.prepareStatement("SELECT "+procedureName+"("+paramHolders+")");
 		        if (paramHolders.length()>0)
 		        	for (int p=0; p<parameters.length; p++)
 		        		stmt.setObject(p+1, parameters[p].getValue(), parameters[p].getType());
@@ -135,7 +162,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		        	rset.close();
 		        	stmt.close();
 			} else {
-				CallableStatement call = conn.prepareCall("{ call "+statement+"("+paramHolders+") }");
+				CallableStatement call = conn.prepareCall("{ call "+procedureName+"("+paramHolders+") }");
 		        if (paramHolders.length()>0)
 		        	for (int p=0; p<parameters.length; p++)
 		        		call.setObject(p+1, parameters[p].getValue(), parameters[p].getType());
@@ -155,6 +182,11 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		return transactMan;
 	}
 
+	/**
+	 * @return <b>false</b> if this DataSource is not using a transaction manager,
+	 * otherwise <b>true</b> if getTransactionManager().getTransaction().getStatus() is not
+	 * STATUS_NO_TRANSACTION, STATUS_COMMITTED nor STATUS_ROLLEDBACK
+	 */
 	@Override
 	public boolean inTransaction() throws JDOException {
 		try {
@@ -193,7 +225,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	// ----------------------------------------------------------
 
 	/**
-	 * <p>Get a single property from the .CNF file for this DBBind.</p>
+	 * <p>Get a single property.</p>
 	 * @param sVarName Property Name
 	 * @param sDefault Default Value
 	 * @return Value of property or sDefault if no property with such name was found.
@@ -324,8 +356,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		}
 
 		if (!Str.in(tableName, Functions.systemTables())) {
-			metaData.removeTable(tableName);
-			metaData.addTable(tableDef);
+			metaData.removeTable(tableName, null);
+			metaData.addTable(tableDef, null);
 			if (useDatabaseMetadata)
 				metaData.getPackage("default").addClass(tableDef);
 			if (DebugFile.trace) DebugFile.writeln("Table " + tableDef.getName()+ " added to cache");
@@ -493,7 +525,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			oTable.setUnmodifiable();
 		} // wend
 
-		for (String t : oUnreadableTables) metaData.removeTable(t);
+		for (String t : oUnreadableTables) metaData.removeTable(t, null);
 
 		if (DebugFile.trace) {
 			if (nWarnings==0)
@@ -966,6 +998,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			return new OrclSequenceGenerator(this, name);
 		else if (databaseProductId.equals(RDBMS.POSTGRESQL))
 			return new PgSequenceGenerator(this, name);
+		else if (databaseProductId.equals(RDBMS.HSQLDB))
+			return new HsqlSequenceGenerator(this, name);
 		else
 			throw new JDOUnsupportedOptionException(databaseProductId+" does not support sequence generation");
 	}

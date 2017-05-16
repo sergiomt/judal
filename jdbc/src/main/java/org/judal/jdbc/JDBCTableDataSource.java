@@ -1,5 +1,17 @@
 package org.judal.jdbc;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,18 +30,40 @@ import org.judal.metadata.JoinDef;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
+import org.judal.storage.DataSource;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 
 import com.knowgate.debug.DebugFile;
 
+/**
+ * Implementation of JDBC table data source
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDataSource {
 	
+	/**
+	 * Constructor
+	 * @param properties Map&lt;String, String&gt; As listed in DataSource.PropertyNames
+	 * @param transactManager TransactionManager
+	 * @throws SQLException
+	 * @throws NumberFormatException
+	 * @throws ClassNotFoundException
+	 * @throws NullPointerException
+	 * @throws UnsatisfiedLinkError
+	 */
 	public JDBCTableDataSource(Map<String, String> properties, TransactionManager transactManager) throws SQLException, NumberFormatException,
 			ClassNotFoundException, NullPointerException, UnsatisfiedLinkError {
 		super(properties,transactManager);
 	}
 
+	/**
+	 * Open relational table for read/write.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the relational table
+	 * @return JDBCRelationalTable
+	 * @throws JDOException
+	 */
 	@Override
 	public JDBCRelationalTable openTable(Record tableRecord) throws JDOException {
 		JDBCRelationalTable tbl = new JDBCRelationalTable(this, tableRecord);
@@ -47,16 +81,34 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		return tbl;
 	}
 
+	/**
+	 * Open relational table for read/write.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the relational table
+	 * @return JDBCRelationalTable
+	 * @throws JDOException
+	 */
 	@Override
 	public JDBCRelationalTable openIndexedTable(Record tableRecord) throws JDOException {
 		return openTable(tableRecord);
 	}
 	
+	/**
+	 * Open relational view for read-only.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read the relational view
+	 * @return JDBCRelationalView
+	 * @throws JDOException
+	 */
 	@Override
 	public JDBCRelationalView openView(Record viewRecord) throws JDOException {
 		return new JDBCRelationalView(this, viewRecord);
 	}
 
+	/**
+	 * Open relational view for read-only.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read the relational view
+	 * @return JDBCRelationalView
+	 * @throws JDOException
+	 */
 	@Override
 	public JDBCRelationalView openIndexedView(Record viewRecord) throws JDOException {
 		return new JDBCRelationalView(this, viewRecord);
@@ -130,16 +182,30 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		return new JDBCRelationalView(this, tdef);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public SchemaMetaData getMetaData() {
 		return metaData;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void setMetaData(SchemaMetaData smd) {
 		metaData = smd;
 	}
 
+	
+	/**
+	 * Create new SQL table definition
+	 * @param tableName String Table Name
+	 * @param options Map&lt;String,Object&gt; May include DataSource.CATALOG and DataSource.SCHEMA
+	 * @return SQLTableDef
+	 * @throws JDOException
+	 */
 	@Override
 	public SQLTableDef createTableDef(String tableName, Map<String,Object> options) throws JDOException {
 		SQLTableDef tableDef;
@@ -149,14 +215,17 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
 		if (options!=null) {
-			if (options.containsKey("catalog"))
-				tableDef.setCatalog((String) options.get("catalog"));
-			if (options.containsKey("schema"))
-				tableDef.setSchema((String) options.get("schema"));
+			if (options.containsKey(DataSource.CATALOG))
+				tableDef.setCatalog((String) options.get(DataSource.CATALOG));
+			if (options.containsKey(DataSource.SCHEMA))
+				tableDef.setSchema((String) options.get(DataSource.SCHEMA));
 		}
 		return tableDef;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void createTable(TableDef tableDef, Map<String, Object> options) throws JDOException {
 		JDCConnection conn = null;
@@ -185,11 +254,17 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void dropTable(String tableName, boolean cascade) throws JDOException {
 		execute("DROP TABLE "+tableName+(cascade ? " CASCADE" : ""));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void truncateTable(String tableName, boolean cascade) throws JDOException {
 		execute("TRUNCATE TABLE "+tableName+(cascade ? " CASCADE" : ""));

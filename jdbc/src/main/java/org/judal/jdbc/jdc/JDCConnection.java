@@ -11,6 +11,7 @@ package org.judal.jdbc.jdc;
  * either express or implied.
  */
 import java.util.Map;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -36,6 +37,7 @@ import com.knowgate.gis.LatLong;
 
 import org.judal.jdbc.HStore;
 import org.judal.jdbc.RDBMS;
+import org.judal.metadata.ColumnDef;
 import org.judal.transaction.TransactionalResource;
 
 
@@ -720,7 +722,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 				oStmt.setBigDecimal (iParamIndex, new java.math.BigDecimal(oParamValue.toString()));
 
 			else if ((oParamClass.getName().equals("java.sql.Timestamp") ||
-					oParamClass.getName().equals("java.util.Date"))    &&
+					oParamClass.getName().equals("java.util.Date") || oParamClass.getName().equals("java.util.Calendar"))    &&
 					iSQLType==Types.DATE) {
 				try {
 					Class[] aTimestamp = new Class[1];
@@ -730,8 +732,10 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 					Object oDATE;
 					if (oParamClass.getName().equals("java.sql.Timestamp")) {
 						oDATE = cNewDATE.newInstance(new Object[]{oParamValue});
-					} else {
+					} else if (oParamValue instanceof Date) {
 						oDATE = cNewDATE.newInstance(new Object[]{new Timestamp(((java.util.Date)oParamValue).getTime())});
+					} else {
+						oDATE = cNewDATE.newInstance(new Object[]{new Timestamp(((java.util.Calendar)oParamValue).getTimeInMillis())});
 					}
 					oStmt.setObject (iParamIndex, oDATE, iSQLType);
 				} catch (ClassNotFoundException cnf) {
@@ -780,6 +784,12 @@ public class JDCConnection extends TransactionalResource implements Connection, 
             nBinded = bindParameterOrcl (oStmt, iParamIndex, oParamValue, iSQLType);
 
 		} else {
+			
+			// if (DebugFile.trace) {
+			// DebugFile.writeln("JDCConnection.bindParameter("+iParamIndex+"," +
+			// 		(null==oParamValue ? "null" : oParamValue.getClass().getName()+" "+oParamValue.toString()) + ","+ 
+			// 		ColumnDef.typeName(iSQLType)+")");
+			// }
 
 			String sParamClassName;
 			if (null!=oParamValue)
@@ -790,12 +800,16 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			if ((Types.TIMESTAMP==iSQLType) && (oParamValue!=null)) {
 				if (sParamClassName.equals("java.util.Date"))
 					oStmt.setTimestamp(iParamIndex, new Timestamp(((java.util.Date)oParamValue).getTime()));
+				else if (oParamValue instanceof Calendar)
+					oStmt.setTimestamp(iParamIndex, new Timestamp(((java.util.Calendar)oParamValue).getTimeInMillis()));
 				else
 					oStmt.setObject(iParamIndex, oParamValue, iSQLType);
 			}
 			else if ((Types.DATE==iSQLType) && (oParamValue!=null)) {
 				if (sParamClassName.equals("java.util.Date"))
 					oStmt.setDate(iParamIndex, new java.sql.Date(((java.util.Date)oParamValue).getTime()));
+				else if (oParamValue instanceof Calendar)
+					oStmt.setDate(iParamIndex, new java.sql.Date(((java.util.Calendar)oParamValue).getTimeInMillis()));
 				else
 					oStmt.setObject(iParamIndex, oParamValue, iSQLType);
 			}
