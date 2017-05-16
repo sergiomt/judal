@@ -114,25 +114,21 @@ public class JdoXmlMetadata implements MetadataScanner {
 					if (DebugFile.trace)
 						DebugFile.writeln("class="+clss.getAttlistClass().getName()+" table="+clss.getAttlistClass().getTable());
 			    	TableDef tbl = createTableDef(clss.getAttlistClass().getTable());
-			    	pckg.addClass(tbl);
 			    	tbl.setRecordClassName(pack.getAttlistPackage().getName()+"."+clss.getAttlistClass().getName());
 			    	List<com.sun.java.xml.ns.jdo.jdo._Class.Choice> clssChoices = clss.getChoiceList();
 			    	if (clssChoices!=null) {
 				    	for (com.sun.java.xml.ns.jdo.jdo._Class.Choice c : clssChoices) {
 			    			if (c.ifColumn()) {
-			    				AttlistColumn col = c.getColumn().getAttlistColumn();
-			    				String cname = col.getName().trim();
-			    				String tname = col.getJdbcType().trim();
-			    				String clength = col.getLength();
-			    				String cscale = col.getScale();
-			    				String dvalue = col.getDefaultValue();
-			    				String target = col.getTarget();
-			    				boolean nullable;
-			    				if (col.getAllowsNull()==null)
-			    					nullable = true;
-			    				else
-			    					nullable = col.getAllowsNull().equals(AllowsNull.TRUE);
-			    				int ctype = ColumnDef.getSQLType(tname);
+			    				final AttlistColumn col = c.getColumn().getAttlistColumn();
+			    				final String cname = col.getName().trim();
+			    				final String tname = col.getJdbcType().trim();
+			    				final String clength = col.getLength();
+			    				final String cscale = col.getScale();
+			    				final String dvalue = col.getDefaultValue();
+			    				final String target = col.getTarget();
+			    				final String targetField = col.getTargetField();
+			    				final boolean nullable = col.getAllowsNull()==null ? true : col.getAllowsNull().equals(AllowsNull.TRUE);
+			    				final int ctype = ColumnDef.getSQLType(tname);
 								if (DebugFile.trace)
 									DebugFile.writeln("column="+cname+" "+tname+"("+clength+","+cscale+") "+(nullable ? "null" : "not null")+" default "+dvalue);
 			    				switch (ctype) {
@@ -151,21 +147,26 @@ public class JdoXmlMetadata implements MetadataScanner {
 			    				case Types.LONGNVARCHAR:
 			    				case Types.LONGVARBINARY:
 			    					if (clength==null || clength.length()==0)
-			    						clength = String.valueOf(ColumnDef.getDefaultPrecision(ctype));
-			    					tbl.addColumnMetadata("", cname, ctype, Integer.parseInt(clength), 0, nullable, null, null, dvalue, false);
+			    						tbl.addColumnMetadata("", cname, ctype, ColumnDef.getDefaultPrecision(ctype), 0, nullable, null, null, dvalue, false);
+			    					else
+			    						tbl.addColumnMetadata("", cname, ctype, Integer.parseInt(clength), 0, nullable, null, null, dvalue, false);
 			    					break;
 			    				default:
 			    					tbl.addColumnMetadata("", cname, ctype, nullable);
+			    					DebugFile.writeln("************* SETTING DEFAULT VALUE "+dvalue+" FOR COLUMN "+cname);
 			    					tbl.getColumnByName(cname).setDefaultValue(dvalue);
 			    				}
+			    				final ColumnDef newcol = tbl.getColumnByName(cname);
 			    				if (target!=null && target.trim().length()>0)
-			    					tbl.getColumnByName(cname).setTarget(target);
+			    					newcol.setTarget(target);
+			    				if (targetField!=null && targetField.trim().length()>0)
+			    					newcol.setTargetField(targetField);
 			    				List<Extension> extensions = c.getColumn().getExtensionList();
 			    				if (extensions!=null)
 			    					for (Extension ext : extensions) {
 			    						AttlistExtension keyval = ext.getAttlistExtension();
 			    						if (keyval.getKey().equalsIgnoreCase("family"))
-			    							tbl.getColumnByName(cname).setFamily(keyval.getValue());
+			    							newcol.setFamily(keyval.getValue());
 			    					}
 			    			}
 			    			if (c.ifPrimaryKey()) {
@@ -215,7 +216,7 @@ public class JdoXmlMetadata implements MetadataScanner {
 			    			}
 			    		} // next			    		
 			    	}
-			    	metadata.addTable(tbl);	    			
+			    	metadata.addTable(tbl, pckg.getName());
 	    		}
 	    	} // next
 	    }

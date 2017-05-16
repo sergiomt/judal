@@ -192,7 +192,7 @@ public class DBTableDataSource extends DBDataSource implements TableDataSource {
 	@Override
 	public TableDef createTableDef(String tableName, Map<String, Object> options) throws JDOException {
 		TableDef tblDef = new TableDef(tableName);
-		oSmd.addTable(tblDef);
+		oSmd.addTable(tblDef,null);
 		return tblDef;
 	}
 

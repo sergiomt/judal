@@ -285,7 +285,7 @@ public class HBTableDataSource implements TableDataSource {
 			} // next
 			try {
 				oAdm.createTable(oTds);
-				oSmd.addTable(tableDef);
+				oSmd.addTable(tableDef,null);
 			} catch (IOException ioe) {
 				throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
 			}

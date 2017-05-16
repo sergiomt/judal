@@ -161,7 +161,7 @@ public class KeySpace implements TableDataSource {
 			try {
 				KeyspaceDefinition oKsDef = oCassandraCluster.describeKeyspace(sKeySpaceName);
 				for (ColumnFamilyDefinition oCfDef : oKsDef.getCfDefs())
-					oSch.addTable(readTable(oCfDef));
+					oSch.addTable(readTable(oCfDef), null);
 			} catch (HectorException hcpt) {
 				throw new JDOException(hcpt.getMessage(), hcpt);
 			}

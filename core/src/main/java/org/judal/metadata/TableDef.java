@@ -102,12 +102,15 @@ public class TableDef extends ViewDef {
 			builder.append(cdef.toJdoXml()).append("\n");
 		if (getPrimaryKeyMetadata()!=null)
 			builder.append(getPrimaryKeyMetadata().toJdoXml()).append("\n");
-		for (ForeignKeyDef fk : getForeignKeys())
-			builder.append(fk.toJdoXml()).append("\n");
-		for (UniqueIndexDef idx : getUniques())
-			builder.append(idx.toJdoXml()).append("\n");
-		for (NonUniqueIndexDef idx : getIndices())
-			builder.append(idx.toJdoXml()).append("\n");
+		if (getForeignKeys()!=null)
+			for (ForeignKeyDef fk : getForeignKeys())
+				builder.append(fk.toJdoXml()).append("\n");
+		if (getUniques()!=null)
+			for (UniqueIndexDef idx : getUniques())
+				builder.append(idx.toJdoXml()).append("\n");
+		if (getIndices()!=null)
+			for (NonUniqueIndexDef idx : getIndices())
+				builder.append(idx.toJdoXml()).append("\n");
 		builder.append("    </class>");
 		return builder.toString();
 	}

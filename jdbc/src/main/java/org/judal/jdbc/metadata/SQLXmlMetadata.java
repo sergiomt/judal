@@ -100,16 +100,19 @@ public class SQLXmlMetadata implements MetadataScanner {
 				}
 				tdef.addForeignKeyMetadata(fdef);
 			}
+			
+			metadata.addTable(tdef, null);
+			
 			for (Index idx : tbl.getIndices()) {
-				LinkedList<ColumnMetadata> cols = new LinkedList<ColumnMetadata>();
+				LinkedList<ColumnMetadata> cols = new LinkedList<>();
 				for (IndexColumn icol : idx.getColumns())
 					cols.add(tdef.getColumnByName(icol.getName()));
-				if (idx.isUnique())
-					metadata.addIndex(new UniqueIndexDef(tbl.getName(), idx.getName(), cols, Type.ONE_TO_ONE));
-				else
-					metadata.addIndex(new NonUniqueIndexDef(tbl.getName(), idx.getName(), cols, Type.ONE_TO_MANY));
+				String[] colNames = new String[cols.size()];
+				int c = 0;
+				for (ColumnMetadata col : cols)
+					colNames[c++] = col.getName();
+				metadata.addIndex(new SQLIndex(tbl.getName(), idx.getName(), colNames, idx.isUnique()));
 			}
-			metadata.addTable(tdef);
 		}
 		return metadata;
 	}

@@ -30,7 +30,6 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -1287,26 +1286,31 @@ public class SQLTableDef extends TableDef implements Scriptable {
 			int c = 0;
 			for (ColumnMetadata col : getPrimaryKeyMetadata().getColumns())
 				pkcols[c++] = col.getName();
-			builder.append("CONSTRAINT ").append((getPrimaryKeyMetadata().getName()==null ? "pk_"+getName() : getPrimaryKeyMetadata().getName())).append(" PRIMARY KEY (").append(String.join(",", pkcols)).append("),\n");
+			builder.append("CONSTRAINT ").append((getPrimaryKeyMetadata().getName()==null ? "pk_"+getName() : getPrimaryKeyMetadata().getName()));
+			builder.append(" PRIMARY KEY (").append(String.join(",", pkcols)).append("),\n");
 		}
 		int n = 0;
-		for (ColumnDef c : getColumns()) {
-			if (c.getConstraint()!=null)
-				builder.append("CONSTRAINT ck_").append(String.valueOf(++n)+"_"+getName()).append(" CHECK ("+c.getConstraint()+"),\n");
+		if (!RDBMS.HSQLDB.equals(dbms)) {
+			for (ColumnDef c : getColumns()) {
+				if (c.getConstraint()!=null)
+					builder.append("CONSTRAINT ck_").append(String.valueOf(++n)+"_"+getName()).append(" CHECK ("+c.getConstraint()+"),\n");
+			}
 		}
 		n = 0;
 		if (getForeignKeys()!=null) {
 			for (ForeignKeyMetadata fk : getForeignKeys()) {
 				builder.append("CONSTRAINT ").append(fk.getName()==null ? "fk_"+String.valueOf(++n)+getName() : fk.getName());
+				if (RDBMS.HSQLDB.equals(dbms))
+					builder.append(" FOREIGN KEY ");
 				ArrayList<String> fkcols = new ArrayList<String>(fk.getColumns().length);
 				for (ColumnMetadata c : fk.getColumns())
 					fkcols.add(c.getName());
 				builder.append(" (").append(String.join(",", fkcols)).append(") REFERENCES ").append(fk.getTable());
 				fkcols.clear();
 				for (ColumnMetadata c : fk.getColumns())
-					fkcols.add(getColumnByName(c.getName()).getTarget());
-				builder.append(" (").append(String.join(",", fkcols)).append("),\n").append(fk.getTable());
-			}			
+					fkcols.add(getColumnByName(c.getName()).getTargetField());
+				builder.append(" (").append(String.join(",", fkcols)).append("),\n");
+			}
 		}
 		builder.setLength(builder.length()-2); // remove trailing comma
 		builder.append("\n)");

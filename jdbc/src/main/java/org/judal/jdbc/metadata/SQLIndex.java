@@ -1,4 +1,5 @@
 package org.judal.jdbc.metadata;
+
 import java.sql.Types;
 
 /**
@@ -12,8 +13,6 @@ import java.sql.Types;
  * KIND, either express or implied.
  */
 
-import java.util.List;
-
 import javax.jdo.metadata.ColumnMetadata;
 
 import org.judal.jdbc.RDBMS;
@@ -22,51 +21,54 @@ import org.judal.metadata.NonUniqueIndexDef;
 
 public class SQLIndex extends NonUniqueIndexDef {
 
-  public SQLIndex (String sTableName, String sIndexName, String sColumnName, boolean bIsUnique) {
-  	super(sTableName, sIndexName, new ColumnDef(sColumnName, Types.NULL, 1), bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE);
-  }
+	private static final long serialVersionUID = 1L;
 
-  public SQLIndex (String sTableName, String sIndexName, String[] aIndexColumns, boolean bIsUnique) {
-	  	super(sTableName, sIndexName, map(aIndexColumns), bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE);
-	  }
+	public SQLIndex(String sTableName, String sIndexName, String sColumnName, boolean bIsUnique) {
+		super(sTableName, sIndexName, new ColumnDef(sColumnName, Types.NULL, 1),
+				bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE);
+	}
 
-  public SQLIndex (String sTableName, String sIndexName, String[] aIndexColumns, boolean bIsUnique, Using eUsing) {
-	  	super(sTableName, sIndexName, map(aIndexColumns), bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE, eUsing);
-	  }
-  
-  private static ColumnDef[] map(String[] aIndexColumns){
-	  ColumnDef[] cols = new ColumnDef[aIndexColumns.length];
-	  for (int c=0; c<aIndexColumns.length; c++)
-		  cols[c] = new ColumnDef(aIndexColumns[c], Types.NULL, c+1);
-	  return cols;
-  }
+	public SQLIndex(String sTableName, String sIndexName, String[] aIndexColumns, boolean bIsUnique) {
+		super(sTableName, sIndexName, map(aIndexColumns), bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE);
+	}
 
-  /*
-  public JDCIndex (String sTableName, String sIndexName, List<String> oIndexColumns, boolean bIsUnique) {
-  	super(sTableName, sIndexName, oIndexColumns, bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE);
-  }
+	public SQLIndex(String sTableName, String sIndexName, String[] aIndexColumns, boolean bIsUnique, Using eUsing) {
+		super(sTableName, sIndexName, map(aIndexColumns), bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE, eUsing);
+	}
 
-  */
+	private static ColumnDef[] map(String[] aIndexColumns) {
+		ColumnDef[] cols = new ColumnDef[aIndexColumns.length];
+		for (int c = 0; c < aIndexColumns.length; c++)
+			cols[c] = new ColumnDef(aIndexColumns[c], Types.NULL, c + 1);
+		return cols;
+	}
 
-  public String sqlScriptDef(RDBMS eRDBMS)  {
-	StringBuffer sql = new StringBuffer();
-	sql.append("CREATE ");
-	if (Type.ONE_TO_ONE.equals(getType()))
-		sql.append("UNIQUE ");
-	sql.append("INDEX ");
-	sql.append(getName());
-	sql.append(" ON ");
-	sql.append(getTable());
-	if (getUsing()!=null)
-		sql.append(" USING "+getUsing()+" ");
-	sql.append(" (");
-	String[] colNames = new String[getNumberOfColumns()];
-	int c = 0;
-	for (ColumnMetadata col : getColumns())
-		colNames[c++] = col.getName();
-	sql.append(String.join(",", colNames));
-	sql.append(")");
-	return sql.toString();
-  }
-  
+	/*
+	 * public JDCIndex (String sTableName, String sIndexName, List<String>
+	 * oIndexColumns, boolean bIsUnique) { super(sTableName, sIndexName,
+	 * oIndexColumns, bIsUnique ? Type.ONE_TO_ONE : Type.MANY_TO_ONE); }
+	 * 
+	 */
+
+	public String sqlScriptDef(RDBMS eRDBMS) {
+		StringBuffer sql = new StringBuffer();
+		sql.append("CREATE ");
+		if (Type.ONE_TO_ONE.equals(getType()))
+			sql.append("UNIQUE ");
+		sql.append("INDEX ");
+		sql.append(getName());
+		sql.append(" ON ");
+		sql.append(getTable());
+		if (getUsing() != null)
+			sql.append(" USING " + getUsing() + " ");
+		sql.append(" (");
+		String[] colNames = new String[getNumberOfColumns()];
+		int c = 0;
+		for (ColumnMetadata col : getColumns())
+			colNames[c++] = col.getName();
+		sql.append(String.join(",", colNames));
+		sql.append(")");
+		return sql.toString();
+	}
+
 }

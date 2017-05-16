@@ -33,6 +33,11 @@ public class ClassPackage extends ExtendableDef {
 		classes = new LinkedHashMap<String, TableDef>();
 	}
 
+	public ClassPackage(String packageName) {
+		classes = new LinkedHashMap<String, TableDef>();
+		name = packageName;
+	}
+
 	/**
 	 * @return String Package name
 	 */
@@ -52,7 +57,23 @@ public class ClassPackage extends ExtendableDef {
 	 * @param TableDef
 	 */
 	public void addClass(TableDef tableDef) {
-		classes.put(tableDef.getName(), tableDef);
+		classes.put(tableDef.getName().toLowerCase(), tableDef);
+	}
+	
+	/**
+	 * <p>Remove TableDef from this package.</p>
+	 * @param String
+	 */
+	public void removeClass(String className) {
+		classes.remove(className.toLowerCase());
+	}
+
+	/**
+	 * @param String
+	 * @return boolean
+	 */
+	public boolean containsClass(String className) {
+		return classes.containsKey(className.toLowerCase());
 	}
 	
 	/**

@@ -127,37 +127,50 @@ public final class SQLColumn extends ColumnDef {
 		default:
 			sTypedef += getSqlTypeName()==null ? ColumnDef.typeName(getSqlType()) : getSqlTypeName();
 		}
-		sTypedef += (getAllowsNull() ? " NULL" : " NOT NULL");
-		if (getDefaultValue()!=null) {
+		
+		if (RDBMS.HSQLDB.equals(eRDBMS))
+			sTypedef += defaultClause(eRDBMS) + (getAllowsNull() ? " NULL" : " NOT NULL");
+		else
+			sTypedef += (getAllowsNull() ? " NULL" : " NOT NULL") + defaultClause(eRDBMS);
+		
+		return sTypedef;
+	} // sqlScriptDef
+
+	protected String defaultClause(RDBMS eRDBMS) {
+		String sClause;
+		if (getDefaultValue()==null) {
+			sClause = "";
+		} else {
 			String sDefVal = getDefaultValue().toString();
-			sTypedef += " DEFAULT ";
+			sClause = " DEFAULT ";
 			switch (getSqlType()) {
 			case Types.BIGINT:
 			case Types.INTEGER:
 				if (sDefVal.equalsIgnoreCase("SERIAL"))
-					sTypedef += Serial[eRDBMS.intValue()];
+					sClause += Serial[eRDBMS.intValue()];
 				else
-					sTypedef += getDefaultValue();
+					sClause += getDefaultValue();
 				break;
 			case Types.TIMESTAMP:
 				if (sDefVal.equalsIgnoreCase("NOW") || sDefVal.equalsIgnoreCase("CURRENT_TIMESTAMP"))
-					sTypedef += CurrentTimeStamp[eRDBMS.intValue()];
+					sClause += CurrentTimeStamp[eRDBMS.intValue()];
 				else
-					sTypedef += getDefaultValue();
+					sClause += getDefaultValue();
 				break;
 			case Types.CHAR:
 			case Types.VARCHAR:
 			case Types.NCHAR:
 			case Types.NVARCHAR:
-				sTypedef += "'" + getDefaultValue() + "'";
+				sClause += "'" + getDefaultValue() + "'";
 				break;
 			default:
-				sTypedef += getDefaultValue();
+				sClause += getDefaultValue();
 				break;
 			}	
 		} // fi	
-		return sTypedef;
-	} // sqlScriptDef
+		return sClause;
+		
+	}
 
 	//-----------------------------------------------------------
 
@@ -176,7 +189,6 @@ public final class SQLColumn extends ColumnDef {
 	// 11= SQLLITE
 	// 12= HSQLDB
 	
-
 	public static final String CurrentTimeStamp[] = { null, "CURRENT_TIMESTAMP", "CURRENT_TIMESTAMP", "GETDATE()", "GETDATE()", "SYSDATE", null, null, null, null, null, null, "CURRENT_TIMESTAMP" };
 	public static final String Timestamp[] = { null, "TIMESTAMP", "TIMESTAMP", "DATETIME", "DATETIME", "DATE", null, null, null, null, null, null, "TIMESTAMP" };
 	public static final String LongVarChar[] = { null, "MEDIUMTEXT", "TEXT", "NTEXT", null, "LONG", null, null, null, null, null, null, "LONGVARCHAR" };

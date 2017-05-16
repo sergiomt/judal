@@ -101,8 +101,16 @@ public class SchemaMetaData {
 				throw new JDOUserException("SchemaMetaData already contains a procedure named "+seqName);
 		for (ClassPackage pkg : metadata.packages)
 			addPackage(pkg);
-		for (String tableName : metadata.tbleDefs.keySet())
-			addTable(metadata.getTable(tableName));
+		for (String tableName : metadata.tbleDefs.keySet()) {
+			String packageName = null;
+			for (ClassPackage pkg : metadata.packages) {
+				if (pkg.containsClass(tableName)) {
+					packageName = pkg.getName();
+					break;
+				}
+			}
+			addTable(metadata.getTable(tableName), packageName);
+		}
 		for (String viewName : metadata.viewDefs.keySet())
 			addView(metadata.getView(viewName));
 		for (String procName : metadata.procDefs.keySet())
@@ -164,12 +172,68 @@ public class SchemaMetaData {
 	 * Add an existing TableDef instance to this SchemaMetaData.
 	 * If this instance already contains a TableDef with the same name as the provided then the existing TableDef is replaced.
 	 * @param tableDef TableDef
+	 * @param packageName String
 	 */
-	public void addTable(TableDef tableDef) {
+	public void addTable(TableDef tableDef, String packageName) {
+		
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin SchemaMetaData.addTable("+tableDef.getName()+","+packageName+")");
+			DebugFile.incIdent();
+			for (ClassPackage pckg : packages())
+				if (pckg.getName().equalsIgnoreCase(packageName==null ? "default" : packageName)) {
+					DebugFile.write("package "+pckg.getName()+" contains tables: ");
+					for (TableDef t : pckg.getClasses())
+						DebugFile.write(t.getName());
+					DebugFile.writeln("");
+			}
+		}
+		
 		final String key = tableDef.getName().toLowerCase();
+
 		if (tbleDefs.containsKey(key))
 			tbleDefs.remove(key);
 		tbleDefs.put(key, tableDef);
+		if (null==packageName) {
+			boolean existsDefault = false;
+			ClassPackage defaultPackage = null;
+			for (ClassPackage pckg : packages()) {
+				existsDefault = pckg.getName().equalsIgnoreCase("default");
+				if (existsDefault) {
+					defaultPackage = pckg;
+					break;
+				}
+			}
+			if (existsDefault) {
+				for (TableDef tdef : defaultPackage.getClasses()) {
+					if (tdef.getName().toLowerCase().equals(key)) {
+						if (DebugFile.trace) DebugFile.decIdent();
+						throw new IllegalArgumentException("Package "+defaultPackage.getName()+" already contains a definition for table "+tableDef.getName());					
+					}
+				}
+				defaultPackage.addClass(tableDef);
+			} else {
+				defaultPackage = new ClassPackage("default");
+				packages.add(defaultPackage);
+				defaultPackage.addClass(tableDef);
+			}
+		} else {
+			for (ClassPackage pckg : packages())
+				if (pckg.getName().equalsIgnoreCase(packageName)) {
+					for (TableDef tdef : pckg.getClasses()) {
+						if (tdef.getName().toLowerCase().equals(key)) {
+							if (DebugFile.trace) DebugFile.decIdent();
+							throw new IllegalArgumentException("Package "+packageName+" already contains a definition for table "+tableDef.getName());
+						}
+					}
+					pckg.addClass(tableDef);
+					break;
+				}			
+		}
+		
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End SchemaMetaData.addTable()");
+		}
 	}
 
 	/**
@@ -177,10 +241,36 @@ public class SchemaMetaData {
 	 * If this SchemaMetadata does not contain a TableDef with the given name then no exception is thrown.
 	 * @param tableName String
 	 */
-	public void removeTable(String tableName) {
+	public void removeTable(String tableName, String packageName) {
 		final String key = tableName.toLowerCase();
 		if (tbleDefs.containsKey(key))
 			tbleDefs.remove(key);
+		if (null==packageName) {
+			for (ClassPackage pckg : packages()) {
+				if (pckg.getName().equalsIgnoreCase("default")) {
+					for (TableDef tdef : pckg.getClasses())
+						if (tdef.getName().toLowerCase().equals(key)) {
+							pckg.removeClass(key);
+							break;
+						}
+					break;
+				}
+			}
+		} else {
+			for (ClassPackage pckg : packages())
+				if (pckg.getName().equalsIgnoreCase(packageName)) {
+					boolean found = false;
+					for (TableDef tdef : pckg.getClasses())
+						if (tdef.getName().toLowerCase().equals(key)) {
+							pckg.removeClass(key);
+							found = true;
+							break;
+						}
+					if (!found)
+						throw new IllegalArgumentException("Package "+packageName+" does not contain a definition for table "+tableName);
+					break;
+				}			
+		}
 	}
 
 	/**
