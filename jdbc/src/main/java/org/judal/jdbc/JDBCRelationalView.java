@@ -79,6 +79,10 @@ public class JDBCRelationalView extends JDBCBucket implements RelationalView {
 		return recordClass;
 	}
 
+	public void setResultClass(Class<? extends Record> recordClass) {
+		this.recordClass = recordClass;
+	}
+	
 	/**
 	 * <p>Count number of rows having a given value for a column</p>
 	 * @param indexColumnName String column name
@@ -174,6 +178,7 @@ public class JDBCRelationalView extends JDBCBucket implements RelationalView {
 		return fetch(fetchGroup, indexColumnName, valueFrom, valueTo, Integer.MAX_VALUE, 0);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched, int maxrows, int offset)
 		throws JDOException {

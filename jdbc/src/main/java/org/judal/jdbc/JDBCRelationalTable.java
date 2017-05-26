@@ -25,6 +25,7 @@ import org.judal.storage.query.Connective;
 import org.judal.storage.query.Expression;
 import org.judal.storage.query.Operator;
 import org.judal.storage.query.Predicate;
+import org.judal.storage.query.sql.SQLPredicate;
 import org.judal.storage.query.sql.SQLQuery;
 import org.judal.storage.relational.RelationalTable;
 import org.judal.storage.table.Record;
@@ -103,7 +104,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 		if (oQry==null) throw new NullPointerException("JDBCIndexableTable.update() filter query cannot be null");
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDBCIndexableTable.update()");
+			DebugFile.writeln("Begin JDBCIndexableTable.update(Param[], AbstractQuery)");
 			DebugFile.incIdent();
 		}
 
@@ -159,24 +160,38 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 
 	@Override
 	public int update(Param[] values, Param[] params) throws JDOException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDBCRelationalTable.update(Param[], Param[])");
+			DebugFile.incIdent();
+		}
+		
 		SQLQuery qry = new SQLQuery(this);
-		Predicate where = qry.newPredicate(Connective.AND);
+		SQLPredicate where = qry.newPredicate(Connective.AND);
 		try {
 			for (Param p : params)
 				where.add(p.getName(), Operator.EQ, p.getValue());
+			qry.setFilter(where);
 		} catch (UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException xcpt) {
 			throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
 		}
-		return update(values, qry);
+		
+		int retval = update(values, qry);
+
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End JDBCRelationalTable.update() : " + String.valueOf(retval));
+		}
+		
+		return retval;
 	}
 	
 	@Override
 	public int delete(AbstractQuery oQry) throws JDOException {
 		int iAffected = 0;
-		if (oQry==null) throw new NullPointerException("JDBCIndexableTable.delete() filter query cannot be null");
+		if (oQry==null) throw new NullPointerException("JDBCRelationalTable.delete() filter query cannot be null");
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDBCIndexableTable.delete()");
+			DebugFile.writeln("Begin JDBCRelationalTable.delete()");
 			DebugFile.incIdent();
 		}
 
@@ -200,7 +215,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDBCIndexableTable.delete() : "+String.valueOf(iAffected));
+			DebugFile.writeln("End JDBCRelationalTable.delete() : "+String.valueOf(iAffected));
 		}
 		return iAffected;
 	}

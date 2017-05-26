@@ -121,7 +121,6 @@ public abstract class AbstractRecord implements Record {
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
 		clearLongData();
-		System.out.println("End AbstractRecord("+dataSource+", "+tableName+", "+fieldHelper+", "+constraintsChecker+")");
 	}
 	
 	@Override

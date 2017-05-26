@@ -14,7 +14,6 @@ package org.judal.jdbc;
 
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
@@ -27,14 +26,17 @@ import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.ForeignKeyDef;
 import org.judal.metadata.JoinDef;
+import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
+import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 
 import com.knowgate.debug.DebugFile;
+import com.knowgate.tuples.Pair;
 
 /**
  * Implementation of JDBC table data source
@@ -114,72 +116,86 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		return new JDBCRelationalView(this, viewRecord);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public JDBCRelationalView openInnerJoinView(Record tableRecord, String joinedTableName, Entry<String,String> column) throws JDOException {
-		return openJoinView(tableRecord, joinedTableName, false, new Entry[]{column});
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public JDBCRelationalView openOuterJoinView(Record tableRecord, String joinedTableName, Entry<String,String> column) throws JDOException {
-		return openJoinView(tableRecord, joinedTableName, true, new Entry[]{column});
-	}
-	
-	@Override
-	public JDBCRelationalView openInnerJoinView(Record tableRecord, String joinedTableName, Entry<String,String>[] columns) throws JDOException {
-		return openJoinView(tableRecord, joinedTableName, false, columns);
-	}
-
-	@Override
-	public JDBCRelationalView openOuterJoinView(Record tableRecord, String joinedTableName, Entry<String,String>[] columns) throws JDOException {
-		return openJoinView(tableRecord, joinedTableName, true, columns);
-	}
-
-	private JDBCRelationalView openJoinView(Record tableRecord, String joinedTableName, boolean outer, Entry<String,String>[] columns) throws JDOException {
+	public IndexableView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) throws JDOException {
+		
 		JDBCRelationalView tbl = null;		
+		
+		if (null==joinType)
+			throw new JDOUserException("Join type cannot be null");
+		if (null==result)
+			throw new JDOUserException("Result record cannot be null");
+		if (null==baseTable || baseTable.getName()==null || baseTable.getName().trim().length()==0)
+			throw new JDOUserException("Base table cannot be empty");
+		if (baseTable.getAlias()==null || baseTable.getAlias().trim().length()==0)
+			throw new JDOUserException("Base table must be aliased");
+		if (null==joinedTable || joinedTable.getName()==null || joinedTable.getName().trim().length()==0)
+			throw new JDOUserException("Joined table cannot be empty");
+		if (joinedTable.getAlias()==null || joinedTable.getAlias().trim().length()==0)
+			throw new JDOUserException("Joined table must be aliased");
+		if (null==onColumns || onColumns.length==0)
+			throw new JDOUserException("At least one column pair is required");
+		
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDBCTableDataSource.openJoinView("+joinType.name()+","+result.getTableName()+","+baseTable.getName()+" AS "+baseTable.getAlias()+joinedTable.getName()+" AS "+joinedTable.getAlias()+", ...)");
+			DebugFile.incIdent();
+		}
+		
 		try {
-			tbl = new JDBCRelationalView(this, tableRecord);
+			tbl = new JDBCRelationalView(this, result);
 		} catch (Exception xcpt) {
+			if (DebugFile.trace) DebugFile.decIdent();
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		} finally {
 			if (tbl!=null) tbl.close();			
 		}
+
 		SQLTableDef tdef = tbl.getTableDef().clone();
 		ForeignKeyDef fk = null;
-		NameAlias joinedTableAlias = NameAlias.parse(joinedTableName);
+
 		for (int f=0; f<tdef.getNumberOfForeignKeys() && fk==null; f++) 
-			if (tdef.getForeignKeys()[f].getTable().equalsIgnoreCase(joinedTableAlias.getName()))
+			if (tdef.getForeignKeys()[f].getTable().equalsIgnoreCase(joinedTable.getName()))
 				fk = tdef.getForeignKeys()[f];
+		
 		if (null==fk) {
 			fk = tdef.newForeignKeyMetadata();
-			fk.setTable(joinedTableName);
+			fk.setTable(joinedTable.toString());
 			int pos = 0;
-			for (Map.Entry<String,String> column : columns) {
+			for (Pair<String,String> column : onColumns) {
 				try {
-					ColumnDef cdef = tdef.getColumnByName(column.getKey());
+					ColumnDef cdef = tdef.getColumnByName(column.$1());
 					cdef.setPosition(++pos);
-					cdef.setName(column.getValue());
+					cdef.setName(column.$2());
 					fk.addColumn(cdef);
 				} catch (ArrayIndexOutOfBoundsException aiob) {
 					throw new JDOUserException(aiob.getMessage(), aiob);
 				}
 			}
 		}
+
 		JoinDef jn = null;
 		for (int j=0; j<tdef.getNumberOfJoins() && jn==null; j++)
-			if (tdef.getJoins()[j].getTable().equalsIgnoreCase(joinedTableAlias.getName()))
+			if (tdef.getJoins()[j].getTable().equalsIgnoreCase(joinedTable.getName()))
 				jn = tdef.getJoins()[j];
+		
 		if (null==jn) {
 			jn = tdef.newJoinMetadata();
-			jn.setOuter(outer);
-			jn.setTable(joinedTableName);
-			for (Map.Entry<String,String> column : columns)
-				jn.addColumn(column.getValue());
+			jn.setOuter(joinType.equals(JoinType.OUTER));
+			jn.setTable(joinedTable.toString());
+			for (Pair<String,String> column : onColumns) {
+				jn.addColumn(column.$2());
+			}
 		}
-		if (jn.getOuter()!=outer)
-			throw new JDOUserException("View join was defined as "+(jn.getOuter() ? "OUTER" : "INNER")+" but opened as "+(outer ? "OUTER" : "INNER"));
-		return new JDBCRelationalView(this, tdef);
+		
+		tbl = new JDBCRelationalView(this, tdef);
+		tbl.setResultClass(result.getClass());
+		
+		if (DebugFile.trace) {
+			DebugFile.writeln(tdef.getTable());
+			DebugFile.decIdent();
+			DebugFile.writeln("End JDBCTableDataSource.openJoinView()");
+		}
+		return tbl;
 	}
 
 	/**

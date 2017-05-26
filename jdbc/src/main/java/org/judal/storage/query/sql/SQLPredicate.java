@@ -6,6 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.judal.storage.query.Part;
 import org.judal.storage.query.Predicate;
 
+import com.knowgate.debug.DebugFile;
 import com.knowgate.typeutils.ObjectFactory;
 
 public class SQLPredicate extends Predicate {
@@ -23,6 +24,17 @@ public class SQLPredicate extends Predicate {
 	@SuppressWarnings("unchecked")
 	public SQLPredicate add(Object... constructorParameters)
 		throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+
+		if (DebugFile.trace) {
+			StringBuilder paramValues = new StringBuilder();
+			if (constructorParameters!=null)
+				for (Object o : constructorParameters)
+					paramValues.append(o==null ? "null" : o.toString()).append(",");
+			paramValues.setLength(paramValues.length()-1);
+			DebugFile.writeln("Begin SQLPredicate.add(" + paramValues.toString() + ")");
+			DebugFile.incIdent();
+		}
+		
 		Class<?>[] parameterClasses = new Class<?>[constructorParameters.length];
 		for (int p = 0; p<constructorParameters.length; p++) {
 			if (constructorParameters[p]==null)
@@ -32,8 +44,22 @@ public class SQLPredicate extends Predicate {
 			if (Part.class.isAssignableFrom(parameterClasses[p]))
 				parameterClasses[p] = Part.class;
 		}
+
 		Constructor<SQLTerm> constructor = (Constructor<SQLTerm>) ObjectFactory.getConstructor(SQLTerm.class, parameterClasses);
+		if (null==constructor) {
+			StringBuilder paramClassNames = new StringBuilder();
+				for (int p = 0; p<constructorParameters.length; p++)
+					paramClassNames.append(parameterClasses[p].getName()).append(p<constructorParameters.length-1 ? "," : "");
+			throw new NoSuchMethodException("Could not find suitable constructor for SQLTerm(" + paramClassNames.toString() + ")");
+		}
+		
 		super.addPart(constructor.newInstance(constructorParameters));
+		
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End SQLPredicate.add()");
+		}
+		
 		return this;
 	}
 

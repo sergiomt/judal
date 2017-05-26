@@ -162,7 +162,7 @@ public class SQLQuery extends AbstractQuery {
 		long qtime = 0;
 
 		if (DebugFile.trace)
-			DebugFile.writeln("Begin JDBCQuery.execute(" + getRangeFromIncl() + "," + getRangeToExcl() + ")");
+			DebugFile.writeln("Begin SQLQuery.execute(" + getRangeFromIncl() + "," + getRangeToExcl() + ")");
 
 		if (getRangeFromIncl()<0l)
 			throw new IllegalArgumentException("row offset must be equal to or greater than zero");
@@ -232,7 +232,7 @@ public class SQLQuery extends AbstractQuery {
 		if (DebugFile.trace)
 		{
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDBCIndexableView.fetch() : "+String.valueOf(retval.size()));
+			DebugFile.writeln("End SQLQuery.execute() : "+String.valueOf(retval.size()));
 		}
 
 		return retval;
@@ -252,7 +252,7 @@ public class SQLQuery extends AbstractQuery {
 		query.append("SELECT ");
 		query.append(getResult());
 		query.append(" FROM ");
-		query.append(getView().name());
+		query.append(getView().getTableDef().getTable());
 		if (getFilter()!=null) {
 			if (getFilter().length()>0) {
 				query.append(" WHERE ");

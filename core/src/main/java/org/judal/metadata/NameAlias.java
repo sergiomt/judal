@@ -17,6 +17,8 @@ import java.util.regex.Pattern;
 
 import javax.jdo.JDOUserException;
 
+import org.judal.storage.table.Record;
+
 /**
  * Helper class from parsing "<i>name</i>.<i>alias</i>" or "<i>name</i> AS <i>alias</i>" strings
  * @author Sergio Montoro Ten
@@ -61,6 +63,16 @@ public class NameAlias {
 	}
 
 	/**
+	 * @return String "<i>name</i> AS <i>alias</i>"
+	 */
+	public String toString() {
+		if (null==alias || alias.isEmpty())
+			return name;
+		else
+			return name + " AS " +alias;
+	}
+
+	/**
 	 * Split a column name and alias from a string.
 	 * The input string must be of the form:
 	 * "columnName"
@@ -88,4 +100,25 @@ public class NameAlias {
 		}
 		throw new JDOUserException("Malformed name "+aliasedName);
 	}
+	
+	/**
+	 * Shortcut for new NameAlias(name, alias)
+	 * @param name String
+	 * @param alias String
+	 * @return NameAlias
+	 */
+	public static NameAlias AS(String name, String alias) {
+		return new NameAlias(name, alias);
+	}
+
+	/**
+	 * Shortcut for new NameAlias(record.getTableName(), alias)
+	 * @param record Record
+	 * @param alias String
+	 * @return NameAlias
+	 */
+	public static NameAlias AS(Record rec, String alias) {
+		return new NameAlias(rec.getTableName(), alias);
+	}
+
 }

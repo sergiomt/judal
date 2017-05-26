@@ -30,7 +30,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 
 	private String table;
 	private Indexed indexed;
-	private boolean outer;
+	private JoinType joinType;
 	private LinkedList<ColumnDef> cols;
 	private UniqueIndexDef index;
 	private ForeignKeyDef fk;
@@ -40,7 +40,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 		pk = null;
 		fk = null;
 		table = null;
-		outer = false;
+		joinType = JoinType.INNER;
 		index = null;
 		indexed = Indexed.UNSPECIFIED;
 		cols = new LinkedList<ColumnDef>();
@@ -111,7 +111,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	 */
 	@Override
 	public boolean getOuter() {
-		return outer;
+		return JoinType.OUTER.equals(joinType);
 	}
 
 	/**
@@ -216,7 +216,6 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	public JoinDef addColumn(String columnName) {
 		ColumnDef cdef = newColumnMetadata();
 		cdef.setName(columnName);
-		cols.add(cdef);
 		return this;
 	}
 	
@@ -246,7 +245,10 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	 */
 	@Override
 	public JoinDef setOuter(boolean outer) {
-		this.outer = outer;
+		if (outer)
+			this.joinType = JoinType.OUTER;
+		else
+			this.joinType = JoinType.INNER;
 		return this;
 	}
 

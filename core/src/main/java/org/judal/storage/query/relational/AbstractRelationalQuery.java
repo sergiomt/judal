@@ -2,6 +2,7 @@ package org.judal.storage.query.relational;
 
 import java.lang.reflect.InvocationTargetException;
 
+import javax.jdo.FetchGroup;
 import javax.jdo.JDOUserException;
 
 import org.judal.storage.query.AbstractQuery;
@@ -33,10 +34,20 @@ public abstract class AbstractRelationalQuery<R extends Record> implements Clone
 	  }
 
 	  public AbstractRelationalQuery<R> setResult(Iterable<String> columnNames) {
-		qry.setResult(columnNames);
+		  qry.setResult(columnNames);
 		return this;
 	  }
-	  
+	  	  
+	  public AbstractRelationalQuery<R> setResultClass(Class<?> resultClass) {
+		  qry.setResultClass(resultClass);
+		return this;
+	  }
+
+	  public AbstractRelationalQuery<R> setClass(Class<?> candidateClass) {
+		  qry.setClass(candidateClass);
+		return this;
+	  }
+
 	  public AbstractRelationalQuery<R> and(String column, String operator, Object param) throws JDOUserException, UnsupportedOperationException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		  prd.and(column, operator, param);
 		  return this;

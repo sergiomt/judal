@@ -498,6 +498,8 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setResultClass(Class resultClass) throws ClassCastException {
+		if (null==resultClass)
+			throw new NullPointerException("Result Class cannot be null");
 		this.resultClass = resultClass;
 		if (Record.class.isAssignableFrom(resultClass)) {
 			recordConstructor = (Constructor<? extends Record>) ObjectFactory.getConstructor((Class<? extends Object>) resultClass, new Class[0]);

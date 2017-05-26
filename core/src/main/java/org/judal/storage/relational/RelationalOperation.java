@@ -1,6 +1,7 @@
 package org.judal.storage.relational;
 
 import org.judal.storage.EngineFactory;
+import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.table.Record;
 import org.judal.storage.relational.RelationalDataSource;
 import org.judal.storage.table.IndexableTableOperation;

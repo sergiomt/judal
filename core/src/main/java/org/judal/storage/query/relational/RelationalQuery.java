@@ -4,18 +4,22 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.jdo.JDOException;
 
-import org.judal.storage.relational.RelationalDataSource;
+import org.judal.storage.EngineFactory;
+import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.table.Record;
-import org.judal.storage.table.TableDataSource;
+import org.judal.storage.relational.RelationalDataSource;
 
 public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R> {
 	  
+	  public RelationalQuery(Class<R> recClass) throws JDOException {
+		  this((RelationalDataSource) EngineFactory.DefaultThreadDataSource.get(), recClass);
+	  }
+
 	  public RelationalQuery(RelationalDataSource dts, Class<R> recClass) throws JDOException {
 	  	R rec;
 		try {
-			rec = recClass.getConstructor(TableDataSource.class).newInstance(dts);
-		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
-				| NoSuchMethodException | SecurityException e) {
+			rec = StorageObjectFactory.newRecord(recClass, dts);
+		} catch (IllegalArgumentException | NoSuchMethodException | SecurityException e) {
 			throw new JDOException(e.getClass().getName()+""+e.getMessage(), e);
 		}
 		viw = dts.openRelationalView(rec);
@@ -40,4 +44,5 @@ public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R
 		  theClone.clone(this);
 		  return theClone;
 	  }	  
+
 }

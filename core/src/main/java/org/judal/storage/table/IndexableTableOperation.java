@@ -36,6 +36,10 @@ public class IndexableTableOperation<R extends Record> extends TableOperation<R>
 		return getTable().exists(keys);
 	}
 
+	public RecordSet<R> fetch(final int maxrows, final int offset, Param... keys) {
+		return getTable().fetch(getRecord().fetchGroup(), maxrows, offset, keys);
+	}
+	
 	public int update(Param[] values, Param[] where) {
 		return getTable().update(values, where);
 	}

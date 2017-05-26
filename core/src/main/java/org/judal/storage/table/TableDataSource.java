@@ -17,9 +17,14 @@ import java.util.Map.Entry;
 
 import javax.jdo.JDOException;
 
+import org.judal.metadata.JoinType;
+import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
+
+import com.knowgate.tuples.Pair;
+import com.knowgate.tuples.Triplet;
 
 /**
  * Interface for DataSource implementations that support tables
@@ -120,43 +125,15 @@ public interface TableDataSource extends DataSource {
 	IndexableView openIndexedView(Record recordInstance) throws JDOException;
 
 	/**
-	 * Open Indexed View for Read-Only of two inner joined views.
-	 * @param recordInstance1 Record subclass that will be used to read the joined pair
-	 * @param joinedTableName String Joined table name
-	 * @param column Entry&lt;String,String&gt; Column name at base table and column name at the joined table
+	 * Open Indexed View for Read-Only of two joined views.
+	 * @param joinType JoinType enum INNER, LEFTOUTER, RIGHTOUTER, FULL
+	 * @param result Record subclass that will be used to read the joined pair
+	 * @param baseTable NameAlias Base table name and alias
+	 * @param joinedTable NameAlias Joined table name and alias
+	 * @param onColumns Pair&lt;String,String&gt; Variable number of columns to do the join
 	 * @return IndexableView
 	 * @throws JDOException
 	 */
-	IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String,String> column) throws JDOException;
+	IndexableView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) throws JDOException;
 
-	/**
-	 * Open Indexed View for Read-Only of two outer joined views.
-	 * @param recordInstance1 Record subclass that will be used to read the joined pair
-	 * @param joinedTableName String Joined table name
-	 * @param column Entry&lt;String,String&gt; Column name at base table and column name at the joined table
-	 * @return IndexableView
-	 * @throws JDOException
-	 */
-	IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String,String> column) throws JDOException;
-
-	/**
-	 * Open Indexed View for Read-Only of two inner joined views.
-	 * @param recordInstance1 Record subclass that will be used to read the joined pair
-	 * @param joinedTableName String Joined table name
-	 * @param columns Entry&lt;String,String&gt;[] Array of pairs {base_column_name, joined_column_name}
-	 * @return IndexableView
-	 * @throws JDOException
-	 */
-	IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String,String>[] columns) throws JDOException;
-
-	/**
-	 * Open Indexed View for Read-Only of two outer joined views.
-	 * @param recordInstance1 Record subclass that will be used to read the joined pair
-	 * @param joinedTableName String Joined table name
-	 * @param columns Entry&lt;String,String&gt;[] Array of pairs {base_column_name, joined_column_name}
-	 * @return IndexableView
-	 * @throws JDOException
-	 */
-	IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String,String>[] columns) throws JDOException;
-	
 }

@@ -34,6 +34,8 @@ public class E10_WriteCSVDataIntoTheDatabase {
 		insertStudentsIntoDatabase();
 		
 		insertCoursesIntoDatabase();
+		
+		assignStudentsToCoursesIntoDatabase();
 
 		tearDown();
 	}
@@ -74,11 +76,11 @@ public class E10_WriteCSVDataIntoTheDatabase {
 	}
 	
 	public static void assignStudentsToCoursesIntoDatabase() throws IOException {
-		List<String> lines = IOUtils.readLines(Resources.getResourceAsStream("studentcourses.csv"));
+		List<String> lines = IOUtils.readLines(Resources.getResourceAsStream("studentcourse.csv"));
 
 		// Write new students into the database
 		for (String line : lines) {
-			String[] fields = line.split(";");
+			String[] fields = line.split(",");
 			StudentCourse sc = new StudentCourse();
 			sc.setStudentId(Integer.parseInt(fields[0]));
 			sc.setCourseId(Integer.parseInt(fields[1]));

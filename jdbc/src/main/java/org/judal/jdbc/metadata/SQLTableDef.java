@@ -156,7 +156,7 @@ public class SQLTableDef extends TableDef implements Scriptable {
 			for (ForeignKeyMetadata fk : getForeignKeys()) {
 				if (fk.getTable().equals(join.getTable())) {
 					if (fk.getNumberOfColumns()!=join.getNumberOfColumns())
-						throw new JDOUserException("Foreign key "+fk.getName()+" columns "+fk.getColumns()+" do not match join columns "+join.getColumns());
+						throw new JDOUserException("Foreign key "+(fk.getName()==null ? "" : fk.getName()) +" number of columns "+fk.getNumberOfColumns()+" does not match join number of columns "+join.getNumberOfColumns());
 					StringBuilder joinSql = new StringBuilder();
 					joinSql.append(getName()).append(" ").append(join.getOuter() ? "OUTER" : "INNER").append(" JOIN ").append(join.getTable()).append(" ON ");
 					joinSql.append(getName()).append(".").append(fk.getColumns()[0].getName()).append("=").append(join.getTable()).append(".").append(join.getColumn());
