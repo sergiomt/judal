@@ -13,18 +13,19 @@ package org.judal.storage.table;
  */
 
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 
 import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
+import org.judal.storage.EngineFactory;
+import org.judal.storage.StorageContext;
 
 import com.knowgate.tuples.Pair;
-import com.knowgate.tuples.Triplet;
 
 /**
  * Interface for DataSource implementations that support tables

@@ -181,10 +181,12 @@ public class SchemaMetaData {
 			DebugFile.incIdent();
 			for (ClassPackage pckg : packages())
 				if (pckg.getName().equalsIgnoreCase(packageName==null ? "default" : packageName)) {
-					DebugFile.write("package "+pckg.getName()+" contains tables: ");
+					StringBuilder b = new StringBuilder();
+					b.append("package "+pckg.getName()+" contains tables: ");
 					for (TableDef t : pckg.getClasses())
-						DebugFile.write(t.getName());
-					DebugFile.writeln("");
+						b.append(t.getName()).append(",");
+					b.setLength(b.length()-1);
+					DebugFile.writeln(b.toString());
 			}
 		}
 		

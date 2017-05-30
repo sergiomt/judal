@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.regex.Pattern;
@@ -1032,7 +1033,9 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		return Types.DOUBLE;
 	else if (obj instanceof BigDecimal)
 		return Types.DECIMAL;
-	else if (obj instanceof Date)
+	else if (obj instanceof java.sql.Date)
+		return Types.DATE;
+	else if (obj instanceof Date || obj instanceof Calendar || obj instanceof Timestamp)
 		return Types.TIMESTAMP;
 	else if (obj instanceof byte[])
 		return Types.BINARY;

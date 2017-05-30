@@ -17,7 +17,7 @@ import static org.judal.metadata.NameAlias.AS;
 
 import static com.knowgate.tuples.Pair.P$;
 
-public class E18_InnerJoinRelationalQuery {
+public class E20_InnerJoinRelationalQuery {
 
 	@SuppressWarnings({ "unused", "unchecked" })
 	@Test
@@ -28,7 +28,7 @@ public class E18_InnerJoinRelationalQuery {
 		Student s = new Student();
 		StudentCourse c = new StudentCourse();
 
-		RelationalDataSource dts = (RelationalDataSource) EngineFactory.DefaultThreadDataSource.get();
+		RelationalDataSource dts = EngineFactory.getDefaultRelationalDataSource();
 
 		try (IndexableView v = dts.openJoinView(INNER, s, AS(s,"s"), AS(c,"c"), P$("id_student","id_student"))) {
 			RecordSet<Student> s80 = v.fetch(s.fetchGroup(), c.getTableName()+".id_course", new Integer(7));

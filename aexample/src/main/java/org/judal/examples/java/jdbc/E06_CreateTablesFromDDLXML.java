@@ -18,7 +18,7 @@ import java.util.Map;
 import javax.jdo.JDOException;
 
 /**
- * Create tables read from a DDL XML file
+ * Example of how to create tables read from a DDL XML file
  * @see https://db.apache.org/ddlutils/schema/
  */
 public class E06_CreateTablesFromDDLXML {

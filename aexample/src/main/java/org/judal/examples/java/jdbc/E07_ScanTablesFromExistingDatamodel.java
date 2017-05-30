@@ -7,6 +7,10 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.jdbc.JDBCRelationalDataSource;
 
+/**
+ * Example of how to read the metadata of tables
+ * already present in a datamodel.
+ */
 public class E07_ScanTablesFromExistingDatamodel {
 
 	@Test

@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -125,6 +126,8 @@ public class BytesConverter {
 				return Bytes.toBytes(((Date) oObj).getTime());
 			else if (oObj instanceof Timestamp)
 				return Bytes.toBytes(((Timestamp) oObj).getTime());		
+			else if (oObj instanceof Calendar)
+				return Bytes.toBytes(((Calendar) oObj).getTimeInMillis());
 			else if (oObj instanceof Long)
 				return Bytes.toBytes(((Long) oObj).longValue());		
 		case Types.BINARY:

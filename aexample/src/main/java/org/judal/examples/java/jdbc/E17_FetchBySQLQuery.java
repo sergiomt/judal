@@ -4,15 +4,15 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
-import org.judal.storage.EngineFactory;
-import org.judal.storage.query.AbstractQuery;
-import org.judal.storage.relational.RelationalTable;
+import org.judal.storage.query.relational.RelationalQuery;
 import org.judal.storage.table.RecordSet;
-import org.judal.storage.relational.RelationalDataSource;
 
 import org.judal.examples.java.model.Student;
 
-public class E16_FetchBySQLQuery {
+/**
+ * Use a SQL WHERE clause as filter of a relational query
+ */
+public class E17_FetchBySQLQuery {
 
 	@SuppressWarnings("unused")
 	@Test
@@ -20,17 +20,19 @@ public class E16_FetchBySQLQuery {
 		
 		setUp();
 
-		// The default DataSource for the thread could also be used implicitly.
-		// Shown here how to retrieve it and inject into Student constructor
-		// for illustrative purposes only.
-		RelationalDataSource dts = (RelationalDataSource) EngineFactory.DefaultThreadDataSource.get();
-		
-		try (RelationalTable students = dts.openRelationalTable(new Student(dts))) {
-			AbstractQuery qry = students.newQuery();
-			qry.setFilter("last_name='Kol'");
-			qry.setOrdering("date_of_birth");
+		// Use implicitly the default RelationalDataSource for the thread.
+		try (RelationalQuery<Student> qry = new RelationalQuery<>(Student.class)) {
+			
+			// List the columns as in SELECT clause
 			qry.setResult("id_student,first_name,last_name,date_of_birth");
-			RecordSet<Student> kols = students.fetch(qry);
+			
+			// Set the filter as it'd be written in a SQL WHERE clause
+			qry.setFilter("last_name='Kol'");
+			
+			// Set ordering as in SQL ORDER BY clause
+			qry.setOrdering("date_of_birth");
+						
+			RecordSet<Student> kols = qry.fetch();
 			for (Student s : kols) {
 				int id = s.getId();
 				String firstName = s.getFirstName();

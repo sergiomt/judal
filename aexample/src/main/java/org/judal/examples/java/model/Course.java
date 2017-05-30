@@ -16,10 +16,10 @@ public class Course extends MapRecord {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final String TABLE_NAME = "course";
+	public static final String TABLE_NAME = "course";
 	
 	public Course() throws JDOException {
-		this((RelationalDataSource) EngineFactory.DefaultThreadDataSource.get());
+		this(EngineFactory.getDefaultRelationalDataSource());
 	}
 
 	public Course(RelationalDataSource dataSource) throws JDOException {

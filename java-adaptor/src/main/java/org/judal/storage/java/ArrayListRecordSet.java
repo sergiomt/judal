@@ -1,7 +1,4 @@
-package org.judal.storage.table;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+package org.judal.storage.java;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -21,6 +18,12 @@ import java.util.List;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.PersistenceManager;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
 
 import org.judal.storage.table.comparators.RecordColumnValueComparatorAsc;
 import org.judal.storage.table.comparators.RecordColumnValueComparatorDesc;
@@ -51,6 +54,10 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 				ensureCapacity(capacity>128 ? 128 : capacity);
 			else
 				ensureCapacity(capacity>16384 ? 16384 : capacity);
+	}
+
+	public ArrayListRecordSet(Class<R> candidateClass, Integer capacity) {
+		this(candidateClass, capacity.intValue());
 	}
 
 	@SuppressWarnings("unchecked")

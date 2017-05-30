@@ -29,4 +29,14 @@
       <reference local="id_course" foreign="id_course"/>
     </foreign-key>
   </table>
+  <table name="student_document">
+    <column name="id_document" primaryKey="true" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="id_student" primaryKey="false" required="true" type="INTEGER" size="10" autoIncrement="false"></column>
+    <column name="dt_created" primaryKey="false" type="TIMESTAMP" size="29,6" default="now()" ></column>
+    <column name="tl_document" primaryKey="false" required="true" type="VARCHAR" size="100" ></column>
+    <column name="tp_doument" primaryKey="false" required="true" type="VARCHAR" size="50" ></column>
+    <column name="path_doument" primaryKey="false" required="true" type="VARCHAR" size="254" ></column>
+    <foreign-key foreignTable="student">
+      <reference local="id_student" foreign="id_student"/>
+    </foreign-key>
 </database>

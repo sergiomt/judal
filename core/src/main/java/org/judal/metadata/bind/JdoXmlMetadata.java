@@ -153,7 +153,6 @@ public class JdoXmlMetadata implements MetadataScanner {
 			    					break;
 			    				default:
 			    					tbl.addColumnMetadata("", cname, ctype, nullable);
-			    					DebugFile.writeln("************* SETTING DEFAULT VALUE "+dvalue+" FOR COLUMN "+cname);
 			    					tbl.getColumnByName(cname).setDefaultValue(dvalue);
 			    				}
 			    				final ColumnDef newcol = tbl.getColumnByName(cname);

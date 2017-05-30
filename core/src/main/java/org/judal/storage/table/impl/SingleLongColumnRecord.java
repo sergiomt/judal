@@ -13,15 +13,12 @@ public class SingleLongColumnRecord extends AbstractSingleNumberColumnRecord {
 
 	public SingleLongColumnRecord(String tableName) {
 		super(tableName);
+		setColumn(new ColumnDef("value", Types.BIGINT, 1));
 	}
 
 	public SingleLongColumnRecord(String tableName, String columnName) {
 		super(tableName, columnName);
-	}
-
-	@Override
-	public ColumnDef getColumn(String colname) throws ArrayIndexOutOfBoundsException {
-		return new ColumnDef(columnName, Types.BIGINT, 1);
+		setColumn(new ColumnDef(columnName, Types.BIGINT, 1));
 	}
 
 	@Override

@@ -15,13 +15,14 @@ package org.judal.storage;
 import java.util.Map;
 
 import org.judal.storage.DataSource;
+import org.judal.storage.keyvalue.BucketDataSource;
 import org.judal.storage.table.TableDataSource;
 import org.judal.transaction.DataSourceTransactionManager;
 import org.judal.storage.relational.RelationalDataSource;
 
 public class StorageContext implements AutoCloseable {
 
-	private DataSource keyValueDataSource = null;
+	private BucketDataSource keyValueDataSource = null;
 	
 	private TableDataSource tableDataSource = null;
 
@@ -32,16 +33,16 @@ public class StorageContext implements AutoCloseable {
 	public void initializeKeyValueDataSource(Engine<? extends DataSource> bucketEngine, Map<String,String> properties) throws IllegalStateException {
 		if (null!=keyValueDataSource)
 			throw new IllegalStateException("Key-Value Data Source has alredy been initialized");
-		keyValueDataSource = bucketEngine.getDataSource(properties, null);
+		keyValueDataSource = (BucketDataSource) bucketEngine.getDataSource(properties, null);
 	}
 
 	public void initializeKeyValueDataSource(Engine<? extends DataSource> bucketEngine, Map<String,String> properties, DataSourceTransactionManager transactionManager) throws IllegalStateException {
 		if (null!=keyValueDataSource)
 			throw new IllegalStateException("Key-Value Data Source has alredy been initialized");
-		keyValueDataSource = bucketEngine.getDataSource(properties, transactionManager);
+		keyValueDataSource = (BucketDataSource) bucketEngine.getDataSource(properties, transactionManager);
 	}
 
-	public DataSource getKeyValueDataSource() {
+	public BucketDataSource getKeyValueDataSource() {
 		return keyValueDataSource;
 	}
 

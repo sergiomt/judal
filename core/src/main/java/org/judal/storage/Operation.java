@@ -14,4 +14,6 @@ public interface Operation extends AutoCloseable {
 
 	  void delete(Object key) throws JDOException;
 	  
+	  DataSource dataSource() throws JDOException;
+	  
 }

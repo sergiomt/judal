@@ -7,7 +7,9 @@ import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
 
-public class SingleStringColumnRecord  extends AbstractSingleColumnRecord  {
+import com.knowgate.stringutils.Html;
+
+public class SingleStringColumnRecord extends SingleObjectColumnRecord  {
 
 	private static final long serialVersionUID = 1L;
 
@@ -17,16 +19,12 @@ public class SingleStringColumnRecord  extends AbstractSingleColumnRecord  {
 
 	public SingleStringColumnRecord(String tableName, String columnName) {
 		super(tableName, columnName);
+		setColumn(new ColumnDef(columnName, Types.VARCHAR, 1));
 	}
 
 	@Override
-	public ColumnDef getColumn(String colname) throws ArrayIndexOutOfBoundsException {
-		return new ColumnDef(columnName, Types.VARCHAR, 1);
-	}
-	
-	@Override
 	public boolean isEmpty(String colname) {
-		return value == null;
+		return value == null || apply(colname).length()==0;
 	}
 
 	@Override
@@ -39,6 +37,22 @@ public class SingleStringColumnRecord  extends AbstractSingleColumnRecord  {
 		return (String) super.getKey();		
 	}
 
+	@Override
+	public String getString(String colname) throws ClassCastException {
+		return (String) value;
+	}
+
+	@Override
+	public String getString(String colname, String defvalue) throws ClassCastException {
+		return null==value ? defvalue : (String) value;
+	}
+
+	@Override
+	public String getStringHtml(String colname, String defvalue) {
+		String sStr = getString(colname, defvalue);
+		return Html.encode(sStr);
+	}
+	
 	@Override
 	public String getValue() throws JDOException {
 		return (String) super.getValue();

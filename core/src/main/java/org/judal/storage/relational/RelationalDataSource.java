@@ -15,10 +15,19 @@ package org.judal.storage.relational;
 import java.util.Map.Entry;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 
 import org.judal.metadata.IndexDef;
+import org.judal.metadata.JoinType;
+import org.judal.metadata.NameAlias;
+import org.judal.storage.DataSource;
+import org.judal.storage.EngineFactory;
+import org.judal.storage.StorageContext;
+import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
+
+import com.knowgate.tuples.Pair;
 
 /**
  * Basic interface for relational DataSource implementations
@@ -61,33 +70,21 @@ public interface RelationalDataSource extends TableDataSource {
 	RelationalView openRelationalView(Record recordInstance) throws JDOException;
 	
 	/**
-	 * Open relational view for read-only of two inner joined views.
-	 * @param recordInstance1 Record subclass that will be used to read the joined pair
-	 * @param joinedTableName String Joined table name
-	 * @param column Entry&lt;String,String&gt; Column name at base table and column name at the joined table
-	 * @return RelationalView
+	 * Open Relational View for read-only of two joined views.
+	 * @param joinType JoinType enum INNER, OUTER
+	 * @param result Record subclass that will be used to read the joined pair
+	 * @param baseTable NameAlias Base table name and alias
+	 * @param joinedTable NameAlias Joined table name and alias
+	 * @param onColumns Pair&lt;String,String&gt; Variable number of columns to do the join
+	 * @return RelationalView 
 	 * @throws JDOException
 	 */
-	RelationalView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String,String> column) throws JDOException;
-
-	/**
-	 * Open relational view for read-only of two outer joined views.
-	 * @param recordInstance1 Record subclass that will be used to read the joined pair
-	 * @param joinedTableName String Joined table name
-	 * @param column Entry&lt;String,String&gt; Column name at base table and column name at the joined table
-	 * @return RelationalView
-	 * @throws JDOException
-	 */
-	RelationalView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String,String> column) throws JDOException;
-
-	RelationalView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String,String>[] columns) throws JDOException;
-
-	RelationalView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String,String>[] columns) throws JDOException;
-
+	RelationalView  openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) throws JDOException;
+	
 	/**
 	 * Get Relational Database Management System Id (given by the implementation)
 	 * @return int
 	 */
 	int getRdbmsId();
-
+	
 }

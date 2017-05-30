@@ -7,6 +7,8 @@ import java.util.Arrays;
 
 import javax.jdo.JDOUserException;
 
+import com.knowgate.debug.DebugFile;
+
 import static org.judal.storage.query.Connective.*;
 
 /**
@@ -239,19 +241,54 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	 */
 	@Override
 	public Object[] getParameters() {
+		
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin Predicate.getParameters()");
+			DebugFile.incIdent();
+		}
+		
 		ArrayList<Object> oParams = new ArrayList<Object>();
+		
 		for (Part oPart : oParts) {
 			if (oPart instanceof Term) {
+				if (DebugFile.trace)
+					DebugFile.writeln("getting parameters of nested Term");
 				Term oTerm = (Term) oPart;
 				if (!oTerm.getOperator().equals(Operator.IS) && !oTerm.getOperator().equals(Operator.ISNOT))
 				  for (int v=0; v<oTerm.getValueCount(); v++)
-					  oParams.add(oTerm.getValue(v));
+					  if (null==oTerm.getValue(v))
+						  oParams.add(oTerm.getValue(v));
+					  else if (oTerm.getValue(v) instanceof Part)
+						  oParams.addAll(Arrays.asList(((Part) oTerm.getValue(v)).getParameters()));
+					  else
+						  oParams.add(oTerm.getValue(v));
 			} else {
 				Object[] aParams = oPart.getParameters();
+				if (DebugFile.trace)
+					DebugFile.writeln("adding "+String.valueOf(aParams.length)+" parameters");
 				for (int p=0; p<aParams.length; p++)
-					oParams.add(aParams[p]);
+					if (aParams[p]==null)
+						oParams.add(aParams[p]);
+					else if (aParams[p] instanceof Part)
+						oParams.addAll(Arrays.asList(((Part) aParams[p]).getParameters()));
+					else
+						oParams.add(aParams[p]);
 			}
 		} // next
+		
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			if (oParams!=null && oParams.size()>0) {
+				StringBuilder b = new StringBuilder();
+				for (Object param : oParams)
+					b.append(param==null ? null : param.getClass().getName()).append(",");
+				b.setLength(b.length()-1);
+				DebugFile.writeln("End Predicate.getParameters() : { "+b.toString()+"}");
+			} else {
+				DebugFile.writeln("End Predicate.getParameters() : { }");
+			}
+		}
+		
 		return oParams.toArray();
 	}
 

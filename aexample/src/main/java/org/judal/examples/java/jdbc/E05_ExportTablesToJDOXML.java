@@ -10,7 +10,7 @@ import org.judal.jdbc.JDBCRelationalDataSource;
 import org.judal.examples.StudentCourseSchema;
 
 /**
- * Programmatically create schema meta data and output it as JDO XML
+ * Example of how to programmatically create schema meta data and output it as JDO XML
  */
 public class E05_ExportTablesToJDOXML {
 

@@ -1,7 +1,10 @@
 package org.judal.storage.query;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+
+import org.judal.metadata.NameAlias;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,7 +20,7 @@ public abstract class Term implements Part,Serializable {
 
 	private static final long serialVersionUID = 10000L;
 	
-	protected String sTable;
+	protected NameAlias oAliasedTable;
 	protected String sColumn;
 	protected String sNestedColumn;
 	protected String sOper;
@@ -33,7 +36,7 @@ public abstract class Term implements Part,Serializable {
 	public Term(String sColumnName, String sOperator) throws IllegalArgumentException {
 		if (!sOperator.equalsIgnoreCase(Operator.ISNULL) && !sOperator.equalsIgnoreCase(Operator.ISNOTNULL))
 			throw new IllegalArgumentException("Operator must be either "+Operator.ISNULL+" or "+Operator.ISNOTNULL);
-		sTable = null;
+		oAliasedTable = null;
 		sColumn = sColumnName;
 		sNestedColumn = null;
 		sOper = sOperator;	
@@ -48,7 +51,7 @@ public abstract class Term implements Part,Serializable {
 	 */
 	public Term(String sColumnName, String sOperator, Object oColumnValue) throws ArrayIndexOutOfBoundsException {
 
-		sTable = null;
+		oAliasedTable = null;
 		sColumn = sColumnName;
 		sNestedColumn = null;
 		sOper = sOperator;
@@ -93,7 +96,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oNestedTerm QueryTerm Nested Query term
 	 */
 	public Term(String sColumnName, String sOperator, String sTableName, Part oNestedTerm) {
-		sTable = sTableName;
+		oAliasedTable = new NameAlias(sTableName, null);
 		sColumn = sColumnName;
 		sNestedColumn = sColumnName;
 		sOper = sOperator;
@@ -103,6 +106,22 @@ public abstract class Term implements Part,Serializable {
 
 	/**
 	 * Create term.
+	 * @param sColumnName String Column Name
+	 * @param sOperator String Operator. Must be one of {"IN","NOT IN","EXISTS","NOT EXISTS","LIKE","ILIKE","BETWEEN"}
+	 * @param oAliasedTableName NameAlias Aliased Table Name
+	 * @param oNestedTerm QueryTerm Nested Query term
+	 */
+	public Term(String sColumnName, String sOperator, NameAlias oAliasedTableName, Part oNestedTerm) {
+		oAliasedTable = oAliasedTableName;
+		sColumn = sColumnName;
+		sNestedColumn = sColumnName;
+		sOper = sOperator;
+		aValues = new Object[]{oNestedTerm};
+		nValues = 1;
+	}
+		
+	/**
+	 * Create term.
 	 * @param sColumnName String Name of column at outer table
 	 * @param sOperator String Operator. Must be one of {"IN","NOT IN","EXISTS","NOT EXISTS","LIKE","ILIKE","BETWEEN"}
 	 * @param sTableName String Table Name
@@ -110,7 +129,24 @@ public abstract class Term implements Part,Serializable {
 	 * @param oNestedTerm QueryTerm Nested Query term
 	 */
 	public Term(String sColumnName, String sOperator, String sTableName, String sNestedColumnName, Part oNestedTerm) {
-		sTable = sTableName;
+		oAliasedTable = new NameAlias(sTableName,null);
+		sColumn = sColumnName;
+		sNestedColumn = sNestedColumnName;
+		sOper = sOperator;
+		aValues = new Object[]{oNestedTerm};
+		nValues = 1;
+	}
+
+	/**
+	 * Create term.
+	 * @param sColumnName String Name of column at outer table
+	 * @param sOperator String Operator. Must be one of {"IN","NOT IN","EXISTS","NOT EXISTS","LIKE","ILIKE","BETWEEN"}
+	 * @param oAliasedTableName NameAlias Aliased Table Name
+	 * @param sNestedColumnName String Name of column at nested table
+	 * @param oNestedTerm QueryTerm Nested Query term
+	 */
+	public Term(String sColumnName, String sOperator, NameAlias oAliasedTableName, String sNestedColumnName, Part oNestedTerm) {
+		oAliasedTable = oAliasedTableName;
 		sColumn = sColumnName;
 		sNestedColumn = sNestedColumnName;
 		sOper = sOperator;
@@ -125,7 +161,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue String[] column values
 	 */
 	public Term(String sColumnName, String sOperator, String[] aColumnValues) {
-		sTable = null;
+	  oAliasedTable = null;
 	  sColumn = sColumnName;
 	  sOper = sOperator;
 	  nValues = aColumnValues.length;
@@ -141,7 +177,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue Integer[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Integer[] aColumnValues) {
-		sTable = null;
+	  oAliasedTable = null;
 	  sColumn = sColumnName;
 	  sOper = sOperator;
 	  nValues = aColumnValues.length;
@@ -157,7 +193,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue int[] column values
 	 */
 	public Term(String sColumnName, String sOperator, int[] aColumnValues) {
-		sTable = null;
+	  oAliasedTable = null;
 	  sColumn = sColumnName;
 	  sOper = sOperator;
 	  nValues = aColumnValues.length;
@@ -173,7 +209,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue Long[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Long[] aColumnValues) {
-		sTable = null;
+	  oAliasedTable = null;
 	  sColumn = sColumnName;
 	  sOper = sOperator;
 	  nValues = aColumnValues.length;
@@ -189,7 +225,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue long[] column values
 	 */
 	public Term(String sColumnName, String sOperator, long[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
 	  sColumn = sColumnName;
 	  sOper = sOperator;
 	  nValues = aColumnValues.length;
@@ -205,7 +241,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue Float[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Float[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = aColumnValues.length;
@@ -221,7 +257,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue Float[] column values
 	 */
 	public Term(String sColumnName, String sOperator, float[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = aColumnValues.length;
@@ -237,7 +273,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue Double[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Double[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = aColumnValues.length;
@@ -253,7 +289,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue double[] column values
 	 */
 	public Term(String sColumnName, String sOperator, double[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = aColumnValues.length;
@@ -271,7 +307,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param double value 3
 	 */
 	public Term(String sColumnName, String sOperator, double d1, double d2, double d3) {
-		sTable = null;
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = 3;
@@ -285,10 +321,42 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
-	 * @param oColumnValue Date[] column values
+	 * @param oColumnValue java.util.Date[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Date[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
+		sColumn = sColumnName;
+		sOper = sOperator;
+		nValues = aColumnValues.length;
+		aValues = new Object[nValues];
+		for (int v=0; v<nValues; v++)
+		  aValues[v] = aColumnValues[v];
+	}
+
+	/**
+	 * Create term.
+	 * @param sColumnName String Column Name
+	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
+	 * @param oColumnValue java.sql.Date[] column values
+	 */
+	public Term(String sColumnName, String sOperator, Calendar[] aColumnValues) {
+		  oAliasedTable = null;
+		sColumn = sColumnName;
+		sOper = sOperator;
+		nValues = aColumnValues.length;
+		aValues = new Object[nValues];
+		for (int v=0; v<nValues; v++)
+		  aValues[v] = aColumnValues[v]==null ? null : new Date(aColumnValues[v].getTimeInMillis());
+	}
+	
+	/**
+	 * Create term.
+	 * @param sColumnName String Column Name
+	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
+	 * @param oColumnValue java.sql.Date[] column values
+	 */
+	public Term(String sColumnName, String sOperator, java.sql.Date[] aColumnValues) {
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = aColumnValues.length;
@@ -304,7 +372,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue Timestamp[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Timestamp[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = aColumnValues.length;
@@ -320,7 +388,7 @@ public abstract class Term implements Part,Serializable {
 	 * @param oColumnValue BigDecimal[] column values
 	 */
 	public Term(String sColumnName, String sOperator, BigDecimal[] aColumnValues) {
-		sTable = null;
+		  oAliasedTable = null;
 		sColumn = sColumnName;
 		sOper = sOperator;
 		nValues = aColumnValues.length;
@@ -331,10 +399,12 @@ public abstract class Term implements Part,Serializable {
 	
 	protected Term() { }
 	
+	public abstract String getTableName();
+
 	public abstract Term clone();
 	
 	protected void clone(Term source) {
-		sTable = source.sTable;
+		oAliasedTable = source.oAliasedTable;
 		sColumn = source.sColumn;
 		sNestedColumn = source.sNestedColumn;
 		sOper = source.sOper;
@@ -343,10 +413,6 @@ public abstract class Term implements Part,Serializable {
 			aValues = null;
 		else
 			aValues = Arrays.copyOf(aValues, aValues.length);
-	}
-
-	public String getTableName() {
-		return sTable;
 	}
 	
 	public String getColumnName() {

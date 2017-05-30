@@ -5,10 +5,11 @@ import java.util.HashMap;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import org.judal.storage.Engine;
 import org.judal.storage.EngineFactory;
-import org.judal.storage.StorageContext;
-import org.judal.storage.relational.RelationalDataSource;
 
 import static org.judal.storage.DataSource.*;
 
@@ -18,7 +19,8 @@ import org.judal.jdbc.JDBCRelationalDataSource;
 import static org.judal.transaction.DataSourceTransactionManager.Transact;
 
 /**
- * Example of how to create a JDBC data source and set it as default relational DataSource in the StorageContext
+ * Example of how to create a JDBC data source and set it as default
+ * relational DataSource for the current Thread
  *
  */
 public class E01_CreateDefaultRelationalDataSource {
@@ -33,8 +35,8 @@ public class E01_CreateDefaultRelationalDataSource {
 		properties.put(URI, "jdbc:hsqldb:mem:test");
 		properties.put(USER, "sa");
 		properties.put(PASSWORD, "");
-		properties.put(POOLSIZE, DEFAULT_MAXPOOLSIZE);
-		properties.put(MAXPOOLSIZE, DEFAULT_MAXCONNECTIONS);
+		properties.put(POOLSIZE, DEFAULT_POOLSIZE);
+		properties.put(MAXPOOLSIZE, DEFAULT_MAXPOOLSIZE);
 		properties.put(SCHEMA, "PUBLIC");
 		properties.put(USE_DATABASE_METADATA, DEFAULT_USE_DATABASE_METADATA);
 
@@ -47,7 +49,10 @@ public class E01_CreateDefaultRelationalDataSource {
 		// Use the Engine to create an instance of a RelationalDataSource
 		JDBCRelationalDataSource dataSource = jdbc.getDataSource(properties, Transact);
 		
-		// Set this as the default data source from the current Thread with default transaction manager		
+		assertNotNull(dataSource);
+		assertEquals("jdbc:hsqldb:mem:test", dataSource.getProperty(URI));
+		
+		// Set this as the default data source for the current Thread with default transaction manager		
 		EngineFactory.DefaultThreadDataSource.set(dataSource);
 
 		return dataSource;
@@ -62,5 +67,5 @@ public class E01_CreateDefaultRelationalDataSource {
 		create();
 		close();
 	}
-	
+
 }

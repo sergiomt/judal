@@ -19,7 +19,7 @@ import org.judal.metadata.bind.JdoXmlMetadata;
 import static org.judal.examples.Resources.getResourceAsStream;
 
 /**
- * Create tables read from a JDO XML file
+ * Example of how to create tables read from a JDO XML file
  */
 public class E04_CreateTablesFromJDOXML {
 

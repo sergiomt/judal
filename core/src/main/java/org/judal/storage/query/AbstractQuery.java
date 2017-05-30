@@ -500,9 +500,9 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	public void setResultClass(Class resultClass) throws ClassCastException {
 		if (null==resultClass)
 			throw new NullPointerException("Result Class cannot be null");
-		this.resultClass = resultClass;
 		if (Record.class.isAssignableFrom(resultClass)) {
 			recordConstructor = (Constructor<? extends Record>) ObjectFactory.getConstructor((Class<? extends Object>) resultClass, new Class[0]);
+			this.resultClass = resultClass;
 		} else {
 			throw new ClassCastException("Cannot cast from "+resultClass.getClass().getName()+" to "+Record.class.getName());
 		}
@@ -510,8 +510,15 @@ public abstract class AbstractQuery implements Cloneable, Query {
 
 	@SuppressWarnings("unchecked")
 	public void setResultClass(Class<? extends Record> resultClass, Class<?>... constructorParameterClasses) {
+		if (null==resultClass)
+			throw new NullPointerException("Result Class cannot be null");
 		if (null==recordConstructor || null==constructorParameters || null==constructorParameterClasses) {
-			setResultClass(resultClass);
+			if (Record.class.isAssignableFrom(resultClass)) {
+				recordConstructor = (Constructor<? extends Record>) ObjectFactory.getConstructor((Class<? extends Object>) resultClass, new Class[0]);
+				this.resultClass = resultClass;
+			} else {
+				throw new ClassCastException("Cannot cast from "+resultClass.getClass().getName()+" to "+Record.class.getName());
+			}
 		} else {
 			this.resultClass = resultClass;
 			recordConstructor = (Constructor<? extends Record>) ObjectFactory.getConstructor((Class<? extends Object>) resultClass, constructorParameterClasses);

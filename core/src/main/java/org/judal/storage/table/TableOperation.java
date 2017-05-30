@@ -3,7 +3,6 @@ package org.judal.storage.table;
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
 
-import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
 import org.judal.storage.Operation;
 import org.judal.storage.Param;
@@ -12,15 +11,15 @@ import org.judal.storage.table.Record;
 public class TableOperation<R extends Record> implements Operation {
 
 	protected Table tbl;
-	protected DataSource dts;
+	protected TableDataSource dts;
 	private R rec;
 
 	public TableOperation() {
-		 this((TableDataSource) EngineFactory.DefaultThreadDataSource.get());
+		 this(EngineFactory.getDefaultTableDataSource());
 	 }
 
 	public TableOperation(R record) {
-		 this((TableDataSource) EngineFactory.DefaultThreadDataSource.get(), record);
+		 this(EngineFactory.getDefaultTableDataSource(), record);
 	 }
 	
 	public TableOperation(TableDataSource dataSource) {
@@ -34,6 +33,11 @@ public class TableOperation<R extends Record> implements Operation {
 		open();
 	}
 
+	@Override
+	public TableDataSource dataSource() {
+		return dts;
+	}
+	
 	protected void open() {
 		tbl = ((TableDataSource) dts).openTable(rec);
 	}

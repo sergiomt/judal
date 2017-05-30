@@ -5,19 +5,23 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.List;
 
+import javax.jdo.JDOException;
+
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import com.knowgate.io.IOUtils;
 
 import org.judal.storage.EngineFactory;
 import org.judal.storage.relational.RelationalDataSource;
+import org.judal.storage.relational.RelationalView;
+import org.judal.storage.table.impl.SingleLongColumnRecord;
 import org.judal.jdbc.JDBCRelationalDataSource;
 
 import org.judal.examples.Resources;
 import org.judal.examples.java.model.Course;
 import org.judal.examples.java.model.Student;
 import org.judal.examples.java.model.StudentCourse;
-
 
 /**
  * Insert data from a comma delimited file into the database
@@ -53,7 +57,9 @@ public class E10_WriteCSVDataIntoTheDatabase {
 			s.setDateOfBirth(fields[3]);
 			// This call use EngineFactory.DefaultThreadDataSource under the hood
 			s.store();
-		}		
+		}
+		
+		assertEquals(lines.size(), countRows(Student.TABLE_NAME));
 	}
 
 	public static void insertCoursesIntoDatabase() throws IOException, ParseException {
@@ -72,7 +78,10 @@ public class E10_WriteCSVDataIntoTheDatabase {
 			c.setDescription(fields[6]);
 			// This call use EngineFactory.DefaultThreadDataSource under the hood
 			c.store();
-		}		
+		}
+		
+		
+		assertEquals(lines.size(), countRows(Course.TABLE_NAME));
 	}
 	
 	public static void assignStudentsToCoursesIntoDatabase() throws IOException {
@@ -87,8 +96,17 @@ public class E10_WriteCSVDataIntoTheDatabase {
 			// This call use EngineFactory.DefaultThreadDataSource under the hood
 			sc.store();
 		}		
+		assertEquals(lines.size(), countRows(StudentCourse.TABLE_NAME));
 	}
 
+	public static int countRows(final String TableName) throws JDOException {
+		SingleLongColumnRecord count = new SingleLongColumnRecord(TableName, "c");
+		RelationalDataSource dts = EngineFactory.getDefaultRelationalDataSource();
+		try (RelationalView courses = dts.openRelationalView(count)) {
+			return courses.count(null).intValue();
+		}
+	}
+	
 	public static JDBCRelationalDataSource setUp() throws Exception {
 		JDBCRelationalDataSource dataSource = E01_CreateDefaultRelationalDataSource.create();
 		E04_CreateTablesFromJDOXML.createSchemaObjects(dataSource);

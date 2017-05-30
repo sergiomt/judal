@@ -14,7 +14,6 @@ import org.junit.Test;
 public class E12_OpenTableAndWriteRecords {
 
 	@Test
-	@SuppressWarnings("unused")
 	public void demo() throws Exception {
 
 		JDBCRelationalDataSource dataSource = setUp();

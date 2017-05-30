@@ -35,5 +35,19 @@
         <column name="id_course" />
       </foreign-key>
     </class>
+    <class name="StudentDocument" table="student_document">
+      <column name="id_document" jdbc-type="INTEGER" allows-null="false"  />
+      <column name="id_student" target="student" target-field="id_student" jdbc-type="INTEGER" allows-null="false"  />
+      <column name="dt_created" jdbc-type="TIMESTAMP" allows-null="false" default-value="NOW" />
+      <column name="tl_document" jdbc-type="VARCHAR" length="100" allows-null="false" />
+      <column name="tp_document" jdbc-type="VARCHAR" length="50" allows-null="false" />
+      <column name="path_document" jdbc-type="VARCHAR" length="254" allows-null="false" />
+      <primary-key name="pk_student_document">
+        <column name="id_document" />
+      </primary-key>
+      <foreign-key table="student" name="f1_student_document">
+        <column name="id_student" />
+      </foreign-key>
+    </class>
   </package>
 </jdo>

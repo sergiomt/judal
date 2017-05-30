@@ -35,7 +35,7 @@ public interface View extends ReadOnlyBucket {
 	  
  	  boolean exists(Param... keys) throws JDOException;
 
- 	  int count(String indexColumnName, Object valueSearched) throws JDOException;
+ 	  long count(String indexColumnName, Object valueSearched) throws JDOException;
 
  	  <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched) throws JDOException;
 

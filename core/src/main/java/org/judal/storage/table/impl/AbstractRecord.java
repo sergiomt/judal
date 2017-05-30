@@ -33,21 +33,23 @@ import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
 import org.judal.storage.FieldHelper;
+import org.judal.storage.StorageContext;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.Table;
 import org.judal.storage.table.TableDataSource;
 
 import com.knowgate.currency.Money;
+import com.knowgate.dateutils.DateHelper;
 import com.knowgate.debug.DebugFile;
 import com.knowgate.gis.LatLong;
 import com.knowgate.stringutils.Html;
 
-import static com.knowgate.typeutils.TypeResolver.ClassLangString;
-import static com.knowgate.typeutils.TypeResolver.ClassSQLDate;
-import static com.knowgate.typeutils.TypeResolver.ClassTimestamp;
-import static com.knowgate.typeutils.TypeResolver.ClassUtilDate;
-import static com.knowgate.typeutils.TypeResolver.ClassCalendar;
+//import static com.knowgate.typeutils.TypeResolver.ClassLangString;
+//import static com.knowgate.typeutils.TypeResolver.ClassSQLDate;
+//import static com.knowgate.typeutils.TypeResolver.ClassTimestamp;
+//import static com.knowgate.typeutils.TypeResolver.ClassUtilDate;
+//import static com.knowgate.typeutils.TypeResolver.ClassCalendar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -178,7 +180,7 @@ public abstract class AbstractRecord implements Record {
 
 	@Override
 	public final boolean load(Object oKey) throws JDOException {
-		return load(EngineFactory.DefaultThreadDataSource.get());
+		return load(EngineFactory.getDefaultTableDataSource());
 	}
 
 	@Override
@@ -196,9 +198,9 @@ public abstract class AbstractRecord implements Record {
 
 	@Override
 	public final void store() throws JDOException {
-		store(EngineFactory.DefaultThreadDataSource.get());
+		store(EngineFactory.getDefaultTableDataSource());
 	}
-	
+
 	@Override
 	public void delete(DataSource oDts) throws JDOException {
 		Table oTbl = ((TableDataSource) oDts).openTable(this);
@@ -211,7 +213,7 @@ public abstract class AbstractRecord implements Record {
 
 	@Override
 	public final void delete() throws JDOException {
-		delete(EngineFactory.DefaultThreadDataSource.get());
+		delete(EngineFactory.getDefaultTableDataSource());
 	}
 	
 	public TableDef getTableDef() {
@@ -327,34 +329,14 @@ public abstract class AbstractRecord implements Record {
 	@SuppressWarnings("deprecation")
 	@Override
 	public Calendar getCalendar(String sKey) throws ClassCastException {
-		Calendar cDt = null;
-		Object oDt = apply(sKey);
-		if (null!=oDt) {
-			if (oDt.getClass().equals(ClassUtilDate)) {
-				cDt = new GregorianCalendar();
-				cDt.setTime((java.util.Date) oDt);	
-			}
-			else if (oDt.getClass().equals(ClassTimestamp)) {
-				cDt = new GregorianCalendar();
-				cDt.setTimeInMillis(((java.sql.Timestamp) oDt).getTime());
-			}
-			else if (oDt.getClass().equals(ClassSQLDate)) {
-				cDt = new GregorianCalendar();
-				cDt.set(((java.sql.Date) oDt).getYear(), ((java.sql.Date) oDt).getMonth(), ((java.sql.Date) oDt).getDate());
-			}
-			else if (oDt.getClass().equals(ClassCalendar)) {
-				cDt = (java.util.Calendar) oDt;
-			}
-			else if (oDt.getClass().equals(ClassLangString)) {
-				try {
-					cDt = new GregorianCalendar();
-					cDt.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse((String) oDt));
-				} catch (java.text.ParseException pe) {
-					throw new ClassCastException("Cannot parse Date " + oDt);
-				}
-			}
+		Date dDt = DateHelper.toDate(apply(sKey));
+		if (dDt==null) {
+			return null;
+		} else {
+			Calendar cDt = new GregorianCalendar();
+			cDt.setTime(dDt);	
+			return cDt;
 		}
-		return cDt;
 	} // getCalendar
 
 	/**
@@ -363,29 +345,9 @@ public abstract class AbstractRecord implements Record {
 	 * @return Date value or <b>null</b>.
 	 * @throws ClassCastException if sKey field is not of type DATETIME
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public Date getDate(String sKey) throws ClassCastException {
-		Date dDt = null;
-		Object oDt = apply(sKey);
-		if (null!=oDt) {
-			if (oDt.getClass().equals(ClassUtilDate))
-				dDt = (java.util.Date) oDt;
-			else if (oDt.getClass().equals(ClassTimestamp))
-				dDt = new java.util.Date(((java.sql.Timestamp) oDt).getTime());
-			else if (oDt.getClass().equals(ClassSQLDate))
-				dDt = new java.util.Date(((java.sql.Date) oDt).getYear(), ((java.sql.Date) oDt).getMonth(), ((java.sql.Date) oDt).getDate());
-			else if (oDt.getClass().equals(ClassCalendar))
-				dDt = ((java.util.Calendar) oDt).getTime();
-			else if (oDt.getClass().equals(ClassLangString)) {
-				try {
-					dDt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse((String) oDt);    	  
-				} catch (java.text.ParseException pe) {
-					throw new ClassCastException("Cannot parse Date " + oDt);
-				}
-			}
-		}
-		return dDt;
+		return DateHelper.toDate(apply(sKey));
 	} // getDate
 
 	/**

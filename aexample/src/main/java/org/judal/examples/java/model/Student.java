@@ -20,10 +20,10 @@ public class Student extends MapRecord {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String TABLE_NAME = "student";
+	public static final String TABLE_NAME = "student";
 	
 	public Student() throws JDOException {
-		this((RelationalDataSource) EngineFactory.DefaultThreadDataSource.get());
+		this(EngineFactory.getDefaultRelationalDataSource());
 	}
 
 	public Student(RelationalDataSource dataSource) throws JDOException {

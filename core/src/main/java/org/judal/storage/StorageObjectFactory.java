@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
 
 import com.knowgate.debug.DebugFile;
 
@@ -28,6 +29,27 @@ import com.knowgate.typeutils.ObjectFactory;
  */
 public class StorageObjectFactory extends ObjectFactory {
 
+	@SuppressWarnings("rawtypes")
+	private static Class JavaRecord;
+	@SuppressWarnings("rawtypes")
+	private static Class JavaRecordSet;
+	@SuppressWarnings("rawtypes")
+	private static Class ScalaRecord;
+	@SuppressWarnings("rawtypes")
+	private static Class ScalaRecordSet;
+
+	static {
+		try {
+			JavaRecord = Class.forName("org.judal.storage.java.JavaRecord");
+		} catch (ClassNotFoundException ignore) { }
+		try {
+			JavaRecordSet = Class.forName("org.judal.storage.java.ArrayListRecordSet");
+		} catch (ClassNotFoundException ignore) { }
+		try {
+			ScalaRecord = Class.forName("org.judal.storage.scala.ScalaRecord");
+		} catch (ClassNotFoundException ignore) { }
+	}
+	
 	/**
 	 * <p>Create instance of a class that implements Stored interface.</p>
 	 * @param recordConstructor Constructor&lt;R extends Stored&gt;
@@ -119,5 +141,60 @@ public class StorageObjectFactory extends ObjectFactory {
 		}
 		return newRecord(recordConstructor, constructorParameters);
 	}
+	
+	public static <R extends Record> RecordSet<R> newRecordSet(Constructor<RecordSet<R>> recordsetConstructor, Object... constructorParameters) throws NoSuchMethodException {
+		RecordSet<R> retval = null;
+		final int parameterCount = recordsetConstructor.getParameterCount();
+		try {
+			if (parameterCount==0)
+				retval = recordsetConstructor.newInstance();
+			else
+				retval = recordsetConstructor.newInstance(filterParameters(recordsetConstructor.getParameters(), constructorParameters));
+		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | IllegalArgumentException xcpt) {
+			if (DebugFile.trace)
+				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" StorageObjectFactory.newRecordSet(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
+		}
+		if (DebugFile.trace)
+			DebugFile.writeln("StorageObjectFactory.newRecordSet() : " + retval.getClass().getName());
+		return retval;
+		
+	}
 
+	/**
+	 * <p>Create instance of a class that implements RecordSet interface for the given Record class.</p>
+	 * @param recordClass Class&lt;R extends Record&gt;
+	 * @param constructorParameters Object[] Parameters for the class constructor
+	 * @return RecordSet&lt;R extends Record&gt;
+	 * @throws NoSuchMethodException If no constructor was found allowing the given parameters
+	 */
+	@SuppressWarnings("unchecked")
+	public static <R extends Record> RecordSet<R> newRecordSetOf(Class<R> recordClass, Object... constructorParameters) throws NoSuchMethodException {
+		Constructor<RecordSet<R>> recordsetConstructor;
+		Class<RecordSet<R>> recordsetClass;
+		if (ScalaRecord!=null && recordClass.isAssignableFrom(ScalaRecord))
+			recordsetClass = ScalaRecordSet;
+		else
+			recordsetClass = JavaRecordSet;
+		recordsetConstructor = (Constructor<RecordSet<R>>) getConstructor(recordsetClass, getParameterClasses(recordClass, constructorParameters));
+		if (null==recordsetConstructor) {
+			recordsetConstructor = (Constructor<RecordSet<R>>) tryConstructor(recordClass);
+			if (null==recordsetConstructor) {
+				throw new NoSuchMethodException("StorageObjectFactory.newRecordSetOf() No suitable constructor found for "+recordsetClass.getName());
+			} else {
+				if (DebugFile.trace)
+					DebugFile.writeln("no matching constructor found for "+recordClass.getName()+" using default constructor");				
+			}
+		}
+		Object[] constParameters;
+		if (constructorParameters==null || constructorParameters.length==0) {
+			constParameters = new Object[]{recordClass};
+		} else {
+			constParameters = new Object[constructorParameters.length+1];
+			constParameters[0] = recordClass;
+			for (int p=0; p<constructorParameters.length; p++)
+				constParameters[p+1] = constructorParameters[p];
+		}
+			
+		return newRecordSet(recordsetConstructor, constParameters);
+	}
 }

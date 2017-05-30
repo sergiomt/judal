@@ -24,7 +24,7 @@ import javax.jdo.JDOException;
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public abstract class AbstractSingleNumberColumnRecord extends AbstractSingleColumnRecord {
+public abstract class AbstractSingleNumberColumnRecord extends SingleObjectColumnRecord {
 
 	private static final long serialVersionUID = 1L;
 

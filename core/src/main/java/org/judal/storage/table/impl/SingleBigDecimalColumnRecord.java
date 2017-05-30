@@ -12,18 +12,15 @@ import org.judal.metadata.ColumnDef;
 public class SingleBigDecimalColumnRecord extends AbstractSingleNumberColumnRecord {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	public SingleBigDecimalColumnRecord(String tableName) {
 		super(tableName);
+		setColumn(new ColumnDef("value", Types.DECIMAL, 1));
 	}
 
 	public SingleBigDecimalColumnRecord(String tableName, String columnName) {
 		super(tableName, columnName);
-	}
-
-	@Override
-	public ColumnDef getColumn(String colname) throws ArrayIndexOutOfBoundsException {
-		return new ColumnDef(columnName, Types.DECIMAL, 1);
+		setColumn(new ColumnDef(columnName, Types.DECIMAL, 1));
 	}
 
 	@Override

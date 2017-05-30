@@ -1,37 +1,34 @@
 package org.judal.examples.java.jdbc;
 
+import java.util.GregorianCalendar;
+
 import org.junit.Test;
 
-import java.sql.Date;
-import java.util.Calendar;
-
-import org.judal.storage.table.RecordSet;
-import org.judal.storage.table.ColumnGroup;
-
-import org.judal.storage.query.relational.RelationalQuery;
-
-import static org.judal.storage.query.Operator.LIKE;
-import static org.judal.storage.query.Operator.GT;
-
 import org.judal.examples.java.model.Student;
+import org.judal.storage.query.relational.RelationalQuery;
+import org.judal.storage.table.RecordSet;
 
-public class E17_FetchByRelationalQuery {
+import static org.judal.storage.query.Operator.BETWEEN;
 
-	@SuppressWarnings({ "unused", "deprecation" })
+/**
+ * Fetch students whose date of birth is between 01/01/1980 and 31/12/1989
+ */
+public class E19_FetchFilteringBetweenDates {
+
+	@SuppressWarnings({ "unused", "unchecked" })
 	@Test
 	public void demo() throws Exception {
 		
 		setUp();
 		
 		try (RelationalQuery<Student> qry = new RelationalQuery<>(Student.class)) {
-			qry.and("last_name", LIKE, "S%").and("date_of_birth", GT, new Date(80, 00, 01));
-			qry.setResult(new ColumnGroup("id_student","first_name","last_name","date_of_birth"));
+			qry.setResult(new Student().fetchGroup().getMembers());
+			qry.and("date_of_birth", BETWEEN, new GregorianCalendar(1980,00,01), new GregorianCalendar(1989,11,31));
 			RecordSet<Student> s80 = qry.fetch();
 			for (Student s : s80) {
 				int id = s.getId();
 				String firstName = s.getFirstName();
 				String lastName = s.getLastName();
-				Calendar dob = s.getDateOfBirth();
 			}
 		}
 
@@ -48,4 +45,5 @@ public class E17_FetchByRelationalQuery {
 	public static void tearDown() throws Exception {
 		E10_WriteCSVDataIntoTheDatabase.tearDown();
 	}
+
 }

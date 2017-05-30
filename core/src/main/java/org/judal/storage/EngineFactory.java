@@ -13,6 +13,12 @@ package org.judal.storage;
 
 import java.util.Hashtable;
 
+import javax.jdo.JDOUserException;
+
+import org.judal.storage.keyvalue.BucketDataSource;
+import org.judal.storage.relational.RelationalDataSource;
+import org.judal.storage.table.TableDataSource;
+
 public class EngineFactory {
 	
 	public static ThreadLocal<DataSource> DefaultThreadDataSource = new ThreadLocal<DataSource>();
@@ -55,6 +61,63 @@ public class EngineFactory {
 		return engineClass.newInstance();
 	}
 
+	public static BucketDataSource getDefaultBucketDataSource() throws JDOUserException {
+		
+		BucketDataSource tdts = null; 		
+		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();		
+		
+		if (null==ddts)
+			tdts = StorageContext.Default.getKeyValueDataSource();
+		else if (ddts instanceof BucketDataSource)
+			tdts = (BucketDataSource) ddts;
+		else
+			tdts = StorageContext.Default.getKeyValueDataSource();
+
+		if (null==tdts)
+			throw new JDOUserException("No suitable default BucketDataSource found at EngineFactory or StorageContext");
+		
+		return tdts;
+	}
+
+	public static TableDataSource getDefaultTableDataSource() throws JDOUserException {
+		
+		TableDataSource tdts = null; 		
+		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();		
+
+		if (null==ddts)
+			tdts = StorageContext.Default.getTableDataSource();
+		else if (ddts instanceof TableDataSource)
+			tdts = (TableDataSource) ddts;
+		else
+			tdts = StorageContext.Default.getTableDataSource();
+
+		if (null==tdts)
+			tdts = StorageContext.Default.getRelationalDataSource();
+			
+		if (null==tdts)
+			throw new JDOUserException("No suitable default TableDataSource found at EngineFactory or StorageContext");
+		
+		return tdts;
+	}
+
+	public static RelationalDataSource getDefaultRelationalDataSource() throws JDOUserException {
+		
+		RelationalDataSource rdts = null; 
+		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();		
+
+		if (null==ddts)
+			rdts = StorageContext.Default.getRelationalDataSource();
+		else if (ddts instanceof RelationalDataSource)
+			rdts = (RelationalDataSource) ddts;
+		else
+			rdts = StorageContext.Default.getRelationalDataSource();
+			
+		if (null==rdts)
+			throw new JDOUserException("No suitable default RelationalDataSource found at EngineFactory or StorageContext");
+		
+		return rdts;
+	}
+	
 	/*
 	 * Some standard names for engines
 	 */

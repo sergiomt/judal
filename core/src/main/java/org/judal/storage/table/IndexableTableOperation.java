@@ -8,11 +8,11 @@ import org.judal.storage.table.Record;
 public class IndexableTableOperation<R extends Record> extends TableOperation<R> {
 
 	public IndexableTableOperation() {
-		this((TableDataSource) EngineFactory.DefaultThreadDataSource.get());
+		this(EngineFactory.getDefaultTableDataSource());
 	}
 
 	public IndexableTableOperation(R record) {
-		this((TableDataSource) EngineFactory.DefaultThreadDataSource.get(), record);
+		this(EngineFactory.getDefaultTableDataSource(), record);
 	}
 
 	public IndexableTableOperation(TableDataSource dataSource) {
@@ -22,7 +22,7 @@ public class IndexableTableOperation<R extends Record> extends TableOperation<R>
 	public IndexableTableOperation(TableDataSource dataSource, R record) {
 		super(dataSource, record);
 	}
-
+	
 	protected void open() {
 		tbl = ((TableDataSource) dts).openIndexedTable(getRecord());
 	}
@@ -30,6 +30,10 @@ public class IndexableTableOperation<R extends Record> extends TableOperation<R>
 	@Override
 	public IndexableTable getTable() {
 		return (IndexableTable) tbl;
+	}
+
+	public long count(String columnName, Object valueSearched) {
+		return getTable().count(columnName, valueSearched);
 	}
 
 	public boolean exists(Param... keys) {
