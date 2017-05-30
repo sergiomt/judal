@@ -44,7 +44,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 	
 	public void execute(String sql) throws JDOException {
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDBCBucketDataSource.execute()");
+			DebugFile.writeln("Begin JDBCBucketDataSource.execute("+sql+")");
 			DebugFile.incIdent();
 		}
 		if (inTransaction())
@@ -101,7 +101,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 			keycolumn.setPrimaryKey(true);
 			tblDef.addColumnMetadata(keycolumn);
 			tblDef.addColumnMetadata(valcolumn);
-			execute(tblDef.toString());		
+			execute(tblDef.getSource());		
 			addTableToCache(tblDef);
 			addColumnsToCache(tblDef, conn, conn.getMetaData());
 			conn.close("JDBCBucketDataSource");

@@ -43,7 +43,6 @@ import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.keyvalue.ReadOnlyBucket;
 import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.query.Operator;
-import org.judal.storage.table.ArrayListRecordSet;
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
@@ -546,7 +545,13 @@ public class DBTable extends DBBucket implements IndexableTable {
 		if (DebugFile.trace)
 			DebugFile.writeln("new ArrayListRecordSet<R>(" + getResultClass().getName() + ")");
 
-		ArrayListRecordSet<? extends Record> oEst = new ArrayListRecordSet<>(getResultClass());
+		RecordSet<R> oEst;
+		try {
+			oEst = StorageObjectFactory.newRecordSetOf((Class<R>) getResultClass(), maxRows);
+		} catch (NoSuchMethodException e) {
+			throw new JDOException(e.getMessage(), e);
+		}
+
 		Cursor oPur = null;
 		SecondaryCursor oCur = null;
 		OperationStatus oOst;
@@ -572,7 +577,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oOst = oPur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
 					if (fetched+skipped>=offset) {
-						Record oRec = (R) makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
+						R oRec = (R) makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 						if (!oRec.isNull(indexColumnName)) {
 							oEst.add(oRec);
 							fetched++;
@@ -594,9 +599,9 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oOst = oPur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
 					if (fetched+skipped>=offset) {
-						Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
+						R oRec = (R) makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 						if (oRec.isNull(indexColumnName)) {
-							oEst.add((R) oRec);
+							oEst.add(oRec);
 							fetched++;
 						}
 					} else {
@@ -630,12 +635,12 @@ public class DBTable extends DBBucket implements IndexableTable {
 						oOst = oCur.getSearchKeyRange(oDbKey, oDbDat, LockMode.DEFAULT);
 
 					while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
-						Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
+						R oRec = (R) makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 						try {
 							oRec.getColumn(indexColumnName);
 							if (oRec.getString(indexColumnName, "").startsWith(sIndexValue)) {
 								if (fetched+skipped>=offset) {
-									oEst.add((R) oRec);
+									oEst.add(oRec);
 									fetched++;
 								} else {
 									skipped++;
@@ -673,7 +678,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 						if (DebugFile.trace)
 							DebugFile.writeln("get return status was "+oOst);
 						if (oOst == OperationStatus.SUCCESS) {
-							Record oRec = makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
+							R oRec = (R) makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat);
 							if (DebugFile.trace) DebugFile.writeln("made record");
 							oEst.add(oRec);
 							fetched++;
@@ -687,7 +692,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 							DebugFile.writeln("getSearchKey return status was "+oOst);
 						while (oOst == OperationStatus.SUCCESS && fetched<maxRows) {
 							if (fetched+skipped>=offset) {
-								oEst.add(makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat));
+								oEst.add((R) makeRecord(getResultClass(), oDbeb, oDbKey, oDbDat));
 								fetched++;
 								if (DebugFile.trace) DebugFile.writeln("fetched "+String.valueOf(fetched));
 							} else {
@@ -799,7 +804,13 @@ public class DBTable extends DBBucket implements IndexableTable {
 		if (!oInd.containsKey(sIndexColumn))
 			throw new JDOException("DBTable.fetch() Column " + sIndexColumn + " is not indexed");
 
-		ArrayListRecordSet<? extends Record> oEst = new ArrayListRecordSet<>(getResultClass());
+		RecordSet<R> oEst;
+		try {
+			oEst = (RecordSet<R>) StorageObjectFactory.newRecordSetOf(getResultClass());
+		} catch (NoSuchMethodException e) {
+			throw new JDOException(e.getMessage(), e);
+		}
+
 		Cursor oPur = null;
 		SecondaryCursor oCur = null;
 		OperationStatus oOst;
@@ -840,7 +851,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				oDbKey = new DatabaseEntry(byMin);
 				oOst = oCur.getSearchKey(oDbKey, oDbDat, LockMode.DEFAULT);
 				while (oOst == OperationStatus.SUCCESS) {
-					Record oRec = StorageObjectFactory.newRecord(getResultClass(), oTbl);
+					R oRec = (R) StorageObjectFactory.newRecord(getResultClass(), oTbl);
 					oDbEnt = oDbeb.entryToObject(oDbKey, oDbDat);
 					oRec.setKey(oDbEnt.getKey());
 					oRec.setValue(oDbEnt.getWrapped());
@@ -848,7 +859,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 					if (oValue != null) {
 						if (Bytes.compareTo(BytesConverter.toBytes(oValue, iType), byMax) > 0)
 							break;						
-						oEst.add((R) oRec);
+						oEst.add(oRec);
 					}
 					oOst = oCur.getNext(oDbKey, oDbDat, LockMode.DEFAULT);
 				} // wend
@@ -1012,8 +1023,14 @@ public class DBTable extends DBBucket implements IndexableTable {
 			DBEntityBinding oDbeb = new DBEntityBinding(getCatalog());
 			DatabaseEntry oDbDat = new DatabaseEntry();
 			DatabaseEntry oDbKey = new DatabaseEntry();
-			ArrayListRecordSet<? extends Record> oEst = new ArrayListRecordSet<>(getResultClass());
 			JoinCursor oJur = null;
+			
+			RecordSet<R> oEst;
+			try {
+				oEst = (RecordSet<R>) StorageObjectFactory.newRecordSetOf(getResultClass(),maxrows);
+			} catch (NoSuchMethodException e) {
+				throw new JDOException(e.getMessage(), e);
+			}
 
 			OperationStatus[] aOst = new OperationStatus[nValues];
 			DBIndex[] aIdxs = new DBIndex[nValues];
@@ -1333,7 +1350,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 	// --------------------------------------------------------------------------
 	
 	@Override
-	public int count(String indexColumnName, Object indexValue) throws JDOException {
+	public long count(String indexColumnName, Object indexValue) throws JDOException {
 		if (null == indexColumnName)
 			throw new JDOException("DBTable.count() Column name may not be null");
 

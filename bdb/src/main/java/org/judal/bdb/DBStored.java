@@ -117,17 +117,17 @@ public class DBStored implements Stored {
 
   @Override
   public boolean load(Object key) throws JDOException {
-	  return load(EngineFactory.DefaultThreadDataSource.get(), key);
+	  return load(EngineFactory.getDefaultBucketDataSource(), key);
   }
 
   @Override
   public void store() throws JDOException {
-	  store(EngineFactory.DefaultThreadDataSource.get());
+	  store(EngineFactory.getDefaultBucketDataSource());
   }
 
   @Override
   public void delete() throws JDOException {
-	  delete(EngineFactory.DefaultThreadDataSource.get());
+	  delete(EngineFactory.getDefaultBucketDataSource());
   }
   
 }

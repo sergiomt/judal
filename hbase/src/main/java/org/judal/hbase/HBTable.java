@@ -39,7 +39,6 @@ import org.judal.metadata.TableDef;
 import org.judal.serialization.BytesConverter;
 import org.judal.storage.keyvalue.ReadOnlyBucket;
 import org.judal.storage.keyvalue.Stored;
-import org.judal.storage.table.ArrayListRecordSet;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.Table;
@@ -310,6 +309,7 @@ public class HBTable implements Table {
 
 	// --------------------------------------------------------------------------
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched, int maxrows, int offset) throws JDOException {
 
@@ -330,7 +330,7 @@ public class HBTable implements Table {
 			throw new JDOException(nsme.getMessage(), nsme);
 		}
 		Set<String> members;
-		if (fetchGroup==null)
+		if (null==fetchGroup)
 			members = oRow.fetchGroup().getMembers();
 		else
 			members = fetchGroup.getMembers();
@@ -342,8 +342,15 @@ public class HBTable implements Table {
 			DebugFile.writeln("Begin HBTable.fetch("+indexColumnName+","+valueSearched+",["+sColList.substring(1)+"])");
 			DebugFile.incIdent();
 		}
+		
+		RecordSet<R> oRst = null;
+		
+		try {
+			oRst = StorageObjectFactory.newRecordSetOf((Class<R>) oCls, maxrows);
+		} catch (NoSuchMethodException e) {
+			throw new JDOException(e.getMessage(), e);
+		}
 
-		ArrayListRecordSet<R> oRst = new ArrayListRecordSet<R>((Class<R>) oCls);
 		Get oGet = new Get(BytesConverter.toBytes(valueSearched));
 		try {
 			Result oRes = oTbl.get(oGet);
@@ -469,7 +476,7 @@ public class HBTable implements Table {
 	}
 
 	@Override
-	public int count(String indexColumnName, Object valueSearched) throws JDOException {
+	public long count(String indexColumnName, Object valueSearched) throws JDOException {
 		if (!indexColumnName.equalsIgnoreCase(getPrimaryKey().getColumn()))
 			throw new JDOUnsupportedOptionException("HBase only supports queries by primary key");
 		return exists(valueSearched) ? 1 : 0;
@@ -486,7 +493,12 @@ public class HBTable implements Table {
 		if (!indexColumnName.equalsIgnoreCase(getPrimaryKey().getColumn()))
 			throw new JDOUnsupportedOptionException("HBase only supports queries by primary key");
 
-		ArrayListRecordSet<R> rst = new ArrayListRecordSet<R>((Class<R>) oCls);
+		RecordSet<R> rst;
+		try {
+			rst = StorageObjectFactory.newRecordSetOf((Class<R>) oCls, maxrows);
+		} catch (NoSuchMethodException e) {
+			throw new JDOException(e.getMessage(), e);
+		}
 		TableDef tdef = getDataSource().getMetaData().getTable(name());
 		ColumnDef[] fetchCols = new ColumnDef[cols.getMembers().size()];
 		Scan scn = new Scan();

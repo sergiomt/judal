@@ -31,6 +31,7 @@ import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
+import org.judal.storage.query.Expression;
 import org.judal.storage.query.Operator;
 import org.judal.storage.query.Predicate;
 
@@ -90,16 +91,36 @@ public class JDBCRelationalView extends JDBCBucket implements RelationalView {
 	 * @throws JDOException
 	 */
 	@Override
-	public int count(String indexColumnName, Object valueSearched) throws JDOException {
-		int rows = 0;
+	public long count(String indexColumnName, Object valueSearched) throws JDOException {
+		long rows = 0;
 		ResultSet rset = null;
 		PreparedStatement stmt = null;
 		try {
-			stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"=?");
-			stmt.setObject(1, getTableDef().getColumnByName(indexColumnName).getType());
+			if (null==indexColumnName || indexColumnName.length()==0) {
+				stmt = getConnection().prepareStatement("SELECT COUNT(*) AS NUM_ROWS FROM "+name());
+			} else {
+				stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"=?");
+				ColumnDef cdef = getTableDef().getColumnByName(indexColumnName);
+				if (null==valueSearched) {
+					if (null==cdef)
+						throw new JDOException("Type could not be infered for null value");
+					else
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+" IS NULL");
+				} else {
+					if (valueSearched instanceof Expression) {
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"="+valueSearched.toString());
+					} else {
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"=?");
+						if (null==cdef)
+							stmt.setObject(1, valueSearched);
+						else
+							stmt.setObject(1, valueSearched, cdef.getType());
+					}
+				}
+			}
 			rset = stmt.executeQuery();
 			if (rset.next()) {
-				rows = rset.getInt(1);
+				rows = rset.getLong(1);
 				if (rset.wasNull())
 					rows = 0;
 			}
@@ -253,6 +274,94 @@ public class JDBCRelationalView extends JDBCBucket implements RelationalView {
 		return fetch(qry);
 	}
 	
+	@Override
+	public Long count(Predicate filterPredicate) {
+		Long retval;
+		if (null==filterPredicate) {
+			retval = count(null,null);
+		} else {
+			SQLQuery qry = newQuery();
+			qry.setFilter(filterPredicate);
+			qry.setResult("COUNT(*)");
+		
+			PreparedStatement stmt = null;
+			ResultSet rset = null;
+			try {
+				stmt = qry.prepareSelect();
+				qry.setParameters(stmt);
+				rset = stmt.executeQuery();
+				rset.next();
+				retval = rset.getLong(1);
+				rset.close();
+				rset = null;
+				stmt.close();
+				stmt = null;
+			} catch (SQLException sqle) {
+				throw new JDOException(sqle.getMessage(), sqle);
+			} finally {
+				try { if (rset!=null) rset.close(); } catch (Exception ignore) { }
+				try { if (stmt!=null) stmt.close(); } catch (Exception ignore) { }
+			}
+		}
+		return retval;
+	}
+
+	public Object aggregate(String sqlFunc, String result, Predicate filterPredicate) throws JDOException {
+		Object retval;
+		PreparedStatement stmt = null;
+		ResultSet rset = null;
+		try {
+			if (filterPredicate==null) {
+				stmt = getConnection().prepareStatement("SELECT "+sqlFunc+"("+result+") FROM "+getTableDef().getTable());
+			} else {
+				SQLQuery qry = newQuery();
+				qry.setFilter(filterPredicate);
+				qry.setResult(sqlFunc+"("+result+")");
+				stmt = qry.prepareSelect();				
+				qry.setParameters(stmt);
+			}
+			rset = stmt.executeQuery();
+			rset.next();
+			retval = rset.getObject(1);
+			rset.close();
+			rset = null;
+			stmt.close();
+			stmt = null;
+		} catch (SQLException sqle) {
+			throw new JDOException(sqle.getMessage(), sqle);
+		} finally {
+			try { if (rset!=null) rset.close(); } catch (Exception ignore) { }
+			try { if (stmt!=null) stmt.close(); } catch (Exception ignore) { }
+		}
+		return retval;
+		
+	}
+
+	@Override
+	public Number sum(String result, Predicate filterPredicate) {
+		return (Number) aggregate("SUM", result, filterPredicate) ;
+	}
+
+	@Override
+	public Number avg(String result, Predicate filterPredicate) {
+		return (Number) aggregate("AVG", result, filterPredicate) ;
+	}
+
+	@Override
+	public Object max(String result, Predicate filterPredicate) {
+		return aggregate("MAX", result, filterPredicate) ;
+	}
+
+	@Override
+	public Object min(String result, Predicate filterPredicate) {
+		return aggregate("MIN", result, filterPredicate) ;
+	}
+
+	@Override
+	public Predicate newPredicate() throws JDOException {
+		return newQuery().newPredicate();
+	}
+
 	@Override
 	public SQLQuery newQuery() throws JDOException {
 		return new SQLQuery(this);

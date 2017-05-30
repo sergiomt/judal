@@ -6,15 +6,18 @@ import java.sql.Timestamp;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.AbstractMap.SimpleImmutableEntry;
 
 import javax.jdo.JDOException;
 import javax.transaction.SystemException;
 
 import org.judal.jdbc.JDBCEngine;
 import org.judal.jdbc.JDBCRelationalView;
+
 import org.judal.metadata.JoinDef;
+import org.judal.metadata.JoinType;
 import org.judal.metadata.TableDef;
+import static org.judal.metadata.NameAlias.AS;
+
 import org.judal.storage.java.ArrayRecord;
 import org.judal.storage.java.MapRecord;
 import org.judal.storage.query.*;
@@ -24,12 +27,14 @@ import org.judal.storage.query.sql.SQLQuery;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.TableDataSource;
+
 import org.judal.storage.java.test.Job;
 import org.judal.storage.java.test.AdhocMailing;
 
 import org.junit.Test;
 
 import com.knowgate.stringutils.Uid;
+import static com.knowgate.tuples.Pair.P$;
 
 import org.junit.Ignore;
 import org.junit.AfterClass;
@@ -55,7 +60,7 @@ public class TestJDBCQuery {
 		if (dts!=null) dts.close();
 	}
 
-	@Ignore
+	@Test
 	public void test01Join() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException {
 	    // SELECT SUM(d.nu_msgs),d.dt_execution FROM k_jobs j INNER JOIN k_jobs_atoms_by_day d ON j.gu_job=d.gu_job AND
 		// WHERE (j.dt_execution BETWEEN ? AND ? OR j.dt_finished BETWEEN ? AND ?) AND 
@@ -117,7 +122,7 @@ public class TestJDBCQuery {
     where = new SQLAndPredicate();
     where.add("gu_job", Operator.IN, "k_jobs", subselect);
 	
-    JDBCRelationalView jobAtomsJoin = (JDBCRelationalView) dts.openInnerJoinView(jobRec, "k_jobs_atoms_by_day", new SimpleImmutableEntry<String,String>("gu_job","gu_job"));
+    JDBCRelationalView jobAtomsJoin = (JDBCRelationalView) dts.openJoinView(JoinType.INNER, jobRec, AS(jobRec,"j"), AS("k_jobs_atoms_by_day","a"), P$("gu_job","gu_job"));
     
     assertNotNull(jobAtomsJoin.getTableDef());
     assertEquals(Job.tableName, jobAtomsJoin.getTableDef().getName());

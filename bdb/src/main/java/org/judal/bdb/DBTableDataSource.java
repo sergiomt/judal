@@ -3,7 +3,6 @@ package org.judal.bdb;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.jdo.JDOException;
@@ -16,9 +15,10 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.JoinType;
+import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
-import org.judal.storage.java.MapRecord;
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
@@ -26,6 +26,7 @@ import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.View;
 
 import com.knowgate.debug.DebugFile;
+import com.knowgate.tuples.Pair;
 import com.sleepycat.db.DatabaseException;
 
 public class DBTableDataSource extends DBDataSource implements TableDataSource {
@@ -265,27 +266,11 @@ public class DBTableDataSource extends DBDataSource implements TableDataSource {
 		}
 	}
 
-	@Override
-	public IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String, String> column)
-			throws JDOException {
-		throw new JDOUnsupportedOptionException("Berkley DB does not natively supports joins");
-	}
+	// --------------------------------------------------------------------------
 
 	@Override
-	public IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String, String> column)
-			throws JDOException {
-		throw new JDOUnsupportedOptionException("Berkley DB does not natively supports joins");
-	}
-
-	@Override
-	public IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName,
-			Entry<String, String>[] columns) throws JDOException {
-		throw new JDOUnsupportedOptionException("Berkley DB does not natively supports joins");
-	}
-
-	@Override
-	public IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName,
-			Entry<String, String>[] columns) throws JDOException {
+	public IndexableView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable,
+			Pair<String, String>... onColumns) throws JDOException {
 		throw new JDOUnsupportedOptionException("Berkley DB does not natively supports joins");
 	}
 	

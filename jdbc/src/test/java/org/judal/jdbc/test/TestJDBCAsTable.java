@@ -57,27 +57,27 @@ public class TestJDBCAsTable extends AbstractTableTest {
 		return (JDBCTableDataSource) dts;
 	}
 
-	@Ignore
+	@Test
 	public void test01Table() throws JDOException, IOException, InstantiationException, IllegalAccessException, SystemException {
 		super.test01Table();
 	}
 
-	@Ignore
+	@Test
 	public void test02Transaction() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 		super.test02Transaction();
 	}
 
-	@Ignore
+	@Test
 	public void test03Recordset() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 		super.test03Recordset();
 	}
 
-	@Ignore
+	@Test
 	public void test04IndexedRecordset() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 		super.test03Recordset();
 	}
 
-	@Ignore
+	@Test
 	public void test06SQLFunctions() throws JDOException, IOException, SecurityException, IllegalStateException, NotSupportedException, SystemException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 		SQLFunctions f = ((JDBCTableDataSource) dts).Functions;
 		createTable1(dts);

@@ -2,15 +2,18 @@ package org.judal.storage.query.sql;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+
 import java.sql.Timestamp;
+
+import java.util.Calendar;
 import java.util.Date;
 
+import org.judal.metadata.NameAlias;
 import org.judal.storage.query.Expression;
 import org.judal.storage.query.Operator;
 import org.judal.storage.query.Part;
 import org.judal.storage.query.Predicate;
 import org.judal.storage.query.Term;
-
 
 /*
 * Represents a fragment of the WHERE clause of a SQL statement
@@ -97,8 +100,16 @@ public class SQLTerm extends Term {
 		super (columnName, operator, tableName, nestedTerm);
 	}
 
+	public SQLTerm(String columnName, String operator, NameAlias aliasedTableName, Part nestedTerm) {
+		super (columnName, operator, aliasedTableName, nestedTerm);
+	}
+	
 	public SQLTerm(String columnName, String operator, String tableName, String nestedColumnName, Part nestedTerm) {
 		super (columnName, operator, tableName, nestedColumnName, nestedTerm);
+	}
+
+	public SQLTerm(String columnName, String operator, NameAlias aliasedTableName, String nestedColumnName, Part nestedTerm) {
+		super (columnName, operator, aliasedTableName, nestedColumnName, nestedTerm);
 	}
 	
 	public SQLTerm(String columnName, String operator, String[] columnValues) {
@@ -141,6 +152,14 @@ public class SQLTerm extends Term {
 		super (columnName, operator, columnValues);
 	}
 
+	public SQLTerm(String columnName, String operator, Calendar[] columnValues) {
+		super (columnName, operator, columnValues);
+	}
+
+	public SQLTerm(String columnName, String operator, java.sql.Date[] columnValues) {
+		super (columnName, operator, columnValues);
+	}
+
 	public SQLTerm(String columnName, String operator, Timestamp[] columnValues) {
 		super (columnName, operator, columnValues);
 	}
@@ -156,7 +175,11 @@ public class SQLTerm extends Term {
 	public SQLTerm(String columnName, String operator, String tableName, String joinColumn, SQLTerm joinTerm) {
 		super(columnName, operator, tableName,  joinColumn, joinTerm);
 	}
-	
+
+	public SQLTerm(String columnName, String operator, NameAlias aliasedTableName, String joinColumn, SQLTerm joinTerm) {
+		super(columnName, operator, aliasedTableName, joinColumn, joinTerm);
+	}
+
 	protected SQLTerm() { }
 	
 	@Override
@@ -164,6 +187,11 @@ public class SQLTerm extends Term {
 		SQLTerm theClone = new SQLTerm();
 		theClone.clone(this);
 		return theClone;
+	}
+
+	@Override
+	public String getTableName() {
+		return oAliasedTable.getAlias()==null ? oAliasedTable.getName() : oAliasedTable.getName()+" "+oAliasedTable.getAlias();
 	}
 
 	/**
@@ -229,7 +257,10 @@ public class SQLTerm extends Term {
 				throw new NullPointerException("Column name for subquery cannot be null");
 			Part oNested = (Part) value0;
 			if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS))
-				oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getTextParametrized()).append(")");
+				if (null==oNested)
+					oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(")");
+				else
+					oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getTextParametrized()).append(")");
 			else
 				oTxt.append(sColumn).append(" ").append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getTextParametrized()).append(")");
 		} else if (value0 instanceof Expression) {
@@ -263,4 +294,5 @@ public class SQLTerm extends Term {
 		else
 			return "?";
 	}
+
 }

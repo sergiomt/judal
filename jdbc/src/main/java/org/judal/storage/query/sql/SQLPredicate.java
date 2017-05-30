@@ -35,22 +35,17 @@ public class SQLPredicate extends Predicate {
 			DebugFile.incIdent();
 		}
 		
-		Class<?>[] parameterClasses = new Class<?>[constructorParameters.length];
-		for (int p = 0; p<constructorParameters.length; p++) {
-			if (constructorParameters[p]==null)
-				parameterClasses[p] = Object.class;
-			else
-				parameterClasses[p] = constructorParameters[p].getClass();
-			if (Part.class.isAssignableFrom(parameterClasses[p]))
-				parameterClasses[p] = Part.class;
-		}
+		Class<?>[] parameterClasses = assumeNullsAre(Object.class, constructorParameters);
 
 		Constructor<SQLTerm> constructor = (Constructor<SQLTerm>) ObjectFactory.getConstructor(SQLTerm.class, parameterClasses);
 		if (null==constructor) {
-			StringBuilder paramClassNames = new StringBuilder();
+			constructor = (Constructor<SQLTerm>) ObjectFactory.getConstructor(SQLTerm.class, assumeNullsAre(Part.class, constructorParameters));
+			if (null==constructor) {			
+				StringBuilder paramClassNames = new StringBuilder();
 				for (int p = 0; p<constructorParameters.length; p++)
 					paramClassNames.append(parameterClasses[p].getName()).append(p<constructorParameters.length-1 ? "," : "");
-			throw new NoSuchMethodException("Could not find suitable constructor for SQLTerm(" + paramClassNames.toString() + ")");
+				throw new NoSuchMethodException("Could not find suitable constructor for SQLTerm(" + paramClassNames.toString() + ")");
+			}
 		}
 		
 		super.addPart(constructor.newInstance(constructorParameters));
@@ -61,6 +56,19 @@ public class SQLPredicate extends Predicate {
 		}
 		
 		return this;
+	}
+
+	private Class<?>[] assumeNullsAre(Class<?> classForNulls, Object[] constructorParameters) {
+		Class<?>[] parameterClasses = new Class<?>[constructorParameters.length];
+		for (int p = 0; p<constructorParameters.length; p++) {
+			if (constructorParameters[p]==null)
+				parameterClasses[p] = classForNulls;
+			else
+				parameterClasses[p] = constructorParameters[p].getClass();
+			if (Part.class.isAssignableFrom(parameterClasses[p]))
+				parameterClasses[p] = Part.class;
+		}
+		return parameterClasses;
 	}
 
 	@Override

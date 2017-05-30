@@ -25,6 +25,7 @@ import org.apache.hadoop.hbase.util.VersionInfo;
 
 import com.knowgate.debug.DebugFile;
 import com.knowgate.io.FileUtils;
+import com.knowgate.tuples.Pair;
 
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.IndexableView;
@@ -33,8 +34,10 @@ import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.View;
 import org.judal.storage.Param;
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
+import org.judal.metadata.JoinType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -473,40 +476,11 @@ public class HBTableDataSource implements TableDataSource {
 	 * Inner joins are not supported by HBase. Therefore this method will always raise JDOUnsupportedOptionException
 	 * @throws JDOUnsupportedOptionException
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
-	public IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName, Entry<String, String> column)
-			throws JDOUnsupportedOptionException {
+	public IndexableView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) 
+			throws JDOException {
 		throw new JDOUnsupportedOptionException("HBase does not support inner join views");
-	}
-
-	/**
-	 * Inner joins are not supported by HBase. Therefore this method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public IndexableView openInnerJoinView(Record recordInstance1, String joinedTableName,
-			Entry<String, String>[] columns) throws JDOException {
-		throw new JDOUnsupportedOptionException("HBase does not support inner join views");
-	}
-
-	/**
-	 * Outer joins are not supported by HBase. Therefore this method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName, Entry<String, String> column)
-			throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("HBase does not support outer join views");
-	}
-
-	/**
-	 * Outer joins are not supported by HBase. Therefore this method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public IndexableView openOuterJoinView(Record recordInstance1, String joinedTableName,
-			Entry<String, String>[] columns) throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("HBase does not support outer join views");
 	}
 	
 }

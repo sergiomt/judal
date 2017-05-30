@@ -30,7 +30,6 @@ import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Expression;
-import org.judal.storage.table.ArrayListRecordSet;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
@@ -188,7 +187,11 @@ public class SQLQuery extends AbstractQuery {
 
 			setFetchSize(rset);
 
-			retval = fetchResultSet(rset);
+			try {
+				retval = fetchResultSet(rset);
+			} catch (NoSuchMethodException e) {
+				throw new JDOException(e.getMessage(), e);
+			}
 
 			if (DebugFile.trace) DebugFile.writeln("ResultSet.close()");
 
@@ -253,6 +256,8 @@ public class SQLQuery extends AbstractQuery {
 		query.append(getResult());
 		query.append(" FROM ");
 		query.append(getView().getTableDef().getTable());
+		if (getView().getAlias()!=null)
+			query.append(" ").append(getView().getAlias());
 		if (getFilter()!=null) {
 			if (getFilter().length()>0) {
 				query.append(" WHERE ");
@@ -287,7 +292,7 @@ public class SQLQuery extends AbstractQuery {
 		return query.toString();
 	}
 
-	private PreparedStatement prepareSelect() throws SQLException {
+	public PreparedStatement prepareSelect() throws SQLException {
 		int ctype = (getRangeFromIncl()==0L ? ResultSet.TYPE_FORWARD_ONLY : ResultSet.TYPE_SCROLL_INSENSITIVE);
 		String sql = source();
 		if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sql + ")");
@@ -295,7 +300,7 @@ public class SQLQuery extends AbstractQuery {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <R extends Record> int fetchRowsAsArrays(ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
+	private <R extends Record> int fetchRowsAsArrays(ResultSet oRSet, RecordSet<R> recordSet, int iMaxRow) throws SQLException {
 		int iRetVal = 0;
 		boolean bHasNext = true;
 		
@@ -320,7 +325,7 @@ public class SQLQuery extends AbstractQuery {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends Record> int fetchRowsAsMaps(ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
+	private <R extends Record> int fetchRowsAsMaps(ResultSet oRSet, RecordSet<R> recordSet, int iMaxRow) throws SQLException {
 		int iRetVal = 0;
 		boolean bHasNext = true;
 		
@@ -351,7 +356,7 @@ public class SQLQuery extends AbstractQuery {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <R extends Record> int fetchRowsAsSingleColumn(ResultSet oRSet, ArrayListRecordSet<R> recordSet, int iMaxRow) throws SQLException {
+	private <R extends Record> int fetchRowsAsSingleColumn(ResultSet oRSet, RecordSet<R> recordSet, int iMaxRow) throws SQLException {
 		int iRetVal = 0;
 		boolean bHasNext = true;
 		String viewName = getView().getAlias();
@@ -374,16 +379,20 @@ public class SQLQuery extends AbstractQuery {
 	}
 
 	@SuppressWarnings("unchecked")
-	private <R extends Record> ArrayListRecordSet<R> fetchResultSet (ResultSet oRSet)
-			throws SQLException, SQLFeatureNotSupportedException, ArrayIndexOutOfBoundsException, InstantiationException, IllegalAccessException
+	private <R extends Record> RecordSet<R> fetchResultSet (ResultSet oRSet)
+			throws SQLException, SQLFeatureNotSupportedException, ArrayIndexOutOfBoundsException, InstantiationException, IllegalAccessException, NoSuchMethodException
 	{
 		int iRetVal = 0;
 		int iMaxRow = getMaxRows()<0 ? Integer.MAX_VALUE : getMaxRows();
 		long lFetchTime = 0;
-		ArrayListRecordSet<R> recordSet = new ArrayListRecordSet<R>(getResultClass(), iMaxRow);
 
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCQuery.fetchResultSet([ResultSet], " + String.valueOf(iMaxRow) + ", " + String.valueOf(getRangeFromIncl()) + ")");
+		}
+		
+		RecordSet<R> recordSet = StorageObjectFactory.newRecordSetOf(getResultClass(), new Integer(iMaxRow));
+		
+		if (DebugFile.trace) {
 			DebugFile.incIdent();
 			lFetchTime = System.currentTimeMillis();
 		}

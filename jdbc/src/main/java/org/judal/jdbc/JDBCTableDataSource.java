@@ -31,6 +31,7 @@ import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
+import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
@@ -116,8 +117,9 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		return new JDBCRelationalView(this, viewRecord);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public IndexableView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) throws JDOException {
+	public RelationalView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) throws JDOException {
 		
 		JDBCRelationalView tbl = null;		
 		

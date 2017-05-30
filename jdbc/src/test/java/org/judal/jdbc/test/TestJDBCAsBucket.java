@@ -15,7 +15,6 @@ import java.util.Map;
 
 import org.judal.jdbc.JDBCBucketDataSource;
 import org.judal.jdbc.JDBCEngine;
-import org.judal.jdbc.JDBCTableDataSource;
 import org.judal.storage.DataSource;
 import javax.jdo.JDOException;
 import javax.transaction.SystemException;
@@ -42,7 +41,7 @@ public class TestJDBCAsBucket extends AbstractBucketTest {
 		if (dts!=null) dts.close();
 	}
 
-	@Ignore
+	@Test
 	public void test00Driver() throws ClassNotFoundException, SQLException  {
 		Class.forName(properties.get(DataSource.DRIVER));
 		Connection conn = DriverManager.getConnection(properties.get(DataSource.URI), properties.get(DataSource.USER), properties.get(DataSource.PASSWORD));
@@ -50,7 +49,7 @@ public class TestJDBCAsBucket extends AbstractBucketTest {
 		conn.close();
 	}
 	
-	@Ignore
+	@Test
 	public void test01Bucket() throws JDOException, IOException, SystemException {
 		super.test01Bucket();
 	}
