@@ -26,6 +26,7 @@ import org.judal.metadata.TableDef
 
 import org.judal.serialization.BytesConverter
 
+import org.judal.storage.EngineFactory
 import org.judal.storage.table.impl.AbstractRecord
 import org.judal.storage.table.TableDataSource
 
@@ -60,6 +61,16 @@ class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinit
 		this(dataSource.getTableDef(tableName))
 	}
 
+	/**
+	 * Alternative constructor using EngineFactory.getDefaultTableDataSource as DataSource
+	 * @param tableName String
+	 * @throws JDOException 
+	 */
+	@throws(classOf[JDOException])
+	def this(tableName: String) = {
+		this(EngineFactory.getDefaultTableDataSource, tableName)
+	}
+	
 	/**
 	 * Alternative constructor
 	 * @param dataSource TableDataSource

@@ -23,6 +23,8 @@ import javax.jdo.JDOException
 import org.judal.metadata.TableDef
 import org.judal.metadata.ColumnDef
 import org.judal.serialization.BytesConverter
+
+import org.judal.storage.EngineFactory
 import org.judal.storage.table.impl.AbstractRecord
 import org.judal.storage.table.TableDataSource
 
@@ -61,7 +63,7 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 
 	var valuesMap = new CaseInsensitiveValuesMap
 	var columnIndexes = Range(0,tableDefinition.getNumberOfColumns).map(c => c+1 -> tableDefinition.getColumns()(c).getName)(collection.breakOut): HashMap[Int,String]
-
+	
 	/**
 	 * Alternative constructor
 	 * @param dataSource TableDataSource
@@ -73,6 +75,16 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 		this(dataSource.getTableDef(tableName))
 	}
 
+	/**
+	 * Alternative constructor using EngineFactory.getDefaultTableDataSource as DataSource
+	 * @param tableName String
+	 * @throws JDOException 
+	 */
+	@throws(classOf[JDOException])
+	def this(tableName: String) = {
+		this(EngineFactory.getDefaultTableDataSource, tableName)
+	}
+	
 	/**
 	 * Alternative constructor
 	 * @param dataSource TableDataSource
