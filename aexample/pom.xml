@@ -8,8 +8,6 @@
   <name>aexamples</name>
   <url>http://maven.apache.org</url>
   <build>
-    <sourceDirectory>src/main/scala</sourceDirectory>
-    <testSourceDirectory>src/test/scala</testSourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -32,6 +30,7 @@
           <executions>
               <execution>
                   <goals>
+                      <goal>add-source</goal>
                       <goal>compile</goal>
                       <goal>testCompile</goal>
                   </goals>
@@ -59,7 +58,7 @@
     </plugins>
   </build>
   <properties>
-    <skipTests>true</skipTests>
+    <skipTests>false</skipTests>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <repositories>
