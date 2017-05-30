@@ -8,6 +8,7 @@
   <name>aexamples</name>
   <url>http://maven.apache.org</url>
   <build>
+	<testSourceDirectory>src/main/scala</testSourceDirectory>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -42,9 +43,11 @@
         <artifactId>scalatest-maven-plugin</artifactId>
         <version>1.0-RC2</version>
         <configuration>
+          <skipTests>false</skipTests>
           <reportsDirectory>${project.build.directory}/reports</reportsDirectory>
           <junitxml>.</junitxml>
           <filereports>WDF TestSuite.txt</filereports>
+          <jUnitClasses>org.judal.examples.scala.jdbc.E01_CreateDefaultRelationalDataSource,org.judal.examples.scala.jdbc.E02_CreateAdditionalDataSource,org.judal.examples.scala.jdbc.E03_ExecuteDDLOnRelationalDataSource</jUnitClasses>
         </configuration>
         <executions>
           <execution>

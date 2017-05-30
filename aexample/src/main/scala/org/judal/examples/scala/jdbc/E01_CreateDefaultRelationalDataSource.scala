@@ -2,6 +2,8 @@ package org.judal.examples.scala.jdbc
 
 import org.junit.Test
 
+import org.scalatest.Suite
+
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 
@@ -39,7 +41,7 @@ object E01_CreateDefaultRelationalDataSource {
                          USE_DATABASE_METADATA -> DEFAULT_USE_DATABASE_METADATA).asJava
 
 		// Create a JDBC Engine
-		val jdbc : Engine[JDBCRelationalDataSource] = new JDBCEngine
+		val jdbc = new JDBCEngine
 		
 		// Register the JDBC Engine (this is optional)
 		EngineFactory.registerEngine (jdbc.name, jdbc.getClass.getName)
@@ -60,12 +62,11 @@ object E01_CreateDefaultRelationalDataSource {
 
 }
 
-class E01_CreateDefaultRelationalDataSource {
+class E01_CreateDefaultRelationalDataSource extends Suite {
 
-  @Test
-	def demo() = {
+	@Test def demo() = {
 		E01_CreateDefaultRelationalDataSource.create()
 		E01_CreateDefaultRelationalDataSource.close ()
 	}
-  
+
 }
