@@ -24,6 +24,8 @@ import org.judal.metadata.TableDef
 import org.judal.metadata.ColumnDef
 import org.judal.serialization.BytesConverter
 
+import org.judal.storage.FieldHelper
+import org.judal.storage.ConstraintsChecker
 import org.judal.storage.EngineFactory
 import org.judal.storage.table.impl.AbstractRecord
 import org.judal.storage.table.TableDataSource
@@ -97,6 +99,44 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 		this(new TableDef(tableName, asJavaCollection(dataSource.getTableDef(tableName).filterColumns(columnNames.map(c => AbstractRecord.getColumnAlias(c)).toArray[String]).toSeq)))
 	}
 
+	/**
+	 * Alternative constructor
+	 * @param tableDefinition TableDef
+	 * @param fieldHelper FieldHelper
+	 * @param constraintsChecker ConstraintsChecker
+	 * @throws JDOException 
+	 */
+	@throws(classOf[JDOException])
+	def this(tableDefinition: TableDef, fieldHelper: FieldHelper, constraintsChecker: ConstraintsChecker) = {
+		this(tableDefinition)
+		setFieldHelper(fieldHelper);
+		setConstraintsChecker(constraintsChecker);		
+	}
+
+	/**
+	 * Alternative constructor
+	 * @param tableDefinition TableDef
+	 * @param fieldHelper FieldHelper
+	 * @throws JDOException 
+	 */
+	@throws(classOf[JDOException])
+	def this(tableDefinition: TableDef, fieldHelper: FieldHelper) = {
+		this(tableDefinition)
+		setFieldHelper(fieldHelper);
+	}
+
+	/**
+	 * Alternative constructor
+	 * @param tableDefinition TableDef
+	 * @param constraintsChecker ConstraintsChecker
+	 * @throws JDOException 
+	 */
+	@throws(classOf[JDOException])
+	def this(tableDefinition: TableDef, constraintsChecker: ConstraintsChecker) = {
+		this(tableDefinition)
+		setConstraintsChecker(constraintsChecker);		
+	}
+	
   /**
    * {@inheritDoc}
    */	
