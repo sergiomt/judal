@@ -29,16 +29,27 @@ public class ColumnGroup implements FetchGroup, Iterable<String> {
 		recursion = null;
 		unmodifiable = false;
 		members = new LinkedHashSet<String>();
+		addMembers(columns);
+	}
+
+	public ColumnGroup(Iterable<String> columns) {
+		rec = null;
+		postLoad = false;
+		recursion = null;
+		unmodifiable = false;
+		members = new LinkedHashSet<String>();
 		for (String column : columns)
 			members.add(column);
 	}
-
+	
 	public ColumnGroup(Record record) {
 		rec = record;
 		members = new LinkedHashSet<String>();
 		postLoad = false;
 		recursion = null;
 		unmodifiable = false;
+		for (Object column : record.fetchGroup().getMembers())
+			members.add((String) column);
 	}
 
 	@Override

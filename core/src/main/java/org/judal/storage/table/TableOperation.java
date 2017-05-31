@@ -79,11 +79,15 @@ public class TableOperation<R extends Record> implements Operation {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		if (getTable() != null) {
 			getTable().close();
 			tbl = null;
 		}
+	}
+
+	public FetchGroup fetchGroup() {
+		return getRecord().fetchGroup();
 	}
 
 	public R getRecord() {
