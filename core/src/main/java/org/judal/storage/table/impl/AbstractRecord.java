@@ -33,7 +33,6 @@ import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
 import org.judal.storage.FieldHelper;
-import org.judal.storage.StorageContext;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.Table;
@@ -44,12 +43,6 @@ import com.knowgate.dateutils.DateHelper;
 import com.knowgate.debug.DebugFile;
 import com.knowgate.gis.LatLong;
 import com.knowgate.stringutils.Html;
-
-//import static com.knowgate.typeutils.TypeResolver.ClassLangString;
-//import static com.knowgate.typeutils.TypeResolver.ClassSQLDate;
-//import static com.knowgate.typeutils.TypeResolver.ClassTimestamp;
-//import static com.knowgate.typeutils.TypeResolver.ClassUtilDate;
-//import static com.knowgate.typeutils.TypeResolver.ClassCalendar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
