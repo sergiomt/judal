@@ -27,6 +27,30 @@ public class E01_CreateDefaultRelationalDataSource {
 
 	public static JDBCRelationalDataSource create() throws Exception {
 		
+		// Create a JDBC Engine
+		Engine<JDBCRelationalDataSource> jdbc = new JDBCEngine();
+		
+		// Register the JDBC Engine (this is optional)
+		EngineFactory.registerEngine(jdbc.name(), jdbc.getClass().getName());
+
+		// Use the Engine to create an instance of a RelationalDataSource
+		JDBCRelationalDataSource dataSource = jdbc.getDataSource(dataSourceProperties(), Transact);
+		
+		assertNotNull(dataSource);
+		assertEquals("jdbc:hsqldb:mem:test", dataSource.getProperty(URI));
+		
+		// Set this as the default data source for the current Thread with default transaction manager		
+		EngineFactory.DefaultThreadDataSource.set(dataSource);
+
+		return dataSource;
+	}
+
+	public static void close() throws Exception {
+		EngineFactory.DefaultThreadDataSource.get().close();
+	}
+
+	public static Map<String, String> dataSourceProperties() {
+		
 		// Properties for am HSQL DB in memory data source
 		// Can be read from external properties files of servlet config
 		// by using org.judal.storage.Env.getDataSourceProperties()
@@ -40,26 +64,7 @@ public class E01_CreateDefaultRelationalDataSource {
 		properties.put(SCHEMA, "PUBLIC");
 		properties.put(USE_DATABASE_METADATA, DEFAULT_USE_DATABASE_METADATA);
 
-		// Create a JDBC Engine
-		Engine<JDBCRelationalDataSource> jdbc = new JDBCEngine();
-		
-		// Register the JDBC Engine (this is optional)
-		EngineFactory.registerEngine(jdbc.name(), jdbc.getClass().getName());
-
-		// Use the Engine to create an instance of a RelationalDataSource
-		JDBCRelationalDataSource dataSource = jdbc.getDataSource(properties, Transact);
-		
-		assertNotNull(dataSource);
-		assertEquals("jdbc:hsqldb:mem:test", dataSource.getProperty(URI));
-		
-		// Set this as the default data source for the current Thread with default transaction manager		
-		EngineFactory.DefaultThreadDataSource.set(dataSource);
-
-		return dataSource;
-	}
-
-	public static void close() throws Exception {
-		EngineFactory.DefaultThreadDataSource.get().close();
+		return properties;
 	}
 	
 	@Test

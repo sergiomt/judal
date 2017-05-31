@@ -119,9 +119,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		super(dataSource, tableName, null, null);
-		values = new CaseInsensitiveValuesMap();
-		columnIndexes = new HashMap<Integer, String>();
+		this(dataSource.getTableDef(tableName));		
 	}
 
 	/**
@@ -129,9 +127,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
-		super(dataSource, tableName, fieldHelper, null);
-		values = new CaseInsensitiveValuesMap();
-		columnIndexes = new HashMap<Integer, String>();
+		this(dataSource.getTableDef(tableName), fieldHelper);
 	}
 
 	/**
@@ -147,9 +143,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
-		super(dataSource, tableName, fieldHelper, constraintsChecker);
-		values = new CaseInsensitiveValuesMap();
-		columnIndexes = new HashMap<Integer, String>();
+		this(dataSource.getTableDef(tableName), fieldHelper, constraintsChecker);
 	}
 	
 	/**
@@ -206,8 +200,11 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	}
 	
 	@Override
-	public Object put(int colpos, Object value) {
-		return values.put(columnIndexes.get(colpos), value);
+	public Object put(int colpos, Object value) throws IllegalArgumentException {
+		final String columnName = columnIndexes.get(colpos);
+		if (null==columnName)
+				throw new IllegalArgumentException("Cannot find column at position " + String.valueOf(colpos)+" of "+String.valueOf(columnIndexes.size())+" columns");
+		return values.put(columnName, value);
 	}
 
 	/**

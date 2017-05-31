@@ -35,6 +35,17 @@ public class Param extends ColumnDef {
 		oDir = Direction.IN;
 	}
 
+	public Param(String sColName, int iType, int iPos, Direction dirInOut, Object oValue) {
+		super(sColName, iType, iPos);
+		oVal = oValue;
+		oDir = dirInOut;
+	}
+
+	public Param(String sColName, int iType, int iPos, Direction dirInOut) {
+		super(sColName, iType, iPos);
+		oDir = dirInOut;
+	}
+	
 	public Param(String sColFamily, String sColName, int iType, int iPos, Object oValue) {
 		super(sColName, iType, iPos);
 		setFamily(sColFamily);
@@ -42,6 +53,19 @@ public class Param extends ColumnDef {
 		oDir = Direction.IN;
 	}
 	
+	public Param(String sColFamily, String sColName, int iType, int iPos, Direction dirInOut) {
+		super(sColName, iType, iPos);
+		setFamily(sColFamily);
+		oDir = dirInOut;
+	}
+
+	public Param(String sColFamily, String sColName, int iType, int iPos, Direction dirInOut, Object oValue) {
+		super(sColName, iType, iPos);
+		setFamily(sColFamily);
+		oVal = oValue;
+		oDir = dirInOut;
+	}
+
 	public Param(String sColName, int iPos, short iVal) {
 		super(sColName, Types.SMALLINT, iPos);
 		oVal = new Short(iVal);
@@ -132,7 +156,11 @@ public class Param extends ColumnDef {
 	public Object getValue() {
 		return oVal;
 	}
-	
+
+	public void setValue(Object oObj) {
+		oVal = oObj;
+	}
+
 	public Direction getDirection() {
 		return oDir;
 	}

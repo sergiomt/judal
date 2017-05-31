@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
-import org.apache.poi.hssf.record.ArrayRecord;
 import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.metadata.ColumnDef;
@@ -332,7 +331,8 @@ public class JDBCBucket implements Bucket {
 		ResultSet rset = null;
 		try {
 			stmt = getConnection().prepareStatement("SELECT * FROM "+name(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			retval = new JDBCIterator((Class<? extends Record>) (candidateClass!=null ? candidateClass : ArrayRecord.class), tableDef, stmt, rset);
+			rset = stmt.executeQuery();
+			retval = new JDBCIterator((Class<? extends Record>) (candidateClass), tableDef, stmt, rset);
 			iterators.add(retval);
 		} catch (SQLException | NoSuchMethodException | SecurityException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);

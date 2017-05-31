@@ -20,6 +20,7 @@ import javax.jdo.JDOException;
 
 import org.judal.storage.EngineFactory;
 import org.judal.storage.Param;
+import org.judal.storage.Param.Direction;
 import org.judal.storage.table.Table;
 import org.judal.storage.table.TableDataSource;
 import org.judal.ramqueue.RAMQueueProducer;
@@ -115,7 +116,7 @@ public class RAMQueueTest {
 				new Param("name", 3, "John Smith"),
 				new Param("description", 4, ""),
 				new Param("location", 5, "Here"),
-				new Param("image", Types.LONGVARBINARY, 6, null),
+				new Param("image", Types.LONGVARBINARY, 6, Direction.IN, null),
 				new Param("amount", Types.DECIMAL, 7, new BigDecimal("334267.87"))
 		};
 
@@ -127,7 +128,7 @@ public class RAMQueueTest {
 				new Param("name", 3, "Mark Brown"),
 				new Param("description", 4, "..."),
 				new Param("location", 5, "There"),
-				new Param("image", Types.LONGVARBINARY, 6, null),
+				new Param("image", Types.LONGVARBINARY, 6, Direction.IN, null),
 				new Param("amount", Types.DECIMAL, 7, new BigDecimal("8215.88"))
 		};
 
