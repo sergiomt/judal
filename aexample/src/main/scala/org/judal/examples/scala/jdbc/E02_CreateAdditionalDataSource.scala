@@ -24,6 +24,16 @@ import org.judal.transaction.DataSourceTransactionManager.Transact
  * for a second or third database other than
  * the main one used by your application.
  */
+
+class E02_CreateAdditionalDataSource extends Suite {
+
+	@Test def demo() = {
+		val relationalDataSource = E02_CreateAdditionalDataSource.create()
+		E02_CreateAdditionalDataSource.close(relationalDataSource)
+	}
+
+}
+
 object E02_CreateAdditionalDataSource {
 
 	val PROPERTIES_NAMESPACE = "example"
@@ -38,20 +48,10 @@ object E02_CreateAdditionalDataSource {
 			val properties = getDataSourceProperties(props, PROPERTIES_NAMESPACE)
 
 			dataSource = new JDBCEngine().getDataSource(properties, Transact)
-
 		}
 		dataSource
 	}
 
-	def close(relationalDataSource: RelationalDataSource) = relationalDataSource.close()
+	def close(relationalDataSource: RelationalDataSource) = relationalDataSource.close
 	
-}
-
-class E02_CreateAdditionalDataSource extends Suite {
-
-	@Test def demo() = {
-		val relationalDataSource = E02_CreateAdditionalDataSource.create()
-		E02_CreateAdditionalDataSource.close(relationalDataSource)
-	}
-
 }

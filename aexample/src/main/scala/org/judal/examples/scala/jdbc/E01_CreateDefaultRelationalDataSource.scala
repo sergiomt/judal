@@ -24,6 +24,15 @@ import collection.JavaConverters._
  * relational DataSource for the current Thread
  *
  */
+class E01_CreateDefaultRelationalDataSource extends Suite {
+
+	@Test def demo() = {
+		E01_CreateDefaultRelationalDataSource.create
+		E01_CreateDefaultRelationalDataSource.close
+	}
+
+}
+
 object E01_CreateDefaultRelationalDataSource {
 
 	def create() = {
@@ -59,14 +68,5 @@ object E01_CreateDefaultRelationalDataSource {
 	}
 
 	def close() = EngineFactory.DefaultThreadDataSource.get.close
-
-}
-
-class E01_CreateDefaultRelationalDataSource extends Suite {
-
-	@Test def demo() = {
-		E01_CreateDefaultRelationalDataSource.create()
-		E01_CreateDefaultRelationalDataSource.close ()
-	}
 
 }

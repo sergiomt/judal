@@ -27,7 +27,6 @@ import org.judal.examples.java.model.StudentCourse;
  * Insert data from a comma delimited file into the database
  * using Default Relational DataSource kept at StorageContext
  */
-@SuppressWarnings("unchecked")
 public class E10_WriteCSVDataIntoTheDatabase {
 	
 	@Test
@@ -116,7 +115,7 @@ public class E10_WriteCSVDataIntoTheDatabase {
 	}
 
 	public static void tearDown() throws Exception {
-		E04_CreateTablesFromJDOXML.dropSchemaObjects((RelationalDataSource) EngineFactory.DefaultThreadDataSource.get());
+		E04_CreateTablesFromJDOXML.dropSchemaObjects(EngineFactory.getDefaultRelationalDataSource());
 		E01_CreateDefaultRelationalDataSource.close();
 	}
 

@@ -47,7 +47,7 @@
           <reportsDirectory>${project.build.directory}/reports</reportsDirectory>
           <junitxml>.</junitxml>
           <filereports>WDF TestSuite.txt</filereports>
-          <jUnitClasses>org.judal.examples.scala.jdbc.E01_CreateDefaultRelationalDataSource,org.judal.examples.scala.jdbc.E02_CreateAdditionalDataSource,org.judal.examples.scala.jdbc.E03_ExecuteDDLOnRelationalDataSource</jUnitClasses>
+          <jUnitClasses></jUnitClasses>
         </configuration>
         <executions>
           <execution>

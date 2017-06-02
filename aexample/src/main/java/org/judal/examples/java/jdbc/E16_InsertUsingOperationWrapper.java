@@ -13,6 +13,9 @@ import org.judal.storage.Param;
 import org.judal.storage.relational.RelationalOperation;
 import org.judal.storage.table.IndexableTableOperation;
 
+/**
+ * Insert a new row that does not previously exist in the database
+ */
 public class E16_InsertUsingOperationWrapper {
 
 	@Test
@@ -47,6 +50,7 @@ public class E16_InsertUsingOperationWrapper {
 	}
 
 	public static Integer freeCourseId() throws Exception {
+		// This is not a safe way of generating ids, it is just for demo purposes
 		try (RelationalOperation<Course> op = new RelationalOperation<>(new Course())) {
 			return op.maxInt("id_course", null) + 1;
 		}

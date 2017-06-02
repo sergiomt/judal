@@ -1,6 +1,8 @@
 package org.judal.examples.java.jdbc;
 
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+
 import org.judal.examples.java.model.Student;
 
 /**
@@ -17,7 +19,7 @@ public class E11_LoadRecordByPrimaryKeyFromDefaultDataSourceModifyAndStore {
 		
 		Student s = new Student();
 		
-		s.load(new Integer(1));
+		assertTrue (s.load(new Integer(1)));
 		
 		s.setDateOfBirth("1971-01-01");
 

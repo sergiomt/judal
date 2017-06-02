@@ -39,4 +39,5 @@
     <foreign-key foreignTable="student">
       <reference local="id_student" foreign="id_student"/>
     </foreign-key>
+  </table>
 </database>
