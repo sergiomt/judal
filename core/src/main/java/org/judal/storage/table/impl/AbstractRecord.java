@@ -173,7 +173,7 @@ public abstract class AbstractRecord implements Record {
 
 	@Override
 	public final boolean load(Object oKey) throws JDOException {
-		return load(EngineFactory.getDefaultTableDataSource());
+		return load(EngineFactory.getDefaultTableDataSource(), oKey);
 	}
 
 	@Override
@@ -237,7 +237,9 @@ public abstract class AbstractRecord implements Record {
 
 	@Override
 	public FetchGroup fetchGroup() {
-		FetchGroup group = new ColumnGroup(this);
+		FetchGroup group = new ColumnGroup();
+		for (ColumnDef cdef : columns())
+			group.addMember(cdef.getName());
 		group.addCategory(FetchGroup.DEFAULT);
 		return group;
 	}
@@ -307,7 +309,7 @@ public abstract class AbstractRecord implements Record {
 	public void setContent(byte[] bytes, String contentType) throws JDOException {
 		put("content", bytes);
 		put("contentType", contentType);
-		if (bytes==null)
+		if (isNullOrNone(bytes))
 			put("contentLength", new Long(0l));
 		else
 			put("contentLength", new Long(bytes.length));			
@@ -319,7 +321,6 @@ public abstract class AbstractRecord implements Record {
 	 * @return Calendar value or <b>null</b>.
 	 * @throws ClassCastException if sKey field is not of type DATETIME
 	 */
-	@SuppressWarnings("deprecation")
 	@Override
 	public Calendar getCalendar(String sKey) throws ClassCastException {
 		Date dDt = DateHelper.toDate(apply(sKey));
@@ -702,7 +703,10 @@ public abstract class AbstractRecord implements Record {
 		Object oVal = apply(sColName);
 		Class oCls;
 		float fRetVal;
-		if (oVal==null) throw new NullPointerException(sColName + " is null");
+
+		if (isNullOrNone(oVal))
+			throw new NullPointerException(sColName + " is null");
+		
 		oCls = oVal.getClass();
 		try {
 			if (oCls.equals(Short.TYPE))
@@ -735,7 +739,10 @@ public abstract class AbstractRecord implements Record {
 		Object oVal = apply(sColName);
 		Class oCls;
 		double dRetVal;
-		if (oVal==null) throw new NullPointerException(sColName + " is null");
+		
+		if (isNullOrNone(oVal))
+			throw new NullPointerException(sColName + " is null");
+		
 		oCls = oVal.getClass();
 		try {
 			if (oCls.equals(Short.TYPE))
@@ -799,7 +806,7 @@ public abstract class AbstractRecord implements Record {
 	@Override
 	public boolean isEmpty(String sColName) {
 		Object obj = apply(sColName);
-		if (obj==null)
+		if (isNullOrNone(obj))
 			return true;
 		else if (obj instanceof String)
 			return ((String) obj).length()==0;
@@ -815,7 +822,7 @@ public abstract class AbstractRecord implements Record {
 	@Override  
 	public boolean isNull(String sColName) {
 		Object obj = apply(sColName);
-		if (obj==null)
+		if (isNullOrNone(obj))
 			return true;
 		else if (obj instanceof String)
 			return ((String) obj).equalsIgnoreCase("null");
@@ -830,7 +837,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Boolean put(String sColName, boolean bVal) {
-		return (Boolean) put(sColName, new Boolean(bVal));
+		Object prev = put(sColName, new Boolean(bVal));
+		return isNullOrNone(prev) ? null : (Boolean) prev;
 	}
 
 	/** <p>Set byte value at internal collection</p>
@@ -839,7 +847,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Byte put(String sColName, byte byVal) {
-		return (Byte) put(sColName,new Byte(byVal));
+		Object prev = put(sColName,new Byte(byVal));
+		return isNullOrNone(prev) ? null : (Byte) prev;
 	}
 
 	/** <p>Set short value at internal collection</p>
@@ -848,7 +857,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Short put(String sColName, short iVal) {
-		return (Short) put(sColName, new Short(iVal));
+		Object prev = put(sColName, new Short(iVal));
+		return isNullOrNone(prev) ? null : (Short) prev;
 	}
 
 	/** <p>Set int value at internal collection</p>
@@ -857,7 +867,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Integer put(String sColName, int iVal) {
-		return (Integer) put(sColName, new Integer(iVal));
+		Object prev = put(sColName, new Integer(iVal));
+		return isNullOrNone(prev) ? null : (Integer) prev;
 	}
 
 	/** <p>Set long value at internal collection</p>
@@ -866,7 +877,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Long put(String sColName, long lVal) {
-		return (Long) put(sColName, new Long(lVal));
+		Object prev = put(sColName, new Long(lVal));
+		return isNullOrNone(prev) ? null : (Long) prev;
 	}
 
 	/** <p>Set float value at internal collection</p>
@@ -875,7 +887,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Float put(String sColName, float fVal) {
-		return (Float) put(sColName, new Float(fVal));
+		Object prev = put(sColName, new Float(fVal));
+		return isNullOrNone(prev) ? null : (Float) prev;
 	}
 
 	/** <p>Set double value at internal collection</p>
@@ -884,7 +897,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Double put(String sColName, double dVal) {
-		return (Double) put(sColName, new Double(dVal));
+		Object prev = put(sColName, new Double(dVal));
+		return isNullOrNone(prev) ? null : (Double) prev;
 	}
 
 	/**
@@ -896,7 +910,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public Date put(String sKey, String sDate, SimpleDateFormat oPattern) throws ParseException {
-		return (Date) put(sKey, oPattern.parse(sDate));
+		Object prev = put(sKey, oPattern.parse(sDate));
+		return isNullOrNone(prev) ? null : (Date) prev;
 	}
 
 	/**
@@ -908,7 +923,8 @@ public abstract class AbstractRecord implements Record {
 	 */
 	@Override
 	public BigDecimal put(String sColName, String sDecVal, DecimalFormat oPattern) throws ParseException {
-		return (BigDecimal) put(sColName, oPattern.parse(sDecVal));
+		Object prev = put(sColName, oPattern.parse(sDecVal));
+		return isNullOrNone(prev) ? null : (BigDecimal) prev;
 	}
 
 	public String toXML(String sIdent, Map<String,String> oAttrs, Locale oLoc) {
@@ -1025,4 +1041,7 @@ public abstract class AbstractRecord implements Record {
 		return columnName;
 	}
 	
+	protected boolean isNullOrNone(Object obj) {
+		return obj==null || obj.getClass().getName().equals("scala.None$");
+	}
 }
