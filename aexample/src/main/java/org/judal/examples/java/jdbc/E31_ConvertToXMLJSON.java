@@ -11,6 +11,9 @@ import org.judal.examples.java.model.Course;
 import org.judal.storage.query.relational.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 
+/**
+ * Example of how to print a RecordSet as XML o JSON
+ */
 public class E31_ConvertToXMLJSON {
 
 	@SuppressWarnings("unused")
@@ -37,7 +40,7 @@ public class E31_ConvertToXMLJSON {
 			RecordSet<Course> courses = qry.fetch();
 			
 			String coursesAsXML = courses.toXML("  ", dateFormat, null, null);
-			
+
 			String coursesAsJSON = courses.toJSON();
 		}
 		
