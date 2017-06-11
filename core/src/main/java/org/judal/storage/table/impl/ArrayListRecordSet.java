@@ -119,7 +119,8 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 		StringBuilder output = new StringBuilder();
 		output.append("[");
 		for (Record r : this)
-			output.append(r.toJSON());
+			output.append(r.toJSON()).append(",");
+		output.setLength(output.length()-1);
 		output.append("]");
 		return output.toString();
 	}
@@ -133,7 +134,7 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 	  * @return String
 	*/
 	public String toXML(String identSpaces, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) throws IOException {
-		String className = candidateClass.getClass().getName();
+		String className = candidateClass.getName();
 		int dot = className.lastIndexOf('.');
 		if (dot>0)
 			className = className.substring(dot+1);
