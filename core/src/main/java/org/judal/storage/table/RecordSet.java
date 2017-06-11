@@ -11,17 +11,42 @@ package org.judal.storage.table;
  * KIND, either express or implied.
  */
 
-import java.util.List;
-import javax.jdo.Extent;
+import java.io.IOException;
 
-public interface RecordSet<R extends Record> extends Extent<R>, List<R> {
+import java.text.DateFormat;
+import java.text.Format;
+import java.text.NumberFormat;
+
+public interface RecordSet<R extends Record> extends Iterable<R> {
   
+  /**
+   * Add a Record to the end of this RecordSet.
+   * @param record &lt;R extends Record&gt;
+   * @return boolean
+   */
+  boolean add(final R record);
+
+  /**
+   * Append the Records of the given RecordSet to the end of this RecordSet
+   * @param otherRecordSet RecordSet<R>
+   * @throws ArrayIndexOutOfBoundsException
+   * @throws NullPointerException
+   */
+  void addAll(RecordSet<R> otherRecordSet);
+  
+  /**
+   * Return the Record in a given position.
+   * @param index int Position starting at 0.
+   * @return &lt;R extends Record&gt;
+   */
+  R get (final int index);
+
   /**
    * Return a list of all the Record elements for which the given Predicate evaluates to <b>true</b>.
    * @param predicate Object
-   * @return List<R>
+   * @return Iterable<R>
    */
-  List<R> filter (final Object predicate);
+  Iterable<R> filter (final Object predicate);
 
   /**
    * Find the first row which value at columnName is equal to the given value
@@ -29,14 +54,22 @@ public interface RecordSet<R extends Record> extends Extent<R>, List<R> {
    * @param value Object
    * @return Record instance or null if no row was found
    */
-  R findFirst (final String columnName, final Object value);
+  Object findFirst (final String columnName, final Object value);
+
+  
+  @SuppressWarnings("rawtypes")
+  /**
+   * Get the class of Record instance contained in this RecordSet
+   * @return Class
+   */
+  Class getCandidateClass();
 
   /**
-   * Count of columns in this RecordSet
+   * Get number of Records in this RecordSet
    * @return int
    */
-  int getColumnCount();
-
+  int size();
+  
   /**
    * Sort the RecordSet by the given column in ascending order
    * @param columnName String
@@ -51,19 +84,8 @@ public interface RecordSet<R extends Record> extends Extent<R>, List<R> {
    */
   void sortDesc(final String columnName) throws ArrayIndexOutOfBoundsException;
 
-  /**
-   * Append the given RecordSet to this RecordSet
-   * @param otherRecordSet RecordSet<R>
-   * @throws ArrayIndexOutOfBoundsException
-   * @throws NullPointerException
-   */
-  void addAll(RecordSet<R> otherRecordSet);
+  String toJson(final String name, final String identifier, final String label) throws IOException;
+
+  String toXML(String identSpaces, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) throws IOException;
   
-  /**
-   * Number of Records in this RecordSet
-   */
-  int size();
-
-  String toJson(final String name, final String identifier, final String label) throws ArrayIndexOutOfBoundsException;
-
 }

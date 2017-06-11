@@ -192,6 +192,17 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	public Entry<String,Object>[] asEntries() {
+		return values.entrySet().toArray(new Entry[values.size()]);
+	}
+
+	@Override
+	public Map<String,Object> asMap() {
+		return values;
+	}
+
+	@Override
 	public Set<String> keySet() {
 		TreeSet<String> keys = new TreeSet<String>();
 		for (ColumnDef c : getTableDef().getColumns())

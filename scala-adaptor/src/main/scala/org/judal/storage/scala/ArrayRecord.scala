@@ -92,6 +92,14 @@ class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinit
 		}
 	}
 
+  def asEntries(): Array[java.util.Map.Entry[String,Object]] = asMap.entrySet.toArray(new Array[java.util.Map.Entry[String,Object]](valuesArray.length))
+
+  def asMap(): java.util.Map[String,Object] = {
+		val retval = new java.util.HashMap[String,Object](valuesArray.length*2+1)
+		columnsMap.foreach(e => retval.put(e._1, valuesArray(e._2)))
+		retval
+  }
+	
 	/**
 	 * Get value for column
 	 * @param columnName String Column Name

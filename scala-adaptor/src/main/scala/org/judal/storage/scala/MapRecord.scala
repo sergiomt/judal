@@ -36,6 +36,7 @@ import scala.collection.mutable.HashMap
 import scala.collection.mutable.Map
 
 import scala.collection.JavaConversions.asJavaCollection
+import scala.collection.JavaConverters._
 
 /**
  * Record interface implementation as a Scala mutable Map
@@ -136,6 +137,10 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 		this(tableDefinition)
 		setConstraintsChecker(constraintsChecker);		
 	}
+
+  def asEntries(): Array[java.util.Map.Entry[String,Object]] = valuesMap.asJava.entrySet.toArray(new Array[java.util.Map.Entry[String,Object]](valuesMap.size))
+  
+  def asMap(): java.util.Map[String,Object] = valuesMap.asJava
 	
   /**
    * {@inheritDoc}

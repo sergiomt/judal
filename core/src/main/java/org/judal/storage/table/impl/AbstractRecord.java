@@ -29,6 +29,7 @@ import java.util.Iterator;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.serialization.BytesConverter;
+import org.judal.serialization.JSONValue;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
@@ -43,14 +44,20 @@ import com.knowgate.dateutils.DateHelper;
 import com.knowgate.debug.DebugFile;
 import com.knowgate.gis.LatLong;
 import com.knowgate.stringutils.Html;
+import com.knowgate.stringutils.XML;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+
 import java.lang.reflect.InvocationTargetException;
+
 import java.math.BigDecimal;
+
 import java.text.NumberFormat;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.Format;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -927,39 +934,47 @@ public abstract class AbstractRecord implements Record {
 		return isNullOrNone(prev) ? null : (BigDecimal) prev;
 	}
 
-	public String toXML(String sIdent, Map<String,String> oAttrs, Locale oLoc) {
-		if (oLoc.getLanguage().equals("es"))
-			return toXML(sIdent, oAttrs, new SimpleDateFormat("DD/MM/yyyy HH:mm:ss"),
-					DecimalFormat.getNumberInstance(oLoc));
-		else
-			return toXML(sIdent, oAttrs, new SimpleDateFormat("yyyy-MM-DD HH:mm:ss"),
-					DecimalFormat.getNumberInstance());
+	public String toJson() throws IOException {
+		final StringBuilder oBF = new StringBuilder();
+		JSONValue.writeJSONObject(asMap(), oBF);
+		return oBF.toString();
 	}
+	
+	/**
+	 * Write Record as XML.
+	 * @param identSpaces String Number of indentation spaces at the beginning of each line.
+	 * @param attribs Map&lt;String,String&gt; Attributes to add to top node.
+	 * @param dateFormat DateFormat Date format. If <b>null</b> then yyyy-MM-DD HH:mm:ss pattern will be used.
+	 * @param decimalFormat NumberFormat Decimal format. If <b>null</b> then DecimalFormat.getNumberInstance() will be used.
+	 * @param textFormat Format. Custom formatter for text fields. May be used to encode text as HTML or similar transformations.
+	 * @return String
+	 */
+	public String toXML(String identSpaces, Map<String,String> attribs, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) {
 
-	public String toXML(String sIdent, Map<String,String> oAttrs, SimpleDateFormat oXMLDate, NumberFormat oXMLDecimal) {
-
-		final String LF = "\n";
-		StringBuffer oBF = new StringBuffer(4000);
+		String ident = identSpaces==null ? "" : identSpaces;
+		final String LF = identSpaces==null ? "" : "\n";
+		StringBuilder oBF = new StringBuilder(4000);
 		Object oColValue;
 		String sColName;
-		String sStartElement = sIdent + sIdent + "<";
+		String sStartElement = identSpaces + identSpaces + "<";
 		String sEndElement = ">" + LF;
-		Class oColClass, ClassString = null, ClassDate = null, ClassDecimal = null;
 
-		try {
-			ClassString = Class.forName("java.lang.String");
-			ClassDate = Class.forName("java.util.Date");
-			ClassDecimal = Class.forName("java.math.BigDecimal");
-		} catch (ClassNotFoundException ignore) { }
+		DateFormat oXMLDate = dateFormat==null ? new SimpleDateFormat("yyyy-MM-DD HH:mm:ss") : dateFormat;
+		NumberFormat oXMLDecimal = decimalFormat==null ? DecimalFormat.getNumberInstance() : decimalFormat;
+		
+		String nodeName = getClass().getName();
+		int dot = nodeName.lastIndexOf('.');
+		if (dot>0)
+			nodeName = nodeName.substring(dot+1);
 
-		if (null==oAttrs) {
-			oBF.append(sIdent + "<" + getClass().getName() + ">" + LF);
+		if (null==attribs) {
+			oBF.append(ident + "<" + nodeName + ">" + LF);
 		} else {
-			oBF.append(sIdent + "<" + getClass().getName());
-			Iterator<String> oNames = oAttrs.keySet().iterator();
+			oBF.append(ident + "<" + nodeName);
+			Iterator<String> oNames = attribs.keySet().iterator();
 			while (oNames.hasNext()) {
 				String sName = oNames.next();
-				oBF.append(" "+sName+"=\""+oAttrs.get(sName)+"\"");
+				oBF.append(" "+sName+"=\""+attribs.get(sName)+"\"");
 			} // wend
 			oBF.append(">" + LF);
 		} // fi
@@ -970,27 +985,54 @@ public abstract class AbstractRecord implements Record {
 
 			oBF.append(sStartElement);
 			oBF.append(sColName);
-			oBF.append(">");
 			if (null!=oColValue) {
-				oColClass = oColValue.getClass();
-				if (oColClass.equals(ClassString))
-					oBF.append("<![CDATA[" + oColValue + "]]>");
-				else if (oColClass.equals(ClassDate))
+				oBF.append(" isnull=\"false\">");
+				if (oColValue instanceof String) {
+					if (textFormat==null)
+						oBF.append(XML.toCData((String) oColValue));
+					else
+						oBF.append(XML.toCData(textFormat.format((String) oColValue)));
+				} else if (oColValue instanceof java.util.Date) {
 					oBF.append(oXMLDate.format((java.util.Date) oColValue));
-				else if (oColClass.equals(ClassDecimal))
-					oBF.append(oXMLDecimal.format((java.math.BigDecimal) oColValue));
-				else
+				} else if (oColValue instanceof Calendar) {
+					oBF.append(oXMLDate.format((java.util.Calendar) oColValue));
+				} else if (oColValue instanceof BigDecimal) {
+					oBF.append(oXMLDecimal.format((BigDecimal) oColValue));
+				} else {
 					oBF.append(oColValue);
+				}
+			} else {
+				oBF.append(" isnull=\"true\">");
 			}
-			oBF.append("</");
-			oBF.append(sColName);
-			oBF.append(sEndElement);
+			oBF.append("</").append(sColName).append(sEndElement);
 		} // wend
 
-		oBF.append(sIdent + "</" + getClass().getName() + ">");
+		oBF.append(ident).append("</").append(nodeName).append(">");
 
 		return oBF.toString();
 	} // toXML
+
+	@Override
+	/**
+	 * Write Record as XML.
+	 * @param identSpaces String Number of indentation spaces at the beginning of each line.
+	 * @param dateFormat DateFormat Date format. If <b>null</b> then yyyy-MM-DD HH:mm:ss pattern will be used.
+	 * @param decimalFormat NumberFormat Decimal format. If <b>null</b> then DecimalFormat.getNumberInstance() will be used.
+	 * @param textFormat Format. Custom formatter for text fields. May be used to encode text as HTML or similar transformations.
+	 * @return String
+	 */
+	public String toXML(String identSpaces, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) {
+		return toXML(identSpaces, null, dateFormat, decimalFormat, textFormat);
+	}
+	
+	/**
+	 * Write Record as XML.
+	 * @return String
+	 */
+	@Override
+	public String toXML() {
+		return toXML("", null, null, null, null);
+	}
 
 	protected Object getBinaryData(String sKey, Object oObj) {
 		Object retObj = null;

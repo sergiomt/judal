@@ -12,17 +12,10 @@ package org.judal.storage.java;
  * KIND, either express or implied.
  */
 
-import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Map;
 
 import org.judal.storage.table.Record;
 
 public interface JavaRecord extends Record, Map<String,Object> {
-
-	String toXML(String ident, Map<String,String> attrs, Locale localization);
-
-	String toXML(String ident, Map<String,String> attrs, SimpleDateFormat xmldate, NumberFormat xmldecimal);
 
 }

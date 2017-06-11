@@ -21,6 +21,7 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -72,6 +73,26 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	public PojoRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
 		super(dataSource, tableName, fieldHelper, constraintsChecker);
 		persistentFields =  null;
+	}
+
+	@Override
+	public Map<String, Object> asMap() {
+		ArrayList<Field> fields = getPersistentFields();
+		HashMap<String,Object> retval = new HashMap<>(fields.size()*2);
+		for (Field fld : fields)
+			retval.put(fld.getName(), get(fld.getName()));
+		return retval;
+	}
+
+	@Override
+	public Set<java.util.Map.Entry<String, Object>> entrySet() {
+		return asMap().entrySet();
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public java.util.Map.Entry<String, Object>[] asEntries() {
+		return entrySet().toArray(new java.util.Map.Entry[getPersistentFields().size()]);
 	}
 	
 	private ArrayList<Field> getPersistentFields() {
@@ -126,8 +147,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	@Override
 	public void setValue(Serializable value) throws JDOException {
-		// TODO Auto-generated method stub
-		
+		throw new JDOUnsupportedOptionException("PojoRecord.setValue()");
 	}
 
 	/**
@@ -150,14 +170,17 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	@Override
 	public boolean containsValue(Object obj) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
-	public Set<java.util.Map.Entry<String, Object>> entrySet() {
-		// TODO Auto-generated method stub
-		return null;
+		if (obj==null) {
+			for (Field fld : getPersistentFields())
+				if (get(fld.getName())==null)
+					return true;
+			return false;
+		} else {
+			for (Field fld : getPersistentFields())
+				if (obj.equals(get(fld.getName())))
+					return true;
+			return false;
+		}
 	}
 
 	@Override
@@ -272,4 +295,5 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	public void clear() {
 		throw new JDOUnsupportedOptionException("PojoRecord.clear()");	
 	}
+
 }

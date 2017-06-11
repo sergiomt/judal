@@ -11,16 +11,22 @@ package org.judal.storage.table;
  * KIND, either express or implied.
  */
 
+import java.io.IOException;
 import java.io.Serializable;
+
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
-
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.Format;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.jdo.FetchGroup;
 
@@ -41,6 +47,10 @@ public interface Record extends Serializable, Stored {
 	ColumnDef[] columns();
 
 	ColumnDef getColumn(String colname) throws ArrayIndexOutOfBoundsException;
+
+	Map<String,Object> asMap();
+
+	Entry<String,Object>[] asEntries();
 
 	boolean isNull(String colname);
 
@@ -153,4 +163,10 @@ public interface Record extends Serializable, Stored {
 	
 	int size();
 
+	String toJson() throws IOException;
+
+	String toXML() throws IOException;
+
+	String toXML(String identSpaces, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) throws IOException;
+	
 }
