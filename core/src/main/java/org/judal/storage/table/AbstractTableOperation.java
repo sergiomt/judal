@@ -7,27 +7,29 @@ import org.judal.storage.EngineFactory;
 import org.judal.storage.Operation;
 import org.judal.storage.Param;
 import org.judal.storage.table.Record;
+import org.judal.storage.table.Table;
+import org.judal.storage.table.TableDataSource;
 
-public class TableOperation<R extends Record> implements Operation {
+public abstract class AbstractTableOperation<R extends Record> implements Operation {
 
 	protected Table tbl;
 	protected TableDataSource dts;
 	private R rec;
 
-	public TableOperation() {
+	public AbstractTableOperation() {
 		 this(EngineFactory.getDefaultTableDataSource());
 	 }
 
-	public TableOperation(R record) {
+	public AbstractTableOperation(R record) {
 		 this(EngineFactory.getDefaultTableDataSource(), record);
 	 }
 	
-	public TableOperation(TableDataSource dataSource) {
+	public AbstractTableOperation(TableDataSource dataSource) {
 		dts = dataSource;
 		rec = null;
 	}
 
-	public TableOperation(TableDataSource dataSource, R record) {
+	public AbstractTableOperation(TableDataSource dataSource, R record) {
 		dts = dataSource;
 		rec = record;
 		open();
@@ -66,9 +68,7 @@ public class TableOperation<R extends Record> implements Operation {
 		getTable().delete(key);
 	}
 
-	public RecordSet<R> fetch(FetchGroup fetchGroup, String columnName, Object valueSearched) throws JDOException {
-		return getTable().fetch(fetchGroup, columnName, valueSearched);
-	}
+	public abstract Object fetch(FetchGroup fetchGroup, String columnName, Object valueSearched) throws JDOException;
 
 	public void insert(Param... params) throws JDOException {
 		getTable().insert(params);

@@ -12,18 +12,11 @@ package org.judal.storage.relational;
  * KIND, either express or implied.
  */
 
-import java.util.Map.Entry;
-
 import javax.jdo.JDOException;
-import javax.jdo.JDOUserException;
 
 import org.judal.metadata.IndexDef;
 import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
-import org.judal.storage.DataSource;
-import org.judal.storage.EngineFactory;
-import org.judal.storage.StorageContext;
-import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 

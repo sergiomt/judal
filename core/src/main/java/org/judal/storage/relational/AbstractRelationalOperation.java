@@ -1,33 +1,37 @@
 package org.judal.storage.relational;
 
+
 import java.util.Date;
 
 import javax.jdo.JDOException;
 
 import org.judal.storage.EngineFactory;
+import org.judal.storage.Param;
 import org.judal.storage.query.Predicate;
+import org.judal.storage.table.AbstractIndexableTableOperation;
 import org.judal.storage.table.Record;
+import org.judal.storage.table.RecordSet;
 
 import com.knowgate.dateutils.DateHelper;
 
 import org.judal.storage.relational.RelationalDataSource;
-import org.judal.storage.table.IndexableTableOperation;
+import org.judal.storage.relational.RelationalTable;
 
-public class RelationalOperation<R extends Record> extends IndexableTableOperation<R> {
+public abstract class AbstractRelationalOperation<R extends Record> extends AbstractIndexableTableOperation<R> {
 
-	public RelationalOperation() {
+	public AbstractRelationalOperation() {
 		this(EngineFactory.getDefaultRelationalDataSource());
 	}
 
-	public RelationalOperation(R record) {
+	public AbstractRelationalOperation(R record) {
 		 this(EngineFactory.getDefaultRelationalDataSource(), record);
 	 }
 
-	public RelationalOperation(RelationalDataSource dataSource) {
+	public AbstractRelationalOperation(RelationalDataSource dataSource) {
 		super(dataSource);
 	}
 
-	public RelationalOperation(RelationalDataSource dataSource, R record) {
+	public AbstractRelationalOperation(RelationalDataSource dataSource, R record) {
 		super(dataSource, record);
 	}
 
@@ -35,12 +39,10 @@ public class RelationalOperation<R extends Record> extends IndexableTableOperati
 		tbl = dataSource().openRelationalTable(getRecord());
 	}
 
-	@Override
 	public RelationalDataSource dataSource() {
 		return (RelationalDataSource) dts;
 	}
 	
-	@Override
 	public RelationalTable getTable() {
 		return (RelationalTable) tbl;
 	}

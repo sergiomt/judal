@@ -1,25 +1,27 @@
 package org.judal.storage.table;
 
-import org.judal.storage.table.TableOperation;
+
 import org.judal.storage.EngineFactory;
 import org.judal.storage.Param;
+import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.Record;
+import org.judal.storage.table.TableDataSource;
 
-public class IndexableTableOperation<R extends Record> extends TableOperation<R> {
+public abstract class AbstractIndexableTableOperation<R extends Record> extends AbstractTableOperation<R> {
 
-	public IndexableTableOperation() {
+	public AbstractIndexableTableOperation() {
 		this(EngineFactory.getDefaultTableDataSource());
 	}
 
-	public IndexableTableOperation(R record) {
+	public AbstractIndexableTableOperation(R record) {
 		this(EngineFactory.getDefaultTableDataSource(), record);
 	}
 
-	public IndexableTableOperation(TableDataSource dataSource) {
+	public AbstractIndexableTableOperation(TableDataSource dataSource) {
 		super(dataSource);
 	}
 
-	public IndexableTableOperation(TableDataSource dataSource, R record) {
+	public AbstractIndexableTableOperation(TableDataSource dataSource, R record) {
 		super(dataSource, record);
 	}
 	
@@ -40,9 +42,7 @@ public class IndexableTableOperation<R extends Record> extends TableOperation<R>
 		return getTable().exists(keys);
 	}
 
-	public RecordSet<R> fetch(final int maxrows, final int offset, Param... keys) {
-		return getTable().fetch(getRecord().fetchGroup(), maxrows, offset, keys);
-	}
+	public abstract Object fetch(final int maxrows, final int offset, Param... keys);
 	
 	public int update(Param[] values, Param[] where) {
 		return getTable().update(values, where);
