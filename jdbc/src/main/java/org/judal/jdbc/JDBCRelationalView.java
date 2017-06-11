@@ -47,15 +47,9 @@ public class JDBCRelationalView extends JDBCBucket implements RelationalView {
 
 	private Class<? extends Record> recordClass;
 	
-	@SuppressWarnings("unchecked")
 	public JDBCRelationalView(JDBCTableDataSource dataSource, Record recordInstance) throws JDOException {
 		super(dataSource, recordInstance.getTableName());
 		recordClass = recordInstance.getClass();
-		setCandidateClass((Class<Stored>) recordClass);
-	}
-
-	public JDBCRelationalView(JDBCTableDataSource dataSource, SQLTableDef tableDef) throws JDOException {
-		super(dataSource, tableDef);
 	}
 
 	@Override

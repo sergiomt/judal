@@ -63,9 +63,12 @@ public class SQLQuery extends AbstractQuery {
 	private Object[] constructorParameters;
 	
 	public SQLQuery(IndexableView view) throws JDOException {
+		if (view.getResultClass()==null)
+			throw new NullPointerException("SQLQuery() IndexableView.getResultClass() cannot be null");
 		setCandidates(view);
 		setRange(0, Integer.MAX_VALUE);
-		recordConstructor = null;		
+		recordConstructor = null;
+		setResultClass(view.getResultClass());
 	}
 
 	@Override
@@ -380,15 +383,19 @@ public class SQLQuery extends AbstractQuery {
 
 	@SuppressWarnings("unchecked")
 	private <R extends Record> RecordSet<R> fetchResultSet (ResultSet oRSet)
-			throws SQLException, SQLFeatureNotSupportedException, ArrayIndexOutOfBoundsException, InstantiationException, IllegalAccessException, NoSuchMethodException
+			throws NullPointerException, SQLException, SQLFeatureNotSupportedException, ArrayIndexOutOfBoundsException, InstantiationException, IllegalAccessException, NoSuchMethodException
 	{
 		int iRetVal = 0;
 		int iMaxRow = getMaxRows()<0 ? Integer.MAX_VALUE : getMaxRows();
 		long lFetchTime = 0;
 
+		if (null==getResultClass())
+			throw new NullPointerException("SQLQuery.fetchResultSet() getResultClass() cannot be null");
+			
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCQuery.fetchResultSet([ResultSet], " + String.valueOf(iMaxRow) + ", " + String.valueOf(getRangeFromIncl()) + ")");
 		}
+		
 		
 		RecordSet<R> recordSet = StorageObjectFactory.newRecordSetOf(getResultClass(), new Integer(iMaxRow));
 		
