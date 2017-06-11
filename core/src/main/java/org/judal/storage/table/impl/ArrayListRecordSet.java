@@ -1,4 +1,4 @@
-package org.judal.storage.java;
+package org.judal.storage.table.impl;
 
 /**
  * This file is licensed under the Apache License version 2.0.
@@ -11,24 +11,31 @@ package org.judal.storage.java;
  * KIND, either express or implied.
  */
 
+import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
+import javax.jdo.Extent;
 import javax.jdo.FetchPlan;
+import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import java.text.DateFormat;
+import java.text.Format;
+import java.text.NumberFormat;
 
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 
 import org.judal.storage.table.comparators.RecordColumnValueComparatorAsc;
 import org.judal.storage.table.comparators.RecordColumnValueComparatorDesc;
-
-import com.knowgate.debug.DebugFile;
 
 /**
 *
@@ -60,20 +67,6 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 		this(candidateClass, capacity.intValue());
 	}
 
-	@SuppressWarnings("unchecked")
-	public boolean add(Record rec) {
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin ArrayListRecordSet.add(Record)");
-			DebugFile.incIdent();
-		}
-		boolean retval = super.add((R) rec);
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End ArrayListRecordSet.add() : " + String.valueOf(retval));
-		}
-		return retval;
-	}
-	
 	@Override
 	public List<R> filter(final Object predicate) {
 		LinkedList<R> filtered = new LinkedList<R> ();
@@ -90,15 +83,16 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 
 	@Override
 	public R findFirst(String columnName, Object value) {
-		for (R rec : this)
-			if (rec.apply(columnName).equals(value))
-				return rec;
+		if (value==null) {
+			for (R r1 : this)
+				if (r1.isNull(columnName))
+					return r1;
+		} else {
+			for (R r2 : this)
+				if (value.equals(r2.apply(columnName)))
+					return r2;
+		}
 		return null;
-	}
-
-	@Override
-	public int getColumnCount() {
-		return size()== 0 ? 0 : get(0).size();
 	}
 
 	@Override
@@ -114,7 +108,8 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 
 	@Override
 	public void addAll(RecordSet<R> otherRecordSet) {
-		ensureCapacity(size()+otherRecordSet.size());
+		final int newRecCount = otherRecordSet.size();
+		ensureCapacity(size()+newRecCount);
 		for (R rec : otherRecordSet)
 			add(rec);
 	}
@@ -124,34 +119,35 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 		return null;
 	}
 
-	@Override
-	public void close(Iterator<R> iterator) {
-		// Do nothing
-	}
-
-	@Override
-	public void closeAll() {
-		// Do nothing		
+	/**
+	  * Write RecordSet as XML.
+	  * @param identSpaces String Number of indentation spaces at the beginning of each line.
+	  * @param dateFormat DateFormat Date format.
+	  * @param decimalFormat NumberFormat Decimal format.
+	  * @param textFormat Format. Custom formatter for text fields. May be used to encode text as HTML or similar transformations.
+	  * @return String
+	*/
+	public String toXML(String identSpaces, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) throws IOException {
+		String className = candidateClass.getClass().getName();
+		int dot = className.lastIndexOf('.');
+		if (dot>0)
+			className = className.substring(dot+1);
+		final String ident = identSpaces==null ? "" : identSpaces;
+		if (size()==0) {
+			return ident + "<RecordSet of=\""+className+"\" />";
+		} else {
+			StringBuilder output = new StringBuilder();
+			output.append(ident).append("<RecordSet of=\"").append(className).append("\" />").append(identSpaces==null ? "" : "\n");
+			for (Record r : this)
+				output.append(r.toXML(identSpaces, dateFormat, decimalFormat, textFormat)).append(identSpaces==null ? "" : "\n");
+			output.append(ident).append("</RecordSet>");
+			return output.toString();
+		}
 	}
 
 	@Override
 	public Class<R> getCandidateClass() {
 		return candidateClass;
-	}
-
-	@Override
-	public FetchPlan getFetchPlan() {
-		return null;
-	}
-
-	@Override
-	public PersistenceManager getPersistenceManager() {
-		return null;
-	}
-
-	@Override
-	public boolean hasSubclasses() {
-		return false;
 	}
 
 } // ArrayListRecordSet
