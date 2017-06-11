@@ -6,12 +6,9 @@ import org.judal.Using._
 
 import org.scalatest.Suite
 
-import org.judal.storage.table.RecordSet
-import org.judal.storage.table.TableOperation
+import org.judal.storage.scala.TableOperation
 
 import org.judal.examples.scala.model.Student
-
-import scala.collection.JavaConversions._
 
 /**
  * Use TableOperation wrapper to fetch students whose last name is "Kol"
@@ -29,9 +26,9 @@ class E13_FetchByNonUniqueIndexUsingOperationWrapper extends Suite {
 		
 		var op : TableOperation[Student] = null
 		using (op) {
-		  op = new TableOperation[Student](s)
+		  op = new TableOperation(s)
 			// Fetch students whose last name is "Kol"
-			val students : RecordSet[Student] = op.fetch(s.fetchGroup(), "last_name", "Kol")
+			val students : Iterable[Student] = op.fetch(s.fetchGroup, "last_name", "Kol")
 			for (t <- students) {
 				// Change last name and update record in the database
 				t.setLastName("Col")

@@ -2,8 +2,8 @@ package org.judal.examples.java.jdbc;
 
 import org.junit.Test;
 import org.judal.storage.Param;
+import org.judal.storage.java.IndexableTableOperation;
 import org.judal.storage.query.Expression;
-import org.judal.storage.table.IndexableTableOperation;
 
 import java.sql.Date;
 import java.sql.Types;

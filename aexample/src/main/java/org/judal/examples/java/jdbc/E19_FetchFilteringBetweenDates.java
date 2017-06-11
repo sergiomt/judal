@@ -5,7 +5,7 @@ import java.util.GregorianCalendar;
 import org.junit.Test;
 
 import org.judal.examples.java.model.Student;
-import org.judal.storage.query.relational.RelationalQuery;
+import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 
 import static org.judal.storage.query.Operator.BETWEEN;

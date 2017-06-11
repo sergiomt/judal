@@ -8,7 +8,7 @@ import java.io.InputStream;
 
 import org.judal.examples.Resources;
 import org.judal.examples.java.model.Student;
-import org.judal.storage.table.TableOperation;
+import org.judal.storage.java.TableOperation;
 
 /**
  * Example of how to write and read a LONGVARBINARY field

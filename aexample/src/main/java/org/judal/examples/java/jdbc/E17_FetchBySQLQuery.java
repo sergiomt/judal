@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
-import org.judal.storage.query.relational.RelationalQuery;
+import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 
 import org.judal.examples.java.model.Student;

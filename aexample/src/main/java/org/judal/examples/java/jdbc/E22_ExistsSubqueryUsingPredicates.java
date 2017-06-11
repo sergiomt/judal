@@ -5,10 +5,9 @@ import org.junit.Test;
 import org.judal.metadata.NameAlias;
 
 import org.judal.storage.table.RecordSet;
-
+import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.query.Expression;
 import org.judal.storage.query.Predicate;
-import org.judal.storage.query.relational.RelationalQuery;
 
 import static org.judal.storage.query.Operator.EQ;
 import static org.judal.storage.query.Operator.EXISTS;

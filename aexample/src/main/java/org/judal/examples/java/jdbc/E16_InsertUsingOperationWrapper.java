@@ -10,8 +10,8 @@ import java.sql.Types;
 
 import org.judal.examples.java.model.Course;
 import org.judal.storage.Param;
-import org.judal.storage.relational.RelationalOperation;
-import org.judal.storage.table.IndexableTableOperation;
+import org.judal.storage.java.IndexableTableOperation;
+import org.judal.storage.java.RelationalOperation;
 
 /**
  * Insert a new row that does not previously exist in the database

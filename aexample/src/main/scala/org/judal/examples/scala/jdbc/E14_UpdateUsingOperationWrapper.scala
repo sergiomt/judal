@@ -8,7 +8,7 @@ import org.scalatest.Suite
 
 import org.judal.storage.Param
 import org.judal.storage.query.Expression
-import org.judal.storage.table.IndexableTableOperation
+import org.judal.storage.scala.IndexableTableOperation
 
 import java.sql.Date
 import java.sql.Types
@@ -27,7 +27,7 @@ class E14_UpdateUsingOperationWrapper extends Suite {
 		var op : IndexableTableOperation[Course] = null
 		
 		using(op) {
-		  op = new IndexableTableOperation[Course](new Course)
+		  op = new IndexableTableOperation(new Course)
 
 		  // Increase by 20% the price of courses staring on 2017-05-15
 			op.update(

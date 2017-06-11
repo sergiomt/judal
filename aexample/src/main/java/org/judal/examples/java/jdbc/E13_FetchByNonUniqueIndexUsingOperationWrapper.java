@@ -1,10 +1,8 @@
 package org.judal.examples.java.jdbc;
 
 import org.junit.Test;
-
+import org.judal.storage.java.TableOperation;
 import org.judal.storage.table.RecordSet;
-import org.judal.storage.table.TableOperation;
-
 import org.judal.examples.java.model.Student;
 
 /**

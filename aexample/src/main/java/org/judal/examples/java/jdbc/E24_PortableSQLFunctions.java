@@ -3,7 +3,7 @@ package org.judal.examples.java.jdbc;
 import org.junit.Test;
 
 import org.judal.storage.EngineFactory;
-import org.judal.storage.query.relational.RelationalQuery;
+import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.impl.SingleStringColumnRecord;
 

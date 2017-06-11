@@ -7,8 +7,8 @@ import org.junit.Test;
 import org.judal.examples.java.model.Course;
 import org.judal.examples.java.model.Student;
 import org.judal.examples.java.model.StudentCourse;
+import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.query.Predicate;
-import org.judal.storage.query.relational.RelationalQuery;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.RecordSet;
 

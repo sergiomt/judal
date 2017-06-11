@@ -1,10 +1,8 @@
 package org.judal.examples.java.jdbc;
 
 import org.junit.Test;
-
-import org.judal.storage.table.IndexableTableOperation;
-
 import org.judal.examples.java.model.Student;
+import org.judal.storage.java.IndexableTableOperation;
 
 /**
  * Delete a student given his internal primary key

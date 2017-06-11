@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.judal.examples.java.model.Course;
-import org.judal.storage.query.relational.RelationalQuery;
+import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 
 /**

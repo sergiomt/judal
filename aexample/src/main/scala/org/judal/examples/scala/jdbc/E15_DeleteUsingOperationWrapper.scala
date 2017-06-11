@@ -6,7 +6,7 @@ import org.scalatest.Suite
 
 import org.judal.Using._
 
-import org.judal.storage.table.IndexableTableOperation
+import org.judal.storage.scala.IndexableTableOperation
 
 import org.judal.examples.scala.model.Student
 
@@ -22,7 +22,7 @@ class E15_DeleteUsingOperationWrapper extends Suite {
 		var op : IndexableTableOperation[Student] = null
 		
 		using (op) {
-			op = new IndexableTableOperation[Student](new Student)
+			op = new IndexableTableOperation(new Student)
 		  op.delete(7)
 		}
 
