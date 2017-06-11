@@ -40,6 +40,7 @@
         <!--
         <module>cassandra</module>
         -->
+        <module>aexample</module>
     </modules>
 
     <properties>
