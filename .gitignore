@@ -1,4 +1,5 @@
 .cache
+.cache-main
 .scala_dependencies
 .settings
 .classpath
