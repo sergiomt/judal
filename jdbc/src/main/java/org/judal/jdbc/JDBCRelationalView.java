@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.storage.Param;
-import org.judal.storage.keyvalue.Stored;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
@@ -52,6 +51,11 @@ public class JDBCRelationalView extends JDBCBucket implements RelationalView {
 		recordClass = recordInstance.getClass();
 	}
 
+	public JDBCRelationalView(JDBCTableDataSource dataSource, SQLTableDef tableDef, Class<? extends Record> recClass) throws JDOException {
+		super(dataSource, tableDef);
+		recordClass = recClass;
+	}	
+	
 	@Override
 	public ColumnDef[] columns() {
 		return tableDef.getColumns();

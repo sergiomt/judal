@@ -616,7 +616,7 @@ public class JDOPersistenceCapable implements JDORecord {
 	}
 
 	@Override
-	public String toJson() throws IOException {
+	public String toJSON() throws IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

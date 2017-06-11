@@ -934,7 +934,7 @@ public abstract class AbstractRecord implements Record {
 		return isNullOrNone(prev) ? null : (BigDecimal) prev;
 	}
 
-	public String toJson() throws IOException {
+	public String toJSON() throws IOException {
 		final StringBuilder oBF = new StringBuilder();
 		JSONValue.writeJSONObject(asMap(), oBF);
 		return oBF.toString();

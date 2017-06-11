@@ -115,8 +115,13 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 	}
 
 	@Override
-	public String toJson(String name, String identifier, String label) throws ArrayIndexOutOfBoundsException {
-		return null;
+	public String toJSON() throws IOException {
+		StringBuilder output = new StringBuilder();
+		output.append("[");
+		for (Record r : this)
+			output.append(r.toJSON());
+		output.append("]");
+		return output.toString();
 	}
 
 	/**

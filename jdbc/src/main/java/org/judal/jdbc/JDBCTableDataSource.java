@@ -189,8 +189,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			}
 		}
 		
-		tbl = new JDBCRelationalView(this, tdef);
-		tbl.setResultClass(result.getClass());
+		tbl = new JDBCRelationalView(this, tdef, result.getClass());
 		
 		if (DebugFile.trace) {
 			DebugFile.writeln(tdef.getTable());

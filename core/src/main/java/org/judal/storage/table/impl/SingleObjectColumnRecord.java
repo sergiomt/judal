@@ -77,7 +77,7 @@ public class SingleObjectColumnRecord extends AbstractSingleColumnRecord  {
 	}
 
 	@Override
-	public String toJson() throws IOException {
+	public String toJSON() throws IOException {
 		StringBuilder out = new StringBuilder ();
 		JSONValue.writeJSONObject(asMap(), out);
 		return out.toString();

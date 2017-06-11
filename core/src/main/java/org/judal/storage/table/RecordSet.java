@@ -84,7 +84,7 @@ public interface RecordSet<R extends Record> extends Iterable<R> {
    */
   void sortDesc(final String columnName) throws ArrayIndexOutOfBoundsException;
 
-  String toJson(final String name, final String identifier, final String label) throws IOException;
+  String toJSON() throws IOException;
 
   String toXML(String identSpaces, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) throws IOException;
   

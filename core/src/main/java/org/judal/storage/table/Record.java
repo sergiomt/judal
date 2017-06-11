@@ -163,7 +163,7 @@ public interface Record extends Serializable, Stored {
 	
 	int size();
 
-	String toJson() throws IOException;
+	String toJSON() throws IOException;
 
 	String toXML() throws IOException;
 
