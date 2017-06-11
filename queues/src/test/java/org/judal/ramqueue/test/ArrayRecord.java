@@ -32,8 +32,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.AbstractMap.SimpleImmutableEntry;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
@@ -412,6 +414,24 @@ public class ArrayRecord extends AbstractRecord {
 				throw new IllegalArgumentException("Column "+sKey+" does not exist at "+getTableDef().getName());
 			}
 		}
+		return retval;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public Entry<String,Object>[] asEntries() {
+		final int vcount = values.length;
+		SimpleImmutableEntry<String,Object>[] entries = new SimpleImmutableEntry[vcount];
+		for (Entry<String,Integer> e : columnsMap.entrySet())
+			entries[e.getValue()] = new SimpleImmutableEntry<String,Object>(e.getKey(), values[e.getValue()]);
+		return entries;
+	}
+
+	@Override
+	public Map<String,Object> asMap() {
+		HashMap<String,Object> retval = new HashMap<>(values.length*2+1);
+		for (Entry<String,Integer> e : columnsMap.entrySet())
+			retval.put(e.getKey(), values[e.getValue()]);
 		return retval;
 	}
 	
