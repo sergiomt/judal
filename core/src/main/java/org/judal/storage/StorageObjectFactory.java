@@ -39,11 +39,9 @@ public class StorageObjectFactory extends ObjectFactory {
 	private static Class ScalaRecordSet;
 
 	static {
+		JavaRecordSet = org.judal.storage.table.impl.ArrayListRecordSet.class;
 		try {
 			JavaRecord = Class.forName("org.judal.storage.java.JavaRecord");
-		} catch (ClassNotFoundException ignore) { }
-		try {
-			JavaRecordSet = Class.forName("org.judal.storage.java.ArrayListRecordSet");
 		} catch (ClassNotFoundException ignore) { }
 		try {
 			ScalaRecord = Class.forName("org.judal.storage.scala.ScalaRecord");
