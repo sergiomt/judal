@@ -96,8 +96,6 @@ public abstract class AbstractRecord implements Record {
 	public AbstractRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
 		if (null==tableDefinition)
 			throw new NullPointerException("AbstractRecord constructor. TableDef cannot be null");
-		if (tableDefinition.getNumberOfColumns()==0)
-			throw new JDOUserException("AbstractRecord constructor. TableDef  is empty");
 		tableDef = tableDefinition;
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
