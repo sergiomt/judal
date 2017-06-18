@@ -121,14 +121,14 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return Column names separated by commas
 	 */
 	public String getColumnsStr() {
-		if (getNumberOfColumns()>0) {
+		if (getNumberOfColumns()==0) {
 			return "";
 		} else {
 			final int ncols = getNumberOfColumns();
 			StringBuilder builder = new StringBuilder(ncols*30);
-			builder.append(columns.get(0));
+			builder.append(columns.get(0).getName());
 			for (int c=1; c<ncols; c++)
-				builder.append(',').append(columns.get(c));
+				builder.append(',').append(columns.get(c).getName());
 			return builder.toString();
 		}
 	} // getColumnsStr
