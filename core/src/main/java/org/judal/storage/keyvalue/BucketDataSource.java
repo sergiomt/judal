@@ -14,11 +14,8 @@ package org.judal.storage.keyvalue;
 import java.util.Map;
 
 import javax.jdo.JDOException;
-import javax.jdo.JDOUserException;
 
 import org.judal.storage.DataSource;
-import org.judal.storage.EngineFactory;
-import org.judal.storage.StorageContext;
 
 public interface BucketDataSource extends DataSource {
 

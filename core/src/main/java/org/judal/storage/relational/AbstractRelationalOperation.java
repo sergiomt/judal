@@ -6,11 +6,9 @@ import java.util.Date;
 import javax.jdo.JDOException;
 
 import org.judal.storage.EngineFactory;
-import org.judal.storage.Param;
 import org.judal.storage.query.Predicate;
 import org.judal.storage.table.AbstractIndexableTableOperation;
 import org.judal.storage.table.Record;
-import org.judal.storage.table.RecordSet;
 
 import com.knowgate.dateutils.DateHelper;
 

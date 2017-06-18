@@ -334,6 +334,8 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	public void addColumnMetadata(ColumnDef cdef) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
+		if (cdef==null)
+			throw new JDOUserException("TypeDef.addColumnMetadata(ColumnDef) ColumnDef must not be null");
 		if (DebugFile.trace)
 			DebugFile.writeln("TypeDef.addColumnMetadata(ColumnDef {"+cdef.getName()+","+String.valueOf(cdef.getPosition())+"}) at position "+String.valueOf(getNumberOfColumns()+1));
 		if (positions.containsKey(cdef.getName()))

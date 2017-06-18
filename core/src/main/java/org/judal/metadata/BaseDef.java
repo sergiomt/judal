@@ -117,13 +117,13 @@ public abstract class BaseDef extends ExtendableDef implements Cloneable {
 	 */
 	public ColumnDef[] filterColumns(String[] columnNames) throws ArrayIndexOutOfBoundsException {
 		final int colCount = columnNames.length;
-		ColumnDef[] filteredCols = new ColumnDef[colCount];
+		ArrayList<ColumnDef> filteredCols = new ArrayList<ColumnDef>(colCount);
 		for (int c=0; c<colCount; c++) {
 			boolean found = false;
 			final String colName = columnNames[c];
 			for (ColumnDef cdef : columns) {
 				if (cdef.getName().equalsIgnoreCase(colName)) {
-					filteredCols[c++] = cdef;
+					filteredCols.add(cdef);
 					found = true;
 					break;
 				}
@@ -131,7 +131,7 @@ public abstract class BaseDef extends ExtendableDef implements Cloneable {
 			if (!found)
 				throw new ArrayIndexOutOfBoundsException("Column "+colName+" bot found at "+getName());
 		}
-		return filteredCols;
+		return filteredCols.toArray(new ColumnDef[filteredCols.size()]);
 	}
 	
 	public PrimaryKeyDef getPrimaryKeyMetadata() {

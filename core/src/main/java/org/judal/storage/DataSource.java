@@ -148,6 +148,7 @@ public interface DataSource extends AutoCloseable {
     public static final String MAXPOOLSIZE = "maxpoolsize";
     public static final String MAXCONNECTIONS = "maxconnections";
     public static final String TRANSACTIONAL = "transactional";
+    public static final String AUTOCOMMIT = "autocommit";
     
     public static String DEFAULT_POOLSIZE = "10";
     public static String DEFAULT_MAXPOOLSIZE = "100";
@@ -157,16 +158,18 @@ public interface DataSource extends AutoCloseable {
     public static String DEFAULT_REGION = "eu-west-1";
     public static String DEFAULT_TRANSACTIONAL = "true";
     public static String DEFAULT_USE_DATABASE_METADATA = "true";
+    public static String DEFAULT_AUTOCOMMIT = "false";
     
     /**
      * List of supported property names
      */
-    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA};
+    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA};
 
     /**
      * List of default property values
      */
     public static final String[][] DefaultValues = new String[][]{
+    	new String[]{AUTOCOMMIT,DEFAULT_AUTOCOMMIT},
     	new String[]{CONNECTIONTIMEOUT,DEFAULT_CONNECTIONTIMEOUT},
     	new String[]{LOGINTIMEOUT,DEFAULT_LOGINTIMEOUT},
     	new String[]{TRANSACTIONAL,DEFAULT_TRANSACTIONAL},

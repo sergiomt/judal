@@ -70,6 +70,10 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 
 	public abstract Object fetch(FetchGroup fetchGroup, String columnName, Object valueSearched) throws JDOException;
 
+	public abstract Object fetchAsc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColum) throws JDOException;
+
+	public abstract Object fetchDesc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColum) throws JDOException;
+
 	public void insert(Param... params) throws JDOException {
 		getTable().insert(params);
 	}

@@ -17,7 +17,9 @@ import java.text.DateFormat;
 import java.text.Format;
 import java.text.NumberFormat;
 
-public interface RecordSet<R extends Record> extends Iterable<R> {
+import java.util.Collection;
+
+public interface RecordSet<R extends Record> extends Collection<R> {
   
   /**
    * Add a Record to the end of this RecordSet.

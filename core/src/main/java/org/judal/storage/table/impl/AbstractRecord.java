@@ -95,7 +95,7 @@ public abstract class AbstractRecord implements Record {
 
 	public AbstractRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
 		if (null==tableDefinition)
-			throw new NullPointerException("Table definition cannot be null");
+			throw new NullPointerException("AbstractRecord constructor. TableDef cannot be null");
 		tableDef = tableDefinition;
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
@@ -291,6 +291,10 @@ public abstract class AbstractRecord implements Record {
 		if (pk.getNumberOfColumns()==0) throw new JDOException("Table "+tableDef.getName()+" has no primary key");
 		if (pk.getNumberOfColumns()==1) {
 			if (DebugFile.trace) DebugFile.writeln("set "+pk.getColumn()+"="+value);
+			if (pk.getColumn()==null)
+				throw new JDOUserException("Primary key column name for table "+tableDef.getName()+" is null");
+			else if (pk.getColumn().trim().length()==0)
+				throw new JDOUserException("Primary key column name for table "+tableDef.getName()+" is empty");
 			put(pk.getColumn(), value);
 		} else {
 			try {
