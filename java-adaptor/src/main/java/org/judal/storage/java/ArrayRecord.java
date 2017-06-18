@@ -34,7 +34,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import javax.jdo.JDOException;
@@ -60,7 +59,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	private static final long serialVersionUID = 10000l;
 
 	private Object[] values;
-	private Map<String, Integer> columnsMap;
+	private String[] columnNames;
+	private Map<String, Integer> columnNamesMap;
 
 	/**
 	 * Constructor
@@ -82,13 +82,14 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	public ArrayRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
 		this(tableDefinition, null, constraintsChecker);
 	}
-	
+
 	/**
 	 * Constructor
 	 */
 	public ArrayRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
 		super(tableDefinition, fieldHelper, constraintsChecker);
-		columnsMap = null;
+		columnNamesMap = null;
+		columnNames = tableDefinition.getColumnsStr().split(",");
 		values = new Object[getTableDef().getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
@@ -99,7 +100,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	 */
 	public ArrayRecord(TableDataSource dataSource, String tableName) throws JDOException {
 		super(dataSource, tableName, null, null);
-		columnsMap = null;
+		columnNamesMap = null;
+		columnNames = dataSource.getTableDef(tableName).getColumnsStr().split(",");
 		values = new Object[getTableDef().getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
@@ -110,7 +112,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	 */
 	public ArrayRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
 		super(dataSource, tableName, fieldHelper, null);
-		columnsMap = null;
+		columnNamesMap = null;
+		columnNames = dataSource.getTableDef(tableName).getColumnsStr().split(",");
 		values = new Object[getTableDef().getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
@@ -129,11 +132,12 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	 */
 	public ArrayRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
 		super(dataSource, tableName, fieldHelper, constraintsChecker);
-		columnsMap = null;
+		columnNamesMap = null;
+		columnNames = dataSource.getTableDef(tableName).getColumnsStr().split(",");
 		values = new Object[getTableDef().getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
-	
+
 	/**
 	 * Constructor
 	 * @throws JDOException 
@@ -157,23 +161,45 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	public ArrayRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker, String... columnNames) throws JDOException {
 		this(dataSource, tableName, null, constraintsChecker, columnNames);
 	}
+
+	private static TableDef dynamicTableDef(TableDataSource dataSource, String tableName, String[] columnNames) throws JDOUserException {
+		TableDef baseTDef = dataSource.getTableDef(tableName);
+		if (null==baseTDef)
+			throw new JDOUserException("Could not find any table with name "+tableName);
+		ColumnDef[] columns = baseTDef.filterColumns(columnAliases(columnNames));
+		if (columns==null || columns.length==0)
+			throw new JDOUserException("Could not find any matching columns for {" + String.join(",", columnNames) + "} at table "+tableName+" with columns {" + baseTDef.getColumnsStr() + "}");
+		return new TableDef(tableName, columns);
+	}
 	
 	/**
 	 * Constructor
 	 * @throws JDOException 
 	 */
 	public ArrayRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker, String... columnNames) throws JDOException {
-		super(new TableDef(tableName, dataSource.getTableDef(tableName).filterColumns(columnAliases(columnNames))), fieldHelper, constraintsChecker);
-		columnsMap = new HashMap<String, Integer>(columnNames.length);
+		super(dynamicTableDef(dataSource, tableName, columnNames), fieldHelper, constraintsChecker);
+		this.columnNamesMap = null;
+		this.columnNames = columnNames;
+		values = new Object[columnNames.length];
+		Arrays.fill(values, null);
+	}
+
+	private Map<String, Integer> getColumnsMap() {
+		if (null==columnNamesMap)
+			setColumnsMap();
+		return columnNamesMap;
+	}
+
+
+	private void setColumnsMap() {
+		columnNamesMap = new HashMap<String, Integer>(columnNames.length*3);
 		int pos = 0;
 		for (String columnName : columnNames) {
 			String columnAlias = getColumnAlias(columnName);
 			ColumnDef cdef = getTableDef().getColumnByName(columnAlias);
 			if (cdef==null) throw new JDOUserException("Column "+columnAlias+" not found at "+getTableName());
-			columnsMap.put(cdef.getName(), ++pos);
-		}
-		values = new Object[columnNames.length];
-		Arrays.fill(values, null);
+			columnNamesMap.put(cdef.getName(), ++pos);
+		}			
 	}
 
 	@Override
@@ -181,7 +207,7 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	public Entry<String,Object>[] asEntries() {
 		final int vcount = values.length;
 		SimpleImmutableEntry<String,Object>[] entries = new SimpleImmutableEntry[vcount];
-		for (Entry<String,Integer> e : columnsMap.entrySet())
+		for (Entry<String,Integer> e : getColumnsMap().entrySet())
 			entries[e.getValue()] = new SimpleImmutableEntry<String,Object>(e.getKey(), values[e.getValue()]);
 		return entries;
 	}
@@ -189,7 +215,7 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	@Override
 	public Map<String,Object> asMap() {
 		HashMap<String,Object> retval = new HashMap<>(values.length*2+1);
-		for (Entry<String,Integer> e : columnsMap.entrySet())
+		for (Entry<String,Integer> e : getColumnsMap().entrySet())
 			retval.put(e.getKey(), values[e.getValue()]);
 		return retval;
 	}
@@ -201,7 +227,7 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 			aliases[c] = getColumnAlias(columnNames[c]);
 		return aliases;
 	}
-	
+
 	@Override
 	public Set<String> keySet() {
 		TreeSet<String> keys = new TreeSet<String>();
@@ -211,10 +237,10 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	private int getColumnIndex(String columnName) {
-		if (null==columnsMap)
+		if (null==getColumnsMap())
 			return getTableDef().getColumnIndex(columnName);
 		else
-			return columnsMap.get(columnName);
+			return getColumnsMap().get(columnName);
 	}
 
 	/**
@@ -246,9 +272,9 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	@Override
-	  public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		return (Map<String,String>) super.getMap(sKey);
-	  } // getMap
+	} // getMap
 
 	@Override
 	public Object getValue() throws JDOException {
@@ -294,7 +320,7 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 			}
 		}
 	}
-	
+
 	@Override
 	public int size() {
 		return values.length;
@@ -400,7 +426,7 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 			vals.add(values[n]);
 		return vals;
 	}
-	
+
 	/**
 	 * <p>Set value at internal collection</p>
 	 * @param sKey Column Name
@@ -440,5 +466,5 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
-	
+
 }

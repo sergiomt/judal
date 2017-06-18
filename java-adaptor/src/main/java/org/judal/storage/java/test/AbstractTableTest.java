@@ -420,7 +420,6 @@ public abstract class AbstractTableTest {
 		Integer one = new Integer(1);
 
 		try {
-			
 			createTable1(ds);
 
 			createRecords1(ds);

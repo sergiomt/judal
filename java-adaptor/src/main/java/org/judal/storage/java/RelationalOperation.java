@@ -37,4 +37,20 @@ public class RelationalOperation<R extends Record> extends AbstractRelationalOpe
 		return getTable().fetch(fetchGroup, columnName, valueSearched);
 	}
 
+	@Override
+	public Object fetchAsc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
+			throws JDOException {
+		RecordSet<R> retval = getTable().fetch(fetchGroup, columnName, valueSearched);
+		retval.sort(sortByColumn);
+		return retval;
+	}
+
+	@Override
+	public Object fetchDesc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
+			throws JDOException {
+		RecordSet<R> retval = getTable().fetch(fetchGroup, columnName, valueSearched);
+		retval.sort(sortByColumn);
+		return retval;
+	}
+
 }

@@ -29,4 +29,16 @@ public class TableOperation<R extends Record> extends AbstractTableOperation<R> 
 		return getTable().fetch(fetchGroup, columnName, valueSearched);
 	}
 
+	public RecordSet<R> fetchAsc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn) throws JDOException {
+		RecordSet<R> retval = getTable().fetch(fetchGroup, columnName, valueSearched);
+		retval.sort(sortByColumn);
+		return retval;
+	}
+
+	public RecordSet<R> fetchDesc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn) throws JDOException {
+		RecordSet<R> retval = getTable().fetch(fetchGroup, columnName, valueSearched);
+		retval.sortDesc(sortByColumn);
+		return retval;
+	}
+
 }

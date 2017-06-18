@@ -76,9 +76,15 @@ public abstract class AbstractBucketTest {
 			assertEquals(map1.get("3"),map2.get("3"));
 			assertFalse(bc.load("no valid pk", retrieved));
 			System.out.println("reloaded 3");
+			bc.close();
+			bc = null;
+			System.out.println("closed bucket");
 			ds.truncateBucket(bucketName);
 			System.out.println("truncated bucket");
+			bc = ds.openBucket(bucketName);
 			assertFalse(bc.load(pk, retrieved));
+			bc.close();
+			bc = null;
 			System.out.println("not reloaded");
 		} finally {
 			if (bc!=null) bc.close();

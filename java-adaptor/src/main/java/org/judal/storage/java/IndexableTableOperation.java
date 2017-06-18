@@ -36,4 +36,20 @@ public class IndexableTableOperation<R extends Record> extends AbstractIndexable
 		return getTable().fetch(fetchGroup, columnName, valueSearched);
 	}
 
+	@Override
+	public RecordSet<R> fetchAsc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
+			throws JDOException {
+		RecordSet<R> retval = fetch(fetchGroup, columnName, valueSearched);
+		retval.sort(sortByColumn);
+		return retval;
+	}
+
+	@Override
+	public RecordSet<R> fetchDesc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
+			throws JDOException {
+		RecordSet<R> retval = fetch(fetchGroup, columnName, valueSearched);
+		retval.sortDesc(sortByColumn);
+		return retval;
+	}
+
 }
