@@ -27,8 +27,8 @@ class E13_FetchByNonUniqueIndexUsingOperationWrapper extends Suite {
 		var op : TableOperation[Student] = null
 		using (op) {
 		  op = new TableOperation(s)
-			// Fetch students whose last name is "Kol"
-			val students : Iterable[Student] = op.fetch(s.fetchGroup, "last_name", "Kol")
+			// Fetch students whose last name is "Kol" returning the results sorted by first_name in ascending order
+			val students : Iterable[Student] = op.fetchAsc(s.fetchGroup, "last_name", "Kol", "first_name")
 			for (t <- students) {
 				// Change last name and update record in the database
 				t.setLastName("Col")

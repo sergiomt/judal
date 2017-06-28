@@ -4,13 +4,12 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
+import org.judal.examples.java.model.map.Student;
+import org.judal.examples.java.model.map.StudentCourse;
 import org.judal.storage.EngineFactory;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.relational.RelationalDataSource;
-
-import org.judal.examples.java.model.Student;
-import org.judal.examples.java.model.StudentCourse;
 
 import static org.judal.metadata.JoinType.INNER;
 import static org.judal.metadata.NameAlias.AS;

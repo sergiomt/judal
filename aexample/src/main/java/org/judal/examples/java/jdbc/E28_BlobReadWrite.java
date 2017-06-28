@@ -7,7 +7,7 @@ import static org.junit.Assert.assertArrayEquals;
 import java.io.InputStream;
 
 import org.judal.examples.Resources;
-import org.judal.examples.java.model.Student;
+import org.judal.examples.java.model.map.Student;
 import org.judal.storage.java.TableOperation;
 
 /**

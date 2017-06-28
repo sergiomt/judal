@@ -3,8 +3,7 @@ package org.judal.examples.java.jdbc;
 import java.util.GregorianCalendar;
 
 import org.junit.Test;
-
-import org.judal.examples.java.model.Student;
+import org.judal.examples.java.model.map.Student;
 import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 
@@ -22,8 +21,12 @@ public class E19_FetchFilteringBetweenDates {
 		setUp();
 		
 		try (RelationalQuery<Student> qry = new RelationalQuery<>(Student.class)) {
+			// Fetch students born between 01/01/1980 and 31/12/1989 ordering results from youngest to oldest
 			qry.setResult(new Student().fetchGroup().getMembers());
-			qry.and("date_of_birth", BETWEEN, new GregorianCalendar(1980,00,01), new GregorianCalendar(1989,11,31));
+			qry.and("date_of_birth", BETWEEN,
+					new GregorianCalendar(1980,0,1),
+					new GregorianCalendar(1989,11,31));
+			qry.setOrdering("date_of_birth DESC");
 			RecordSet<Student> s80 = qry.fetch();
 			for (Student s : s80) {
 				int id = s.getId();

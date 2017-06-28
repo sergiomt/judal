@@ -20,11 +20,11 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
 import org.judal.storage.Param;
-import org.judal.examples.java.model.Student;
+import org.judal.examples.java.model.map.Student;
 import org.judal.jdbc.JDBCRelationalDataSource;
 
 /**
- * Example of how to 
+ * Example of how to call a stored procedure which returns a ResultSet
  */
 @RunWith(MockitoJUnitRunner.class)
 public class E27_StoredProcedureReturningResultSet {

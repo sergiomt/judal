@@ -4,10 +4,10 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
+import org.judal.examples.java.model.map.Student;
 import org.judal.storage.EngineFactory;
 import org.judal.storage.relational.RelationalDataSource;
 import org.judal.storage.table.View;
-import org.judal.examples.java.model.Student;
 
 public class E29_IterateOpenResultSet {
 

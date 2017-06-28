@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Types;
 
-import org.judal.examples.java.model.Course;
+import org.judal.examples.java.model.map.Course;
 import org.judal.storage.Param;
 import org.judal.storage.java.IndexableTableOperation;
 import org.judal.storage.java.RelationalOperation;

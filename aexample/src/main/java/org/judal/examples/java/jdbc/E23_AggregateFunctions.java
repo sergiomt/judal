@@ -16,9 +16,9 @@ import static org.judal.storage.query.Operator.LIKE;
 import java.math.BigDecimal;
 import java.util.Date;
 
-import org.judal.examples.java.model.Course;
-import org.judal.examples.java.model.Student;
 import org.judal.examples.java.jdbc.E10_WriteCSVDataIntoTheDatabase;
+import org.judal.examples.java.model.map.Course;
+import org.judal.examples.java.model.map.Student;
 
 public class E23_AggregateFunctions {
 

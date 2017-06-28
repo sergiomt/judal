@@ -1,4 +1,4 @@
-package org.judal.examples.java.model;
+package org.judal.examples.java.model.map;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,7 +13,7 @@ import org.judal.storage.java.MapRecord;
 import org.judal.storage.relational.RelationalDataSource;
 
 /**
- * Extend MapRecord or ArrayRecord in order to create model classes manageable by JUDAL.
+ * Extend MapRecord in order to create model classes manageable by JUDAL.
  * Add your getters and setters for database fields.
  */
 public class Student extends MapRecord {

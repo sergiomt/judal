@@ -6,11 +6,9 @@ import org.judal.storage.EngineFactory;
 import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.impl.SingleStringColumnRecord;
-
+import org.judal.examples.java.model.map.Student;
 import org.judal.jdbc.JDBCDataSource;
 import org.judal.jdbc.metadata.SQLFunctions;
-
-import org.judal.examples.java.model.Student;
 
 /**
  * Use SQL functions in a way which is portable across RDBMS

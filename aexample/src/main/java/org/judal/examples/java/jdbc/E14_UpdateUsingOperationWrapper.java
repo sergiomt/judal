@@ -1,14 +1,13 @@
 package org.judal.examples.java.jdbc;
 
 import org.junit.Test;
+import org.judal.examples.java.model.map.Course;
 import org.judal.storage.Param;
 import org.judal.storage.java.IndexableTableOperation;
 import org.judal.storage.query.Expression;
 
 import java.sql.Date;
 import java.sql.Types;
-
-import org.judal.examples.java.model.Course;
 
 /**
  * Use an IndexableTableOperation to update a set of rows

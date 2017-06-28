@@ -3,10 +3,9 @@ package org.judal.examples.java.jdbc;
 import java.math.BigDecimal;
 
 import org.junit.Test;
-
-import org.judal.examples.java.model.Course;
-import org.judal.examples.java.model.Student;
-import org.judal.examples.java.model.StudentCourse;
+import org.judal.examples.java.model.map.Course;
+import org.judal.examples.java.model.map.Student;
+import org.judal.examples.java.model.map.StudentCourse;
 import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.query.Predicate;
 import org.judal.storage.table.ColumnGroup;

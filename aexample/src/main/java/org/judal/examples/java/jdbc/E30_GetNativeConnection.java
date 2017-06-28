@@ -21,6 +21,9 @@ public class E30_GetNativeConnection {
 		Connection conn = dts.getConnection();		
 		Statement stmt = conn.createStatement();
 		ResultSet rset = stmt.executeQuery("SELECT * FROM student");
+		
+		// ...
+
 		rset.close();
 		stmt.close();
 		conn.close();

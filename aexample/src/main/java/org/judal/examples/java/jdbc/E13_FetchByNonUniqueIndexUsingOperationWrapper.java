@@ -1,9 +1,9 @@
 package org.judal.examples.java.jdbc;
 
 import org.junit.Test;
+import org.judal.examples.java.model.map.Student;
 import org.judal.storage.java.TableOperation;
 import org.judal.storage.table.RecordSet;
-import org.judal.examples.java.model.Student;
 
 /**
  * Use TableOperation wrapper to fetch students whose last name is "Kol"
@@ -21,8 +21,8 @@ public class E13_FetchByNonUniqueIndexUsingOperationWrapper {
 		Student s = new Student();
 		
 		try (TableOperation<Student> op = new TableOperation<>(s)) {
-			// Fetch students whose last name is "Kol"
-			RecordSet<Student> students = op.fetch(s.fetchGroup(), "last_name", "Kol");
+			// Fetch students whose last name is "Kol" returning the results sorted by first_name in ascending order
+			RecordSet<Student> students = op.fetchAsc(s.fetchGroup(), "last_name", "Kol", "first_name");
 			for (Student t : students) {
 				// Change last name and update record in the database
 				t.setLastName("Col");

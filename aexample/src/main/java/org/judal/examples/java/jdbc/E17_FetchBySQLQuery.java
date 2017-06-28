@@ -4,10 +4,14 @@ import org.junit.Test;
 
 import java.util.Calendar;
 
+import org.judal.examples.java.model.map.Student;
+import org.judal.storage.EngineFactory;
 import org.judal.storage.java.RelationalQuery;
+import org.judal.storage.query.AbstractQuery;
+import org.judal.storage.relational.RelationalDataSource;
+import org.judal.storage.relational.RelationalView;
+import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
-
-import org.judal.examples.java.model.Student;
 
 /**
  * Use a SQL WHERE clause as filter of a relational query
@@ -20,6 +24,8 @@ public class E17_FetchBySQLQuery {
 		
 		setUp();
 
+		// ---------------------------------------------------------------
+		
 		// Use implicitly the default RelationalDataSource for the thread.
 		try (RelationalQuery<Student> qry = new RelationalQuery<>(Student.class)) {
 			
@@ -41,6 +47,30 @@ public class E17_FetchBySQLQuery {
 			}
 		}
 
+		// ---------------------------------------------------------------
+		// Another way to do the same
+
+		RelationalDataSource dts = EngineFactory.getDefaultRelationalDataSource();
+		
+		try  (RelationalView viw = dts.openRelationalView(new Student())) {
+			AbstractQuery aqr = viw.newQuery();
+			aqr.setResult("*");
+			aqr.declareParameters("last_name"); // must be called before setFilter()
+			aqr.setFilter("last_name=?");
+			aqr.setOrdering("date_of_birth");
+			RecordSet<? extends Record> kols = aqr.execute("Kol");
+			for (Record r : kols) {
+				Student s = (Student) r;
+				int id = s.getId();
+				String firstName = s.getFirstName();
+				String lastName = s.getLastName();
+				Calendar dob = s.getDateOfBirth();				
+			}
+			
+		}
+
+		// ---------------------------------------------------------------
+		
 		tearDown();
 	}
 

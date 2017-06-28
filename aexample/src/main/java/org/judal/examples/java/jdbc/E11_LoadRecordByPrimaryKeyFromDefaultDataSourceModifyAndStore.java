@@ -3,7 +3,7 @@ package org.judal.examples.java.jdbc;
 import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 
-import org.judal.examples.java.model.Student;
+import org.judal.examples.java.model.map.Student;
 
 /**
  * Load a Student from the database using his primary key to find him

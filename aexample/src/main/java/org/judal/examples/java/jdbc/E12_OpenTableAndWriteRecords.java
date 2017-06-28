@@ -2,7 +2,7 @@ package org.judal.examples.java.jdbc;
 
 import java.text.ParseException;
 
-import org.judal.examples.java.model.Student;
+import org.judal.examples.java.model.map.Student;
 import org.judal.jdbc.JDBCRelationalDataSource;
 import org.judal.storage.table.Table;
 import org.junit.Test;

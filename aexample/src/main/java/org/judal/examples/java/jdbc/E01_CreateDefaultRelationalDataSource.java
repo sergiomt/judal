@@ -63,6 +63,7 @@ public class E01_CreateDefaultRelationalDataSource {
 		properties.put(MAXPOOLSIZE, DEFAULT_MAXPOOLSIZE);
 		properties.put(SCHEMA, "PUBLIC");
 		properties.put(USE_DATABASE_METADATA, DEFAULT_USE_DATABASE_METADATA);
+		properties.put(AUTOCOMMIT, "true");
 
 		return properties;
 	}

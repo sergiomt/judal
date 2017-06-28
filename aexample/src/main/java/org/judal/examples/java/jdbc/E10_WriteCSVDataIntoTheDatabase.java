@@ -19,9 +19,9 @@ import org.judal.storage.table.impl.SingleLongColumnRecord;
 import org.judal.jdbc.JDBCRelationalDataSource;
 
 import org.judal.examples.Resources;
-import org.judal.examples.java.model.Course;
-import org.judal.examples.java.model.Student;
-import org.judal.examples.java.model.StudentCourse;
+import org.judal.examples.java.model.map.Course;
+import org.judal.examples.java.model.map.Student;
+import org.judal.examples.java.model.map.StudentCourse;
 
 /**
  * Insert data from a comma delimited file into the database

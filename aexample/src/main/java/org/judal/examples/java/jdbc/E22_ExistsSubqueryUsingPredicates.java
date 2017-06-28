@@ -12,8 +12,8 @@ import org.judal.storage.query.Predicate;
 import static org.judal.storage.query.Operator.EQ;
 import static org.judal.storage.query.Operator.EXISTS;
 
-import org.judal.examples.java.model.Student;
-import org.judal.examples.java.model.StudentCourse;
+import org.judal.examples.java.model.map.Student;
+import org.judal.examples.java.model.map.StudentCourse;
 
 public class E22_ExistsSubqueryUsingPredicates {
 

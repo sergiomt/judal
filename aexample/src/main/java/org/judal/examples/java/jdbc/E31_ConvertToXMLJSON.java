@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.judal.examples.java.model.Course;
+import org.judal.examples.java.model.map.Course;
 import org.judal.storage.java.RelationalQuery;
 import org.judal.storage.table.RecordSet;
 
