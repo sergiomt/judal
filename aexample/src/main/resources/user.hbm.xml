@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+"-//Hibernate/Hibernate Mapping DTD//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="org.judal.benchmark.java.model.MediumRecordPojo" table="mediumrecord1">
+		<id name="pk" type="int" column="pk">
+			<generator class="assigned"/>
+		</id>
+		<property name="i0" type="int"><column name="i0"/></property>
+		<property name="i1" type="int"><column name="i1"/></property>
+		<property name="i2" type="int"><column name="i2"/></property>
+		<property name="i3" type="int"><column name="i3"/></property>
+		<property name="i4" type="int"><column name="i4"/></property>
+		<property name="i5" type="int"><column name="i5"/></property>
+		<property name="i6" type="int"><column name="i6"/></property>
+		<property name="i7" type="int"><column name="i7"/></property>
+		<property name="i8" type="int"><column name="i8"/></property>
+		<property name="i9" type="int"><column name="i9"/></property>
+		<property name="d0" type="timestamp"><column name="d0"/></property>
+		<property name="d1" type="timestamp"><column name="d1"/></property>
+		<property name="d2" type="timestamp"><column name="d2"/></property>
+		<property name="d3" type="timestamp"><column name="d3"/></property>
+		<property name="d4" type="timestamp"><column name="d4"/></property>
+		<property name="d5" type="timestamp"><column name="d5"/></property>
+		<property name="d6" type="timestamp"><column name="d6"/></property>
+		<property name="d7" type="timestamp"><column name="d7"/></property>
+		<property name="d8" type="timestamp"><column name="d8"/></property>
+		<property name="d9" type="timestamp"><column name="d9"/></property>
+		<property name="v0"><column name="v0"/></property>
+		<property name="v1"><column name="v1"/></property>
+		<property name="v2"><column name="v2"/></property>
+		<property name="v3"><column name="v3"/></property>
+		<property name="v4"><column name="v4"/></property>
+		<property name="v5"><column name="v5"/></property>
+		<property name="v6"><column name="v6"/></property>
+		<property name="v7"><column name="v7"/></property>
+		<property name="v8"><column name="v8"/></property>
+		<property name="v9"><column name="v9"/></property>
+		<property name="v10"><column name="v10"/></property>
+		<property name="v11"><column name="v11"/></property>
+		<property name="v12"><column name="v12"/></property>
+		<property name="v13"><column name="v13"/></property>
+		<property name="v14"><column name="v14"/></property>
+		<property name="v15"><column name="v15"/></property>
+		<property name="v16"><column name="v16"/></property>
+		<property name="v17"><column name="v17"/></property>
+		<property name="v18"><column name="v18"/></property>
+		<property name="v19"><column name="v19"/></property>
+		<property name="v20"><column name="v20"/></property>
+		<property name="v21"><column name="v21"/></property>
+		<property name="v22"><column name="v22"/></property>
+		<property name="v23"><column name="v23"/></property>
+		<property name="v24"><column name="v24"/></property>
+		<property name="v25"><column name="v25"/></property>
+		<property name="v26"><column name="v26"/></property>
+		<property name="v27"><column name="v27"/></property>
+		<property name="v28"><column name="v28"/></property>
+		<property name="v29"><column name="v29"/></property>
+		<property name="v30"><column name="v30"/></property>
+		<property name="v31"><column name="v31"/></property>
+		<property name="v32"><column name="v32"/></property>
+		<property name="v33"><column name="v33"/></property>
+		<property name="v34"><column name="v34"/></property>
+		<property name="v35"><column name="v35"/></property>
+		<property name="v36"><column name="v36"/></property>
+		<property name="v37"><column name="v37"/></property>
+		<property name="v38"><column name="v38"/></property>
+		<property name="v39"><column name="v39"/></property>
+		<property name="v40"><column name="v40"/></property>
+		<property name="v41"><column name="v41"/></property>
+		<property name="v42"><column name="v42"/></property>
+		<property name="v43"><column name="v43"/></property>
+		<property name="v44"><column name="v44"/></property>
+		<property name="v45"><column name="v45"/></property>
+		<property name="v46"><column name="v46"/></property>
+		<property name="v47"><column name="v47"/></property>
+		<property name="v48"><column name="v48"/></property>
+		<property name="v49"><column name="v49"/></property>
+	</class>
+</hibernate-mapping>
