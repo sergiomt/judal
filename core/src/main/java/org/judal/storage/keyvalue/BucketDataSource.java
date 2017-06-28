@@ -17,14 +17,41 @@ import javax.jdo.JDOException;
 
 import org.judal.storage.DataSource;
 
+/**
+ * <p>Interface for data sources providing key-value pairs</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public interface BucketDataSource extends DataSource {
 
+	/**
+	 * <p>Create a container for key-value pairs.</p>
+	 * @param bucketName String Bucket name
+	 * @param options Map&lt;String,Object&gt; with entries defined by the implementation
+	 * @throws JDOException
+	 */
 	void createBucket(String bucketName, Map<String,Object> options) throws JDOException;
 
+	/**
+	 * <p>Get instance of an existing Bucket.</p>
+	 * @param bucketName String
+	 * @return Bucket
+	 * @throws JDOException
+	 */
 	Bucket openBucket(String bucketName) throws JDOException;
 
+	/**
+	 * <p>Drop an existing Bucket.</p>
+	 * @param bucketName String
+	 * @throws JDOException
+	 */
 	void dropBucket(String bucketName) throws JDOException;
 
+	/**
+	 * <p>Remove all key-value pairs contained in a Bucket.</p>
+	 * @param bucketName String
+	 * @throws JDOException
+	 */
 	void truncateBucket(String bucketName) throws JDOException;
 	
 }

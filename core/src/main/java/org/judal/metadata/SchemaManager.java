@@ -16,18 +16,51 @@ import java.io.PrintWriter;
 
 import javax.jdo.JDOException;
 
+/**
+ * Interface for managing schemas from SchemaMetaData
+ * @author Sergio Montoro Ten
+ *
+ */
 public interface SchemaManager {
 
+	/**
+	 * <p>Create schema.</p>
+	 * @param metadata SchemaMetaData
+	 * @return int
+	 * @throws JDOException
+	 */
 	int create(SchemaMetaData metadata) throws JDOException;
 
+	/**
+	 * <p>Update schema.</p>
+	 * @param metadata SchemaMetaData
+	 * @return int
+	 * @throws JDOException
+	 */
 	int update(SchemaMetaData metadata) throws JDOException;
 
+	/**
+	 * <p>Drop schema.</p>
+	 * @param metadata SchemaMetaData
+	 * @return int
+	 * @throws JDOException
+	 */
 	int drop  (SchemaMetaData metadata) throws JDOException;
 
+	/**
+	 * @param printer PrintWriter
+	 * @throws JDOException
+	 */
 	void setLogWriter (PrintWriter printer);
 	
+	/**
+	 * @return boolean
+	 */
 	boolean stopOnError();
 
+	/**
+	 * @param stopOnError boolean
+	 */
 	void stopOnError(boolean stopOnError);
 	
 }

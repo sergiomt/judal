@@ -33,6 +33,11 @@ public class MemberGroupDef extends ExtendableDef implements FetchGroupMetadata 
 	private boolean postLoad;
 	private ArrayList<FieldMetadata> members;
 	
+	/**
+	 * Constructor
+	 * @param groupName String
+	 * @param fieldNames String&hellip;
+	 */
 	public MemberGroupDef(String groupName, String... fieldNames) {
 		name = groupName;
 		if (fieldNames==null) {
@@ -44,43 +49,72 @@ public class MemberGroupDef extends ExtendableDef implements FetchGroupMetadata 
 		}
 	}
 
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 	
+	/**
+	 * @return MemberMetadata[]
+	 */
 	@Override
 	public MemberMetadata[] getMembers() {
 		return members.toArray(new FieldMetadata[members.size()]);
 	}
 
+	/**
+	 * <p>Get number of members.</p>
+	 * @return int
+	 */
 	@Override
 	public int getNumberOfMembers() {
 		return members.size();
 	}
 
+	/**
+	 * @return boolean
+	 */
 	@Override
 	public Boolean getPostLoad() {
 		return postLoad;
 	}
 
+	/**
+	 * <p>Create a new FieldDef and append it to the members of this MemberGroupDef.</p>
+	 * @param fieldName String
+	 * @return FieldDef
+	 */
 	@Override
-	public FieldMetadata newFieldMetadata(String fieldName) {
-		FieldMetadata fieldMeta = new FieldDef();
+	public FieldDef newFieldMetadata(String fieldName) {
+		FieldDef fieldMeta = new FieldDef();
 		fieldMeta.setName(fieldName);
 		members.add(fieldMeta);
 		return fieldMeta;
 	}
 
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public PropertyMetadata newPropertyMetadata(String arg0) {
 		throw new JDOUnsupportedOptionException("newPropertyMetadata");
 	}
 
+	/**
+	 * @param postLoad boolean
+	 * @return MemberGroupDef
+	 */
 	@Override
 	public MemberGroupDef setPostLoad(boolean postLoad) {
 		this.postLoad = postLoad;

@@ -185,7 +185,7 @@ public class SchemaMetaData {
 					b.append("package "+pckg.getName()+" contains tables: ");
 					for (TableDef t : pckg.getClasses())
 						b.append(t.getName()).append(",");
-					b.setLength(b.length()-1);
+					if (b.length()>0) b.setLength(b.length()-1);
 					DebugFile.writeln(b.toString());
 			}
 		}
@@ -391,6 +391,10 @@ public class SchemaMetaData {
 		return procDefs.containsKey(procedureName);
 	}
 
+	/**
+	 * Add trigger.
+	 * @param trigDef TriggerDef
+	 */
 	public void addTrigger(TriggerDef trigDef) {
 		final String key = trigDef.getName().toLowerCase();
 		if (trigDefs.containsKey(key))
@@ -398,20 +402,38 @@ public class SchemaMetaData {
 		trigDefs.put(key, trigDef);
 	}
 
+	/**
+	 * Remove trigger. I no trigger is found with the given name this method does nothing and does not return any error.
+	 * @param triggerName String
+	 */
 	public void removeTrigger(String triggerName) {
 		final String key = triggerName.toLowerCase();
 		if (trigDefs.containsKey(key))
 			trigDefs.remove(key);
 	}
 
+	/**
+	 * Get TriggerDef by name. Lookup is case insensitive.
+	 * @param triggerName String
+	 * @return TriggerDef or <b>nulll</b> if no trigger is found with given name
+	 */
 	public TriggerDef getTrigger(String triggerName) {
 		return trigDefs.get(triggerName.toLowerCase());
 	}
 	
+	/**
+	 * Get whether this SchemaMetadata contains a TriggerDef by the given name. Name lookup is case insensitive.
+	 * @param triggerName String
+	 * @return boolean
+	 */
 	public boolean containsTrigger(String triggerName) {
 		return trigDefs.containsKey(triggerName);
 	}
 
+	/**
+	 * Add or replace Sequence
+	 * @param seqDef SequenceDef
+	 */
 	public void addSequence(SequenceDef seqDef) {
 		final String key = seqDef.getName().toLowerCase();
 		if (seqDefs.containsKey(key))
@@ -419,20 +441,38 @@ public class SchemaMetaData {
 		seqDefs.put(key, seqDef);
 	}
 
+	
+	/**
+	 * Remove sequence. I no sequence is found with the given name this method does nothing and does not return any error.
+	 * @param sequenceName String
+	 */
 	public void removeSequence(String sequenceName) {
 		final String key = sequenceName.toLowerCase();
 		if (seqDefs.containsKey(key))
 			seqDefs.remove(key);
 	}
 
+	/**
+	 * Get SequenceDef by name. Lookup is case insensitive.
+	 * @param sequenceName String
+	 * @return SequenceDef or <b>nulll</b> if no sequence is found with given name
+	 */
 	public SequenceDef getSequence(String sequenceName) {
 		return seqDefs.get(sequenceName.toLowerCase());
 	}
 	
+	/**
+	 * Get whether this SchemaMetadata contains a SequenceDef by the given name. Name lookup is case insensitive.
+	 * @param sequenceName String
+	 * @return boolean
+	 */
 	public boolean containsSequence(String sequenceName) {
 		return seqDefs.containsKey(sequenceName);
 	}
 	
+	/**
+	 * Remove all tables,views, procedures, triggers, sequences and packages
+	 */
 	public void clear() {
 		tbleDefs.clear();
 		viewDefs.clear();
@@ -442,18 +482,34 @@ public class SchemaMetaData {
 		packages.clear();
 	}
 
+	/**
+	 * Get unmodifiable collection of packages in this schema
+	 * @return Collection&lt;ClassPackage&gt;
+	 */
 	public Collection<ClassPackage> packages() {
 		return Collections.unmodifiableCollection(packages);
 	}
 	
+	/**
+	 * Get unmodifiable collection of tables in this schema
+	 * @return Collection&lt;TableDef&gt;
+	 */
 	public Collection<TableDef> tables() {
 		return Collections.unmodifiableCollection(tbleDefs.values());
 	}
 
+	/**
+	 * Get unmodifiable collection of views in this schema
+	 * @return Collection&lt;ViewDef&gt;
+	 */
 	public Collection<ViewDef> views() {
 		return Collections.unmodifiableCollection(viewDefs.values());
 	}
 	
+	/**
+	 * Get unmodifiable collection of indexes in this schema
+	 * @return Collection&lt;IndexDef&gt;
+	 */
 	public Collection<IndexDef> indexes() {
 		LinkedList<IndexDef> allIndexes = new LinkedList<IndexDef>();
 		for (TableDef tdef : tables())
@@ -462,34 +518,62 @@ public class SchemaMetaData {
 		return Collections.unmodifiableCollection(allIndexes);
 	}
 
+	/**
+	 * Get unmodifiable collection of procedures in this schema
+	 * @return Collection&lt;ProcedureDef&gt;
+	 */
 	public Collection<ProcedureDef> procedures() {
 		return Collections.unmodifiableCollection(procDefs.values());
 	}
 
+	/**
+	 * Get unmodifiable collection of triggers in this schema
+	 * @return Collection&lt;TriggerDef&gt;
+	 */
 	public Collection<TriggerDef> triggers() {
 		return Collections.unmodifiableCollection(trigDefs.values());
 	}
 
+	/**
+	 * Get unmodifiable collection of sequences in this schema
+	 * @return Collection&lt;SequenceDef&gt;
+	 */
 	public Collection<SequenceDef> sequences() {
 		return Collections.unmodifiableCollection(seqDefs.values());
 	}
 
+	/**
+	 * @return int
+	 */
 	public int getTablesCount() {
 		return tbleDefs.size();
 	}
 	
+	/**
+	 * Get unmodifiable map of tables in this schema
+	 * @return Map&lt;String,TableDef&gt;
+	 */
 	public Map<String,TableDef> tableMap() {
 		return Collections.unmodifiableMap(tbleDefs);
 	}
 	
+	/**
+	 * @return String catalogName
+	 */
 	public String getCatalog() {
 		return catalogName;
 	}
 
+	/**
+	 * @param name String
+	 */
 	public void setCatalog(String name) {
 		catalogName = name;
 	}
 	
+	/**
+	 * @return String schemaName
+	 */
 	public String getSchema() {
 		return schemaName;
 	}

@@ -40,7 +40,7 @@ public class HBEngine implements Engine<TableDataSource> {
 	public HBTableDataSource getDataSource(Map<String, String> properties) throws JDOException {
 		SchemaMetaData metadata;
 		try {
-			String metadataFilePath = Env.getString(properties, DataSource.METADATA, "metadata.xml");
+			String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
 			String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
 			if (metadataPackage.length()>0) {
 				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);

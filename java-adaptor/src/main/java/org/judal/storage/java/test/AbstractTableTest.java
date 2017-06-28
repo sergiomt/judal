@@ -181,16 +181,23 @@ public abstract class AbstractTableTest {
 
 		TableDataSource ds = getTableDataSource();
 
+		assertNotNull(ds);
+
 		ArrayRecord1.dataSource = ds;
 		ArrayRecord2.dataSource = ds;
 		MapRecord1.dataSource = ds;
 		MapRecord2.dataSource = ds;
+
 		boolean created = false;
 		
 		try {
 			createTable1(ds);
 			created = true;
 			TestRecord1 rec = recordClass1.newInstance();
+			assertEquals(7, rec.getTableDef().getNumberOfColumns());
+			
+			assertEquals(7, rec.getTableDef().getColumnsStr().split(",").length);
+			assertNotNull(rec.getTableDef().getColumnByName("id"));
 			rec.put("id", new Integer(1));
 			rec.put("created", new Timestamp(System.currentTimeMillis()));
 			rec.put("name", "John Smith");

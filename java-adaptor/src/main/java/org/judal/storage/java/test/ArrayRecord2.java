@@ -37,6 +37,11 @@ public class ArrayRecord2 extends ArrayRecord implements TestRecord2 {
 	}
 
 	@Override
+	public TableDef getTableDef() {
+		return ArrayRecord2.getTableDef(dataSource);
+	}
+	
+	@Override
 	public Date getCreated() {
 		return getDate("created");
 	}

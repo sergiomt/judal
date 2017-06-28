@@ -13,8 +13,21 @@ package org.judal.storage;
 
 import javax.jdo.JDOException;
 
+/**
+ * <p>Interface for foreign key checkers.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public interface ForeignKeyChecker {
 
+	/**
+	 * <p>Check whether a value exists in a foreign table.</p>
+	 * @param tableName String Foreign table name
+	 * @param columnName String Foreign column Name
+	 * @param columnValue Object Foreign column value
+	 * @return boolean
+	 * @throws JDOException
+	 */
 	boolean exists(String tableName, String columnName, Object columnValue) throws JDOException;
 
 }

@@ -39,6 +39,7 @@ import java.util.TreeSet;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.serialization.BytesConverter;
 import org.judal.storage.ConstraintsChecker;
@@ -84,28 +85,28 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	/**
 	 * Constructor
 	 */
-	public MapRecord(TableDef tableDefinition) {
+	public MapRecord(ViewDef tableDefinition) {
 		this(tableDefinition,null,null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public MapRecord(TableDef tableDefinition, FieldHelper fieldHelper) {
+	public MapRecord(ViewDef tableDefinition, FieldHelper fieldHelper) {
 		this(tableDefinition, fieldHelper, null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public MapRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
+	public MapRecord(ViewDef tableDefinition, ConstraintsChecker constraintsChecker) {
 		this(tableDefinition, null, constraintsChecker);
 	}
 	
 	/**
 	 * Constructor
 	 */
-	public MapRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
+	public MapRecord(ViewDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
 		super(tableDefinition, fieldHelper, constraintsChecker);
 		values = new CaseInsensitiveValuesMap();
 		columnIndexes = new HashMap<Integer, String>();
@@ -119,7 +120,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		this(dataSource.getTableDef(tableName));		
+		this(dataSource.getTableOrViewDef(tableName));		
 	}
 
 	/**
@@ -127,7 +128,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
-		this(dataSource.getTableDef(tableName), fieldHelper);
+		this(dataSource.getTableOrViewDef(tableName), fieldHelper);
 	}
 
 	/**
@@ -143,7 +144,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
-		this(dataSource.getTableDef(tableName), fieldHelper, constraintsChecker);
+		this(dataSource.getTableOrViewDef(tableName), fieldHelper, constraintsChecker);
 	}
 	
 	/**
@@ -175,7 +176,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker, String... columnNames) throws JDOException {
-		super(new TableDef(tableName, dataSource.getTableDef(tableName).filterColumns(columnAliases(columnNames))), fieldHelper, constraintsChecker);
+		super(new TableDef(tableName, dataSource.getTableOrViewDef(tableName).filterColumns(columnAliases(columnNames))), fieldHelper, constraintsChecker);
 		values = new CaseInsensitiveValuesMap();
 		columnIndexes = new HashMap<Integer, String>();
 		int c = 0;
@@ -211,10 +212,10 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	}
 	
 	@Override
-	public Object put(int colpos, Object value) throws IllegalArgumentException {
+	public Object put(int colpos, Object value) throws ArrayIndexOutOfBoundsException {
 		final String columnName = columnIndexes.get(colpos);
 		if (null==columnName)
-				throw new IllegalArgumentException("Cannot find column at position " + String.valueOf(colpos)+" of "+String.valueOf(columnIndexes.size())+" columns");
+				throw new ArrayIndexOutOfBoundsException("Cannot find column at position " + String.valueOf(colpos)+" of "+String.valueOf(columnIndexes.size())+" columns");
 		return values.put(columnName, value);
 	}
 

@@ -14,15 +14,8 @@ package org.judal.storage.table.impl;
 import java.io.IOException;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-
-import javax.jdo.Extent;
-import javax.jdo.FetchPlan;
-import javax.jdo.JDOException;
-import javax.jdo.PersistenceManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,18 +35,28 @@ import org.judal.storage.table.comparators.RecordColumnValueComparatorDesc;
 * <p>An array representing data read from a database table or view.</p>
 * ArrayListRecordSet object is used for reading a collection of registers from the database and keep them in memory for immediate access.
 * @author Sergio Montoro Ten
+* @version 1.0
+* @param &lt;R extends Record&gt;
 */
-
 public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implements RecordSet<R> {
 
 	private static final long serialVersionUID = 10000L;
 
 	private Class<R> candidateClass;
 
+	/**
+	 * <p>Construct ArrayListRecordSet for Records of class R and initial capacity for 10 results.</p>
+	 * @param candidateClass Class&lt;R&gt;
+	 */
 	public ArrayListRecordSet(Class<R> candidateClass) {
 		this.candidateClass = candidateClass;
 	}
 
+	/**
+	 * <p>Construct ArrayListRecordSet for Records of class R and initial capacity for 10 results.</p>
+	 * @param candidateClass Class&lt;R&gt;
+	 * @param capacity int Initial capacity to be allocated for results
+	 */
 	public ArrayListRecordSet(Class<R> candidateClass, int capacity) {
 		this.candidateClass = candidateClass;
 		if (capacity>0)
@@ -63,10 +66,20 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 				ensureCapacity(capacity>16384 ? 16384 : capacity);
 	}
 
+	/**
+	 * <p>Construct ArrayListRecordSet for Records of class R and initial capacity for 10 results.</p>
+	 * @param candidateClass Class&lt;R&gt;
+	 * @param capacity Integer Initial capacity to be allocated for results
+	 */
 	public ArrayListRecordSet(Class<R> candidateClass, Integer capacity) {
 		this(candidateClass, capacity.intValue());
 	}
 
+	/**
+	 * <p>Get sublist of results that match a given predicate.</p>
+	 * @param predicate Object Instance of a class containing a public method {@code boolean test(R)}
+	 * @return List&lt;R&gt;
+	 */
 	@Override
 	public List<R> filter(final Object predicate) {
 		LinkedList<R> filtered = new LinkedList<R> ();
@@ -81,6 +94,12 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 		return filtered;
 	}
 
+	/**
+	 * <p>Find first result in this RecordSet which columnName contains the given value.</p>
+	 * @param columnName String Column Name
+	 * @param value Object value May be null but do not use Scala Option instances as input value here.
+	 * @return R or <b>null</b> if no Record is found matching the search criteria
+	 */
 	@Override
 	public R findFirst(String columnName, Object value) {
 		if (value==null) {
@@ -95,17 +114,31 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 		return null;
 	}
 
+	/**
+	 * <p>Sort in ascending order on columnName
+	 * @param columnName String
+	 * @see org.judal.storage.table.comparators.RecordColumnValueComparatorAsc
+	 */
 	@Override
 	public void sort(String columnName) {
 		sort(new RecordColumnValueComparatorAsc(columnName));
 		
 	}
 
+	/**
+	 * <p>Sort in descending order on columnName
+	 * @param columnName String
+	 * @see org.judal.storage.table.comparators.RecordColumnValueComparatorDesc
+	 */
 	@Override
 	public void sortDesc(String columnName) throws ArrayIndexOutOfBoundsException {
 		sort(new RecordColumnValueComparatorDesc(columnName));		
 	}
 
+	/**
+	 * <p>Append another RecordSet to this one.</p>
+	 * @param otherRecordSet RecordSet&lt;R&gt;
+	 */
 	@Override
 	public void addAll(RecordSet<R> otherRecordSet) {
 		final int newRecCount = otherRecordSet.size();
@@ -114,13 +147,18 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 			add(rec);
 	}
 
+	/**
+	 * <p>Get representation of this RecordSet as a JSON array.</p>
+	 * @return String
+	 * @throws IOException
+	 */
 	@Override
 	public String toJSON() throws IOException {
 		StringBuilder output = new StringBuilder();
 		output.append("[");
 		for (Record r : this)
 			output.append(r.toJSON()).append(",");
-		output.setLength(output.length()-1);
+		if (output.length()>1) output.setLength(output.length()-1);
 		output.append("]");
 		return output.toString();
 	}
@@ -151,6 +189,9 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 		}
 	}
 
+	/**
+	 * @return Class&lt;R&gt;
+	 */
 	@Override
 	public Class<R> getCandidateClass() {
 		return candidateClass;

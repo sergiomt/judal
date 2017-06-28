@@ -25,6 +25,11 @@ import com.knowgate.debug.DebugFile;
  */
 import com.knowgate.typeutils.ObjectFactory;;
 
+/**
+* Factory of metadata objects.
+* @author Sergio Montoro Ten
+* @version 1.0
+*/
 public class MetadataObjectFactory extends ObjectFactory {
 	
 	/**
@@ -58,7 +63,7 @@ public class MetadataObjectFactory extends ObjectFactory {
 
 	/**
 	 * <p>Find a suitable constructor using reflection and create an instance of a subclass of ViewDef</p>
-	 * @param tableDefSubclass Subclass of org.judal.metadata.ViewDef
+	 * @param viewDefSubclass Subclass of org.judal.metadata.ViewDef
 	 * @param constructorParameters Parameters for the constructor
 	 * @return T extends ViewDef
 	 * @throws NoSuchMethodException
@@ -87,7 +92,7 @@ public class MetadataObjectFactory extends ObjectFactory {
 
 	/**
 	 * <p>Find a suitable constructor using reflection and create an instance of a subclass of ProcedureDef</p>
-	 * @param tableDefSubclass Subclass of org.judal.metadata.ProcedureDef
+	 * @param procedureDefSubclass Subclass of org.judal.metadata.ProcedureDef
 	 * @param constructorParameters Parameters for the constructor
 	 * @return T extends ProcedureDef
 	 * @throws NoSuchMethodException
@@ -116,7 +121,7 @@ public class MetadataObjectFactory extends ObjectFactory {
 
 	/**
 	 * <p>Find a suitable constructor using reflection and create an instance of a subclass of TriggerDef</p>
-	 * @param tableDefSubclass Subclass of org.judal.metadata.TriggerDef
+	 * @param triggerDefSubclass Subclass of org.judal.metadata.TriggerDef
 	 * @param constructorParameters Parameters for the constructor
 	 * @return T extends TriggerDef
 	 * @throws NoSuchMethodException
@@ -145,7 +150,7 @@ public class MetadataObjectFactory extends ObjectFactory {
 
 	/**
 	 * <p>Find a suitable constructor using reflection and create an instance of a subclass of SequenceDef</p>
-	 * @param tableDefSubclass Subclass of org.judal.metadata.SequenceDef
+	 * @param sequenceDefSubclass Subclass of org.judal.metadata.SequenceDef
 	 * @param constructorParameters Parameters for the constructor
 	 * @return T extends SequenceDef
 	 * @throws NoSuchMethodException

@@ -97,9 +97,9 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 			} catch (SQLException notimplemented) { }
 			SQLTableDef tblDef = new SQLTableDef(getDatabaseProductId(), catalog, schema, bucketName);
 			SQLColumn keycolumn = new SQLColumn(bucketName, keyfield, (short) Types.VARCHAR, "VARCHAR", 255, 0, DatabaseMetaData.columnNoNulls, 1);
-			SQLColumn valcolumn = new SQLColumn(bucketName, valfield, (short) Types.LONGVARBINARY, "LONGVARBINARY", 2147483647, 0, DatabaseMetaData.columnNullable, 2);
 			keycolumn.setPrimaryKey(true);
-			tblDef.addColumnMetadata(keycolumn);
+			tblDef.addPrimaryKeyColumn("", keycolumn.getName(), Types.VARCHAR, 255);
+			SQLColumn valcolumn = new SQLColumn(bucketName, valfield, (short) Types.LONGVARBINARY, "LONGVARBINARY", 2147483647, 0, DatabaseMetaData.columnNullable, 2);
 			tblDef.addColumnMetadata(valcolumn);
 			execute(tblDef.getSource());		
 			addTableToCache(tblDef);

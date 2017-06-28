@@ -1,6 +1,7 @@
 package org.judal.storage;
 
 /**
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -50,7 +51,7 @@ public class StorageObjectFactory extends ObjectFactory {
 	
 	/**
 	 * <p>Create instance of a class that implements Stored interface.</p>
-	 * @param recordConstructor Constructor&lt;R extends Stored&gt;
+	 * @param storedConstructor Constructor&lt;R extends Stored&gt;
 	 * @param constructorParameters Object[] Parameters for the given constructor
 	 * @return R extends Stored
 	 * @throws NoSuchMethodException If constructor parameter classes do not match the classes of constructorParameters
@@ -96,7 +97,7 @@ public class StorageObjectFactory extends ObjectFactory {
 
 	/**
 	 * <p>Create instance of a class that implements Stored interface.</p>
-	 * @param recordClass Class&lt;R extends Stored&gt;
+	 * @param storedClass Class&lt;R extends Stored&gt;
 	 * @param constructorParameters Object[] Parameters for the class constructor
 	 * @return R extends Stored
 	 * @throws NoSuchMethodException If no constructor was found allowing the given parameters

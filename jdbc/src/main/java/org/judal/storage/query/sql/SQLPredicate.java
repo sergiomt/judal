@@ -30,7 +30,7 @@ public class SQLPredicate extends Predicate {
 			if (constructorParameters!=null)
 				for (Object o : constructorParameters)
 					paramValues.append(o==null ? "null" : o.toString()).append(",");
-			paramValues.setLength(paramValues.length()-1);
+			if (paramValues.length()>0) paramValues.setLength(paramValues.length()-1);
 			DebugFile.writeln("Begin SQLPredicate.add(" + paramValues.toString() + ")");
 			DebugFile.incIdent();
 		}

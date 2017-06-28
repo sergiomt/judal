@@ -29,10 +29,17 @@ public class ClassPackage extends ExtendableDef {
 
 	private String name; 
 	
+	/**
+	 * <p>Create an unnamed package.</p>
+	 */
 	public ClassPackage() {
 		classes = new LinkedHashMap<String, TableDef>();
 	}
 
+	/**
+	 * <p>Create a package with the given name.</p>
+	 * @param packageName String
+	 */
 	public ClassPackage(String packageName) {
 		classes = new LinkedHashMap<String, TableDef>();
 		name = packageName;
@@ -46,7 +53,7 @@ public class ClassPackage extends ExtendableDef {
 	}
 
 	/**
-	 * @param String Package name
+	 * @param name String Package name
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -54,7 +61,7 @@ public class ClassPackage extends ExtendableDef {
 
 	/**
 	 * <p>Add TableDef to this package.</p>
-	 * @param TableDef
+	 * @param tableDef TableDef
 	 */
 	public void addClass(TableDef tableDef) {
 		classes.put(tableDef.getName().toLowerCase(), tableDef);
@@ -62,14 +69,14 @@ public class ClassPackage extends ExtendableDef {
 	
 	/**
 	 * <p>Remove TableDef from this package.</p>
-	 * @param String
+	 * @param className String
 	 */
 	public void removeClass(String className) {
 		classes.remove(className.toLowerCase());
 	}
 
 	/**
-	 * @param String
+	 * @param className String Fully qualified class name
 	 * @return boolean
 	 */
 	public boolean containsClass(String className) {

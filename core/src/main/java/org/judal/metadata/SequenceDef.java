@@ -32,60 +32,98 @@ public class SequenceDef extends ExtendableDef implements SequenceMetadata {
 	private String name;
 	private SequenceStrategy strategy;
 	
+	/**
+	 * @return Integer
+	 */
 	@Override
 	public Integer getAllocationSize() {
 		return allocationSize;
 	}
 
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getDatastoreSequence() {
 		return datastoreSequence;
 	}
 
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getFactoryClass() {
 		return factoryClass;
 	}
 
+	/**
+	 * @return Integer
+	 */
 	@Override
 	public Integer getInitialValue() {
 		return initialValue;
 	}
 
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * @return SequenceStrategy
+	 */
 	@Override
 	public SequenceStrategy getSequenceStrategy() {
 		return strategy;
 	}
 
+	/**
+	 * @param size int
+	 * @return SequenceMetadata <b>this</b>
+	 */
 	@Override
 	public SequenceMetadata setAllocationSize(int size) {
 		allocationSize = new Integer(size);
 		return this;
 	}
 
+	/**
+	 * @param name String
+	 * @return SequenceMetadata <b>this</b>
+	 */
 	@Override
 	public SequenceMetadata setDatastoreSequence(String name) {
 		datastoreSequence = name;
 		return this;
 	}
 
+	/**
+	 * @param className String Fully qualified class name
+	 * @return SequenceMetadata <b>this</b>
+	 */
 	@Override
 	public SequenceMetadata setFactoryClass(String className) {
 		factoryClass = className;
 		return this;
 	}
 
+	/**
+	 * @param initial int
+	 * @return SequenceMetadata <b>this</b>
+	 */
 	@Override
 	public SequenceMetadata setInitialValue(int initial) {
 		initialValue = new Integer(initial);
 		return this;
 	}
 
+	/**
+	 * <p>This method is not implemented and always throws a JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	public String source() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("source() must be implemented by a subclass specific for a data source implementation");
 	}

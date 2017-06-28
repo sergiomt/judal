@@ -13,7 +13,6 @@ package org.judal.metadata;
  */
 
 import java.util.Collection;
-import java.util.regex.Pattern;
 
 import javax.jdo.JDOUserException;
 
@@ -22,7 +21,7 @@ import com.knowgate.debug.DebugFile;
 /**
  * View metadata
  * @author Sergio Montoro Ten
- *
+ * @version 1.0
  */
 public class ViewDef extends TypeDef {
 
@@ -31,11 +30,13 @@ public class ViewDef extends TypeDef {
 	private Class recordClass;
 	private String recordClassName;
 	private String alias;
-
-	private static Pattern quotedAliased = Pattern.compile("(\".+\") +(.)", Pattern.CASE_INSENSITIVE);
-	private static Pattern unquotedAliased = Pattern.compile("(.+) +(.+)", Pattern.CASE_INSENSITIVE);
-	private static Pattern quotedUnAliased = Pattern.compile("\".+\"", Pattern.CASE_INSENSITIVE);
 	
+	/**
+	 * <p>Create ViewDef.</p>
+	 * @param aliasedName String View names can be aliased.
+	 * Aliased names have the form <i>name</i>.<i>alias</i> or <i>name</i> AS <i>alias</i> where both <i>name</i> and/or <i>alias</i> can be enclosed in double quotes.
+	 * @throws JDOUserException
+	 */
 	public ViewDef(String aliasedName) throws JDOUserException {
 		recordClass = null;
 		recordClassName = null;
@@ -44,18 +45,36 @@ public class ViewDef extends TypeDef {
 		setAlias(nameAndAlias.getAlias());
 	}
 
+	/**
+	 * <p>Create ViewDef and add columns.</p>
+	 * @param aliasedName String View names can be aliased.
+	 * @param columnDefs ColumnDef&hellip;
+	 * Aliased names have the form <i>name</i>.<i>alias</i> or <i>name</i> AS <i>alias</i> where both <i>name</i> and/or <i>alias</i> can be enclosed in double quotes.
+	 * @throws JDOUserException
+	 */
 	public ViewDef(String aliasedName, ColumnDef... columnDefs) {
 		this(aliasedName);
 		for (ColumnDef c : columnDefs)
 			addColumnMetadata(c);
 	}
 
+	/**
+	 * <p>Create ViewDef and add columns.</p>
+	 * @param aliasedName String View names can be aliased.
+	 * @param columnDefs Collection&lt;ColumnDef&gt;
+	 * Aliased names have the form <i>name</i>.<i>alias</i> or <i>name</i> AS <i>alias</i> where both <i>name</i> and/or <i>alias</i> can be enclosed in double quotes.
+	 * @throws JDOUserException
+	 */
 	public ViewDef(String aliasedName, Collection<ColumnDef> columnDefs) {
 		this(aliasedName);
 		for (ColumnDef c : columnDefs)
 			addColumnMetadata(c);
 	}
 	
+	/**
+	 * <p>Create ViewDef by cloning another ViewDef.</p>
+	 * @param source ViewDef
+	 */
 	public ViewDef(ViewDef source) {
 		super(source);
 		alias = source.alias;
@@ -63,11 +82,19 @@ public class ViewDef extends TypeDef {
 		recordClassName  = source.recordClassName;		
 	}
 
+	/**
+	 * @return ViewDef
+	 */
 	@Override
 	public ViewDef clone() {
 		return new ViewDef(this);
 	}
 	
+	/**
+	 * <p>Set alias.</p>
+	 * @param alias String
+	 * @return ViewDef <b>this</b>
+	 */
 	public ViewDef setAlias(String alias) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -75,10 +102,21 @@ public class ViewDef extends TypeDef {
 		return this;
 	}
 
+	/**
+	 * <p>Get view alias or view name if this view is not aliased.</p>
+	 * @return String
+	 */
 	public String getAlias() {
 		return alias==null ? getName() : alias;
 	}
 
+	/**
+	 * <p>Set the class of Record object that must be used to iterate this View.</p>
+	 * This method will only effectively set the class if it can be loaded by calling Class.forName()
+	 * else the record class will be set to <b>null</b>.
+	 * @param className String Fully qualified class name
+	 * @return ViewDef <b>this</b>
+	 */
 	public ViewDef setRecordClassName(String className) {
 		recordClassName = className;
 		try {
@@ -89,15 +127,29 @@ public class ViewDef extends TypeDef {
 		return this;
 	}
 
+	/**
+	 * @return String
+	 */
 	public String getRecordClassName() {
 		return recordClassName;
 	}
 
+    /**
+	 * <p>Set the class of Record object that must be used to iterate this View.</p>
+     * @param classRecord Class
+	 * @return ViewDef <b>this</b>
+     */
+	@SuppressWarnings("rawtypes")
 	public ViewDef setRecordClass(Class classRecord) {
 		recordClass = classRecord;
 		return this;
 	}
 
+	/**
+	 * @return Class
+	 * @throws ClassNotFoundException if the class of Record set cannot be loaded by mean of calling Class.forName()
+	 */
+	@SuppressWarnings("rawtypes")
 	public Class getRecordClass() throws ClassNotFoundException {
 		if (recordClass==null && recordClassName!=null)
 			recordClass = Class.forName(recordClassName);
@@ -106,6 +158,16 @@ public class ViewDef extends TypeDef {
 		return recordClass;
 	}
 	
+	/**
+	 * <p>Add column to this ViewDef</p>
+	 * @param columnFamilyName String. Optional.
+	 * @param columnName String
+	 * @param columnType int one of java.sql.Types
+	 * @param maxLength int
+	 * @param isNullable boolean
+	 * @param indexType NonUniqueIndexDef.Type
+	 * @throws JDOUserException if this ViewDef is unmodifiable 
+	 */
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int maxLength, boolean isNullable, NonUniqueIndexDef.Type indexType) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -114,6 +176,15 @@ public class ViewDef extends TypeDef {
 		addColumnMetadata(columnFamilyName, columnName, columnType, maxLength, 0, isNullable, indexType, null, null);
 	}
 
+	/**
+	 * <p>Add column to this ViewDef</p>
+	 * @param columnFamilyName String. Optional.
+	 * @param columnName String
+	 * @param columnType int one of java.sql.Types
+	 * @param maxLength int
+	 * @param isNullable boolean
+	 * @throws JDOUserException if this ViewDef is unmodifiable 
+	 */
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int maxLength, boolean isNullable) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -122,6 +193,16 @@ public class ViewDef extends TypeDef {
 		addColumnMetadata(columnFamilyName, columnName, columnType, maxLength, 0, isNullable, null, null, null);
 	}
 
+	/**
+	 * <p>Add column to this ViewDef</p>
+	 * @param columnFamilyName String. Optional.
+	 * @param columnName String
+	 * @param columnType int one of java.sql.Types
+	 * @param precision int
+	 * @param decimalDigits int
+	 * @param isNullable boolean
+	 * @throws JDOUserException if this ViewDef is unmodifiable 
+	 */
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int precision, int decimalDigits, boolean isNullable) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -130,6 +211,15 @@ public class ViewDef extends TypeDef {
 		addColumnMetadata(columnFamilyName, columnName, columnType, precision, decimalDigits, isNullable, null, null, null);
 	}
 	
+	/**
+	 * <p>Add column to this ViewDef</p>
+	 * @param columnFamilyName String. Optional.
+	 * @param columnName String
+	 * @param columnType int one of java.sql.Types
+	 * @param isNullable boolean
+	 * @param indexType NonUniqueIndexDef.Type
+	 * @throws JDOUserException if this ViewDef is unmodifiable 
+	 */
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, boolean isNullable, NonUniqueIndexDef.Type indexType) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -138,6 +228,14 @@ public class ViewDef extends TypeDef {
 		addColumnMetadata(columnFamilyName, columnName, columnType, ColumnDef.getDefaultPrecision(columnType), 0, isNullable, indexType, null, null);
 	}
 	
+	/**
+	 * <p>Add column to this ViewDef</p>
+	 * @param columnFamilyName String. Optional.
+	 * @param columnName String
+	 * @param columnType int one of java.sql.Types
+	 * @param isNullable boolean
+	 * @throws JDOUserException if this ViewDef is unmodifiable 
+	 */
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, boolean isNullable) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");

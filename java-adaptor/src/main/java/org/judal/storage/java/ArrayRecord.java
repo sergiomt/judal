@@ -41,6 +41,7 @@ import javax.jdo.JDOUserException;
 
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 import org.judal.serialization.BytesConverter;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.FieldHelper;
@@ -65,32 +66,32 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	/**
 	 * Constructor
 	 */
-	public ArrayRecord(TableDef tableDefinition) {
+	public ArrayRecord(ViewDef tableDefinition) {
 		this(tableDefinition, null, null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ArrayRecord(TableDef tableDefinition, FieldHelper fieldHelper) {
+	public ArrayRecord(ViewDef tableDefinition, FieldHelper fieldHelper) {
 		this(tableDefinition, fieldHelper, null);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ArrayRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
+	public ArrayRecord(ViewDef tableDefinition, ConstraintsChecker constraintsChecker) {
 		this(tableDefinition, null, constraintsChecker);
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ArrayRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
+	public ArrayRecord(ViewDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
 		super(tableDefinition, fieldHelper, constraintsChecker);
 		columnNamesMap = null;
 		columnNames = tableDefinition.getColumnsStr().split(",");
-		values = new Object[getTableDef().getNumberOfColumns()];
+		values = new Object[tableDefinition.getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
 
@@ -101,8 +102,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	public ArrayRecord(TableDataSource dataSource, String tableName) throws JDOException {
 		super(dataSource, tableName, null, null);
 		columnNamesMap = null;
-		columnNames = dataSource.getTableDef(tableName).getColumnsStr().split(",");
-		values = new Object[getTableDef().getNumberOfColumns()];
+		columnNames = dataSource.getTableOrViewDef(tableName).getColumnsStr().split(",");
+		values = new Object[dataSource.getTableOrViewDef(tableName).getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
 
@@ -113,8 +114,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	public ArrayRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
 		super(dataSource, tableName, fieldHelper, null);
 		columnNamesMap = null;
-		columnNames = dataSource.getTableDef(tableName).getColumnsStr().split(",");
-		values = new Object[getTableDef().getNumberOfColumns()];
+		columnNames = dataSource.getTableOrViewDef(tableName).getColumnsStr().split(",");
+		values = new Object[dataSource.getTableOrViewDef(tableName).getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
 
@@ -133,8 +134,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	public ArrayRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
 		super(dataSource, tableName, fieldHelper, constraintsChecker);
 		columnNamesMap = null;
-		columnNames = dataSource.getTableDef(tableName).getColumnsStr().split(",");
-		values = new Object[getTableDef().getNumberOfColumns()];
+		columnNames = dataSource.getTableOrViewDef(tableName).getColumnsStr().split(",");
+		values = new Object[dataSource.getTableOrViewDef(tableName).getNumberOfColumns()];
 		Arrays.fill(values, null);
 	}
 
@@ -163,7 +164,7 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	private static TableDef dynamicTableDef(TableDataSource dataSource, String tableName, String[] columnNames) throws JDOUserException {
-		TableDef baseTDef = dataSource.getTableDef(tableName);
+		ViewDef baseTDef = dataSource.getTableOrViewDef(tableName);
 		if (null==baseTDef)
 			throw new JDOUserException("Could not find any table with name "+tableName);
 		ColumnDef[] columns = baseTDef.filterColumns(columnAliases(columnNames));
@@ -194,7 +195,11 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	private void setColumnsMap() {
 		columnNamesMap = new HashMap<String, Integer>(columnNames.length*3);
 		int pos = 0;
+		if (columnNames==null || columnNames.length==0)
+			columnNames = getTableDef().getColumnsStr().split(",");
 		for (String columnName : columnNames) {
+			if (columnName==null || columnName.trim().length()==0)
+				throw new JDOUserException("Expected Column name but got "+(columnName==null ? "null" : "empty string")+" from columns list {" + String.join(",", columnNames) + "}");
 			String columnAlias = getColumnAlias(columnName);
 			ColumnDef cdef = getTableDef().getColumnByName(columnAlias);
 			if (cdef==null) throw new JDOUserException("Column "+columnAlias+" not found at "+getTableName());
@@ -237,6 +242,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	private int getColumnIndex(String columnName) {
+		if (columnName==null || columnName.length()==0)
+			throw new JDOUserException("ArrayRecord.getColumnIndex() column name cannot be "+(columnName==null ? "null" : "empty"));
 		if (null==getColumnsMap())
 			return getTableDef().getColumnIndex(columnName);
 		else
@@ -436,8 +443,8 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 	@Override
 	public Object put(String sKey, Object oObj) {
 
-		if (sKey==null)
-			throw new NullPointerException("ArrayRecord.put(String,Object) field name cannot be null");
+		if (sKey==null || sKey.length()==0)
+			throw new NullPointerException("ArrayRecord.put(String,Object) field name cannot be " + (sKey==null ? "null" : "empty"));
 
 		int index = getColumnIndex(sKey) - 1;
 		if (index<0)

@@ -7,6 +7,7 @@ import java.util.Properties;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
+import javax.jdo.JDOUserException;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -19,6 +20,7 @@ import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
@@ -185,6 +187,20 @@ public class DBTableDataSource extends DBDataSource implements TableDataSource {
 	
 	@Override
 	public TableDef getTableDef(String tableName) throws JDOException {
+		return oSmd.getTable(tableName);
+	}
+
+	// --------------------------------------------------------------------------
+	
+	@Override
+	public ViewDef getViewDef(String viewName) throws JDOException {
+		throw new JDOUserException("DBTableDataSource.getViewDef() Berkeley DB does not support views");
+	}
+
+	// --------------------------------------------------------------------------
+	
+	@Override
+	public TableDef getTableOrViewDef(String tableName) throws JDOException {
 		return oSmd.getTable(tableName);
 	}
 

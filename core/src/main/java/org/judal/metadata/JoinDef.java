@@ -199,7 +199,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 
 	/**
 	 * Set name of column used to join the foreign table
-	 * @param String Name of the column in the foreign table
+	 * @param columnName String Name of the column in the foreign table
 	 * @return JoinDef <b>this</b> object
 	 */
 	@Override
@@ -210,7 +210,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 
 	/**
 	 * Add a new column to the list of columns used to join the foreign table
-	 * @param String Name of the column in the foreign table
+	 * @param columnName String Name of the column in the foreign table
 	 * @return JoinDef <b>this</b> object
 	 */
 	public JoinDef addColumn(String columnName) {
@@ -220,7 +220,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	}
 	
 	/**
-	 * @param ForeignKeyAction
+	 * @param action ForeignKeyAction
 	 * @return JoinDef <b>this</b> object
 	 */
 	@Override
@@ -230,7 +230,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	}
 
 	/**
-	 * @param Indexed
+	 * @param indexed Indexed
 	 * @return JoinDef <b>this</b> object
 	 */
 	@Override
@@ -240,7 +240,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	}
 
 	/**
-	 * @param boolean
+	 * @param outer boolean
 	 * @return JoinDef <b>this</b> object
 	 */
 	@Override
@@ -253,7 +253,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	}
 
 	/**
-	 * @param String Foreign key table name
+	 * @param table String Foreign key table name
 	 * @return JoinDef <b>this</b> object
 	 */
 	@Override
@@ -263,7 +263,7 @@ public class JoinDef extends ExtendableDef implements JoinMetadata {
 	}
 
 	/**
-	 * @param boolean
+	 * @param unique boolean
 	 * @return JoinDef <b>this</b> object
 	 */
 	@Override

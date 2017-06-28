@@ -33,39 +33,67 @@ public class TriggerDef extends CallableDef {
 	private When when;
 	private ProcedureDef proc;
 	
+	/**
+	 * <p>Constructor.</p>
+	 * Set action and when as UNDEFINED
+	 */
 	public TriggerDef() {
 		action = Action.UNDEFINED;
 		when = When.UNDEFINED;
 	}
 	
+	/**
+	 * @param tableName String
+	 */
 	public void setTable(String tableName) {
 		table = tableName;
 	}
 
+	/**
+	 * @return String Table name
+	 */
 	public String getTable() {
 		return table;
 	}
 
+	/**
+	 * @param procedure ProcedureDef
+	 */
 	public void setProcedure(ProcedureDef procedure) {
 		this.proc = procedure;
 	}
 
+	/**
+	 * @return ProcedureDef
+	 */
 	public ProcedureDef getProcedure() {
 		return proc;
 	}
 
+	/**
+	 * @return Action INSERT, UPDATE, DELETE  or UNDEFINED
+	 */
 	public Action getAction() {
 		return action;
 	}
 
+	/**
+	 * @param action Action INSERT, UPDATE, DELETE or UNDEFINED
+	 */
 	public void setAction(Action action) {
 		this.action = action;
 	}
 
+	/**
+	 * @return When BEFORE or AFTER action
+	 */
 	public When getWhen() {
 		return when;
 	}
 
+	/**
+	 * @param when When BEFORE or AFTER action
+	 */
 	public void setWhen(When when) {
 		this.when = when;
 	}

@@ -14,7 +14,9 @@ import org.judal.storage.table.TableDataSource;
 
 public class MapRecord1 extends MapRecord implements TestRecord1 {
 
-public static String tableName = "unittest_table1";
+	private static final long serialVersionUID = 1L;
+
+	public static String tableName = "unittest_table1";
 	
 	public static TableDataSource dataSource = null;
 
@@ -39,6 +41,11 @@ public static String tableName = "unittest_table1";
 		return tbl;
 	}
 
+	@Override
+	public TableDef getTableDef() {
+		return MapRecord1.getTableDef(dataSource);
+	}
+	
 	public Integer getId() { return getInteger("id"); }
 
 	public void setId(Integer n) { put("id", n); }

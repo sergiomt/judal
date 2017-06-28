@@ -14,14 +14,24 @@ package org.judal.storage.keyvalue;
 import javax.jdo.JDOException;
 
 /**
- * 
+ * <p>Interface for key-value read-write buckets.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */
 public interface Bucket extends ReadOnlyBucket {
 	
+	/**
+	 * <p>Store key-value pair.</p>
+	 * @param target Stored
+	 * @throws JDOException
+	 */
 	void store(Stored target) throws JDOException;
 
+	/**
+	 * <p>delete key-value pair given its key.</p>
+	 * @param key Object
+	 * @throws JDOException
+	 */
 	void delete(Object key) throws JDOException;
 
 }

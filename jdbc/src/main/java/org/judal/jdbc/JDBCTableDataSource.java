@@ -102,8 +102,8 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 * @throws JDOException
 	 */
 	@Override
-	public JDBCRelationalView openView(Record viewRecord) throws JDOException {
-		return new JDBCRelationalView(this, viewRecord);
+	public JDBCIndexableView openView(Record viewRecord) throws JDOException {
+		return new JDBCIndexableView(this, viewRecord);
 	}
 
 	/**
@@ -113,8 +113,8 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 * @throws JDOException
 	 */
 	@Override
-	public JDBCRelationalView openIndexedView(Record viewRecord) throws JDOException {
-		return new JDBCRelationalView(this, viewRecord);
+	public JDBCIndexableView openIndexedView(Record viewRecord) throws JDOException {
+		return new JDBCIndexableView(this, viewRecord);
 	}
 
 	@SuppressWarnings("unchecked")

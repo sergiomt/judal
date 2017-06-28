@@ -27,7 +27,7 @@ public class PrimaryKeyDef extends ExtendableDef implements PrimaryKeyMetadata {
 	private static final long serialVersionUID = 10000l;
 
 	private String name;
-	private ColumnMetadata[] columns;
+	private ColumnDef[] columns;
 
 	public PrimaryKeyDef() {
 		clear();
@@ -38,7 +38,7 @@ public class PrimaryKeyDef extends ExtendableDef implements PrimaryKeyMetadata {
 	 */
 	public void clear() {
 		name = null;
-		columns = new ColumnMetadata[0];
+		columns = new ColumnDef[0];
 	}
 
 	/**
@@ -53,10 +53,10 @@ public class PrimaryKeyDef extends ExtendableDef implements PrimaryKeyMetadata {
 	}
 
 	/**
-	 * @return ColumnMetadata[] Array of columns of this primary key.
+	 * @return ColumnDef[] Array of columns of this primary key.
 	 */
 	@Override
-	public ColumnMetadata[] getColumns() {
+	public ColumnDef[] getColumns() {
 		return columns;
 	}
 
@@ -85,7 +85,7 @@ public class PrimaryKeyDef extends ExtendableDef implements PrimaryKeyMetadata {
 		ColumnDef colDef = new ColumnDef();
 		colDef.setPrimaryKey(true);
 		if (columns.length==0) {
-			columns = new ColumnMetadata[]{colDef};
+			columns = new ColumnDef[]{colDef};
 		} else {
 			int pos = columns.length;
 			columns = Arrays.copyOf(columns, pos+1);

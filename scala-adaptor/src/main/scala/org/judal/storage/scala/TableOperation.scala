@@ -16,7 +16,20 @@ class TableOperation[R >: Null <: Record](dataSource: TableDataSource , record: 
 
 	def this(dataSource: TableDataSource) = this(dataSource, null)
 
-	def fetch(fetchGroup: FetchGroup, columnName: String , valueSearched: AnyRef) : Iterable[R] =
+	def fetch(fetchGroup: FetchGroup, columnName: String , valueSearched: AnyRef)  : Iterable[R] = {
 		getTable.fetch(fetchGroup, columnName, valueSearched).asScala
+	}
+	
+	def fetchAsc(fetchGroup: FetchGroup, columnName: String , valueSearched: AnyRef, sortByColumn: String) : Iterable[R]  = {
+		val retval : RecordSet[R] = getTable.fetch(fetchGroup, columnName, valueSearched)
+		retval.sort(sortByColumn)
+		retval.asScala
+	}
+	
+	def fetchDesc(fetchGroup: FetchGroup, columnName: String , valueSearched: AnyRef, sortByColumn: String) : Iterable[R]  = {
+		val retval : RecordSet[R] = getTable.fetch(fetchGroup, columnName, valueSearched)
+		retval.sortDesc(sortByColumn)
+		retval.asScala
+	}
 
 }

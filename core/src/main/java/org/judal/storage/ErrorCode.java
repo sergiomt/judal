@@ -12,7 +12,7 @@ package org.judal.storage;
  */
 
 /**
- * 
+ * <p>Authentication error codes.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */

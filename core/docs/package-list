@@ -1,0 +1,12 @@
+org.judal.metadata
+org.judal.metadata.bind
+org.judal.storage
+org.judal.storage.keyvalue
+org.judal.storage.query
+org.judal.storage.query.relational
+org.judal.storage.queue
+org.judal.storage.relational
+org.judal.storage.table
+org.judal.storage.table.comparators
+org.judal.storage.table.impl
+org.judal.transaction

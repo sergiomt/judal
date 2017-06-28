@@ -37,14 +37,30 @@ import com.sun.java.xml.ns.jdo.jdo.AttlistForeignKey.Deferred;
 
 import com.knowgate.debug.DebugFile;
 
+/**
+ * <p>Load schema metadata from a JDO XML file.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class JdoXmlMetadata implements MetadataScanner {
 
 	private DataSource dts;
 
+	/**
+	 * Constructor
+	 * @param dts DataSource
+	 */
 	public JdoXmlMetadata (DataSource dts) {
 		this.dts = dts;
 	}
 
+	/**
+	 * <p>Write schema definition as JDO XML.</p>
+	 * @param metadata SchemaMetaData
+	 * @param out OutputStream
+	 * @throws JDOException
+	 * @throws IOException
+	 */
 	public void writeMetadata(SchemaMetaData metadata, OutputStream out) throws JDOException, IOException {
 		OutputStreamWriter writer = new OutputStreamWriter(out);
 		writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
@@ -66,8 +82,16 @@ public class JdoXmlMetadata implements MetadataScanner {
 			return new TableDef(tableName);
 	}
 
+	/**
+	 * <p>Create schema metadata from JDO XML description.</p>
+	 * @param in InputStream 
+	 * @return SchemaMetaData
+	 * @throws JDOException
+	 * @throws IOException
+	 * @throws NullPointerException if InputStream is <b>null</b>
+	 */
 	@Override
-	public SchemaMetaData readMetadata(InputStream in) throws JDOException, IOException {
+	public SchemaMetaData readMetadata(InputStream in) throws JDOException, IOException, NullPointerException {
 
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JdoXmlMetadata.readMetadata(InputStream)");

@@ -20,8 +20,20 @@ class RelationalOperation[R >: Null <: Record](dataSource: RelationalDataSource 
 
 	override def fetch(maxrows: Int, offset: Int, keys: Param*) : Iterable[R] =
 		getTable.fetch(getRecord.fetchGroup, maxrows, offset, keys: _*).asScala
-
+		
 	override def fetch(fetchGroup: FetchGroup , columnName: String, valueSearched: AnyRef) : Iterable[R] =
 		getTable.fetch(fetchGroup, columnName, valueSearched).asScala
+
+	override def fetchAsc(fetchGroup: FetchGroup , columnName: String, valueSearched: AnyRef, sortByColumn: String) : Iterable[R] = {
+		val retval : RecordSet[R] = getTable.fetch(fetchGroup, columnName, valueSearched)
+		retval.sort(sortByColumn)
+		retval.asScala
+	}
+    		
+	override def fetchDesc(fetchGroup: FetchGroup , columnName: String, valueSearched: AnyRef, sortByColumn: String) : Iterable[R] = {
+		val retval : RecordSet[R] = getTable.fetch(fetchGroup, columnName, valueSearched)
+		retval.sort(sortByColumn)
+		retval.asScala
+	}
 
 }

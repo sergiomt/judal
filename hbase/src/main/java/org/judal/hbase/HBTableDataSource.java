@@ -37,6 +37,7 @@ import org.judal.metadata.ColumnDef;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 import org.judal.metadata.JoinType;
 
 import java.io.File;
@@ -410,6 +411,16 @@ public class HBTableDataSource implements TableDataSource {
 	@Override
 	public TableDef getTableDef(String tableName) throws JDOException {
 		return getMetaData().getTable(tableName);
+	}
+	
+	@Override
+	public TableDef getTableOrViewDef(String tableName) throws JDOException {
+		return getMetaData().getTable(tableName);
+	}
+
+	@Override
+	public ViewDef getViewDef(String viewName) throws JDOException {
+		throw new JDOUserException("HBTableDataSource.getView() HBase does not support views");
 	}
 
 	@Override

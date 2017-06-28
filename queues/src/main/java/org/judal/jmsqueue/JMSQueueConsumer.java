@@ -51,7 +51,7 @@ public class JMSQueueConsumer implements RecordQueueConsumer {
   private boolean bSnc;
   private String sLoginId;
   private String sAuthStr;
-  private Hashtable oEnv;
+  private Hashtable<String,String> oEnv;
   private Context oCtx;
   private String oQnm;
   private ConnectionFactory oCnf;
@@ -59,13 +59,28 @@ public class JMSQueueConsumer implements RecordQueueConsumer {
   private Queue oQue;
   private Session oSes;
   private QueueReceiver oQrc;
-	  
+
+  /**
+   * <p>Constructor.</p>
+   * Set the initial context factory to com.sun.jndi.fscontext.RefFSContextFactory
+   * and the provider URL pointing to sDirectory
+   * The call javax.naming.Context.lookup() on sConnectionFactoryName
+   * @param sConnectionFactoryName String
+   * @param sQueueName String Queue name
+   * @param sDirectory String Disk path to provider URL
+   * @param sUserId String
+   * @param sPassword String
+   * @param bSynchronous boolean
+   * @throws JDOException
+   * @throws NamingException
+   * @throws JMSException
+   */
   public JMSQueueConsumer(String sConnectionFactoryName, String sQueueName, String sDirectory,
-  						     String sUserId, String sPassword, boolean bSynchronous)
+  						  String sUserId, String sPassword, boolean bSynchronous)
   	throws JDOException,NamingException,JMSException {  		
   	sLoginId = sUserId;
   	sAuthStr = sPassword;
-    oEnv = new Hashtable();
+    oEnv = new Hashtable<String,String>();
     oEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.fscontext.RefFSContextFactory");
     oEnv.put(Context.PROVIDER_URL, "file://"+sDirectory);
     oCtx = new InitialContext(oEnv);
@@ -82,6 +97,11 @@ public class JMSQueueConsumer implements RecordQueueConsumer {
   	try { stop(); } catch (Exception ignore) {}
   }
 
+  /**
+   * <p>Connect to queue and enumerate messages.</p>
+   * @return ArrayList&lt;Message&gt;
+   * @throws JMSException
+   */
   public ArrayList<Message> browse() throws JMSException {
 
     if (DebugFile.trace) {
@@ -110,9 +130,20 @@ public class JMSQueueConsumer implements RecordQueueConsumer {
 
 	return oMsgs;
   } // browse
-  
+    
+  /**
+   * <p>Start RecordQueueConsumer.</p>
+   * Create JMS connection, session, queue and receiver.
+   * If this RecordQueueConsumer was configured as synchronous when it was constructed
+   * then enter a loop to immediately process the pending messages using the current Thread
+   * until a STOP command is received.
+   * @param engine Engine&lt;? extends DataSource&gt;
+   * @param properties Map&lt;String,String&gt;
+   * @throws IllegalStateException If this RecordQueueConsumer is already connected
+   * @throws JDOException
+   */
   @Override
-  public void start(Engine<? extends DataSource> engine, Map<String,String> properties) throws JDOException {
+  public void start(Engine<? extends DataSource> engine, Map<String,String> properties) throws JDOException, IllegalStateException {
 
   	Message oMsg;
 	JMSQueueListener oRql;
@@ -165,7 +196,7 @@ public class JMSQueueConsumer implements RecordQueueConsumer {
             }
             if (DebugFile.trace) DebugFile.writeln("before RecordQueueListener.onMessage("+oMsg.getJMSMessageID()+")");
           	oRql.onMessage(oMsg);
-            if (iCmd==0) {
+            if (iCmd == JMSQueueListener.COMMAND_STOP) {
               stop();
               break;
             }
@@ -193,6 +224,11 @@ public class JMSQueueConsumer implements RecordQueueConsumer {
     }
   } // start
   
+  /**
+   * <p>Close this RecordQueueConsumer.</p>
+   * Stop the current JMS connection, close the QueueReceiver, close the Session and finally close the JMS connection.
+   * @throws JDOException
+   */
   @Override
   public void stop() throws JDOException {
 

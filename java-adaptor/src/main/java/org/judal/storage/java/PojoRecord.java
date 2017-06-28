@@ -29,11 +29,14 @@ import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
 import javax.jdo.JDOUnsupportedOptionException;
 
-import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.FieldHelper;
 import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.impl.AbstractRecord;
+
+import com.knowgate.dateutils.DateHelper;
+import com.knowgate.debug.DebugFile;
 
 public class PojoRecord extends AbstractRecord implements JavaRecord {
 
@@ -41,19 +44,19 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	private ArrayList<Field> persistentFields;
 	
-	public PojoRecord(TableDef tableDefinition) {
+	public PojoRecord(ViewDef tableDefinition) {
 		this(tableDefinition, null, null);
 	}
 	
-	public PojoRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
+	public PojoRecord(ViewDef tableDefinition, ConstraintsChecker constraintsChecker) {
 		this(tableDefinition, null, constraintsChecker);
 	}
 
-	public PojoRecord(TableDef tableDefinition, FieldHelper fieldHelper) {
+	public PojoRecord(ViewDef tableDefinition, FieldHelper fieldHelper) {
 		this(tableDefinition, fieldHelper, null);
 	}
 	
-	public PojoRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
+	public PojoRecord(ViewDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
 		super(tableDefinition, fieldHelper, constraintsChecker);
 		persistentFields =  null;
 	}
@@ -98,11 +101,18 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	private ArrayList<Field> getPersistentFields() {
 		if (null==persistentFields) {
 			Field[] declaredFields = getClass().getDeclaredFields();
+			if (null==declaredFields) {
+				if (DebugFile.trace)
+					DebugFile.writeln("PojoRecord.getPersistentFields() NullPointerException getClass().getDeclaredFields()  returned null for " + getClass());
+			} else {
+				DebugFile.writeln("found " + String.valueOf(declaredFields.length) + " declared fields");
+			}
 			persistentFields = new ArrayList<Field>(declaredFields.length);
-			for (Field fld : getPersistentFields()) {
+			for (Field fld : declaredFields) {
 				final int mods = fld.getModifiers();
-				if (!Modifier.isFinal(mods) && ! Modifier.isTransient(mods) && !Modifier.isStatic(mods))
-					persistentFields.add(fld);
+				if (!Modifier.isFinal(mods) && !Modifier.isTransient(mods) && !Modifier.isStatic(mods)) {
+					persistentFields.add(fld);					
+				}
 			}
 		}
 		return persistentFields;
@@ -120,8 +130,11 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 		Field fld = getPersistentFields().get(colpos-1);
 		Object formerValue = null;
 		try {
+			final boolean accesible = fld.isAccessible();
+			fld.setAccessible(true);
 			formerValue = fld.get(this);
-			fld.set(this, obj);
+			castAndSet(fld, obj);
+			fld.setAccessible(accesible);
 		} catch (IllegalAccessException neverthrown) { }
 		return formerValue;
 	}
@@ -132,8 +145,11 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 		for (Field fld : getPersistentFields()) {
 			if (fld.getName().equalsIgnoreCase(colname)) {
 				try {
+					final boolean accesible = fld.isAccessible();
+					fld.setAccessible(true);
 					formerValue = fld.get(this);
 					fld.set(this, bytearray);
+					fld.setAccessible(accesible);
 				} catch (IllegalAccessException neverthrown) { }
 			}
 		}
@@ -184,7 +200,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	@Override
-	public Object get(Object colname) {
+	public Object get(Object colname) throws JDOUserException {
 		Object retval = null;
 		String columnName = (String) colname;
 		Field col = null;
@@ -196,8 +212,15 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 			}
 		}
 		if (null!=col) {
+			final boolean accesible = col.isAccessible();
+			col.setAccessible(true);
 			Class<?> ctype = col.getType();
 			try {				
+				if (ctype==null) {
+					if (DebugFile.trace)
+						DebugFile.writeln("PojoRecord.get() Cannot determine type of column " + columnName);
+					throw new JDOUserException("PojoRecord.get() cannot determine type of column "+ columnName);
+				}
 				if (ctype.equals(String.class))
 					retval = col.get(this);
 				else if (ctype.equals(boolean.class))
@@ -219,8 +242,14 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 				else
 					retval = col.get(this);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
+				if (DebugFile.trace)
+					DebugFile.writeln("PojoRecord.get() " + e.getClass().getName() + " " + e.getMessage());
+				try { col.setAccessible(accesible); } catch (Exception ignore) { }
 				throw new JDOUserException("PojoRecord.get("+colname+")");
 			}
+		} else {
+			if (DebugFile.trace)
+				DebugFile.writeln("PojoRecord.get() Column not found " + columnName);
 		}
 		return retval;
 	}
@@ -271,15 +300,33 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 			if (fld.getName().equalsIgnoreCase(columnName)) {
 				retval = get(colname);
 				try {
-					fld.set(this, value);
+					final boolean accesible = fld.isAccessible();
+					fld.setAccessible(true);
+					castAndSet(fld, value);
+					fld.setAccessible(accesible);
 				} catch (IllegalArgumentException | IllegalAccessException e) {
-					throw new JDOUserException("PojoRecord.put("+colname+","+value+")");
+					throw new JDOUserException("PojoRecord.put("+colname+","+value+") " + e.getClass().getName() + " " + e.getMessage());
 				}
 				break;
 			}
 		}
 		return retval;
 	}
+
+	private void castAndSet(Field fld, Object value) throws IllegalArgumentException, IllegalAccessException, ClassCastException {
+		Class<?> cls = fld.getType();
+		Object castedValue = value;
+		if (java.util.Date.class.equals(cls))
+			castedValue = DateHelper.toDate(value);
+		else if (java.util.Calendar.class.isAssignableFrom(cls))
+			castedValue = DateHelper.toCalendar(value);
+		else if (java.sql.Timestamp.class.equals(cls))
+			castedValue = DateHelper.toTimestamp(value);
+		else if (java.sql.Date.class.equals(cls))
+			castedValue = DateHelper.toSQLDate(value);
+		fld.set(this, castedValue);
+	}
+	
 
 	@Override
 	public Object remove(String colname) {
@@ -293,7 +340,34 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	
 	@Override
 	public void clear() {
-		throw new JDOUnsupportedOptionException("PojoRecord.clear()");	
+		for (Field fld : getPersistentFields()) {
+			final boolean accesible = fld.isAccessible();
+			fld.setAccessible(true);
+			Class<?> ctype = fld.getType();
+			try {
+				if (ctype.equals(boolean.class))
+					fld.setBoolean(this, false);
+				else if (ctype.equals(short.class))
+					fld.setShort(this, (short) 0);
+				else if (ctype.equals(int.class))
+					fld.setInt(this, 0);
+				else if (ctype.equals(long.class))
+					fld.setLong(this, 0l);
+				else if (ctype.equals(float.class))
+					fld.setFloat(this, 0f);
+				else if (ctype.equals(double.class))
+					fld.setDouble(this, 0d);
+				else if (ctype.equals(byte.class))
+					fld.setByte(this, (byte) 0);
+				else if (ctype.equals(char.class))
+					fld.setChar(this, (char) 0);
+				else
+					fld.set(this, null);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				throw new JDOUserException("PojoRecord.clear() " + e.getClass().getName() + " " + e.getMessage());
+			}
+			fld.setAccessible(accesible);
+		}
 	}
 
 }

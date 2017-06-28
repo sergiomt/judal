@@ -1312,7 +1312,7 @@ public class SQLTableDef extends TableDef implements Scriptable {
 				builder.append(" (").append(String.join(",", fkcols)).append("),\n");
 			}
 		}
-		builder.setLength(builder.length()-2); // remove trailing comma
+		if (builder.length()>1) builder.setLength(builder.length()-2); // remove trailing comma
 		builder.append("\n)");
 		return builder.toString();
 	} // getSource

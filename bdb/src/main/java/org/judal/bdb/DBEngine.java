@@ -37,7 +37,7 @@ public class DBEngine implements Engine<DBDataSource> {
 	public DBDataSource getDataSource(Map<String, String> properties, TransactionManager transactManager) throws JDOException {
 		SchemaMetaData metadata;
 		try {
-			String metadataFilePath = Env.getString(properties, DataSource.METADATA, "metadata.xml");
+			String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
 			String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
 			if (metadataPackage.length()==0) {
 				FileInputStream fin = new FileInputStream(new File(metadataFilePath));

@@ -22,12 +22,12 @@ import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
 import javax.jdo.metadata.ColumnMetadata;
-import javax.jdo.metadata.PrimaryKeyMetadata;
 
 import java.util.Iterator;
 
-import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.PrimaryKeyDef;
 import org.judal.serialization.BytesConverter;
 import org.judal.serialization.JSONValue;
 import org.judal.storage.ConstraintsChecker;
@@ -63,10 +63,21 @@ import java.text.SimpleDateFormat;
 
 
 /**
- * Partial implementation of Record interface.
- * The actual storage of rows is determined by a subclass.
- * It may be storing each row as an array or as a map
- * depending on whether ArrayRecord or MapRecord is used.
+ * <p>Partial implementation of Record interface.</p>
+ * <p>The actual storage of rows is determined by a subclass.
+ * It may be storing each row as Java member variables, an array or as a map
+ * depending on whether PojoRecord, ArrayRecord, MapRecord is used.</p>
+ * <p>Each AbstractRecord is associated with an underlying ViewDef or TableDef
+ * which describes the list of columns held by the Record.
+ * The ViewDef or TableDef may represent an actual table or view in the database
+ * or may be generated on the fly to represent any set of columns.</p>
+ * <p>If the actual implementation is of type MapRecord, then the Record may hold
+ * more columns than just the ones described in the ViewDef/TableDef. This is in
+ * order to accommodate varying columns list from schemaless storage systems or
+ * growing column families from column-oriented databases.</p>
+ * <p>It is possible to associate a ConstraintsChecker and a FieldHelper to the Record.
+ * These classes help to perform client-side validations on data integrity and custom
+ * type conversion for non-standard types of a database.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  *
@@ -75,45 +86,101 @@ public abstract class AbstractRecord implements Record {
 
 	private static final long serialVersionUID = 10000l;
 
-	protected transient TableDef tableDef;
+	protected transient ViewDef tableDef;
 	protected transient ConstraintsChecker checker;
 	protected transient FieldHelper fhelper;
 	protected boolean hasLongVarBinaryData;
 	protected HashMap<String,Long> longVarBinariesLengths;
 
-	public AbstractRecord(TableDef tableDefinition) {
+	/**
+	 * <p>Construct AbstractRecord reading the metadata from a ViewDef or TableDef and with no ConstraintsChecker nor FieldHelper.</p>
+	 * @param tableDefinition ViewDef or TableDef
+	 * @throws JDOUserException if tableDefinition is <b>null</b>
+	 */
+	public AbstractRecord(ViewDef tableDefinition) throws JDOUserException {
 		this(tableDefinition, null, null);
 	}
 
-	public AbstractRecord(TableDef tableDefinition, ConstraintsChecker constraintsChecker) {
+	/**
+	 * <p>Construct AbstractRecord reading the metadata from a ViewDef or TableDef and with the given ConstraintsChecker and no FieldHelper.</p>
+	 * @param tableDefinition ViewDef or TableDef
+	 * @param constraintsChecker ConstraintsChecker
+	 * @throws JDOUserException if tableDefinition is <b>null</b>
+	 */
+	public AbstractRecord(ViewDef tableDefinition, ConstraintsChecker constraintsChecker) throws JDOUserException {
 		this(tableDefinition, null, constraintsChecker);
 	}
 
-	public AbstractRecord(TableDef tableDefinition, FieldHelper fieldHelper) {
+	/**
+	 * <p>Construct AbstractRecord reading the metadata from a ViewDef or TableDef and with the given FieldHelper and no ConstraintsChecker.</p>
+	 * @param tableDefinition ViewDef or TableDef
+	 * @param fieldHelper FieldHelper
+	 * @throws JDOUserException if tableDefinition is <b>null</b>
+	 */
+	public AbstractRecord(ViewDef tableDefinition, FieldHelper fieldHelper) throws JDOUserException {
 		this(tableDefinition, fieldHelper, null);
 	}
 
-	public AbstractRecord(TableDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) {
+	/**
+	 * <p>Construct AbstractRecord reading the metadata from a ViewDef or TableDef and with the given FieldHelper and ConstraintsChecker.</p>
+	 * @param tableDefinition ViewDef or TableDef
+	 * @param fieldHelper FieldHelper
+	 * @param constraintsChecker ConstraintsChecker
+	 * @throws JDOUserException if tableDefinition is <b>null</b>
+	 */
+	public AbstractRecord(ViewDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOUserException {
 		if (null==tableDefinition)
-			throw new NullPointerException("AbstractRecord constructor. TableDef cannot be null");
+			throw new JDOUserException("AbstractRecord constructor. TableDef cannot be null");
 		tableDef = tableDefinition;
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
 		clearLongData();
 	}
 	
+	/**
+	 * <p>Construct AbstractRecord reading the metadata directly from a DataSource capable of providing it.</p>
+	 * @param dataSource TableDataSource
+	 * @param tableName Name of table or view
+	 * @throws JDOException
+	 * @throws JDOUserException if dataSource is <b>null</b>
+	 */
 	public AbstractRecord(TableDataSource dataSource, String tableName) throws JDOException {
 		this(dataSource, tableName, null, null);
 	}
 
+	/**
+	 * <p>Construct AbstractRecord reading the metadata directly from a DataSource capable of providing it.</p>
+	 * @param dataSource TableDataSource
+	 * @param tableName Name of table or view
+	 * @param fieldHelper FieldHelper
+	 * @throws JDOException
+	 * @throws JDOUserException if dataSource is <b>null</b>
+	 */
 	public AbstractRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
 		this(dataSource, tableName, fieldHelper, null);
 	}
 	
+	/**
+	 * <p>Construct AbstractRecord reading the metadata directly from a DataSource capable of providing it.</p>
+	 * @param dataSource TableDataSource
+	 * @param tableName Name of table or view
+	 * @param constraintsChecker ConstraintsChecker
+	 * @throws JDOException
+	 * @throws JDOUserException if dataSource is <b>null</b>
+	 */
 	public AbstractRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
 		this(dataSource, tableName, null, constraintsChecker);
 	}
 
+	/**
+	 * <p>Construct AbstractRecord reading the metadata directly from a DataSource capable of providing it.</p>
+	 * @param dataSource TableDataSource
+	 * @param tableName Name of table or view
+	 * @param fieldHelper FieldHelper
+	 * @param constraintsChecker ConstraintsChecker
+	 * @throws JDOException
+	 * @throws JDOUserException if dataSource is <b>null</b>
+	 */
 	public AbstractRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
 		if (null==dataSource)
 			throw new JDOUserException("No DataSource specified and no one provided by EngineFactory neither");
@@ -125,103 +192,177 @@ public abstract class AbstractRecord implements Record {
 		clearLongData();
 	}
 	
+	/**
+	 * <p>Get the value of a column.</p>
+	 * @return Object Returned value may be <b>null</b> or an Option[AnyRef] if using implementation for Scala.
+	 */
 	@Override
 	public abstract Object apply(String columnName);
 
 	/**
-	 * This method from Map interface is implemented by subclasses of AbstractRecord
+	 * <p>Set value of a column.</p>
+	 * @param colname String Column Name
+	 * @param value Object Column value
 	 */
 	@Override
-	public abstract Object put(String sColName, Object oValue);
+	public abstract Object put(String colname, Object value);
 
+	/**
+	 * <p>Remove value of a column.</p>
+	 * This method may have different behaviors depending on the implementation.
+	 * For MapRecord subclass, removing a column will cause that it won't be updated in the database.
+	 * But for ArrayRecord and PojoRecord, removing a column will set it to <b>null</b> or cause an exception.
+	 * @param colname String Column Name
+	 */
 	@Override
 	public abstract Object remove(String colname);
 
+	/**
+	 * <p>Remove values for all columns.</p>
+	 * This method may have different behaviors depending on the implementation.
+	 */
 	@Override
 	public abstract void clear();
 
+	/**
+	 * @return ConstraintsChecker
+	 */
 	@Override
 	public ConstraintsChecker getConstraintsChecker() {
 		return checker;
 	}
 
+	/**
+	 * @param checker ConstraintsChecker
+	 */
 	public void setConstraintsChecker(ConstraintsChecker checker) {
 		this.checker = checker;
 	}
 
+	/**
+	 * @return FieldHelper
+	 */
 	public FieldHelper getFieldHelper() {
 		return fhelper;
 	}
 
+	/**
+	 * @param helper FieldHelper
+	 */
 	public void setFieldHelper(FieldHelper helper) {
 		this.fhelper = helper;
 	}
 
+	/**
+	 * <p>Replace value of a column.</p>
+	 * @param colname String Column Name
+	 * @param newvalue Object New value for column
+	 * @return Object Former value of column
+	 */
 	@Override
-	public Object replace(String sColName, Object oValue) {
-		Object retval = apply(sColName);
-		remove(sColName);
-		put(sColName, oValue);
+	public Object replace(String colname, Object newvalue) {
+		Object retval = apply(colname);
+		remove(colname);
+		put(colname, newvalue);
 		return retval;
 	}
 	
+	/**
+	 * <p>Load Record using given DataSource.</p>
+	 * @param oDts TableDataSource
+	 * @param oKey Object Value for primary key. May actually be Object[] if the key has multiple columns.
+	 * @return <b>true</b> if a Record was found with the given primary key, <b>false</b>otherwise.
+	 * @throws JDOException If the underlying table has no primary key
+	 * @throws ClassCastException If oDts is not an instance of class TableDataSource or a subclass of it.
+	 */
 	@Override
-	public boolean load(DataSource oDts, Object oKey) throws JDOException {
-		Table oTbl = null;
+	public boolean load(DataSource oDts, Object oKey) throws JDOException, ClassCastException {
 		boolean bLoaded = false;
-		try {
-			oTbl = ((TableDataSource) oDts).openTable(this);
+		try (Table oTbl = ((TableDataSource) oDts).openTable(this)) {
 			bLoaded = oTbl.load(oKey, this);
-		} finally {
-			if (oTbl!=null) oTbl.close();
 		}
 		return bLoaded;
 	}
 
+	/**
+	 * <p>Load Record using EngineFactory.getDefaultTableDataSource().</p>
+	 * @param oKey Object Value for primary key. May actually be Object[] if the key has multiple columns.
+	 * @return <b>true</b> if a Record was found with the given primary key, <b>false</b>otherwise.
+	 * @throws JDOException If the underlying table has no primary key
+	 * @throws NullPointerException If EngineFactory.getDefaultTableDataSource() is not set
+	 */
 	@Override
-	public final boolean load(Object oKey) throws JDOException {
+	public final boolean load(Object oKey) throws JDOException,NullPointerException {
 		return load(EngineFactory.getDefaultTableDataSource(), oKey);
 	}
 
+	/**
+	 * <p>Store this Record using given DataSource.</p>
+	 * A store operation will insert the Record if it does not exist or update it if already exists.
+	 * If a ConstraintsChecker has been set, its check() method will be called before attempting to store the Record.
+	 * This may result in a JDOException thrown if the Record does not comply with the constraints.
+	 * @param oDts TableDataSource
+	 * @throws JDOException
+	 * @throws ClassCastException If oDts is not an instance of class TableDataSource or a subclass of it.
+	 */
 	@Override
-	public void store(DataSource oDts) throws JDOException {
+	public void store(DataSource oDts) throws JDOException,ClassCastException {
 		if (getConstraintsChecker()!=null)
 			getConstraintsChecker().check(oDts, this);
-		Table oTbl = null;
-		try {
-			oTbl = ((TableDataSource) oDts).openTable(this);
+		try (Table oTbl = ((TableDataSource) oDts).openTable(this)) {
 			oTbl.store(this);
-		} finally {
-			if (oTbl!=null) oTbl.close();
 		}
 	}
 
+	/**
+	 * <p>Store this Record using EngineFactory.getDefaultTableDataSource().</p>
+	 * A store operation will insert the Record if it does not exist or update it if already exists.
+	 * If a ConstraintsChecker has been set, its check() method will be called before attempting to store the Record.
+	 * This may result in a JDOException thrown if the Record does not comply with the constraints.
+	 * @throws JDOException
+	 */
 	@Override
 	public final void store() throws JDOException {
 		store(EngineFactory.getDefaultTableDataSource());
 	}
 
+	/**
+	 * <p>Delete this Record using the given DataSource.</p>
+	 * @param oDts TableDataSource
+	 * @throws JDOException
+	 * @throws ClassCastException If oDts is not an instance of class TableDataSource or a subclass of it.
+	 */
 	@Override
-	public void delete(DataSource oDts) throws JDOException {
+	public void delete(DataSource oDts) throws JDOException,ClassCastException {
 		Table oTbl = ((TableDataSource) oDts).openTable(this);
 		try {
-			oTbl.delete(this);
+			oTbl.delete(getKey());
 		} finally {
 			if (oTbl!=null) oTbl.close();
 		}
 	}
 
+	/**
+	 * <p>Delete this Record using EngineFactory.getDefaultTableDataSource().</p>
+	 * @throws JDOException
+	 */
 	@Override
 	public final void delete() throws JDOException {
 		delete(EngineFactory.getDefaultTableDataSource());
 	}
 	
-	public TableDef getTableDef() {
+	/**
+	 * @return ViewDef
+	 */
+	public ViewDef getTableDef() {
 		return tableDef;
 	}
 
-	public void setTableDef(TableDef tableDef) {
-		this.tableDef = tableDef;
+	/**
+	 * @param viewDef ViewDef
+	 */
+	public void setTableDef(ViewDef viewDef) {
+		tableDef = viewDef;
 	}
 	
 	public void clearLongData() {
@@ -229,19 +370,31 @@ public abstract class AbstractRecord implements Record {
 		longVarBinariesLengths = null;
 	}
 
+	/**
+	 * @return boolean <b>true</b> if this Record contains any LONGVARCHAR, LONGVARBINARY, CLOB or BLOB column
+	 */
 	public boolean hasLongData() {
 		return hasLongVarBinaryData;
 	}
 
+	/**
+	 * @return Map&lt;String,Long&gt;
+	 */
 	public Map<String,Long> longDataLengths() {
 		return longVarBinariesLengths;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ColumnDef[] columns() {
 		return tableDef.getColumns();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public FetchGroup fetchGroup() {
 		FetchGroup group = new ColumnGroup();
@@ -251,43 +404,89 @@ public abstract class AbstractRecord implements Record {
 		return group;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ColumnDef getColumn(String colname) throws ArrayIndexOutOfBoundsException {
 		return tableDef.getColumnByName(colname);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getBucketName() {
 		return tableDef.getName();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public String getTableName() {
 		return tableDef.getName();
 	}
 
 	/**
+	 * <p>Get value of primary key.</p>
 	 * @return Value of record primary key. Will be an array of Object if the primary key is composed of multiple columns.
+	 * @throws JDOUserException if table or view has no primary key
 	 */
 	@Override
 	public Object getKey() throws JDOException {
-		PrimaryKeyMetadata pk = tableDef.getPrimaryKeyMetadata();
-		if (pk.getNumberOfColumns()==0) return null;
-		if (pk.getNumberOfColumns()==1) return apply(pk.getColumn());
-		Object[] retval = new Object[pk.getNumberOfColumns()];
-		int c = 0;
-		for (ColumnMetadata col : pk.getColumns())
-			retval[c++] = apply(col.getName());
-		return retval;
+		Object retval;
+		PrimaryKeyDef pk = tableDef.getPrimaryKeyMetadata();
+		if (null==pk)
+			throw new JDOUserException("Table or view "+getTableName()+"  has no primary key");
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin AbstractRecord.getKey()");
+			DebugFile.incIdent();
+			DebugFile.writeln("primary key has " +  String.valueOf(pk.getNumberOfColumns()) + " columns");
+		}
+		if (pk.getNumberOfColumns()==0) {
+			retval = null;
+		} else if (pk.getNumberOfColumns()==1) {
+			retval = apply(pk.getColumn());
+			if (retval instanceof String) {
+				try {
+					retval = pk.getColumns()[0].convert((String) retval);
+				} catch (NumberFormatException | NullPointerException | ParseException e) {
+					throw new JDOUserException("AbstractRecord.getKey() " + e.getClass().getName()+" " + e.getMessage());
+				}
+			}
+		}  else {
+			Object[] retvals = new Object[pk.getNumberOfColumns()];
+			int c = 0;
+			for (ColumnMetadata col : pk.getColumns()) {
+				retvals[c] = apply(col.getName());
+				if (retvals[c] instanceof String) {
+					try {
+						retvals[c] = pk.getColumns()[c].convert((String) retvals[c]);
+					} catch (NumberFormatException | NullPointerException | ParseException e) {
+						throw new JDOUserException("AbstractRecord.getKey() " + e.getClass().getName()+" " + e.getMessage());
+					}
+				}
+				c++;
+			}
+			retval = (Object) retvals;
+		}
+
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End AbstractRecord.getKey() : " + retval + (retval!=null ? " of class " + retval.getClass().getName() : ""));
+		}
+		return (Object) retval;
 	}
 
-	@Override
 	/**
 	 * <p>Set value of primary key for this record.</p>
 	 * @param value If primary key is composed of multiple columns then must be an array of Object
+	 * @throws JDOException
 	 */
+	@Override
 	public void setKey(Object value) throws JDOException {
-		PrimaryKeyMetadata pk = tableDef.getPrimaryKeyMetadata();
+		PrimaryKeyDef pk = tableDef.getPrimaryKeyMetadata();
 		if (pk.getNumberOfColumns()==0) throw new JDOException("Table "+tableDef.getName()+" has no primary key");
 		if (pk.getNumberOfColumns()==1) {
 			if (DebugFile.trace) DebugFile.writeln("set "+pk.getColumn()+"="+value);
@@ -295,13 +494,31 @@ public abstract class AbstractRecord implements Record {
 				throw new JDOUserException("Primary key column name for table "+tableDef.getName()+" is null");
 			else if (pk.getColumn().trim().length()==0)
 				throw new JDOUserException("Primary key column name for table "+tableDef.getName()+" is empty");
-			put(pk.getColumn(), value);
+			if (value instanceof String) {
+				try {
+					put(pk.getColumn(), pk.getColumns()[0].convert((String) value));
+				} catch (NumberFormatException | NullPointerException | ParseException e) {
+					throw new JDOUserException("AbstractRecord.setKey("+ value + ") "+e.getClass().getName()+" "+e.getMessage());
+				}
+			} else {
+				put(pk.getColumn(), value);
+			}
 		} else {
 			try {
 				Object[] vals = (Object[]) value;
 				int c = 0;
-				for (ColumnMetadata col : pk.getColumns())
-					put(col.getName(), vals[c++]);
+				for (ColumnMetadata col : pk.getColumns()) {
+					if (value instanceof String) {
+						try {
+							put(col.getName(), pk.getColumns()[c].convert((String) vals[c]));
+							c++;
+						} catch (NumberFormatException | NullPointerException | ParseException e) {
+							throw new JDOUserException("AbstractRecord.setKey("+ value + ") "+e.getClass().getName()+" "+e.getMessage());
+						}
+					}  else {
+						put(col.getName(), vals[c++]);						
+					}
+				}
 			} catch (ClassCastException cce) {
 				String pkcols = "";
 				for (ColumnMetadata col : pk.getColumns())
@@ -311,12 +528,13 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
-	@Override
 	/**
 	 * <p>Set value of content, contentType and contentLength fields.</p>
 	 * @param bytes byte[] Value of content field
 	 * @param contentType String Value of contentType field
+	 * @throws JDOException
 	 */
+	@Override
 	public void setContent(byte[] bytes, String contentType) throws JDOException {
 		put("content", bytes);
 		put("contentType", contentType);
@@ -423,6 +641,7 @@ public abstract class AbstractRecord implements Record {
 	 * @return String value for Date or <b>null</b>.
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	public String getDateShort(String sColName) throws ClassCastException {
 		Date dDt = getDate(sColName);
 		if (null!=dDt) {
@@ -433,6 +652,17 @@ public abstract class AbstractRecord implements Record {
 			return null;
 	} // getDateShort
 
+	/**
+	 * <p>Get value of an interval part.</p>
+	 * @param sColName String Column Name
+	 * @param sPart String Part Identifier
+	 * @return int
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 * @throws NullPointerException
+	 * @throws NumberFormatException
+	 * @throws IllegalArgumentException
+	 */
 	@Override
 	public int getIntervalPart(String sColName, String sPart) throws ClassCastException, ClassNotFoundException, NullPointerException, NumberFormatException, IllegalArgumentException {
 		if (null==fhelper)
@@ -440,6 +670,14 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getIntervalPart(this, sColName, sPart);
 	}
 
+	/**
+	 * @param sColName String Column Name
+	 * @return LatLong
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 * @throws NumberFormatException
+	 * @throws ArrayIndexOutOfBoundsException
+	 */
 	@Override
 	public LatLong getLatLong(String sColName) throws ClassCastException, ClassNotFoundException, NumberFormatException, ArrayIndexOutOfBoundsException {
 		if (null==fhelper)
@@ -447,6 +685,15 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getLatLong(this, sColName);
 	}
 	
+	/**
+	 * <p>Get column as byte array.</p>
+	 * If the column value is <b>null</b> then <b>null</b> will be returned
+	 * Else If the column type is byte[] that same value will be returned
+	 * Else this method will call org.judal.serialization.BytesConverter.toBytes(value, getColumn(sColName).getType())
+	 * to convert the column Object into a byte array.
+	 * @param sColName String Column Name
+	 * @return byte[]
+	 */
 	@Override
 	public byte[] getBytes(String sColName) {
 		if (isNull(sColName))
@@ -460,6 +707,15 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
+	/**
+	 * <p>Get column value as BigDecimal.</p>
+	 * If the actual value of the column is not BigDecimal Then this function will try to convert it to BigDecimal.
+	 * @param sColName String
+	 * @return BigDecimal
+	 * @throws NullPointerException
+	 * @throws ClassCastException
+	 * @throws NumberFormatException
+	 */
 	@Override
 	public BigDecimal getDecimal(String sColName)
 			throws NullPointerException,ClassCastException,NumberFormatException {
@@ -479,7 +735,7 @@ public abstract class AbstractRecord implements Record {
 	/**
 	 * <p>Get BigDecimal formated as a String using the given locale and fractional digits</p>
 	 * @param sColName String Column Name
-	 * @param Locale
+	 * @param oLoc Locale
 	 * @param nFractionDigits Number of digits at the right of the decimal separator
 	 * @return String decimal value formated according to Locale or <b>null</b>
 	 * @throws ClassCastException
@@ -527,7 +783,7 @@ public abstract class AbstractRecord implements Record {
 
 	/**
 	 * <p>Get double formated as a String using the given pattern and the symbols for the default locale</p>
-	 * @param sColName Field Name
+	 * @param sColName Column Name
 	 * @param sPattern A non-localized pattern string, for example: "#0.00"
 	 * @return String decimal value formated according to sPatern or <b>null</b>
 	 * @throws ClassCastException
@@ -545,7 +801,7 @@ public abstract class AbstractRecord implements Record {
 
 	/**
 	 * <p>Get float formated as a String using the given pattern and the symbols for the default locale</p>
-	 * @param sColName Field Name
+	 * @param sColName Column Name
 	 * @param sPattern A non-localized pattern string, for example: "#0.00"
 	 * @return String decimal value formated according to sPatern or <b>null</b>
 	 * @throws ClassCastException
@@ -561,6 +817,16 @@ public abstract class AbstractRecord implements Record {
 			return new DecimalFormat(sPattern).format(getFloat(sColName));
 	}
 
+	/**
+	 * <p>Get value of column as int.</p>
+	 * This function must not be used to retrieve nullable values.
+	 * If the actual value of the column is not int Then this function will try to convert it to int.
+	 * @param sColName Column Name
+	 * @return int
+	 * @throws NullPointerException if column value is <b>null</b> or <b>None</b>
+	 * @throws ClassCastException
+	 * @throws NumberFormatException
+	 */
 	@Override
 	public int getInt(String sColName)
 			throws NullPointerException,ClassCastException,NumberFormatException {
@@ -582,6 +848,19 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
+	/**
+	 * <p>Get value of column holding a map of key-value pairs.</p>
+	 * @param sColName String Column Name
+	 * @return Object A Map which class depends on the FieldHelper implementation
+	 * @throws ClassNotFoundException if not FieldHelper has been set
+	 * @throws ClassCastException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 */
 	@Override
 	public Object getMap(String sColName) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		if (null==fhelper)
@@ -589,6 +868,13 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getMap(this, sColName);
 	}
 	
+	/**
+	 * <p>Get column value as Integer.</p>
+	 * If the actual value of the column is not Integer Then this function will try to convert it to Integer.
+	 * @param sColName String
+	 * @return Integer
+	 * @throws NumberFormatException
+	 */
 	@Override
 	public Integer getInteger(String sColName) throws NumberFormatException {
 		if (!isNull(sColName)) {
@@ -606,6 +892,13 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
+	/**
+	 * <p>Get Integer array value.</p>
+	 * @param sColName String
+	 * @return Integer[]
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 */
 	@Override
 	public Integer[] getIntegerArray(String sColName) throws ClassCastException, ClassNotFoundException {
 		if (null==fhelper)
@@ -613,6 +906,13 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getIntegerArray(this, sColName);
 	}
 
+	/**
+	 * <p>Get Long array value.</p>
+	 * @param sColName String
+	 * @return Long[]
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 */
 	@Override
 	public Long[] getLongArray(String sColName) throws ClassCastException, ClassNotFoundException {
 		if (null==fhelper)
@@ -620,6 +920,13 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getLongArray(this, sColName);
 	}
 
+	/**
+	 * <p>Get Float array value.</p>
+	 * @param sColName String
+	 * @return Float[]
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 */
 	@Override
 	public Float[] getFloatArray(String sColName) throws ClassCastException, ClassNotFoundException {
 		if (null==fhelper)
@@ -627,6 +934,13 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getFloatArray(this, sColName);
 	}
 
+	/**
+	 * <p>Get Double array value.</p>
+	 * @param sColName String
+	 * @return Double[]
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 */
 	@Override
 	public Double[] getDoubleArray(String sColName) throws ClassCastException, ClassNotFoundException {
 		if (null==fhelper)
@@ -634,6 +948,13 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getDoubleArray(this, sColName);
 	}
 
+	/**
+	 * <p>Get Date array value.</p>
+	 * @param sColName String
+	 * @return Date[]
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 */
 	@Override
 	public Date[] getDateArray(String sColName) throws ClassCastException, ClassNotFoundException {
 		if (null==fhelper)
@@ -641,6 +962,13 @@ public abstract class AbstractRecord implements Record {
 		return fhelper.getDateArray(this, sColName);
 	}
 	
+	/**
+	 * <p>Get String array value.</p>
+	 * @param sColName String
+	 * @return String[]
+	 * @throws ClassNotFoundException If no FieldHelper has been set for this Record
+	 * @throws ClassCastException
+	 */
 	@Override
 	public String[] getStringArray(String sColName) throws ClassCastException, ClassNotFoundException {
 		if (null==fhelper)
@@ -668,6 +996,15 @@ public abstract class AbstractRecord implements Record {
 			return null;
 	} // getMoney
 
+	/**
+	 * <p>Get value of column as short.</p>
+	 * This function must not be used to retrieve nullable values.
+	 * If the actual value of the column is not short Then this function will try to convert it to short.
+	 * @param sColName String Column Name
+	 * @return short
+	 * @throws NullPointerException if column value is <b>null</b> or <b>None</b>
+	 * @throws NumberFormatException
+	 */
 	@Override
 	public short getShort(String sColName) throws NullPointerException,NumberFormatException {
 		if (!isNull(sColName)) {
@@ -688,6 +1025,15 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
+	/**
+	 * <p>Get value of column as long.</p>
+	 * This function must not be used to retrieve nullable values.
+	 * If the actual value of the column is not long Then this function will try to convert it to long.
+	 * @param sColName String Column Name
+	 * @return long
+	 * @throws NullPointerException if column value is <b>null</b> or <b>None</b>
+	 * @throws NumberFormatException
+	 */
 	@Override
 	public long getLong(String sColName) throws NullPointerException,NumberFormatException {
 		if (!isNull(sColName)) {
@@ -708,6 +1054,15 @@ public abstract class AbstractRecord implements Record {
 		}
 	}
 
+	/**
+	 * <p>Get value of column as float.</p>
+	 * This function must not be used to retrieve nullable values.
+	 * If the actual value of the column is not float Then this function will try to convert it to float.
+	 * @param sColName String Column Name
+	 * @return float
+	 * @throws NullPointerException if column value is <b>null</b> or <b>None</b>
+	 * @throws NumberFormatException
+	 */
 	@Override
 	public float getFloat(String sColName)
 			throws NullPointerException, ClassCastException, NumberFormatException {
@@ -738,10 +1093,11 @@ public abstract class AbstractRecord implements Record {
 
 	/**
 	 * <p>Get value for a DOUBLE or NUMBER([1..28],m) column<p>
+	 * This function must not be used to retrieve nullable values.
+	 * If the actual value of the column is not double Then this function will try to convert it to double.
 	 * @param sColName Column Name
 	 * @return Column value.
-	 * @throws NullPointerException if column is <b>null</b> or no column with
-	 * such name was found at internal value collection.
+	 * @throws NullPointerException if column is <b>null</b> or no column with such name was found at internal value collection.
 	 * @throws NumberFormatException
 	 */  
 	@Override
@@ -773,11 +1129,24 @@ public abstract class AbstractRecord implements Record {
 		return dRetVal;
 	} // getDouble
 
+	/**
+	 * <p>Get value of String column.</p>
+	 * @param sColName String Column Name
+	 * @return String
+	 * @throws ClassCastException
+	 */
 	@Override
 	public String getString(String sColName) throws ClassCastException {
 		return (String) apply(sColName);
 	}
 
+	/**
+	 * <p>Get value of String column replacing <b>null</b> with a default value.<p>
+	 * @param sColName String Column Name
+	 * @param sDefault String Default Value
+	 * @return String
+	 * @throws ClassCastException
+	 */
 	@Override
 	public String getString(String sColName, String sDefault) throws ClassCastException {
 		if (isNull(sColName))
@@ -786,16 +1155,13 @@ public abstract class AbstractRecord implements Record {
 			return (String) apply(sColName);
 	}
 
-
 	/**
-	 * <p>Get value for a CHAR, VARCHAR or LONGVARCHAR field replacing <b>null</b>
+	 * <p>Get value of String column replacing <b>null</b>
 	 * with a default value and replacing non-ASCII and quote values with &#<i>code</i>;<p>
 	 * @param sColName Column Name
-	 * @param iRow Row position [0..getRowCount()-1]
 	 * @param sDefault Default value
 	 * @return Field value or default value encoded as HTML numeric entities.
 	 */
-
 	@Override
 	public String getStringHtml(String sColName, String sDefault)
 			throws ArrayIndexOutOfBoundsException {
@@ -803,6 +1169,12 @@ public abstract class AbstractRecord implements Record {
 		return Html.encode(sStr);
 	} // getStringHtml
 
+	/**
+	 * @param sColName String Column Name
+	 * @param bDefault boolean Default Value
+	 * @return boolean
+	 * @throws ClassCastException
+	 */
 	@Override
 	public boolean getBoolean(String sColName, boolean bDefault) throws ClassCastException {
 		if (isNull(sColName))
@@ -826,9 +1198,10 @@ public abstract class AbstractRecord implements Record {
 	}
 
 	/**
-	 * <p>Test is a field is null.</p>
+	 * <p>Test is a field is <b>null</b> or <b>None</b>.</p>
+	 * If the sColName is a String and its value is "null" Then it will also be considered <b>null</b>
 	 * @param sColName Column Name
-	 * @return <b>true</b> if field is null or if it is a String value "null" or if no column with given name was found 
+	 * @return <b>true</b> if field is null or None or if it is a String value "null" or if no column with given name was found 
 	 */
 	@Override  
 	public boolean isNull(String sColName) {
@@ -845,6 +1218,7 @@ public abstract class AbstractRecord implements Record {
 	 * <p>Put boolean value at internal collection</p>
 	 * @param sColName String Column Name
 	 * @param bVal Field Value
+	 * @return Boolean Previous column value
 	 */
 	@Override
 	public Boolean put(String sColName, boolean bVal) {
@@ -855,6 +1229,7 @@ public abstract class AbstractRecord implements Record {
 	/** <p>Set byte value at internal collection</p>
 	 * @param sColName String Column Name
 	 * @param byVal byte Field Value
+	 * @return Byte Previous column value
 	 */
 	@Override
 	public Byte put(String sColName, byte byVal) {
@@ -865,6 +1240,7 @@ public abstract class AbstractRecord implements Record {
 	/** <p>Set short value at internal collection</p>
 	 * @param sColName String Column Name
 	 * @param iVal short Field Value
+	 * @return Short Previous column value
 	 */
 	@Override
 	public Short put(String sColName, short iVal) {
@@ -875,6 +1251,7 @@ public abstract class AbstractRecord implements Record {
 	/** <p>Set int value at internal collection</p>
 	 * @param sColName String Column Name
 	 * @param iVal int Field Value
+	 * @return Integer Previous column value
 	 */
 	@Override
 	public Integer put(String sColName, int iVal) {
@@ -885,6 +1262,7 @@ public abstract class AbstractRecord implements Record {
 	/** <p>Set long value at internal collection</p>
 	 * @param sColName String Column Name
 	 * @param lVal long Field Value
+	 * @return Long Previous column value
 	 */
 	@Override
 	public Long put(String sColName, long lVal) {
@@ -895,6 +1273,7 @@ public abstract class AbstractRecord implements Record {
 	/** <p>Set float value at internal collection</p>
 	 * @param sColName String Column Name
 	 * @param fVal float Field Value
+	 * @return Float Previous column value
 	 */
 	@Override
 	public Float put(String sColName, float fVal) {
@@ -905,6 +1284,7 @@ public abstract class AbstractRecord implements Record {
 	/** <p>Set double value at internal collection</p>
 	 * @param sColName String Column Name
 	 * @param dVal double Field Value
+	 * @return Double Previous column value
 	 */
 	@Override
 	public Double put(String sColName, double dVal) {
@@ -917,6 +1297,7 @@ public abstract class AbstractRecord implements Record {
 	 * @param sColName String Column Name
 	 * @param sDate String Field Value as String
 	 * @param oPattern SimpleDateFormat Date format to be used   
+	 * @return Date Previous column value
 	 * @throws ParseException
 	 */
 	@Override
@@ -930,6 +1311,7 @@ public abstract class AbstractRecord implements Record {
 	 * @param sColName String Column Name
 	 * @param sDecVal String Field Value
 	 * @param oPattern DecimalFormat
+	 * @return BigDecimal Previous column value
 	 * @throws ParseException
 	 */
 	@Override
@@ -938,6 +1320,11 @@ public abstract class AbstractRecord implements Record {
 		return isNullOrNone(prev) ? null : (BigDecimal) prev;
 	}
 
+	/**
+	 * <p>Get representation of this Record as a JSON object.</p>
+	 * @return String
+	 */
+	@Override
 	public String toJSON() throws IOException {
 		final StringBuilder oBF = new StringBuilder();
 		JSONValue.writeJSONObject(asMap(), oBF);
@@ -1016,7 +1403,6 @@ public abstract class AbstractRecord implements Record {
 		return oBF.toString();
 	} // toXML
 
-	@Override
 	/**
 	 * Write Record as XML.
 	 * @param identSpaces String Number of indentation spaces at the beginning of each line.
@@ -1025,6 +1411,7 @@ public abstract class AbstractRecord implements Record {
 	 * @param textFormat Format. Custom formatter for text fields. May be used to encode text as HTML or similar transformations.
 	 * @return String
 	 */
+	@Override
 	public String toXML(String identSpaces, DateFormat dateFormat, NumberFormat decimalFormat, Format textFormat) {
 		return toXML(identSpaces, null, dateFormat, decimalFormat, textFormat);
 	}

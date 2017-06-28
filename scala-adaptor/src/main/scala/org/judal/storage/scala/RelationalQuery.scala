@@ -47,5 +47,15 @@ class RelationalQuery[R >: Null <: Record](dts: RelationalDataSource , recClass:
 		qry.setFilter(prd)
 		viw.fetch(qry).asScala
 	}
+
+	def fetchWithArray(params: (String,AnyRef)*) = {
+		qry.declareParameters(params.map(p => p._1).mkString(","))
+	  qry.executeWithArray(params.map(p => p._2):_*).asInstanceOf[RecordSet[R]].asScala
+	}
+
+	def fetchWithMap(params: scala.collection.mutable.LinkedHashMap[String,AnyRef]) = {
+	  qry.declareParameters(params.keysIterator.mkString(","))
+		qry.executeWithArray(params.values.toSeq:_*).asInstanceOf[RecordSet[R]].asScala
+	}
 	
 }

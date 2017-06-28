@@ -18,7 +18,9 @@ import javax.jdo.JDOException;
 import javax.transaction.TransactionManager;
 
 /**
- * Interface for Engine instances.
+ * <p>Interface for Engine instances.</p>
+ * <p>Engines are the top level abstraction for an storage technology, a RDBMS, Amazon S3, Hadoop, etc.</p>
+ * <p>Each engine acts a factory of data sources and transaction managers if transactions are supported by the engine.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */

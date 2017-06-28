@@ -30,6 +30,11 @@ import java.util.List;
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.UniqueMetadata;
 
+/**
+ * Implementation of JDO UniqueMetadata interface
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class UniqueIndexDef extends NonUniqueIndexDef implements UniqueMetadata {
 
 	private static final long serialVersionUID = 10000l;
@@ -101,6 +106,14 @@ public class UniqueIndexDef extends NonUniqueIndexDef implements UniqueMetadata 
 		return this;
 	}
 
+	/**
+	 * <p>Get JDO XML representation of this unique index like:</p>
+	 * &lt;unique name="<i>indexName</i>" table="<i>tableName</i>"&gt;
+	 * &lt;column name="<i>column1</i>"/&gt;
+	 * &lt;column name="<i>column2</i>"/&gt;
+	 * &lt;/unique&gt;
+	 * @return String
+	 */
 	@Override
 	public String toJdoXml() {
 		StringBuilder builder = new StringBuilder();

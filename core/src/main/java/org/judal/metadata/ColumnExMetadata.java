@@ -33,16 +33,25 @@ public class ColumnExMetadata implements ExtensionMetadata, Serializable {
 		this.vendor = vendor;
 	}
 
+	/**
+	 * @return String Key name
+	 */
 	@Override
 	public String getKey() {
 		return key;
 	}
 
+	/**
+	 * @return String Key value
+	 */
 	@Override
 	public String getValue() {
 		return value;
 	}
 
+	/**
+	 * @return String Vendor name
+	 */
 	@Override
 	public String getVendorName() {
 		return vendor;

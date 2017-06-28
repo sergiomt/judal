@@ -24,7 +24,6 @@ import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Expression;
 import org.judal.storage.query.Operator;
-import org.judal.storage.query.Predicate;
 import org.judal.storage.query.sql.SQLPredicate;
 import org.judal.storage.query.sql.SQLQuery;
 import org.judal.storage.relational.RelationalTable;
@@ -43,6 +42,20 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 	}
 
 	@Override
+	public void close() {
+		if (preparedInsert!=null) {
+			try {
+				preparedInsert.close();
+			} catch (SQLException sqle) {
+				if (DebugFile.trace)
+					DebugFile.writeln("Table.close() SQLException closing prepared insert statement "+sqle.getMessage());
+			}
+			preparedInsert = null;
+		}
+		super.close();
+	}
+
+	@Override
 	public PrimaryKeyMetadata getPrimaryKey() {
 		return tableDef.getPrimaryKeyMetadata();
 	}
@@ -57,6 +70,13 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 		getTableDef().setCreationTimestampColumnName(columnName);
 	}
 
+	private String paramSignature(Param... aParams) {
+		StringBuilder sign = new StringBuilder();
+		for (Param p : aParams)
+			sign.append(String.valueOf(p.getType()));
+		return sign.toString();
+	}
+
 	@Override
 	public void insert(Param... aParams) throws JDOException {
 		if (DebugFile.trace) {
@@ -68,28 +88,50 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 			DebugFile.incIdent();
 		}
 
-		StringBuffer oCols = new StringBuffer();
-		for (Param v : aParams)
-			oCols.append(",").append(v.getName());
-		PreparedStatement oStmt = null;			  
-		try {
-			String sSQL = "INSERT INTO "+name()+" ("+oCols.substring(1)+") VALUES (?"+String.format(String.format("%%0%dd",aParams.length-1),0).replace("0",",?")+")";
-			if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
-			oStmt = getConnection().prepareStatement(sSQL);
-			int p = 0;
+		final String paramSign = paramSignature(aParams);		
+		if (preparedInsert!=null && paramSign.equals(insertSignture)) {
+			try {
+				int p = 0;
+				for (Param v : aParams)
+					if (!(v.getValue() instanceof LatLong) && !(v.getValue() instanceof Expression))
+						preparedInsert.setObject(++p, v.getValue(), v.getType());
+				preparedInsert.executeUpdate();
+			} catch (SQLException sqle) {
+				if (DebugFile.trace) {
+					DebugFile.writeln("SQLException "+sqle.getMessage());
+					DebugFile.decIdent();
+				}	  
+				throw new JDOException(sqle.getMessage(), sqle);
+			}			
+		} else {
+			if (preparedInsert!=null) {
+				try {
+					preparedInsert.close();
+				} catch (SQLException sqle) {
+					if (DebugFile.trace) DebugFile.writeln("Table.insert() SQLException closing PreparedStatement "+sqle.getMessage());
+				}
+				preparedInsert = null;
+			}
+			insertSignture = paramSign;
+			StringBuilder oCols = new StringBuilder();
 			for (Param v : aParams)
-				if (!(v.getValue() instanceof LatLong) && !(v.getValue() instanceof Expression))
-					oStmt.setObject(++p, v.getValue(), v.getType());
-			oStmt.executeUpdate();
-			oStmt.close();
-			oStmt=null;
-		} catch (SQLException sqle) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("SQLException "+sqle.getMessage());
-				DebugFile.decIdent();
-			}	  
-			try { if (oStmt!=null) oStmt.close(); } catch (Exception ignore) { }
-			throw new JDOException(sqle.getMessage(), sqle);
+				oCols.append(",").append(v.getName());
+			try {
+				final String sSQL = "INSERT INTO "+name()+" ("+oCols.substring(1)+") VALUES (?"+String.format(String.format("%%0%dd",aParams.length-1),0).replace("0",",?")+")";
+				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
+				preparedInsert = getConnection().prepareStatement(sSQL);
+				int p = 0;
+				for (Param v : aParams)
+					if (!(v.getValue() instanceof LatLong) && !(v.getValue() instanceof Expression))
+						preparedInsert.setObject(++p, v.getValue(), v.getType());
+				preparedInsert.executeUpdate();
+			} catch (SQLException sqle) {
+				if (DebugFile.trace) {
+					DebugFile.writeln("SQLException "+sqle.getMessage());
+					DebugFile.decIdent();
+				}	  
+				throw new JDOException(sqle.getMessage(), sqle);
+			}			
 		}
 
 		if (DebugFile.trace) {
@@ -271,5 +313,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
 	}
-	
+
+	private String insertSignture = null;
+	private PreparedStatement preparedInsert = null;
 }

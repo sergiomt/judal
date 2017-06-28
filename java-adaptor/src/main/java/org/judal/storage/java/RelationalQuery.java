@@ -1,11 +1,18 @@
 package org.judal.storage.java;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.jdo.JDOException;
 
 import org.judal.storage.EngineFactory;
 import org.judal.storage.query.relational.AbstractRelationalQuery;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
+
+import com.knowgate.tuples.Pair;
+
 import org.judal.storage.relational.RelationalDataSource;
 
 public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R> {
@@ -56,6 +63,54 @@ public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R
 	public RecordSet<R> fetch() {
 		qry.setFilter(prd);
 		return viw.fetch(qry);
+	}
+
+	@SuppressWarnings("unchecked")
+	public RecordSet<R> fetchWithArray(Entry<String,Object>... params) {
+		if (params!=null) {
+			final int nparams = params.length;
+			StringBuilder paramList = new StringBuilder();
+			Object[] paramValues = new Object[nparams];
+			for (int p=0; p<nparams; p++) {
+				paramList.append(p==0 ? "" : ",").append(params[p].getKey());
+				paramValues[p] = params[p].getValue();
+			}
+			qry.declareParameters(paramList.toString());
+			return (RecordSet<R>) qry.executeWithArray(paramValues);
+		} else {
+			return (RecordSet<R>) qry.execute();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public RecordSet<R> fetchWithArray(Pair<String,Object>... params) {
+		if (params!=null) {
+			final int nparams = params.length;
+			StringBuilder paramList = new StringBuilder();
+			Object[] paramValues = new Object[nparams];
+			for (int p=0; p<nparams; p++) {
+				paramList.append(p==0 ? "" : ",").append(params[p].$1());
+				paramValues[p] = params[p].$2();
+			}
+			qry.declareParameters(paramList.toString());
+			return (RecordSet<R>) qry.executeWithArray(paramValues);
+		} else {
+			return (RecordSet<R>) qry.execute();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public RecordSet<R> fetchWithMap(LinkedHashMap<String,Object> params) {
+		if (params!=null & params.size()>0) {
+			StringBuilder paramList = new StringBuilder();
+			int p = 0;
+			for (Entry<String,Object> e : params.entrySet())
+				paramList.append(++p==1 ? "" : ",").append(e.getKey());
+			qry.declareParameters(paramList.toString());		
+			return (RecordSet<R>) qry.executeWithMap(params);			
+		} else {
+			return (RecordSet<R>) qry.execute();
+		}
 	}
 	
 }

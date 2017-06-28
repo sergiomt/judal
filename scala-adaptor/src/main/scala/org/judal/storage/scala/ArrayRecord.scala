@@ -23,6 +23,7 @@ import javax.jdo.JDOUserException
 
 import org.judal.metadata.ColumnDef
 import org.judal.metadata.TableDef
+import org.judal.metadata.ViewDef
 
 import org.judal.serialization.BytesConverter
 
@@ -44,7 +45,7 @@ import scala.collection.mutable.HashMap
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinition: TableDef) with ScalaRecord {
+class ArrayRecord(tableDefinition: ViewDef) extends AbstractRecord(tableDefinition: ViewDef) with ScalaRecord {
 
 	var valuesArray = new Array[AnyRef](getTableDef.getNumberOfColumns)
 	var columnsMap : HashMap[String,Int] = null
@@ -58,7 +59,7 @@ class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinit
 	 */
 	@throws(classOf[JDOException])
 	def this(dataSource: TableDataSource, tableName: String) = {
-		this(dataSource.getTableDef(tableName))
+		this(dataSource.getTableOrViewDef(tableName))
 	}
 
 	/**
@@ -80,7 +81,7 @@ class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinit
 	 */	
 	@throws(classOf[JDOException])
 	def this(dataSource: TableDataSource, tableName: String, columnNames:String* ) {
-		this(new TableDef(tableName, asJavaCollection(dataSource.getTableDef(tableName).filterColumns(columnNames.map(c => AbstractRecord.getColumnAlias(c)).toArray[String]).toSeq)))
+		this(new TableDef(tableName, asJavaCollection(dataSource.getTableOrViewDef(tableName).filterColumns(columnNames.map(c => AbstractRecord.getColumnAlias(c)).toArray[String]).toSeq)))
 		var pos = 0
 		for (columnName <- columnNames) {
 			val columnAlias = AbstractRecord.getColumnAlias(columnName)
@@ -214,18 +215,19 @@ class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinit
 	}
 
 	/**
-	 * 
+	 * <p>Set column value.</p>
 	 * @colpos int [1..columnCount()]
 	 * @obj AnyRef
+	 * @return Option[AnyRef]
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
-	override def put(colpos: Int, obj: AnyRef) : AnyRef = {
+	override def put(colpos: Int, obj: AnyRef) : Option[AnyRef] = {
 		val retval = valuesArray(colpos-1)
 		valuesArray(colpos-1) = obj
-		retval
+		Some(retval)
 	}
 
-	override def put(colname: String, bytes: Array[Byte]) : AnyRef = {
+	override def put(colname: String, bytes: Array[Byte]) : Option[AnyRef] = {
 		var retval : Array[Byte] = null
 		val index = getColumnIndex(colname) - 1
 		if (null==valuesArray(index)) {
@@ -237,7 +239,7 @@ class ArrayRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinit
 			retval = BytesConverter.toBytes(valuesArray(index), Types.JAVA_OBJECT)
 		}
 		valuesArray(index) = bytes
-		retval
+		Some(retval)
 	}
 	
 	override def values() : Iterable[AnyRef] = values.toSeq

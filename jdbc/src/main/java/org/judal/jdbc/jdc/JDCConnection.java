@@ -69,6 +69,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	private Connection conn;	
 	private JDCConnectionPool pool;
 	private boolean inuse;
+	private boolean started;
 		
 	private static final String DBMSNAME_MSSQL = RDBMS.MSSQL.toString();
 	private static final String DBMSNAME_POSTGRESQL = RDBMS.POSTGRESQL.toString();
@@ -84,6 +85,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		this.conn=conn;
 		this.pool=pool;
 		this.inuse=false;
+		this.started=false;
 		this.timestamp=0;
 		this.name = null;
 		this.schema=schemaname;
@@ -95,6 +97,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		this.conn=conn;
 		this.pool=pool;
 		this.inuse=false;
+		this.started=false;
 		this.timestamp=0;
 		this.name = null;
 		this.schema=null;
@@ -114,6 +117,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			if (DebugFile.trace) DebugFile.decIdent();
 			throw new XAException(sqle.getMessage());
 		}
+		started = true;
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End JDCConnection.startResource()");
@@ -131,6 +135,8 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 
 	@Override
 	protected void commitResource() throws XAException {
+		if (!started)
+			throw new XAException("JDCConnection.commitResource() Resource is not started");
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDCConnection.commitResource()");
 			DebugFile.incIdent();
@@ -144,6 +150,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			}
 			throw new XAException(sqle.getMessage());
 		}
+		started = false;
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End JDCConnection.commitResource()");
@@ -152,6 +159,8 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 
 	@Override
 	protected void rollbackResource() throws XAException {
+		if (!started)
+			throw new XAException("JDCConnection.rollbackResource() Resource is not started");
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDCConnection.rollbackResource()");
 			DebugFile.incIdent();
@@ -165,6 +174,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			}
 			throw new XAException(sqle.getMessage());
 		}
+		started = false;
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End JDCConnection.rollbackResource()");
@@ -343,10 +353,12 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			notifyClose();
 		}
 		else {
-			try { setAutoCommit(true); }
-			catch (SQLException sqle) { DebugFile.writeln("SQLException setAutoCommit(true) "+sqle.getMessage()); } 
-			try { setReadOnly(false); }
-			catch (SQLException sqle) { DebugFile.writeln("SQLException setReadOnly(false) "+sqle.getMessage()); } 
+			if (!started) {
+				try { setAutoCommit(true); }
+				catch (SQLException sqle) { DebugFile.writeln("SQLException setAutoCommit(true) "+sqle.getMessage()); } 
+				try { setReadOnly(false); }
+				catch (SQLException sqle) { DebugFile.writeln("SQLException setReadOnly(false) "+sqle.getMessage()); } 
+			}
 			pool.returnConnection(this);
 		}
 
@@ -368,10 +380,12 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			notifyClose();
 		}
 		else {
-			try { setAutoCommit(true); }
-			catch (SQLException sqle) { DebugFile.writeln("SQLException setAutoCommit(true) "+sqle.getMessage()); } 
-			try { setReadOnly(false); }
-			catch (SQLException sqle) { DebugFile.writeln("SQLException setReadOnly(false) "+sqle.getMessage()); } 
+			if (!started) {
+				try { setAutoCommit(true); }
+				catch (SQLException sqle) { DebugFile.writeln("SQLException setAutoCommit(true) "+sqle.getMessage()); } 
+				try { setReadOnly(false); }
+				catch (SQLException sqle) { DebugFile.writeln("SQLException setReadOnly(false) "+sqle.getMessage()); } 
+			}
 			pool.returnConnection(this, sCaller);
 		}
 
@@ -535,6 +549,8 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 
 	@Override
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
+		if (DebugFile.trace)
+			DebugFile.writeln("JDCConnection.setAutoCommit(" + String.valueOf(autoCommit)+ ") " + (this.name!=null ? this.name: "") + " " + this);
 		conn.setAutoCommit(autoCommit);
 	}
 

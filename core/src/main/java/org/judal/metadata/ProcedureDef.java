@@ -12,6 +12,11 @@ package org.judal.metadata;
  * KIND, either express or implied.
  */
 
+/**
+ * <p>Base class for  procedure definitions on each RDBMS.</p>
+ * @author Sergio Montoro Ten
+ *
+ */
 public class ProcedureDef extends CallableDef {
 
 	private static final long serialVersionUID = 10000l;

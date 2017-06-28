@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.logging.Logger;
 
 import javax.jdo.JDOException;
@@ -45,12 +46,13 @@ import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.jdc.JDCConnectionPool;
 import org.judal.jdbc.metadata.SQLFunctions;
 import org.judal.jdbc.metadata.SQLTableDef;
+import org.judal.jdbc.metadata.SQLViewDef;
 import org.judal.jdbc.oracle.OrclSequenceGenerator;
 import org.judal.jdbc.postgresql.PgSequenceGenerator;
 
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
-
+import org.judal.metadata.ViewDef;
 import org.judal.storage.Env;
 import org.judal.storage.Param;
 import org.judal.storage.DataSource;
@@ -78,6 +80,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	protected RDBMS databaseProductId;
 	protected SchemaMetaData metaData;
 	protected boolean useDatabaseMetadata;
+	protected boolean autocommit;
 
 	private static final String VERSION = "1.0.0";
 
@@ -98,6 +101,15 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		super(properties);
 		props = new HashMap<String,String>(17);
 		props.putAll(properties);
+		if (DebugFile.trace) {
+			StringBuilder b = new StringBuilder();
+			for (Entry<String,String> e : props.entrySet())
+				b.append(e.getKey()).append("=").append(e.getValue()).append(",");
+			if (b.length()>0) b.setLength(b.length()-1);
+			DebugFile.writeln("JDBCDataSource({" + b.toString() + "} "+ transactManager + " )");
+		}
+		String autoCommit = props.getOrDefault(AUTOCOMMIT, DEFAULT_AUTOCOMMIT);
+		autocommit = autoCommit.equalsIgnoreCase("true")  || autoCommit.equalsIgnoreCase("yes") || autoCommit.equalsIgnoreCase("1");
 		String metaDataFromDb = props.getOrDefault(USE_DATABASE_METADATA, DEFAULT_USE_DATABASE_METADATA);
 		useDatabaseMetadata = metaDataFromDb.equalsIgnoreCase("true") || metaDataFromDb.equalsIgnoreCase("yes") || metaDataFromDb.equalsIgnoreCase("1") || metaDataFromDb.equalsIgnoreCase("");
 		transactMan = transactManager;
@@ -210,6 +222,28 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	public Map<String,String> getProperties() {
 		return props;
 	}
+
+	// ----------------------------------------------------------
+	
+	/**
+	 * <p>Get the autoCommit behavior that connections obtained from this DataSource will have.</p>
+	 * @return boolean
+	 */
+	public boolean getDefaultAutoCommit() {
+		return autocommit;
+	}	
+
+	// ----------------------------------------------------------
+	
+	/**
+	 * <p>Get the autoCommit behavior that connections obtained from this DataSource will have.</p>
+	 * @param autoCommit boolean 
+	 */
+	public void setDefaultAutoCommit(final boolean autoCommit) {
+		if (DebugFile.trace)
+			DebugFile.writeln("JDBCDataSource.setDefaultAutoCommit(" + String.valueOf(autoCommit) + ")");
+		this.autocommit = autoCommit;
+	}	
 
 	// ----------------------------------------------------------
 
@@ -788,25 +822,62 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	// ----------------------------------------------------------
 
 	/**
-	 * <p>Get {@link SQLTableDef} object by name</p>
+	 * <p>Get {@link SQLViewDef} object by name</p>
 	 * @param sTable Table name
-	 * @return JDCTable object or <b>null</b> if no table was found with given name.
-	 * @throws IllegalStateException JDCTable objects are cached in a static Map,
-	 * the Map is loaded upon first call to a DBDataSource constructor.
-	 * If getJDCTable() is called before creating any instance of DBDataSource then an
-	 * JDOException will be thrown.
+	 * @return SQLViewDef object or <b>null</b> if no view was found with given name.
 	 * @throws NullPointerException if sTable is <b>null</b>
 	 */
-	public SQLTableDef getTableDef(String sTable) throws JDOException {
+	public SQLViewDef getViewDef(String sView) throws JDOException {
 
-		if (null==sTable) throw new NullPointerException("JDBCDataSource.getDBTableDef() table name cannot be null");
+		if (null==sView) throw new NullPointerException("JDBCDataSource.getViewDef() view name cannot be null");
 
 		if (null==metaData)
 			throw new JDOException("DBDataSource internal table map not initialized, call DBDataSource constructor first");
 
+		return (SQLViewDef) metaData.getView(sView.toLowerCase());
+	} 
+
+	// ----------------------------------------------------------
+
+	/**
+	 * <p>Get {@link SQLTableDef} object by name</p>
+	 * @param sTable Table name
+	 * @return SQLTableDef object or <b>null</b> if no table was found with given name.
+	 * @throws NullPointerException if sTable is <b>null</b>
+	 */
+	public SQLTableDef getTableDef(String sTable) throws JDOException {
+
+		if (null==sTable) throw new NullPointerException("JDBCDataSource.getTableDef() table name cannot be null");
+
+		if (null==metaData)
+			throw new JDOException("JDBCDataSource internal table map not initialized, call DBDataSource constructor first");
+
 		return (SQLTableDef) metaData.getTable(sTable.toLowerCase());
 	} 
 
+	// ----------------------------------------------------------
+
+	/**
+	 * <p>Get {@link SQLTableDef} or {@link SQLViewDef} object by name</p>
+	 * @param sObjectName Object name
+	 * @return ViewDef or TableDef object or <b>null</b> if no table nor view was found with given name.
+	 * @throws NullPointerException if sObjectName is <b>null</b>
+	 */
+	public ViewDef getTableOrViewDef(String sObjectName) throws JDOException {
+
+		if (null==sObjectName) throw new NullPointerException("JDBCDataSource.getTableOrViewDef() table name cannot be null");
+
+		if (null==metaData)
+			throw new JDOException("JDBCDataSource internal table map not initialized, call DBDataSource constructor first");
+
+		if (metaData.containsTable(sObjectName))
+			return metaData.getTable(sObjectName.toLowerCase());
+		else if (metaData.containsView(sObjectName))
+			return metaData.getView(sObjectName.toLowerCase());
+		else 
+			return null;
+	} 
+	
 	// ----------------------------------------------------------
 
 	/**
@@ -863,6 +934,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		}
 
 		oConn = super.getConnection(sCaller);
+		oConn.setAutoCommit(autocommit);
 
 		if (DebugFile.trace) {
 			if (oConn!=null) DebugFile.writeln("Connection process id. is " + oConn.pid());
@@ -926,6 +998,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			oConn = DriverManager.getConnection(getProperty(URI));
 		else
 			oConn = DriverManager.getConnection(getProperty(URI), sUser, sPasswd);   
+
+		oConn.setAutoCommit(autocommit);
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();

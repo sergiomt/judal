@@ -33,16 +33,26 @@ public class PropertyDef extends FieldDef implements PropertyMetadata {
 		this.fieldName = source.fieldName;
 	}
 
+	/**
+	 * @return PropertyDef new instance of PropertyDef with the same data as <b>this</b>.
+	 */
 	@Override
 	public PropertyDef clone() {
 		return new PropertyDef(this);
 	}
 	
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getFieldName() {
 		return fieldName;
 	}
 
+	/**
+	 * @param fieldName String
+	 * @return PropertyMetadata <b>this</b>
+	 */
 	@Override
 	public PropertyMetadata setFieldName(String fieldName) {
 		this.fieldName = fieldName;

@@ -1,6 +1,7 @@
 package org.judal.storage;
 
 /**
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -32,6 +33,11 @@ public class StandardConstraintsChecker implements ConstraintsChecker {
 	
 	// --------------------------------------------------------------------------
 
+	/**
+	 * <p>Constructor</p>
+	 * @param sequencer Sequence
+	 * @param fkChecker ForeignKeyChecker
+	 */
 	public StandardConstraintsChecker(Sequence sequencer, ForeignKeyChecker fkChecker) {
 		this.sequencer = sequencer;		
 		this.fkChecker = fkChecker;
@@ -39,6 +45,17 @@ public class StandardConstraintsChecker implements ConstraintsChecker {
 	
 	// --------------------------------------------------------------------------
 
+	/**
+	 * <p>Perform validations on a Record:</p>
+	 * <ol>
+	 * <li>For each column which value is <b>null</b> and has a default value defined, set the default value.</li>
+	 * <li>After performing step 1, check that columns with a NOT NULL constraint actually do not contain a <b>null</b> value.</li>
+	 * <li>Use the provided ForeignKeyChecker (if any) to check foreign key constraints.</li>
+	 * </ol>
+	 * @param oDts DataSource
+	 * @param oRec Rec
+	 * @throws JDOException
+	 */
 	public void check(DataSource oDts, Record oRec)
 			throws JDOException {
 
@@ -88,7 +105,7 @@ public class StandardConstraintsChecker implements ConstraintsChecker {
 						} else if (sDefVal.toString().indexOf('+')<0) {
 
 							if (sDefVal.toString().startsWith("$"))
-								oRec.put(n, Slugs.slugify(oRec.getString(sDefVal.toString().substring(1))).replace(' ','_').toLowerCase());
+								oRec.put(n, Slugs.transliterate(oRec.getString(sDefVal.toString().substring(1))).replace(' ','_').toLowerCase());
 							else if (sDefVal.toString().startsWith("'"))
 								oRec.put(n, sDefVal.toString().substring(1, sDefVal.toString().indexOf((char) 39, 1)));
 							else
@@ -99,7 +116,7 @@ public class StandardConstraintsChecker implements ConstraintsChecker {
 							if (aCols!=null)
 								for (int v=0; v<aCols.length; v++)
 									if (aCols[v].startsWith("$"))
-										sDefVal = sDefVal + Slugs.slugify(oRec.getString(aCols[v].substring(1))).replace(' ','_').toLowerCase();
+										sDefVal = sDefVal + Slugs.transliterate(oRec.getString(aCols[v].substring(1))).replace(' ','_').toLowerCase();
 									else if (aCols[v].startsWith("'"))
 										sDefVal = sDefVal + aCols[v].substring(1, aCols[v].indexOf((char) 39, 1));
 									else

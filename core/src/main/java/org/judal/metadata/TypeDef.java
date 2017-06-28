@@ -38,6 +38,11 @@ import com.knowgate.debug.DebugFile;
 
 import javax.jdo.annotations.IdentityType;
 
+/**
+ * Implementation of JDO TypeMetadata interface
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class TypeDef extends BaseDef implements TypeMetadata {
 
 	private static final long serialVersionUID = 10000l;
@@ -74,6 +79,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	private HashMap<String,QueryDef> queries;
 	private CaseInsensitiveColumnMap positions;
 
+	/**
+	 * <p>Constructor.</p>
+	 */
 	public TypeDef() {
 		queries = new HashMap<String,QueryDef>();
 		positions = new CaseInsensitiveColumnMap();
@@ -86,6 +94,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		catalog = null;
 	}
 
+	/**
+	 * <p>Create TypeDef by cloning another one.</p>
+	 */
 	public TypeDef(TypeDef source) {
 		super(source);
 		schema = source.schema;
@@ -102,6 +113,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		requiresExtent = source.requiresExtent;
 	}
 
+	/**
+	 * @return TypeDef Clone of <b>this</b>
+	 */
 	@Override
 	public TypeDef clone() {
 		return new TypeDef(this);
@@ -111,6 +125,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		columns.ensureCapacity(minCapacity);
 	}
 
+	/**
+	 * @return String Catalog name or empty String or <b>null</b>
+	 */
 	@Override
 	public String getCatalog() {
 		return catalog;
@@ -118,7 +135,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 
 
 	/**
-	 * @return Column names separated by commas
+	 * @return Column names separated by commas. If column count is zero then empty String is returned.
 	 */
 	public String getColumnsStr() {
 		if (getNumberOfColumns()==0) {
@@ -133,6 +150,13 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		}
 	} // getColumnsStr
 
+	/**
+	 * <p>Get column by name.</p>
+	 * Name matching is case insensitive.
+	 * @param columnName String
+	 * @return ColumnDef
+	 * @throws ArrayIndexOutOfBoundsException If no column with the given name is found.
+	 */
 	public ColumnDef getColumnByName(String columnName) throws ArrayIndexOutOfBoundsException {
 		final int ncols = columns.size();
 		if (ncols!=positions.size()) {
@@ -148,7 +172,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 
 	/**
 	 * Column position at the table
-	 * @param String columnName
+	 * @param columnName String
 	 * @return int [1..columnCount()] or -1 if no column with such name exists
 	 */
 	public int getColumnIndex(String columnName) {
@@ -163,27 +187,46 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		return colIndex;
 	}
 	
+	/**
+	 * @return DatastoreIdentityMetadata
+	 */
 	@Override
 	public DatastoreIdentityMetadata getDatastoreIdentityMetadata() {
 		return identityMeta;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	@Override
 	public boolean getDetachable() {
 		return detachable;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	@Override
 	public Boolean getEmbeddedOnly() {
 		return embeddedOnly;
 	}
 
+	/**
+	 * <p>Get array of known fetch groups applicable to this TypeDef.</p>
+	 * @return MemberGroupDef[]
+	 */
 	@Override
 	public MemberGroupDef[] getFetchGroups() {
 		return fetchGroups.toArray(new MemberGroupDef[fetchGroups.size()]);
 	}
 
-	public MemberGroupDef getFetchGroup(String groupName) {
+	/**
+	 * <p>Get fetch group by name.</p>
+	 * @param groupName String
+	 * @return MemberGroupDef or <b>null</b> if no fetch group is found with the given name.
+	 * @throws NullPointerException If groupName is <b>null</b>.
+	 */
+	public MemberGroupDef getFetchGroup(String groupName) throws NullPointerException {
 		if (null==groupName)
 			throw new NullPointerException("TypeDef.getFetchGroup() group name cannot be null");
 		for (MemberGroupDef group : fetchGroups)
@@ -192,6 +235,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		return null;
 	}
 
+	/**
+	 * @return ForeignKeyDef[] or <b>null</b> if this TypeDef has no foreign keys.
+	 */
 	@Override
 	public ForeignKeyDef[] getForeignKeys() {
 		if (fks.size()>0)
@@ -200,11 +246,17 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			return null;
 	}
 	
+	/**
+	 * @return IdentityType
+	 */
 	@Override
 	public IdentityType getIdentityType() {
 		return identityType;
 	}
 
+	/**
+	 * @return NonUniqueIndexDef[] or TypeDef.NoIndices if there aren't any non unique indexes.
+	 */
 	@Override
 	public NonUniqueIndexDef[] getIndices() {
 		if (nonUniqueIndexes.size()>0)
@@ -213,11 +265,18 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			return NoIndices;
 	}
 
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public InheritanceMetadata getInheritanceMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support getInheritanceMetadata()");
 	}
 
+	/**
+	 * @return JoinDef[] or TypeDef.NoJoins there aren't any joins.
+	 */
 	@Override
 	public JoinDef[] getJoins() {
 		if (getNumberOfJoins()>0)
@@ -226,98 +285,153 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			return NoJoins;
 	}
 
+	/**
+	 * <p>Get array of member fields of this TypeDef.</p>
+	 * @return FieldDef[]
+	 */
 	@Override
-	public MemberMetadata[] getMembers() {
+	public FieldDef[] getMembers() {
 		final int count = getNumberOfColumns();
 		FieldDef[] members = new FieldDef[count];
 		int m = 0;
-		for (ColumnDef column : columns) {
-			FieldDef member = new FieldDef();
-			member.setName(column.getName());
-			member.setColumn(column.getName());
-			member.setFieldType(column.getJDBCType());
-			member.setIndexed(column.isIndexed());
-			member.setPrimaryKey(column.isPrimaryKey());
-			member.setTable(column.getTableName());
-			if (column.getIndexType()==null)
-				member.setUnique(false);
-			else
-				member.setUnique(IndexDef.Type.ONE_TO_ONE.equals(column.getIndexType()));
-			members[m++] = member;
+		if (columns!=null) {
+			for (ColumnDef column : columns) {
+				FieldDef member = new FieldDef();
+				member.setName(column.getName());
+				member.setColumn(column.getName());
+				member.setFieldType(column.getJDBCType());
+				member.setIndexed(column.isIndexed());
+				member.setPrimaryKey(column.isPrimaryKey());
+				member.setTable(column.getTableName());
+				if (column.getIndexType()==null)
+					member.setUnique(false);
+				else
+					member.setUnique(IndexDef.Type.ONE_TO_ONE.equals(column.getIndexType()));
+				members[m++] = member;
+			}			
 		}
 		return members;
 	}
 
+	/**
+	 * <p>Set name of this TypeDef.</p>
+	 * @param name String
+	 * @return TypeMetadata <b>this</b>
+	 */
 	public TypeMetadata setName(String name) {
 		this.name = name;
 		return this;
 	}
 	
+	/**
+	 * @return int
+	 */
 	@Override
-	public int getNumberOfFetchGroups() {
-		return fetchGroups.size();
+	public int getNumberOfFetchGroups() {		
+		return fetchGroups==null ? 0 : fetchGroups.size();
 	}
 
+	/**
+	 * @return int
+	 */
 	@Override
 	public int getNumberOfForeignKeys() {
-		return fks.size();
+		return fks==null ? 0 : fks.size();
 	}
 
+	/**
+	 * @return int
+	 */
 	@Override
 	public int getNumberOfIndices() {
-		return nonUniqueIndexes.size();
+		return nonUniqueIndexes==null ? 0 : nonUniqueIndexes.size();
 	}
 
+	/**
+	 * @return int
+	 */
 	@Override
 	public int getNumberOfJoins() {
-		return joins.size();
+		return joins==null ? 0 : joins.size();
 	}
 
+	/**
+	 * @return int
+	 */
 	@Override
 	public int getNumberOfMembers() {
 		return getNumberOfColumns();
 	}
 
+	/**
+	 * <p>This method always returns zero.</p>
+	 * @return int 0
+	 */
 	@Override
 	public int getNumberOfQueries() {
 		return 0;
 	}
 
+	/**
+	 * @return int
+	 */
 	@Override
 	public int getNumberOfUniques() {
-		return uniqueIndexes.size();
+		return uniqueIndexes==null ? 0 : uniqueIndexes.size();
 	}
 
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getObjectIdClass() {
 		return objectIdClass;
 	}
 
+	/**
+	 * <p>This method always returns <b>null</b>.</p>
+	 * @return <b>null</b>
+	 */
 	@Override
 	public QueryMetadata[] getQueries() {
 		return null;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	@Override
 	public boolean getRequiresExtent() {
 		return requiresExtent;
 	}
 
+	/**
+	 * @return String Schema name or empty String or <b>null</b>
+	 */
 	@Override
 	public String getSchema() {
 		return schema;
 	}
 
+	/**
+	 * @return boolean
+	 */
 	@Override
 	public boolean getSerializeRead() {
 		return serializeRead;
 	}
 
+	/**
+	 * @return String Table name
+	 */
 	@Override
 	public String getTable() {
 		return table;
 	}
 
+	/**
+	 * @return UniqueIndexDef[] or TypeDef.NoUniques if there aren't any unique indexes.
+	 */
 	@Override
 	public UniqueIndexDef[] getUniques() {		
 		if (getNumberOfUniques()>0)
@@ -326,16 +440,27 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			return NoUniques;
 	}
 
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public VersionMetadata getVersionMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support getVersionMetadata()");
 	}
 
-	public void addColumnMetadata(ColumnDef cdef) throws JDOUserException {
+	/**
+	 * <p>Add a column to this TypeDef.</p>
+	 * @param cdef ColumnDef
+	 * @throws JDOException if the column position in the given ColumnDef does not match the next available column position at <b>this</b> TypeDef.
+	 * @throws JDOUserException if <b>this</b> is unmodifiable or another column with the same name is already present at this TypeDef.
+	 * @throws NullPointerException if ColumnDef is <b>null</b>
+	 */
+	public void addColumnMetadata(ColumnDef cdef) throws JDOException, JDOUserException, NullPointerException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		if (cdef==null)
-			throw new JDOUserException("TypeDef.addColumnMetadata(ColumnDef) ColumnDef must not be null");
+			throw new NullPointerException("TypeDef.addColumnMetadata(ColumnDef) ColumnDef must not be null");
 		if (DebugFile.trace)
 			DebugFile.writeln("TypeDef.addColumnMetadata(ColumnDef {"+cdef.getName()+","+String.valueOf(cdef.getPosition())+"}) at position "+String.valueOf(getNumberOfColumns()+1));
 		if (positions.containsKey(cdef.getName()))
@@ -351,7 +476,22 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		}
 	}
 	
-	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int maxLength, int decimalDigits, boolean isNullable, NonUniqueIndexDef.Type indexType, String foreignKeyTableName, String defaultValue, boolean isPrimaryKey) {
+	/**
+	 * <p>Add a column to this TypeDef.</p>
+	 * @param columnFamilyName String. Optional.
+	 * @param columnName String
+	 * @param columnType int one of java.sql.Types
+	 * @param maxLength int
+	 * @param decimalDigits int
+	 * @param isNullable boolean
+	 * @param indexType NonUniqueIndexDef.Type
+	 * @param foreignKeyTableName String
+	 * @param defaultValue String
+	 * @param isPrimaryKey boolean <b>true</b> if the column is part of the primary key or <b>false</b> otherwise.
+	 * @throws JDOUserException if <b>this</b> is unmodifiable or another column with the same name is already present at this TypeDef.
+	 */
+	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int maxLength, int decimalDigits, boolean isNullable, NonUniqueIndexDef.Type indexType, String foreignKeyTableName, String defaultValue, boolean isPrimaryKey)
+			throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		if (positions.containsKey(columnName))
@@ -378,7 +518,20 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			pk.addColumn(colDef);
 		}
 	}
-		
+	
+	/**
+	 * <p>Add a column to this TypeDef.</p>
+	 * @param columnFamilyName String. Optional.
+	 * @param columnName String
+	 * @param columnType int one of java.sql.Types
+	 * @param maxLength int
+	 * @param decimalDigits int
+	 * @param isNullable boolean
+	 * @param indexType NonUniqueIndexDef.Type
+	 * @param foreignKeyTableName String
+	 * @param defaultValue String
+	 * @throws JDOUserException if <b>this</b> is unmodifiable or another column with the same name is already present at this TypeDef.
+	 */
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int maxLength, int decimalDigits, boolean isNullable, NonUniqueIndexDef.Type indexType, String foreignKeyTableName, String defaultValue) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -408,11 +561,20 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			pk.clear();
 	}
 	
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public DatastoreIdentityMetadata newDatastoreIdentityMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support newDatastoreIdentityMetadata()");
 	}
 
+	/**
+	 * <p>Add a new MemberGroupDef with the given name.</p>
+	 * @param groupName String
+	 * @return MemberGroupDef
+	 */
 	@Override
 	public MemberGroupDef newFetchGroupMetadata(String groupName) {
 		MemberGroupDef group = new MemberGroupDef(groupName);
@@ -420,6 +582,11 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		return group;
 	}
 
+	/**
+	 * <p>Add a foreign key to this TypeDef.</p>
+	 * @param fk ForeignKeyDef
+	 * @throws JDOUserException if <b>this</b> is unmodifiable or another foreign key with the same name is already present at this TypeDef.
+	 */
 	public void addForeignKeyMetadata(ForeignKeyDef fk) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -430,6 +597,11 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		fks.add(fk);
 	}
 
+	/**
+	 * <p>Add a non unique index to this TypeDef.</p>
+	 * @param index NonUniqueIndexDef
+	 * @throws JDOUserException if <b>this</b> is unmodifiable or another index with the same name is already present at this TypeDef.
+	 */
 	public void addIndexMetadata(NonUniqueIndexDef index) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -442,12 +614,21 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		nonUniqueIndexes.add(index);
 	}
 	
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public InheritanceMetadata newInheritanceMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef doe snot support newInheritanceMetadata()");
 	}
 
-
+	/**
+	 * <p>Create a new PrimaryKeyDef.</p>
+	 * The newly created PrimaryKeyDef is not automatically added to primary of this TypeDef but must be added manually by calling setPrimaryKeyMetadata()
+	 * @return PrimaryKeyDef
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
 	public PrimaryKeyDef newPrimaryKeyMetadata() throws JDOUserException {
 		if (getUnmodifiable())
@@ -456,6 +637,11 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		return pk;
 	}
 
+	/**
+	 * <p>Set primary key of this TypeDef.</p>
+	 * @param pk PrimaryKeyDef
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	public void setPrimaryKeyMetadata(PrimaryKeyDef pk) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -465,21 +651,38 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 				getColumnByName(cdef.getName()).setPrimaryKey(true);
 	}
 	
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public PropertyMetadata newPropertyMetadata(String arg0) throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support newPropertyMetadata()");
 	}
 
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public PropertyMetadata newPropertyMetadata(Method arg0) throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support newPropertyMetadata()");
 	}
 
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public QueryMetadata newQueryMetadata(String queryName) throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support newQueryMetadata()");
 	}
 
+	/**
+	 * <p>Add unique index.</p>
+	 * @param index UniqueIndexDef
+	 * @throws JDOUserException if <b>this</b> is unmodifiable or another with the same name already exists at this TypeDef.
+	 */
 	public void addUniqueMetadata(UniqueIndexDef index) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -492,35 +695,59 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		uniqueIndexes.add(index);
 	}
 
+	/**
+	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
+	 * @throws JDOUnsupportedOptionException
+	 */
 	@Override
 	public VersionMetadata newVersionMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef doe snot support newVersionMetadata()");
 	}
 
+	/**
+	 * @param cacheable boolean
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
-	public TypeMetadata setCacheable(boolean cacheable) {
+	public TypeDef setCacheable(boolean cacheable) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		super.cacheable = cacheable;
 		return this;
 	}
 
+	/**
+	 * @param catalog String Catalog Name
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
-	public TypeMetadata setCatalog(String catalog) {
+	public TypeDef setCatalog(String catalog) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.catalog = catalog;
 		return this;
 	}
 
+	/**
+	 * @param detachable boolean
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
-	public TypeMetadata setDetachable(boolean detachable) {
+	public TypeDef setDetachable(boolean detachable) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.detachable = detachable;
 		return this;
 	}
 
+	/**
+	 * @param embeddedOnly boolean
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
 	public TypeMetadata setEmbeddedOnly(boolean embeddedOnly) {
 		if (getUnmodifiable())
@@ -529,6 +756,11 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		return this;
 	}
 
+	/**
+	 * @param identityType IdentityType
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
 	public TypeMetadata setIdentityType(IdentityType identityType) {
 		if (getUnmodifiable())
@@ -537,38 +769,63 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		return this;
 	}
 
+	/**
+	 * @param objectClass String
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
-	public TypeMetadata setObjectIdClass(String objectClass) {
+	public TypeDef setObjectIdClass(String objectClass) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.objectIdClass = objectClass;
 		return this;
 	}
 
+	/**
+	 * @param requiresExtent boolean
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
-	public TypeMetadata setRequiresExtent(boolean requiresExtent) {
+	public TypeDef setRequiresExtent(boolean requiresExtent) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.requiresExtent = requiresExtent;
 		return this;
 	}
 
+	/**
+	 * @param schema String Schema Name
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
-	public TypeMetadata setSchema(String schema) {
+	public TypeDef setSchema(String schema) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.schema = schema;
 		return this;
 	}
 
+	/**
+	 * @param serializeRead boolean
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
-	public TypeMetadata setSerializeRead(boolean serializeRead) {
+	public TypeDef setSerializeRead(boolean serializeRead) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.serializeRead = serializeRead;
 		return this;
 	}
 
+	/**
+	 * @param table String Table Name
+	 * @return TypeDef <b>this</b>
+	 * @throws JDOUserException if <b>this</b> is unmodifiable.
+	 */
 	@Override
 	public TypeMetadata setTable(String table) {
 		if (getUnmodifiable())

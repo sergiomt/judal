@@ -9,7 +9,7 @@ import org.judal.storage.table.TableDataSource;
 public class TestStored extends ArrayRecord {
 
 	public TestStored(TableDataSource dataSource, String tableName) throws JDOException {
-		super(dataSource, tableName);
+		super(dataSource, tableName, "key", "value");
 	}
 
 }

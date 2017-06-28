@@ -13,6 +13,8 @@ import org.judal.storage.table.TableDataSource;
 
 public class MapRecord2 extends MapRecord implements TestRecord2 {
 
+	private static final long serialVersionUID = 1L;
+
 	public static String tableName = "unittest_table2";
 	
 	public static TableDataSource dataSource = null;
@@ -33,6 +35,11 @@ public class MapRecord2 extends MapRecord implements TestRecord2 {
 		tbl.addColumnMetadata("default", "created", Types.TIMESTAMP, false);
 		tbl.addColumnMetadata("default", "description", Types.VARCHAR, 255, true);
 		return tbl;
+	}
+
+	@Override
+	public TableDef getTableDef() {
+		return MapRecord2.getTableDef(dataSource);
 	}
 
 	@Override

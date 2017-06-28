@@ -20,6 +20,7 @@ import java.util.Arrays
 
 import javax.jdo.JDOException
 
+import org.judal.metadata.ViewDef
 import org.judal.metadata.TableDef
 import org.judal.metadata.ColumnDef
 import org.judal.serialization.BytesConverter
@@ -43,7 +44,7 @@ import scala.collection.JavaConverters._
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinition: TableDef) with ScalaRecord {
+class MapRecord(tableDefinition: ViewDef) extends AbstractRecord(tableDefinition: ViewDef) with ScalaRecord {
 
   /**
    * Column names are case insensitive, so specialize a HashMap to implement case insensitive lookups
@@ -75,7 +76,7 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 	 */
 	@throws(classOf[JDOException])
 	def this(dataSource: TableDataSource, tableName: String) = {
-		this(dataSource.getTableDef(tableName))
+		this(dataSource.getTableOrViewDef(tableName))
 	}
 
 	/**
@@ -97,18 +98,18 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 	 */
 	@throws(classOf[JDOException])
 	def this(dataSource: TableDataSource, tableName:String , columnNames:String*) = {
-		this(new TableDef(tableName, asJavaCollection(dataSource.getTableDef(tableName).filterColumns(columnNames.map(c => AbstractRecord.getColumnAlias(c)).toArray[String]).toSeq)))
+		this(new TableDef(tableName, asJavaCollection(dataSource.getTableOrViewDef(tableName).filterColumns(columnNames.map(c => AbstractRecord.getColumnAlias(c)).toArray[String]).toSeq)))
 	}
 
 	/**
 	 * Alternative constructor
-	 * @param tableDefinition TableDef
+	 * @param tableDefinition ViewDef
 	 * @param fieldHelper FieldHelper
 	 * @param constraintsChecker ConstraintsChecker
 	 * @throws JDOException 
 	 */
 	@throws(classOf[JDOException])
-	def this(tableDefinition: TableDef, fieldHelper: FieldHelper, constraintsChecker: ConstraintsChecker) = {
+	def this(tableDefinition: ViewDef, fieldHelper: FieldHelper, constraintsChecker: ConstraintsChecker) = {
 		this(tableDefinition)
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);		
@@ -116,24 +117,24 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 
 	/**
 	 * Alternative constructor
-	 * @param tableDefinition TableDef
+	 * @param tableDefinition ViewDef
 	 * @param fieldHelper FieldHelper
 	 * @throws JDOException 
 	 */
 	@throws(classOf[JDOException])
-	def this(tableDefinition: TableDef, fieldHelper: FieldHelper) = {
+	def this(tableDefinition: ViewDef, fieldHelper: FieldHelper) = {
 		this(tableDefinition)
 		setFieldHelper(fieldHelper);
 	}
 
 	/**
 	 * Alternative constructor
-	 * @param tableDefinition TableDef
+	 * @param tableDefinition ViewDef
 	 * @param constraintsChecker ConstraintsChecker
 	 * @throws JDOException 
 	 */
 	@throws(classOf[JDOException])
-	def this(tableDefinition: TableDef, constraintsChecker: ConstraintsChecker) = {
+	def this(tableDefinition: ViewDef, constraintsChecker: ConstraintsChecker) = {
 		this(tableDefinition)
 		setConstraintsChecker(constraintsChecker);		
 	}
@@ -177,15 +178,23 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
    */	
 	override def keys() = valuesMap.keys
 	
-  /**
-   * {@inheritDoc}
-   */	
-	override def put(colpos: Int, value: AnyRef) : Option[AnyRef] = valuesMap.put(columnIndexes.get(colpos).get, value)
+	/**
+	 * <p>Set column value.</p>
+	 * @colpos int [1..columnCount()]
+	 * @obj AnyRef
+	 * @return Option[AnyRef]
+	 * @throws ArrayIndexOutOfBoundsException
+	 */
+	override def put(colpos: Int, value: AnyRef) : Option[AnyRef] = {
+    if (!columnIndexes.contains(colpos))
+      throw new ArrayIndexOutOfBoundsException("Cannot find column at position " + colpos + " of " + columnIndexes.size +" columns")
+    valuesMap.put(columnIndexes.get(colpos).get, value)
+  }
 
   /**
    * {@inheritDoc}
    */	
-	override def put(colname: String, bytes: Array[Byte]) : AnyRef = {
+	override def put(colname: String, bytes: Array[Byte]) : Option[AnyRef] = {
 		var retval : Array[Byte] = null
 		val former = valuesMap.get(colname)
 		if (former.isEmpty)
@@ -195,7 +204,7 @@ class MapRecord(tableDefinition: TableDef) extends AbstractRecord(tableDefinitio
 		else
 			retval = BytesConverter.toBytes(former, Types.JAVA_OBJECT)
 		valuesMap.put(colname, bytes);
-		return retval;
+		return Some(retval)
 	}
 
   /**

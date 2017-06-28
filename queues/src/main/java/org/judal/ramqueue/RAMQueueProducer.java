@@ -37,9 +37,13 @@ import com.knowgate.tuples.Pair;
 import com.knowgate.tuples.Triplet;
 
 import org.judal.jms.ObjectMessageImpl;
+import org.judal.metadata.ColumnDef;
+import org.judal.metadata.PrimaryKeyDef;
 
 /**
- * RecordQueueProducer interface implementation
+ * <p>RecordQueueProducer interface implementation.</p>
+ * This implementation instantiates an in-memory RAMQueueConsumer
+ * and a DataSource for processing the produced messages.
  * @author Sergio Montoro Ten
  */
 public class RAMQueueProducer implements RecordQueueProducer {
@@ -49,6 +53,15 @@ public class RAMQueueProducer implements RecordQueueProducer {
 	private RAMQueueConsumer oCon;
 	private TableDataSource oDts;
 
+	/**
+	 * <p>Constructor.</p>
+	 * Create and start a RAMQueueConsumer()
+	 * @param engineName String
+	 * @param properties Map&lt;String,String&gt; for DataSource creation.
+	 * @throws JDOException
+	 * @throws IllegalStateException
+	 * @throws InstantiationException
+	 */
 	public RAMQueueProducer(String engineName, Map<String,String> properties)
 			throws JDOException, IllegalStateException, InstantiationException {
 		if (DebugFile.trace) DebugFile.writeln("new RAMQueueConsumer("+this+")");
@@ -70,6 +83,9 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		return oCon;
 	}
 
+	/**
+	 * Stop the associated RecordQueueConsumer and close the associated DataSource.
+	 */
 	@Override
 	public void close() throws JDOException {
 
@@ -92,8 +108,16 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		}
 	}
 
+	/**
+	 * <p>Perform asynchronous insert operation.</p>
+	 * There must not exist another Record with the same primary key in the target table.
+	 * @param oRec Record Instance of a Record subclass
+	 * @param aParams Param[] Parameters to be binded
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException If another Record already exists with the same primary key
+	 */
 	@Override
-	public void insert(Record oRec, Param[] aParams) throws JDOException {
+	public void insert(Record oRec, Param[] aParams) throws JDOException, IllegalStateException {
 		if (oCon==null) throw new IllegalStateException("Queue is closed");
 		ObjectMessageImpl oMsg = new ObjectMessageImpl(oDts);
 		try {
@@ -105,23 +129,38 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		oCon.onMessage(oMsg);
 	}
 
+	/**
+	 * <p>Perform synchronous or asynchronous insert operation.</p>
+	 * There must not exist another Record with the same primary key in the target table.
+	 * @param oRec Record Instance of a Record subclass
+	 * @param aParams Param[] Parameters to be binded
+	 * @param oProps Properties If property "synchronous" is set to "true" then the operation will be performed synchronously using the current thread
+	 * otherwise the insert operation will be sent to the RAMQueueConsumer queue.
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException If another Record already exists with the same primary key
+	 */
 	@Override
 	public void insert(Record oRec, Param[] aParams, Properties oProps) throws JDOException {
 		if (oProps.getProperty("synchronous","false").equals("true")) {
-			IndexableTable oTbl = null;
-			try {
-			  oTbl = oDts.openIndexedTable(oRec);
+			try (IndexableTable oTbl = oDts.openIndexedTable(oRec)) {
 			  oTbl.insert(aParams);
-			} finally {
-				if (oTbl!=null) oTbl.close();
 			}
 		} else {
 			insert(oRec, aParams);
 		}
 	}
 
+	/**
+	 * <p>Perform asynchronous update operation.</p>
+	 * There should exist another Record with the same primary key in the target table.
+	 * @param oRec Record Instance of a Record subclass
+	 * @param aParams Param[] Values to be updated
+	 * @param aWhere Param[] Values for the filter clause defining the records to be updated
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException
+	 */
 	@Override
-	public void update(Record oRec, Param[] aParams, Param[] aWhere) throws JDOException {
+	public void update(Record oRec, Param[] aParams, Param[] aWhere) throws IllegalStateException,JDOException {
 		if (oCon==null) throw new IllegalStateException("Queue is closed");
 		ObjectMessageImpl oMsg = new ObjectMessageImpl(oDts);
 		try {
@@ -133,6 +172,17 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		oCon.onMessage(oMsg);
 	}
 
+	/**
+	 * <p>Perform synchronous or asynchronous update operation.</p>
+	 * There should exist another Record with the same primary key in the target table.
+	 * @param oRec Record Instance of a Record subclass
+	 * @param aParams Param[] Values to be updated
+	 * @param aWhere Param[] Values for the filter clause defining the records to be updated
+	 * @param oProps Properties If property "synchronous" is set to "true" then the operation will be performed synchronously using the current thread
+	 * otherwise the update operation will be sent to the RAMQueueConsumer queue.
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException
+	 */
 	@Override
 	public void update(Record oRec, Param[] aParams, Param[] aWhere, Properties oProps) throws JDOException {
 		if (oProps.getProperty("synchronous","false").equals("true")) {
@@ -148,6 +198,13 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		}
 	}
 	
+	/**
+	 * <p>Perform asynchronous store operation.</p>
+	 * A store operation will update the given Record if it already exists or insert it if no previous record with the same primary key exists.
+	 * @param oRec Record Instance of a Record subclass
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException
+	 */
 	@Override
 	public void store(Record oRec) throws JDOException {
 		if (oCon==null) throw new IllegalStateException("Queue is closed");
@@ -161,6 +218,13 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		oCon.onMessage(oMsg);
 	}
 
+	/**
+	 * <p>Perform asynchronous store operation.</p>
+	 * A store operation will update the given Records if they already exist or insert it if no previous records with the same primary key exist.
+	 * @param oRec Record[] Instances of a Record subclass
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException
+	 */
 	@Override
 	public void store(Record[] aRecs) throws JDOException, ArrayIndexOutOfBoundsException {
 		if (oCon==null) throw new IllegalStateException("Queue is closed");
@@ -186,6 +250,15 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		}
 	}
 
+	/**
+	 * <p>Perform synchronous or asynchronous store operation.</p>
+	 * A store operation will update the given Records if they already exist or insert it if no previous records with the same primary key exist.
+	 * @param oRec Record[] Instances of a Record subclass
+	 * @param oProps Properties If property "synchronous" is set to "true" then the operation will be performed synchronously using the current thread
+	 * otherwise the store operation will be sent to the RAMQueueConsumer queue.
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException
+	 */
 	@Override
 	public void store(Record[] aRecs, Properties oProps) throws JDOException {
 		if (oCon==null) throw new IllegalStateException("Queue is closed");
@@ -243,6 +316,16 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		}
 	}
 
+	/**
+	 * <p>Perform synchronous or asynchronous store operation.</p>
+	 * A store operation will update the given Record if it already exists or insert it if no previous record with the same primary key exists.
+	 * @param oRec Record Instance of a Record subclass
+	 * @param oProps Properties If property "synchronous" is set to "true" then the operation will be performed synchronously using the current thread
+	 * otherwise the store operation will be sent to the RAMQueueConsumer queue.
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException
+	 */
+	@Override
 	public void store(Record oRec, Properties oProps) throws JDOException {
 		if (oCon==null) throw new IllegalStateException("Queue is closed");
 		if (oProps.getProperty("synchronous","false").equals("true")) {
@@ -280,6 +363,16 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		}
 	}
 
+	/**
+	 * <p>Perform synchronous or asynchronous delete operation.</p>
+	 * There must not exist another Record with the same primary key in the target table.
+	 * @param oRec Record Instance of a Record subclass
+	 * @param aKeys String[] Values of the primary keys of the records to be deleted
+	 * @param oProps Properties If property "synchronous" is set to "true" then the operation will be performed synchronously using the current thread
+	 * otherwise the delete operation will be sent to the RAMQueueConsumer queue.
+	 * @throws IllegalStateException if the queue is closed
+	 * @throws JDOException If another Record already exists with the same primary key
+	 */
 	@Override
 	public void delete(Record oRec, String[] aKeys, Properties oProps) throws JDOException {
 		if (oCon==null) throw new IllegalStateException("Queue is closed");
@@ -294,7 +387,7 @@ public class RAMQueueProducer implements RecordQueueProducer {
 			Table oTbl = null;
 			try {
 				oTbl = oDts.openTable(oRec);
-				for (String k : aKeys) {
+				for (String k : aKeys) {					
 					oRec.setKey(k);
 					oTbl.delete(oRec);
 				} // next
@@ -322,13 +415,15 @@ public class RAMQueueProducer implements RecordQueueProducer {
 				oMsg.setJMSTimestamp(System.currentTimeMillis());
 				oMsg.setIntProperty("command", ObjectMessageImpl.COMMAND_DELETE_RECORDS);
 				boolean first = false;
-				StringBuffer buff = new StringBuffer();
+				StringBuilder buff = new StringBuilder();
 				for (String k : aKeys) {
-					if (first)
-						first = false;
-					else
-						buff.append("`");
-					buff.append(k);					
+					if (k!=null && k.trim().length()>0) {
+						if (first)
+							first = false;
+						else
+							buff.append("`");
+						buff.append(k);
+					}
 				}
 				oMsg.setStringProperty("keys", buff.toString());
 			} catch (JMSException neverthrown) { }			
@@ -341,6 +436,11 @@ public class RAMQueueProducer implements RecordQueueProducer {
 		}		
 	}
 
+	/**
+	 * <p>Wait for a certain time and call close.</p>
+	 * @param bInmediate boolean If <b>true</p> Then ignore iTimeout and stop immediately.
+	 * @param iTimeout int Time to wait in milliseconds before stopping.
+	 */
 	@Override
 	public void stop(boolean bInmediate, int iTimeout) throws JDOException {
 		if (iTimeout>0 && !bInmediate) {

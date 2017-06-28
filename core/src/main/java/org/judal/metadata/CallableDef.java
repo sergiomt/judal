@@ -30,6 +30,10 @@ public abstract class CallableDef extends ExtendableDef implements Scriptable {
 	
 	public CallableDef() { }
 
+	/**
+	 * <p>Set callable object name</p>
+	 * @param name String
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
@@ -45,8 +49,8 @@ public abstract class CallableDef extends ExtendableDef implements Scriptable {
 
 	/**
 	 * <p>Set callable object source code.</p>
-	 * This source code is dependant on the data source where the callable object is instantiated.
-	 * @param String
+	 * This source code is dependent on the data source where the callable object is instantiated.
+	 * @param source String
 	 */
 	public void setSource(String source) {
 		this.source = source;
@@ -63,7 +67,7 @@ public abstract class CallableDef extends ExtendableDef implements Scriptable {
 
 	/**
 	 * <p>Set source code needed to drop the callable object.</p>
-	 * @param String For example "DROP PROCEDURE proc_name"
+	 * @param drop String For example "DROP PROCEDURE proc_name"
 	 */
 	public void setDrop(String drop) {
 		this.drop = drop;
@@ -80,7 +84,7 @@ public abstract class CallableDef extends ExtendableDef implements Scriptable {
 	
 	/**
 	 * <p>Callable object parameters definition.</p>
-	 * @param Param[]
+	 * @param params Param[]
 	 */
 	public void setParams(Param[] params) {
 		this.params = params;

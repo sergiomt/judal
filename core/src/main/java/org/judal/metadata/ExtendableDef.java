@@ -52,13 +52,17 @@ public abstract class ExtendableDef implements Metadata, Serializable {
 	}
 
 	/**
-	 * @return int
+	 * @return int Number of extensions
 	 */
 	@Override
 	public int getNumberOfExtensions() {
 		return getExtensions().length;
 	}
 
+	/**
+	 * <p>Get parent Metadata.</p>
+	 * @return Metadata
+	 */
 	@Override
 	public Metadata getParent() {
 		return parent;

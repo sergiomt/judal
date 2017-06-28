@@ -1,5 +1,17 @@
 package org.judal.storage.query;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -34,7 +46,7 @@ import static org.judal.storage.query.Connective.*;
 * Example of Usage #3: Get all contacts whose title is "CEO" or "CIO" and are women or older that 45 years old
 * Term t1 = new QueryTerm("de_title","IN",new String[]{"CEO","CIO"});
 * Term t2 = new QueryTerm("id_gender","=","F");
-* Term t3 = new QueryTerm("dt_birth","<=",new Date()-1419120000000l);
+* Term t3 = new QueryTerm("dt_birth","&lt;=",new Date()-1419120000000l);
 * AndPredicate p = new AndPredicate();
 * OrPredicate o = new OrPredicate();
 * p.add(t1);
@@ -228,7 +240,7 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	
 	/**
 	 * Get predicate parts
-	 * @return ArrayList<QueryPart>
+	 * @return ArrayList&lt;QueryPart&gt;
 	 */
 	public ArrayList<Part> parts() {
 		return oParts;
@@ -282,7 +294,7 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 				StringBuilder b = new StringBuilder();
 				for (Object param : oParams)
 					b.append(param==null ? null : param.getClass().getName()).append(",");
-				b.setLength(b.length()-1);
+				if (b.length()>0) b.setLength(b.length()-1);
 				DebugFile.writeln("End Predicate.getParameters() : { "+b.toString()+"}");
 			} else {
 				DebugFile.writeln("End Predicate.getParameters() : { }");
@@ -292,8 +304,16 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 		return oParams.toArray();
 	}
 
+	/**
+	 * <p>Get text representation of this Predicate according to the query syntax required by the implementation.</p>
+	 * @return String
+	 */
 	public abstract String getText();
 
+	/**
+	 * <p>Get parameterized text representation of this Predicate according to the query syntax required by the implementation.</p>
+	 * @return String
+	 */
 	public abstract String getTextParametrized();
 	
 }

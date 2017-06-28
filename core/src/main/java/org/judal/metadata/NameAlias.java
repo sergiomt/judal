@@ -20,7 +20,7 @@ import javax.jdo.JDOUserException;
 import org.judal.storage.table.Record;
 
 /**
- * Helper class from parsing "<i>name</i>.<i>alias</i>" or "<i>name</i> AS <i>alias</i>" strings
+ * Helper class for parsing "<i>name</i>.<i>alias</i>" or "<i>name</i> AS <i>alias</i>" strings
  * @author Sergio Montoro Ten
  *
  */
@@ -113,7 +113,7 @@ public class NameAlias {
 
 	/**
 	 * Shortcut for new NameAlias(record.getTableName(), alias)
-	 * @param record Record
+	 * @param rec Record
 	 * @param alias String
 	 * @return NameAlias
 	 */

@@ -1,5 +1,17 @@
 package org.judal.storage.query;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -12,7 +24,8 @@ import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
 
-/*
+/**
+* <p>Predicate Term</p>
 * @author Sergio Montoro Ten
 * @version 1.0
 */
@@ -45,7 +58,7 @@ public abstract class Term implements Part,Serializable {
 	/**
 	 * Create term.
 	 * @param sColumnName String Column Name
-	 * @param sOperator String Operator. Must be one of {"=","<>",">=","<=","IS","IS NOT","IS NULL","IS NOT NULL","LIKE","ILIKE","BETWEEN","EXISTS","NOT EXISTS"}
+	 * @param sOperator String Operator. Must be one of {"=","&lt;&gt;","&gt;=","&lt;=","IS","IS NOT","IS NULL","IS NOT NULL","LIKE","ILIKE","BETWEEN","EXISTS","NOT EXISTS"}
 	 * @param oColumnValue Object column value
 	 * @throws ArrayIndexOutOfBoundsException if oColumnValue is an array
 	 */
@@ -158,7 +171,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Must be Operator.BETWEEN or Operator.IN 
-	 * @param oColumnValue String[] column values
+	 * @param aColumnValues String[] column values
 	 */
 	public Term(String sColumnName, String sOperator, String[] aColumnValues) {
 	  oAliasedTable = null;
@@ -174,7 +187,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
-	 * @param oColumnValue Integer[] column values
+	 * @param aColumnValues Integer[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Integer[] aColumnValues) {
 	  oAliasedTable = null;
@@ -190,7 +203,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
-	 * @param oColumnValue int[] column values
+	 * @param aColumnValues int[] column values
 	 */
 	public Term(String sColumnName, String sOperator, int[] aColumnValues) {
 	  oAliasedTable = null;
@@ -206,7 +219,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
-	 * @param oColumnValue Long[] column values
+	 * @param aColumnValues Long[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Long[] aColumnValues) {
 	  oAliasedTable = null;
@@ -222,7 +235,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
-	 * @param oColumnValue long[] column values
+	 * @param aColumnValues long[] column values
 	 */
 	public Term(String sColumnName, String sOperator, long[] aColumnValues) {
 		  oAliasedTable = null;
@@ -238,7 +251,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
-	 * @param oColumnValue Float[] column values
+	 * @param aColumnValues Float[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Float[] aColumnValues) {
 		  oAliasedTable = null;
@@ -254,7 +267,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
-	 * @param oColumnValue Float[] column values
+	 * @param aColumnValues Float[] column values
 	 */
 	public Term(String sColumnName, String sOperator, float[] aColumnValues) {
 		  oAliasedTable = null;
@@ -270,7 +283,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
-	 * @param oColumnValue Double[] column values
+	 * @param aColumnValues Double[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Double[] aColumnValues) {
 		  oAliasedTable = null;
@@ -286,7 +299,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
-	 * @param oColumnValue double[] column values
+	 * @param aColumnValues double[] column values
 	 */
 	public Term(String sColumnName, String sOperator, double[] aColumnValues) {
 		  oAliasedTable = null;
@@ -302,9 +315,9 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.IN or Operator.WITHIN
-	 * @param double value 1
-	 * @param double value 2
-	 * @param double value 3
+	 * @param d1 double value 1
+	 * @param d2 double value 2
+	 * @param d3 double value 3
 	 */
 	public Term(String sColumnName, String sOperator, double d1, double d2, double d3) {
 		  oAliasedTable = null;
@@ -321,7 +334,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
-	 * @param oColumnValue java.util.Date[] column values
+	 * @param aColumnValues java.util.Date[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Date[] aColumnValues) {
 		  oAliasedTable = null;
@@ -337,7 +350,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
-	 * @param oColumnValue java.sql.Date[] column values
+	 * @param aColumnValues java.sql.Date[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Calendar[] aColumnValues) {
 		  oAliasedTable = null;
@@ -353,7 +366,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.WITHIN
-	 * @param oColumnValue java.sql.Date[] column values
+	 * @param aColumnValues java.sql.Date[] column values
 	 */
 	public Term(String sColumnName, String sOperator, java.sql.Date[] aColumnValues) {
 		  oAliasedTable = null;
@@ -369,7 +382,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN
-	 * @param oColumnValue Timestamp[] column values
+	 * @param aColumnValues Timestamp[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Timestamp[] aColumnValues) {
 		  oAliasedTable = null;
@@ -385,7 +398,7 @@ public abstract class Term implements Part,Serializable {
 	 * Create term.
 	 * @param sColumnName String Column Name
 	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN
-	 * @param oColumnValue BigDecimal[] column values
+	 * @param aColumnValues BigDecimal[] column values
 	 */
 	public Term(String sColumnName, String sOperator, BigDecimal[] aColumnValues) {
 		  oAliasedTable = null;
@@ -420,7 +433,8 @@ public abstract class Term implements Part,Serializable {
 	}
 
 	/**
-	 * @return One of {"=","<>",">=","<=","IN","BETWEEN","IS","IS NOT","LIKE","ILIKE"}
+	 * @return One of org.judal.storage.query.Operator constants
+	 * @see org.judal.storage.query.Operator
 	 */
 	public String getOperator() {
 		return sOper;

@@ -87,6 +87,19 @@ public class SQLQuery extends AbstractQuery {
 		return (JDBCRelationalView) getCandidates();
 	}
 	
+	/**
+	 * <p>Change transaction isolation level.</p>
+	 * If <b>true</b> then the transaction isolation level will be set to
+	 * TRANSACTION_SERIALIZABLE before fetching results, otherwise the
+	 * transaction isolation level will be the default of the database
+	 * in use which is usually TRANSACTION_READ_COMMITTED
+	 * @param Boolean serialize
+	 */
+	@Override
+	public void setSerializeRead(Boolean serialize) {
+		super.setSerializeRead(serialize);
+	}
+	
 	@Override
 	public String getResult() {
 		final String retval = super.getResult();
@@ -160,6 +173,7 @@ public class SQLQuery extends AbstractQuery {
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
 		RecordSet<? extends Record> retval;
+		int formerIsolationLevel = java.sql.Connection.TRANSACTION_READ_COMMITTED;
 
 		long qtime = 0;
 
@@ -173,9 +187,19 @@ public class SQLQuery extends AbstractQuery {
 			DebugFile.incIdent();
 
 		try {
+			if (getSerializeRead()) {
+				formerIsolationLevel = getView().getConnection().getTransactionIsolation();
+				getView().getConnection().setTransactionIsolation(java.sql.Connection.TRANSACTION_SERIALIZABLE);
+			}
+
 			stmt = prepareSelect();
 
 			setParameters(stmt);
+
+			if (getDatastoreReadTimeoutMillis()!=null && getDatastoreReadTimeoutMillis()>0) {
+				if (DebugFile.trace) DebugFile.writeln("PreparedStatement.setQueryTimeout(" + String.valueOf(getDatastoreReadTimeoutMillis()*1000) + ")");
+				stmt.setQueryTimeout(getDatastoreReadTimeoutMillis()*1000);
+			}
 
 			if (DebugFile.trace) {
 				DebugFile.writeln("PreparedStatement.executeQuery()");
@@ -205,6 +229,10 @@ public class SQLQuery extends AbstractQuery {
 
 			stmt.close();
 			stmt = null;
+
+			if (getSerializeRead())
+				getView().getConnection().setTransactionIsolation(formerIsolationLevel);
+
 		}
 		catch (SQLException sqle) {
 			try { 
@@ -213,6 +241,10 @@ public class SQLQuery extends AbstractQuery {
 			try { if (null!=rset) rset.close();
 			} catch (Exception logit) { if (DebugFile.trace) DebugFile.writeln(logit.getClass().getName()+" "+logit.getMessage()); }
 			try { if (null!=stmt) stmt.close();
+			} catch (Exception logit) { if (DebugFile.trace) DebugFile.writeln(logit.getClass().getName()+" "+logit.getMessage()); }
+			try {
+				if (getSerializeRead())
+					getView().getConnection().setTransactionIsolation(formerIsolationLevel);
 			} catch (Exception logit) { if (DebugFile.trace) DebugFile.writeln(logit.getClass().getName()+" "+logit.getMessage()); }
 			if (getParameters().length==0)
 				throw new JDOException(sqle.getSQLState()+" "+sqle.getMessage()+" zero parameters set", sqle);
@@ -227,6 +259,10 @@ public class SQLQuery extends AbstractQuery {
 			try { if (null!=rset) rset.close();
 			} catch (Exception logit) { if (DebugFile.trace) DebugFile.writeln(logit.getClass().getName()+" "+logit.getMessage()); }
 			try { if (null!=stmt) stmt.close();
+			} catch (Exception logit) { if (DebugFile.trace) DebugFile.writeln(logit.getClass().getName()+" "+logit.getMessage()); }
+			try {
+				if (getSerializeRead())
+					getView().getConnection().setTransactionIsolation(formerIsolationLevel);
 			} catch (Exception logit) { if (DebugFile.trace) DebugFile.writeln(logit.getClass().getName()+" "+logit.getMessage()); }
 			if (getParameters().length==0)
 				throw new JDOException(xcpt.getMessage()+" zero parameters set", xcpt);
@@ -254,7 +290,7 @@ public class SQLQuery extends AbstractQuery {
 		}
 		final long offset = getRangeFromIncl();
 		final long limit = getRangeToExcl()==null ? -1L : getRangeToExcl()-getRangeFromIncl();
-		StringBuffer query = new StringBuffer(512);
+		StringBuilder query = new StringBuilder(512);
 		query.append("SELECT ");
 		query.append(getResult());
 		query.append(" FROM ");

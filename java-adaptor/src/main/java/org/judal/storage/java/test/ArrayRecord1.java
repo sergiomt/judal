@@ -39,6 +39,11 @@ public class ArrayRecord1 extends ArrayRecord implements TestRecord1 {
 		return tbl;
 	}
 
+	@Override
+	public TableDef getTableDef() {
+		return ArrayRecord1.getTableDef(dataSource);
+	}
+
 	public Integer getId() { return getInteger("id"); }
 
 	public void setId(Integer n) { put("id", n); }

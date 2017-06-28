@@ -17,8 +17,20 @@ import java.io.InputStream;
 
 import javax.jdo.JDOException;
 
+/**
+* Interface for SchemaMetaData scanners.
+* @author Sergio Montoro Ten
+* @version 1.0
+*/
 public interface MetadataScanner {
 
+	/**
+	 * <p>Create an SchemaMetaData instance from an InputStream.</p>
+	 * @param instrm InputStream
+	 * @return SchemaMetaData
+	 * @throws JDOException
+	 * @throws IOException
+	 */
 	SchemaMetaData readMetadata(InputStream instrm) throws JDOException, IOException;
 	
 }

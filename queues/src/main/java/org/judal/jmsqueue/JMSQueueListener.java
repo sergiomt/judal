@@ -28,6 +28,7 @@ import javax.jms.MessageListener;
 
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.Record;
+import org.judal.storage.table.Table;
 import org.judal.storage.table.TableDataSource;
 import org.judal.storage.Param;
 import org.judal.storage.EngineFactory;
@@ -38,10 +39,20 @@ import com.knowgate.tuples.Triplet;
 
 public class JMSQueueListener implements MessageListener {
 
+	@SuppressWarnings("unused")
 	private Map<String,String> properties;
 	private Session sssn;
 	private TableDataSource dts;
 
+	/**
+	 * <p>Constructor.</p>
+	 * Call EngineFactory.getEngine(engineName).getDataSource(properties, transactManager) to create a DataSource instance.
+	 * @param engineName String
+	 * @param properties Map&lt;String,String&gt;
+	 * @param transactManager TransactionManager
+	 * @param sssn Session
+	 * @throws JDOException
+	 */
 	public JMSQueueListener(String engineName, Map<String,String> properties, TransactionManager transactManager, Session sssn) throws JDOException {
 		this.properties = properties;
 		this.sssn = sssn;
@@ -53,6 +64,10 @@ public class JMSQueueListener implements MessageListener {
 		}	  
 	}
 
+	/**
+	 * <p>Close the DataSource used by thisMessageListener.</p>
+	 * @throws JDOException
+	 */
 	public void close() throws JDOException {
 		if (dts!=null) {
 			dts.close();
@@ -60,9 +75,19 @@ public class JMSQueueListener implements MessageListener {
 		}
 	}
 
+	/**
+	 * <p>Process message.</p>
+	 * Read "command" int property from Message.
+	 * If Message is instance of ObjectMessage Then
+	 * Depending on the value of "command" property
+	 * insert, update, store or delete records.
+	 * If Message.getJMSReplyTo() is not null And Session is not null Then
+	 * send a TextMessage as reply.
+	 * @param oMsg Message
+	 */
 	public void onMessage (Message oMsg) {
 
-		IndexableTable tbl = null;
+		IndexableTable itbl = null;
 		TemporaryQueue rpl;
 		MessageProducer rpr = null;
 		String serr = null; 
@@ -75,7 +100,8 @@ public class JMSQueueListener implements MessageListener {
 		try {
 
 			int commnd = -1;
-			for (Enumeration oPropNames = oMsg.getPropertyNames();
+			for (@SuppressWarnings("unchecked")
+			Enumeration<String> oPropNames = oMsg.getPropertyNames();
 					oPropNames.hasMoreElements() && commnd<0;) {
 				if (oPropNames.nextElement().equals("command"))
 					commnd = oMsg.getIntProperty("command");
@@ -88,19 +114,19 @@ public class JMSQueueListener implements MessageListener {
 				switch (commnd) {
 
 				case COMMAND_INSERT_RECORD:
+					@SuppressWarnings("unchecked")
 					Pair<Record,Param[]> oPir = ((Pair<Record,Param[]>) oObj);
-					tbl = dts.openIndexedTable(oPir.$1());
-					tbl.insert(oPir.$2());
-					tbl.close();
-					tbl = null;
+					try (Table tbl = dts.openTable(oPir.$1())) {
+						tbl.insert(oPir.$2());
+					}
 					break;
 					
 				case COMMAND_UPDATE_RECORD:
+					@SuppressWarnings("unchecked")
 					Triplet<Record,Param[],Param[]> oTir = ((Triplet<Record,Param[],Param[]>) oObj);
-					tbl = dts.openIndexedTable(oTir.$1());
-					tbl.update(oTir.$2(), oTir.$3());
-					tbl.close();
-					tbl = null;
+					try (IndexableTable tbl = dts.openIndexedTable(oTir.$1())) {
+						tbl.update(oTir.$2(), oTir.$3());
+					}
 					break;
 				
 				case COMMAND_STORE_RECORD:
@@ -116,12 +142,12 @@ public class JMSQueueListener implements MessageListener {
 					for (int r=0; r<nRecs; r++) {
 						try {
 							Record oRec = aRecs[r];
-							if (null==tbl)
-								tbl = dts.openIndexedTable(oRec);
+							if (null==itbl)
+								itbl = dts.openIndexedTable(oRec);
 
 							if (COMMAND_STORE_RECORD==commnd) {
 
-								tbl.store(oRec);
+								itbl.store(oRec);
 
 							} else if (COMMAND_DELETE_RECORDS==commnd) {
 
@@ -129,18 +155,18 @@ public class JMSQueueListener implements MessageListener {
 								if (null!=aKeys) {
 									for (int k=0; k<aKeys.length; k++) {
 										oRec.setKey(aKeys[k]);
-										tbl.delete(oRec);
+										itbl.delete(oRec);
 									} // next
 								} // fi
 
 							} // fi
 
 							if (r==nRecs-1) {
-								tbl.close();
-								tbl = null;						
+								itbl.close();
+								itbl = null;						
 							} else if (!aRecs[r].getTableName().equals(aRecs[r+1].getTableName())) {
-								tbl.close();
-								tbl = null;
+								itbl.close();
+								itbl = null;
 							}
 
 							if (DebugFile.trace) DebugFile.writeln("record successfully "+(commnd==COMMAND_STORE_RECORD ? "stored" : "deleted"));
@@ -148,10 +174,10 @@ public class JMSQueueListener implements MessageListener {
 						} catch (Exception oXcpt) {
 							if (DebugFile.trace) DebugFile.writeln(oXcpt.getClass().getName()+" "+oXcpt.getMessage());
 							try { if (DebugFile.trace) DebugFile.writeln(com.knowgate.debug.StackTraceUtil.getStackTrace(oXcpt)); } catch (Exception ignore) {}
-							if (tbl!=null) {
+							if (itbl!=null) {
 								if (DebugFile.trace) DebugFile.writeln("gracefully closing connection");
-								try { tbl.close(); } catch (Exception ignore) { }
-								tbl=null;
+								try { itbl.close(); } catch (Exception ignore) { }
+								itbl = null;
 							}
 						}
 					} // next
@@ -225,7 +251,7 @@ public class JMSQueueListener implements MessageListener {
 			} catch (Exception ignore) { }
 
 		} finally {
-			if (tbl!=null) { try { tbl.close(); } catch (Exception ignore) {} }
+			if (itbl!=null) { try { itbl.close(); } catch (Exception ignore) {} }
 			if (rpr!=null) { try { rpr.close(); } catch (Exception ignore) {} }
 		}
 

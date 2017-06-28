@@ -1,5 +1,17 @@
 package org.judal.storage.table;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +36,7 @@ import org.judal.storage.queue.RecordQueueProducer;
 
 import com.knowgate.debug.DebugFile;
 
-public class RecordManager {
+public class RecordManager implements AutoCloseable {
 
 	private Properties properties;
 	private Cache<Object, Record> cache;
@@ -52,7 +64,7 @@ public class RecordManager {
 	public void deletePersistent(Object obj) {
 		Record rec = (Record) obj;
 		evict(rec);
-		storageQueue.delete(rec, new String[]{(String) rec.getKey()}, properties);
+		storageQueue.delete(rec, new String[]{rec.getKey().toString()}, properties);
 	}
 
 	public void updatePersistent(Object obj, Param... params) {

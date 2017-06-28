@@ -27,6 +27,8 @@ import java.util.regex.Pattern;
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.ExtensionMetadata;
 
+import com.knowgate.debug.DebugFile;
+
 import java.util.regex.Matcher;
 
 import java.io.Serializable;
@@ -223,7 +225,8 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}
 
 	/**
-	 * Constructor
+	 * <p>Construct by cloning another ColumnMetadata.</p>
+	 * @param oCol ColumnMetadata
 	 */
 	public ColumnDef(ColumnMetadata oCol) {
 		iPosition = oCol.getPosition();
@@ -356,7 +359,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 
 	/**
-	 * @param int
+	 * @param iSqlType int 
 	 * @return ColumnMetadata <b>this</b> object
 	 * @see java.sql.Types
 	 */
@@ -366,7 +369,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 
 	/**
-	 * @param short
+	 * @param iSqlType short
 	 * @return ColumnMetadata <b>this</b> object
 	 * @see java.sql.Types
 	 */
@@ -386,7 +389,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 
 	/**
 	 * Same as setSQLType()
-	 * @param String The String name representation of getType()
+	 * @param sTypeName String The String name representation of getType()
 	 * @return ColumnMetadata <b>this</b> object
 	 */
 	@Override
@@ -406,7 +409,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 
 	/**
 	 * Same as setJDBCType()
-	 * @param String The String name representation of getType()
+	 * @param sTypeName String The String name representation of getType()
 	 * @return ColumnMetadata <b>this</b> object
 	 */
 	@Override
@@ -449,7 +452,17 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 
 	/**
-	 * @param String Column default value
+	 * <p>Set column default value.</p>
+	 * Pass one of the following options on oDefValue parameter:
+	 * <ul>
+	 * <li><b>GUID</b>: Set the column value by calling com.knowgate.stringutils.Uid.createUniqueKey() or another global unique key generator defined by the implementation.</li>
+	 * <li><b>SERIAL</b>: Set the column value by getting next value of a Sequence provided by the implementation.</li>
+	 * <li><b>NOW</b>: Set the column value to a Timestamp which date is taken from system time.</li> 
+	 * <li><b>$<i>column_name</i></b>: Transliterate the value of another column by calling com.knowgate.stringutils.Slugs.transliterate() or another normalizer defined by the implementation.</li> 
+	 * <li><b>'<i>string literal</i>'</b>: Set the column value to the string literal value inside the single quotes.</li>
+	 * <li><b><i>column_name_or_literal</i>+<i>another_column_name_or_literal</i></b>: Concatenate the given values of columns or literals.</li>
+	 * </ul>
+	 * @param oDefValue String Column default value
 	 */
 	@Override
 	public ColumnMetadata setDefaultValue(String oDefValue) {
@@ -457,11 +470,17 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		return this;
 	}  
 
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getInsertValue() {
 		return sInsertValue;
 	}
 
+	/**
+	 * @param sValue String
+	 */
 	@Override
 	public ColumnMetadata setInsertValue(String sValue) {
 		sInsertValue = sValue;
@@ -518,7 +537,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 
 	/**
-	 * @param boolean
+	 * @param b boolean
 	 * @return ColumnMetadata <b>this</b> object
 	 */
 	@Override
@@ -535,7 +554,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 
 	/**
-	 * @param boolean
+	 * @param a boolean
 	 * @return ColumnMetadata <b>this</b> object
 	 */
 	public ColumnMetadata setAutoIncrement(boolean a) {
@@ -563,7 +582,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 
 	/**
-	 * @param String Name of table referenced by the foreign key
+	 * @param sFk String Name of table referenced by the foreign key
 	 * @return ColumnMetadata <b>this</b> object
 	 */
 	@Override
@@ -581,7 +600,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 
 	/**
-	 * @param String Name of column referenced by the foreign key
+	 * @param sFk String Name of column referenced by the foreign key
 	 * @return ColumnMetadata <b>this</b> object
 	 */
 	@Override
@@ -591,7 +610,8 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	}  
 	
 	/**
-	 * @param boolean Is this column part of the primary key?
+	 * @param bIsPk boolean Is this column part of the primary key?
+	 * @return ColumnMetadata <b>this</b> object
 	 */
 	public ColumnMetadata setPrimaryKey(boolean bIsPk) {
 		bPk = bIsPk;
@@ -623,11 +643,22 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	 * @throws ParseException
 	 * @throws NullPointerException
 	 */
-	public Object convert(String sIn)
+	public Object convert(String sIn) throws NumberFormatException,ParseException,NullPointerException {
+		Object retval = unloggedConvert(sIn);
+		if (sIn!=null && retval!=null && !retval.getClass().equals(String.class)) {
+			if (DebugFile.trace)
+				DebugFile.writeln("ColumnDef.convert(" + sIn + ") into " + retval.getClass().getName());
+		}
+		return retval;
+	}
+
+	private Object unloggedConvert(String sIn)
 			throws NumberFormatException,ParseException,NullPointerException {
 		if (sIn==null) return null;
 		if (sIn.length()==0) return null;
 		switch (getType()) {
+		case Types.BOOLEAN:
+			return new Boolean(sIn);
 		case Types.SMALLINT:
 			return new Short(sIn);
 		case Types.INTEGER:
@@ -650,6 +681,12 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		}
 	} // convert
 
+	/**
+	 * <p>Check if a column value matches the pattern set for the column.</p>
+	 * For boolean, any numeric, date and timestamp types check that the class of the value matches the SQL type assigned in the metadata.
+	 * @param sValue Object
+	 * @return boolean
+	 */
 	public boolean check(Object sValue) {
 		boolean bRetVal;
 		if (null==sValue) {
@@ -664,6 +701,10 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 					bRetVal = bMatches || (bNullable && ((String)sValue).length()==0);
 				} else {
 					switch (getType()) {
+					case Types.BOOLEAN:
+						bRetVal = sValue instanceof Boolean;
+						if (bRetVal) bRetVal = bMatches;
+						break;
 					case Types.SMALLINT:
 						bRetVal = sValue instanceof Short;
 						if (bRetVal) bRetVal = bMatches;
@@ -690,8 +731,10 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 						if (bRetVal) bRetVal = bMatches;
 						break;
 					case Types.TIMESTAMP:
+						bRetVal = sValue instanceof Date || sValue instanceof Calendar || sValue instanceof Timestamp || sValue instanceof Long;
+						break;
 					case Types.DATE:
-						bRetVal = sValue instanceof Date || sValue instanceof Timestamp || sValue instanceof Long;
+						bRetVal = sValue instanceof Date || sValue instanceof java.sql.Date || sValue instanceof Calendar || sValue instanceof Long;
 						break;
 					default:
 						bRetVal = false;
@@ -1010,7 +1053,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 
 	/**
 	 * Infer SQL type for a Java object
-	 * @param Object
+	 * @param obj Object
 	 * @return int
 	 * @see java.sql.Types
 	 */
@@ -1039,6 +1082,8 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		return Types.TIMESTAMP;
 	else if (obj instanceof byte[])
 		return Types.BINARY;
+	else if (obj instanceof Boolean)
+		return Types.BOOLEAN;
 	else if (obj.getClass().isArray())
 		return Types.ARRAY;
 	else

@@ -24,6 +24,8 @@ import org.judal.storage.query.*;
 import org.judal.storage.query.sql.SQLAndPredicate;
 import org.judal.storage.query.sql.SQLOrPredicate;
 import org.judal.storage.query.sql.SQLQuery;
+import org.judal.storage.relational.RelationalDataSource;
+import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.TableDataSource;
@@ -46,7 +48,7 @@ import static org.junit.Assert.assertNotNull;
 public class TestJDBCQuery {
 
 	private static Map<String,String> properties;
-	private static TableDataSource dts;
+	private static RelationalDataSource dts;
 
 	@BeforeClass
 	public static void init() throws ClassNotFoundException, JDOException, IOException {
@@ -172,7 +174,7 @@ public class TestJDBCQuery {
 
 		ArrayRecord mailingsRec = new ArrayRecord(dts.getTableDef(AdhocMailing.tableName));
 	    
-	    IndexableView mailingsTbl = dts.openIndexedView(mailingsRec);
+	    RelationalView mailingsTbl = dts.openRelationalView(mailingsRec);
 	    SQLQuery qry = new SQLQuery(mailingsTbl);
 	    qry.setFilter(where);
 	    

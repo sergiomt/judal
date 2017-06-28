@@ -1,10 +1,7 @@
 package org.judal.storage;
 
-import javax.jdo.JDOException;
-
-import org.judal.storage.table.Record;
-
 /**
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -15,8 +12,23 @@ import org.judal.storage.table.Record;
  * KIND, either express or implied.
  */
 
+import javax.jdo.JDOException;
+
+import org.judal.storage.table.Record;
+
+/**
+ * <p>Interface for Record data check.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public interface ConstraintsChecker {
 
-	void check(DataSource oDts, Record oRec) throws JDOException;
+	/**
+	 * <p>Check Record data.</p>
+	 * @param dataSource DataSource
+	 * @param rec Record
+	 * @throws JDOException
+	 */
+	void check(DataSource dataSource, Record rec) throws JDOException;
 
 }

@@ -24,41 +24,83 @@ public class TableDef extends ViewDef {
 
 	private String creationTimestampColumnName;
 
+	/**
+	 * <p>Create an empty TableDef.</p>
+	 * @param name String TableDef name
+	 */
 	public TableDef(String name) {
 		super(name);
 		creationTimestampColumnName = null;
 	}
 
+	/**
+	 * <p>Create TableDef and add the given columns.</p>
+	 * If one or more ColumnDefs are defined as belonging to the primary key,
+	 * then the primary key of this TableDef will be automatically set.
+	 * @param name String TableDef name
+	 * @param columnDefs ColumnDef&hellip;
+	 */
 	public TableDef(String name, ColumnDef... columnDefs) {
 		super(name, columnDefs);
 		creationTimestampColumnName = null;
 		autoSetPrimaryKey();
 	}
 
+	/**
+	 * <p>Create TableDef and add the given columns.</p>
+	 * If one or more ColumnDefs are defined as belonging to the primary key,
+	 * then the primary key of this TableDef will be automatically set.
+	 * @param name String TableDef name
+	 * @param columnDefs Collection&lt;ColumnDef&gt;
+	 */
 	public TableDef(String name, Collection<ColumnDef> columnDefs) {
 		super(name, columnDefs);
 		creationTimestampColumnName = null;
 		autoSetPrimaryKey();
 	}
 
+	/**
+	 * <p>Create TableDef by cloning another one.</p>
+	 * @param source TableDef
+	 */
 	public TableDef(TableDef source) {
 		super(source);
 		creationTimestampColumnName = source.creationTimestampColumnName;
 	}
 
+	/**
+	 * @return TableDef clone of <b>this</b>
+	 */
 	@Override
 	public TableDef clone() {
 		return new TableDef(this);
 	}
 	
+	/**
+	 * <p>Add a column which belongs to the primary key.</p>
+	 * @param columnFamilyName String. Optional. Maybe <b>null</b> or empty String.
+	 * @param columnName String
+	 * @param columnType int from java.sql.Types
+	 * @param maxLength int
+	 */
 	public void addPrimaryKeyColumn(String columnFamilyName, String columnName, int columnType, int maxLength) {
 		addColumnMetadata (columnFamilyName, columnName, columnType, maxLength, 0, false, null, null, null, true);
 	}
 
+	/**
+	 * <p>Add a column which belongs to the primary key.</p>
+	 * The column precision will be automatically set by calling ColumnDef.getDefaultPrecision()
+	 * @param columnFamilyName String. Optional. Maybe <b>null</b> or empty String.
+	 * @param columnName String
+	 * @param columnType int from java.sql.Types
+	 */
 	public void addPrimaryKeyColumn(String columnFamilyName, String columnName, int columnType) {
 		addColumnMetadata (columnFamilyName, columnName, columnType, ColumnDef.getDefaultPrecision(columnType), 0, false, null, null, null, true);
 	}
 
+	/**
+	 * Walk the list of columns of this TableDef and auto-generate the corresponding PrimaryKeyMetadata.
+	 */
 	public void autoSetPrimaryKey() {
 		if (getPrimaryKeyMetadata()!=null) {
 			getPrimaryKeyMetadata().clear();
@@ -80,17 +122,26 @@ public class TableDef extends ViewDef {
 		}
 	}
 
+	/**
+	 * <p>Get the name of the column which will never be modified by update writes of a Record.</p>
+	 * @return String Column Name or <b>null</b> if no column in the Record is prevented from being modified upon update.
+	 */
 	public String getCreationTimestampColumnName() {
 		return creationTimestampColumnName;
 	}
 
+	/**
+	 * <p>If not <b>null</b> the value held in this column must not be modified when a Record is updated.</p>
+	 * It is up to the implementation of the DataSource and its child object to implement the behavior.
+	 * @param columnName String Column Name or <b>null</b> if no column in the Record must be prevented from being modified on update.
+	 */
 	public void setCreationTimestampColumnName(String columnName) {
 		creationTimestampColumnName = columnName;
 	}
 	
 	/**
 	 * Get representation of this TableDef as a JDO XML class
-	 * @return String of the form &lt;class name="<i>class_name</i>" table="<i>table_name</i>" /&gt; &hellip; &lt;/class&gt;
+	 * @return String of the form<br/>&lt;class name="<i>class_name</i>" table="<i>table_name</i>" /&gt; &hellip; &lt;/class&gt;
 	 */
 	public String toJdoXml() {
 		StringBuilder builder = new StringBuilder();

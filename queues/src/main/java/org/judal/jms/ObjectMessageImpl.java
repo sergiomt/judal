@@ -51,351 +51,227 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 	private boolean bRdl;
 	private long lTs;
 	private long lExp;
+	private Destination replyTo;
+	private Destination jmsDestination;
 	private TableDataSource oDts;
 	private Hashtable<String, Object> oPrp;
 
 	public ObjectMessageImpl() {
 		oDts = null;
 		oPrp = new Hashtable<String, Object>();
+		replyTo = null;
 	}
 
 	public ObjectMessageImpl(TableDataSource oDtsr) {
 		oDts = oDtsr;
 		oPrp = new Hashtable<String, Object>();
+		replyTo = null;
 	}
 
 	/**
-	 * Method setObject
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 Serializable Instance of Record, Record[], com.knowgate.tuples.Pair&lt;Record,Param[]&gt; or com.knowgate.tuples.Triplet&lt;Record,Param[],Param[]&gt;
 	 * @throws JMSException
-	 *
 	 */
 	public void setObject(Serializable parm1) throws JMSException {
 		oObj = parm1;
 	}
 
 	/**
-	 * Method getObject
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return Serializable Instance of Record, Record[], com.knowgate.tuples.Pair&lt;Record,Param[]&gt; or com.knowgate.tuples.Triplet&lt;Record,Param[],Param[]&gt;
 	 */
 	public Serializable getObject() throws JMSException {
 		return oObj;
 	}
 
 	/**
-	 * Method getJMSMessageID
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return String
 	 */
 	public String getJMSMessageID() throws JMSException {
 		return sId;
 	}
 
 	/**
-	 * Method setJMSMessageID
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSMessageID(String parm1) throws JMSException {
 		sId = parm1;
 	}
 
 	/**
-	 * Method getJMSTimestamp
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return long
 	 */
 	public long getJMSTimestamp() throws JMSException {
 		return lTs;
 	}
 
 	/**
-	 * Method setJMSTimestamp
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 long
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSTimestamp(long parm1) throws JMSException {
 		lTs = parm1;
 	}
 
 	/**
-	 * Method getJMSCorrelationIDAsBytes
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return byte[]
 	 */
 	public byte[] getJMSCorrelationIDAsBytes() throws JMSException {
 		return sCid.getBytes();
 	}
 
 	/**
-	 * Method setJMSCorrelationIDAsBytes
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 byte[]
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSCorrelationIDAsBytes(byte[] parm1) throws JMSException {
 		sCid = new String(parm1);
 	}
 
 	/**
-	 * Method setJMSCorrelationID
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSCorrelationID(String parm1) throws JMSException {
 		sCid = parm1;
 	}
 
 	/**
-	 * Method getJMSCorrelationID
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return String
 	 */
 	public String getJMSCorrelationID() throws JMSException {
 		return sCid;
 	}
 
 	/**
-	 * Method getJMSReplyTo
-	 *
-	 *
+	 * This method always returns <b>null</b>.
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return Destination <b>null</b>
 	 */
 	public Destination getJMSReplyTo() throws JMSException {
-		return null;
+		return replyTo;
 	}
 
 	/**
-	 * Method setJMSReplyTo
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 Destination
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSReplyTo(Destination parm1) throws JMSException {
-		// TODO: Add your code here
+		replyTo = parm1;
 	}
 
 	/**
-	 * Method getJMSDestination
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return Destination
 	 */
 	public Destination getJMSDestination() throws JMSException {
-		return null;
+		return jmsDestination;
 	}
 
 	/**
-	 * Method setJMSDestination
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 Destination
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSDestination(Destination parm1) throws JMSException {
-		// TODO: Add your code here
+		jmsDestination = parm1;
 	}
 
 	/**
-	 * Method getJMSDeliveryMode
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return int
 	 */
 	public int getJMSDeliveryMode() throws JMSException {
 		return iDlm;
 	}
 
 	/**
-	 * Method setJMSDeliveryMode
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 int
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSDeliveryMode(int parm1) throws JMSException {
 		iDlm = parm1;
 	}
 
 	/**
-	 * Method getJMSRedelivered
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return boolean
 	 */
 	public boolean getJMSRedelivered() throws JMSException {
 		return bRdl;
 	}
 
 	/**
-	 * Method setJMSRedelivered
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 boolean
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSRedelivered(boolean parm1) throws JMSException {
 		bRdl = parm1;
 	}
 
 	/**
-	 * Method getJMSType
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return String
 	 */
 	public String getJMSType() throws JMSException {
 		return sJtp;
 	}
 
 	/**
-	 * Method setJMSType
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSType(String parm1) throws JMSException {
 		sJtp = parm1;
 	}
 
 	/**
-	 * Method getJMSExpiration
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return long
 	 */
 	public long getJMSExpiration() throws JMSException {
 		return lExp;
 	}
 
 	/**
-	 * Method setJMSExpiration
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 long
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSExpiration(long parm1) throws JMSException {
 		lExp = parm1;
 	}
 
 	/**
-	 * Method getJMSPriority
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return int
 	 */
 	public int getJMSPriority() throws JMSException {
 		return iPrt;
 	}
 
 	/**
-	 * Method setJMSPriority
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 int
 	 * @throws JMSException
-	 *
 	 */
 	public void setJMSPriority(int parm1) throws JMSException {
 		iPrt = parm1;
 	}
 
 	/**
-	 * Method clearProperties
-	 *
-	 *
 	 * @throws JMSException
-	 *
 	 */
 	public void clearProperties() throws JMSException {
 		oPrp.clear();
 	}
 
 	/**
-	 * Method propertyExists
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
+	 * @return boolean
 	 *
 	 */
 	public boolean propertyExists(String parm1) throws JMSException {
@@ -403,306 +279,207 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 	}
 
 	/**
-	 * Method getBooleanProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return boolean
 	 */
 	public boolean getBooleanProperty(String parm1) throws JMSException {
 		return ((Boolean) oPrp.get(parm1)).booleanValue();
 	}
 
 	/**
-	 * Method getByteProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return byte
 	 */
 	public byte getByteProperty(String parm1) throws JMSException {
 		return ((Byte) oPrp.get(parm1)).byteValue();
 	}
 
 	/**
-	 * Method getShortProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return short
 	 */
 	public short getShortProperty(String parm1) throws JMSException {
 		return ((Short) oPrp.get(parm1)).shortValue();
 	}
 
 	/**
-	 * Method getIntProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return int
 	 */
 	public int getIntProperty(String parm1) throws JMSException {
 		return ((Integer) oPrp.get(parm1)).intValue();
 	}
 
 	/**
-	 * Method getLongProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return long
 	 */
 	public long getLongProperty(String parm1) throws JMSException {
 		return ((Long) oPrp.get(parm1)).longValue();
 	}
 
 	/**
-	 * Method getFloatProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return float
 	 */
 	public float getFloatProperty(String parm1) throws JMSException {
 		return ((Float) oPrp.get(parm1)).floatValue();
 	}
 
 	/**
-	 * Method getDoubleProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return double
 	 */
 	public double getDoubleProperty(String parm1) throws JMSException {
 		return ((Double) oPrp.get(parm1)).doubleValue();
 	}
 
 	/**
-	 * Method getStringProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return String
 	 */
 	public String getStringProperty(String parm1) throws JMSException {
 		return (String) oPrp.get(parm1);
 	}
 
 	/**
-	 * Method getObjectProperty
-	 *
-	 *
-	 * @param parm1
-	 *
+	 * @param parm1 String
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return Object
 	 */
 	public Object getObjectProperty(String parm1) throws JMSException {
 		return oPrp.get(parm1);
 	}
 
 	/**
-	 * Method getPropertyNames
-	 *
-	 *
 	 * @throws JMSException
-	 *
-	 * @return
-	 *
+	 * @return Enumeration&lt;String&gt;
 	 */
-	public Enumeration getPropertyNames() throws JMSException {
+	public Enumeration<String> getPropertyNames() throws JMSException {
 		return oPrp.keys();
 	}
 
 	/**
-	 * Method setBooleanProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2 boolean
 	 * @throws JMSException
-	 *
 	 */
 	public void setBooleanProperty(String parm1, boolean parm2) throws JMSException {
 		oPrp.put(parm1, new Boolean(parm2));
 	}
 
 	/**
-	 * Method setByteProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2 byte
 	 * @throws JMSException
-	 *
 	 */
 	public void setByteProperty(String parm1, byte parm2) throws JMSException {
 		oPrp.put(parm1, new Byte(parm2));
 	}
 
 	/**
-	 * Method setShortProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2 short
 	 * @throws JMSException
-	 *
 	 */
 	public void setShortProperty(String parm1, short parm2) throws JMSException {
 		oPrp.put(parm1, new Short(parm2));
 	}
 
 	/**
-	 * Method setIntProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * <p>Set int property.</p>
+	 * The "command" property will determine the behavior of the run method with one of
+	 * { COMMAND_STORE_RECORD, COMMAND_DELETE_RECORDS, COMMAND_INSERT_RECORD, COMMAND_UPDATE_RECORD }
+	 * @param parm1 String
+	 * @param parm2 int
 	 * @throws JMSException
-	 *
 	 */
 	public void setIntProperty(String parm1, int parm2) throws JMSException {
 		oPrp.put(parm1, new Integer(parm2));
 	}
 
 	/**
-	 * Method setLongProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2 long
 	 * @throws JMSException
-	 *
 	 */
 	public void setLongProperty(String parm1, long parm2) throws JMSException {
 		oPrp.put(parm1, new Long(parm2));
 	}
 
 	/**
-	 * Method setFloatProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2 float
 	 * @throws JMSException
-	 *
 	 */
 	public void setFloatProperty(String parm1, float parm2) throws JMSException {
 		oPrp.put(parm1, new Float(parm2));
 	}
 
 	/**
-	 * Method setDoubleProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2 double
 	 * @throws JMSException
-	 *
 	 */
 	public void setDoubleProperty(String parm1, double parm2) throws JMSException {
 		oPrp.put(parm1, new Double(parm2));
 	}
 
 	/**
-	 * Method setStringProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2 String
 	 * @throws JMSException
-	 *
 	 */
 	public void setStringProperty(String parm1, String parm2) throws JMSException {
 		oPrp.put(parm1, parm2);
 	}
 
 	/**
-	 * Method setObjectProperty
-	 *
-	 *
-	 * @param parm1
-	 * @param parm2
-	 *
+	 * @param parm1 String
+	 * @param parm2  Object
 	 * @throws JMSException
-	 *
 	 */
 	public void setObjectProperty(String parm1, Object parm2) throws JMSException {
 		oPrp.put(parm1, parm2);
 	}
 
 	/**
-	 * Method acknowledge
-	 *
-	 *
 	 * @throws JMSException
-	 *
 	 */
 	public void acknowledge() throws JMSException {
 		// TODO: Add your code here
 	}
 
 	/**
-	 * Method clearBody
-	 *
-	 *
 	 * @throws JMSException
-	 *
 	 */
 	public void clearBody() throws JMSException {
 		oObj = null;
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * <p>Run operation on this object.</p>
+	 * This method will perform the following actions:<br/>
+	 * <ol>
+	 * <li>Cast getObject() into the appropriate number of Record and Param[] instances</li>
+	 * <li>Call getIntProperty("command")</li>
+	 * <li>If command is COMMAND_STORE_RECORD Then call Record.store(TableDataSource).</li>
+	 * <li>Else If command is COMMAND_DELETE_RECORD Then call Record.store(TableDataSource).</li>
+	 * <li>Else If command is COMMAND_INSERT_RECORD Then call Table.insert(Param[]).</li>
+	 * <li>Else If command is COMMAND_UPDATE_RECORD Then call IndexableTable.update(Param[],Param[]).</li>
+	 * </ol>
+	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public void run() {
-		Table oTbl = null;
-		IndexableTable oITbl = null;
 		try {
 			final int iCmd = getIntProperty("command");
 			Object oObj = getObject();
@@ -785,14 +562,6 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 					if (DebugFile.trace)
 						DebugFile.writeln("executing command " + String.valueOf(iCmd) + " for record " + oRec.getKey());
 
-					/*
-					if (null == oTbl) {
-						if (DebugFile.trace)
-							DebugFile.writeln("opening table " + oRec.getTableName() + " from DataSource " + oDts);
-						oTbl = oDts.openIndexedTable(oRec);
-					}
-					*/
-
 					if (DebugFile.trace)
 						DebugFile.writeln("table " + oRec.getTableName() + " opened");
 
@@ -805,24 +574,27 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 
 					case COMMAND_DELETE_RECORDS:
 						if (DebugFile.trace)
-							DebugFile.writeln("COMMAND_DELETE_RECORDS " + oRec.getTableName());
+							DebugFile.writeln("COMMAND_DELETE_RECORDS { " + getStringProperty("keys") + "} from " + oRec.getTableName());
 						String[] aKeys = getStringProperty("keys").split("`");
-						for (int k = aKeys.length; k <= 0; k--) {
-							oRec.setKey(aKeys[k]);
-							oRec.delete(oDts);
+						for (int k = aKeys.length-1; k >= 0; k--) {
+							if (aKeys[k]!=null & aKeys[k].trim().length()>0) {
+								if (DebugFile.trace) {
+									DebugFile.writeln("Deleting record " + aKeys[k] + " on "+ oRec.getTableName());
+								}
+								oRec.setKey(aKeys[k]);
+								oRec.delete(oDts);
+								if (DebugFile.trace) {
+									try (Table oTbd = oDts.openTable(oRec)) {
+										if (oTbd.exists(aKeys[k])) {
+											DebugFile.writeln("Error deleting " + oRec.getClass().getName() + " with key " + aKeys[k] + " on table " + oRec.getTableName());
+										}
+									}
+								}								
+							}
 						}
 						break;
 					} // end switch
 
-					/*
-					if (r == nRecs - 1) {
-						oTbl.close();
-						oTbl = null;
-					} else if (!oRec.getTableName().equals(aRecs[r + 1].getTableName())) {
-						oTbl.close();
-						oTbl = null;
-					}
-					*/
 				}
 			} // next
 
@@ -833,10 +605,9 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 						DebugFile.writeln("COMMAND_UPDATE_RECORD FROM " + oRec.getTableName());
 					if (DebugFile.trace)
 						DebugFile.writeln("opening table " + oRec.getTableName() + " from DataSource " + oDts + " for update");
-					oITbl = oDts.openIndexedTable(oRec);
-					oITbl.update(aParms, aWhere);
-					oITbl.close();
-					oITbl = null;
+					try (IndexableTable oITbl = oDts.openIndexedTable(oRec)) {
+						oITbl.update(aParms, aWhere);
+					}
 					break;
 
 				case COMMAND_INSERT_RECORD:
@@ -844,10 +615,9 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 						DebugFile.writeln("COMMAND_INSERT_RECORD INTO " + oRec.getTableName());
 					if (DebugFile.trace)
 						DebugFile.writeln("opening table " + oRec.getTableName() + " from DataSource " + oDts + " for insert");
-					oTbl = oDts.openTable(oRec);
-					oTbl.insert(aParms);
-					oTbl.close();
-					oTbl = null;
+					try (Table oTbl = oDts.openTable(oRec)) {
+						oTbl.insert(aParms);						
+					}
 					break;
 				} // end switch
 			}
@@ -864,14 +634,12 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 				if (oDts.getTransactionManager()!=null)
 					if (oDts.inTransaction()) oDts.getTransactionManager().rollback();
 			} catch (Exception ignore) { }
-		} finally {
-			try { if (oITbl!= null) oITbl.close();} catch (Exception ignore) { }
-			try { if (oTbl != null) oTbl.close(); } catch (Exception ignore) { }
 		}
 		if (DebugFile.trace)
 			DebugFile.writeln("End ObjectMessageImpl.run()");
 	}
 
+	public final static int COMMAND_STOP = 0;
 	public final static int COMMAND_STORE_RECORD = 1;
 	public final static int COMMAND_DELETE_RECORDS = 4;
 	public final static int COMMAND_INSERT_RECORD = 8;

@@ -18,24 +18,104 @@ import org.judal.storage.table.Record;
 
 import com.knowgate.gis.LatLong;
 
+/**
+ * <p>Interface for adaptors of non-standard field types.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public interface FieldHelper {
 
+	/**
+	 * <p>Get part of a time interval.</p>
+	 * @param rec Record
+	 * @param colname String Column name
+	 * @param part String Part name
+	 * @return int Value of part
+	 * @throws ClassCastException
+	 * @throws NullPointerException
+	 * @throws NumberFormatException
+	 * @throws IllegalArgumentException
+	 */
 	int getIntervalPart(Record rec, String colname, String part) throws ClassCastException, NullPointerException, NumberFormatException, IllegalArgumentException;
 	
+	/**
+	 * <p>Get Integer array.</p>
+	 * @param rec Record
+	 * @param colname String Column name
+	 * @return Integer[]
+	 * @throws ClassCastException
+	 */
 	Integer[] getIntegerArray(Record rec, String colname) throws ClassCastException;
 
+	/**
+	 * <p>Get Long array.</p>
+	 * @param rec Record
+	 * @param colname String Column name
+	 * @return Long[]
+	 * @throws ClassCastException
+	 */
 	Long[] getLongArray(Record rec, String colname) throws ClassCastException;
 
+	/**
+	 * <p>Get Float array.</p>
+	 * @param rec Record
+	 * @param colname String Column name
+	 * @return Float[]
+	 * @throws ClassCastException
+	 */
 	Float[] getFloatArray(Record rec, String colname) throws ClassCastException;
 
+	/**
+	 * <p>Get Double array.</p>
+	 * @param rec Record
+	 * @param colname String Column name
+	 * @return Double[]
+	 * @throws ClassCastException
+	 */
 	Double[] getDoubleArray(Record rec, String colname) throws ClassCastException;
 
+	/**
+	 * <p>Get Date array.</p>
+	 * @param rec Record
+	 * @param colname String Column name
+	 * @return Date[]
+	 * @throws ClassCastException
+	 */
 	Date[] getDateArray(Record rec, String colname) throws ClassCastException;
 	
+	/**
+	 * <p>Get String array.</p>
+	 * @param rec Record
+	 * @param colname String Column name
+	 * @return String[]
+	 * @throws ClassCastException
+	 * @throws ClassNotFoundException
+	 */
 	String[] getStringArray(Record rec, String colname) throws ClassCastException, ClassNotFoundException;
 	
-	LatLong getLatLong(Record rec, String columname) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException;
+	/**
+	 * <p>Get LatLong.</p>
+	 * @param rec Record
+	 * @param columName String Column name
+	 * @return LatLong
+	 * @throws ClassCastException
+	 */
+	LatLong getLatLong(Record rec, String columName) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException;
 	
-	public Object getMap(Record rec, String key) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException;
+	/**
+	 * <p>Get name-&gt;value Map.</p>
+	 * @param rec Record
+	 * @param columName String Column name
+	 * @return Object (usually an instance of java.util.Map&lt;String,String&gt;)
+	 * @throws ClassCastException
+	 * @throws InstantiationException
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 * @throws NoSuchMethodException
+	 * @throws SecurityException
+	 * @throws ClassNotFoundException
+	 */
+	Object getMap(Record rec, String columName) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException;
 	
 }

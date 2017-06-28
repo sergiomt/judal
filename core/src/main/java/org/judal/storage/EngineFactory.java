@@ -19,8 +19,19 @@ import org.judal.storage.keyvalue.BucketDataSource;
 import org.judal.storage.relational.RelationalDataSource;
 import org.judal.storage.table.TableDataSource;
 
+/**
+ * <p>Engine registry and default data source keeper.</p>
+ * This singleton serves to provide a central registry of storage engines in use and 
+ * also as a holder of data sources that are used implicitly by load, store and fetch methods
+ * when no data source is provided explicitly.
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class EngineFactory {
 	
+	/**
+	 * A default data source can be kept per thread so that load and store methods can use it implicitly.
+	 */
 	public static ThreadLocal<DataSource> DefaultThreadDataSource = new ThreadLocal<DataSource>();
 	
 	private static Hashtable<String, Class<Engine<? extends DataSource>>> engines = new Hashtable<String, Class<Engine<? extends DataSource>>>();
@@ -61,6 +72,16 @@ public class EngineFactory {
 		return engineClass.newInstance();
 	}
 
+	/**
+	 * <p>Get default key-value data source.</p>
+	 * Checks whether EngineFactory.DefaultThreadDataSource is instance of BucketDataSource
+	 * if that is the case then return EngineFactory.DefaultThreadDataSource else if
+	 * StorageContext.Default.getKeyValueDataSource() is not null then return key-value
+	 * data source from StorageContext else throw JDOUserException if a default key-value
+	 * data source can't be found at thread local nor StorageContext.
+	 * @return BucketDataSource
+	 * @throws JDOUserException If there is no default key-value data source set.
+	 */
 	public static BucketDataSource getDefaultBucketDataSource() throws JDOUserException {
 		
 		BucketDataSource tdts = null; 		
@@ -79,6 +100,16 @@ public class EngineFactory {
 		return tdts;
 	}
 
+	/**
+	 * <p>Get default table data source.</p>
+	 * Checks whether EngineFactory.DefaultThreadDataSource is instance of TableDataSource
+	 * if that is the case then return EngineFactory.DefaultThreadDataSource else if
+	 * StorageContext.Default.getTableDataSource() is not null then return table
+	 * data source from StorageContext else throw JDOUserException if a default table
+	 * data source can't be found at thread local nor StorageContext.
+	 * @return TableDataSource
+	 * @throws JDOUserException If there is no default table data source set.
+	 */
 	public static TableDataSource getDefaultTableDataSource() throws JDOUserException {
 		
 		TableDataSource tdts = null; 		
@@ -100,6 +131,16 @@ public class EngineFactory {
 		return tdts;
 	}
 
+	/**
+	 * <p>Get default relational data source.</p>
+	 * Checks whether EngineFactory.DefaultThreadDataSource is instance of RelationalDataSource
+	 * if that is the case then return EngineFactory.DefaultThreadDataSource else if
+	 * StorageContext.Default.getRelationalDataSource() is not null then return table
+	 * data source from StorageContext else throw JDOUserException if a default relational
+	 * data source can't be found at thread local nor StorageContext.
+	 * @return RelationalDataSource
+	 * @throws JDOUserException If there is no default relational data source set.
+	 */
 	public static RelationalDataSource getDefaultRelationalDataSource() throws JDOUserException {
 		
 		RelationalDataSource rdts = null; 

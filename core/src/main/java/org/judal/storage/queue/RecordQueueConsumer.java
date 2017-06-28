@@ -18,10 +18,24 @@ import javax.jdo.JDOException;
 import org.judal.storage.DataSource;
 import org.judal.storage.Engine;
 
+/**
+ * <p>Record queue consumer.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public interface RecordQueueConsumer {
 
-	public void start(Engine<? extends DataSource> engine, Map<String,String> properties) throws JDOException;
+	/**
+	 * <p>Start record queue consumer.</p>
+	 * @param engine Engine&lt;? extends DataSource&gt;
+	 * @param properties Map&lt;String,String&gt;
+	 * @throws JDOException
+	 */
+	void start(Engine<? extends DataSource> engine, Map<String,String> properties) throws JDOException;
 	
-	public void stop() throws JDOException;
+	/**
+	 * @throws JDOException
+	 */
+	void stop() throws JDOException;
 	
 }

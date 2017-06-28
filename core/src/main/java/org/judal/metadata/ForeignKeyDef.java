@@ -44,45 +44,75 @@ public class ForeignKeyDef extends ExtendableDef implements ForeignKeyMetadata {
 		clear();
 	}
 
+	/**
+	 * <p>Clear all columns of this ForeignKeyDef.</p>
+	 */
 	public void clear() {
 		columns = new ColumnMetadata[0];
 	}
 	
+	/**
+	 * <p>Get columns of this ForeignKeyDef.</p>
+	 * @return ColumnMetadata[]
+	 */
 	@Override
 	public ColumnMetadata[] getColumns() {
 		return columns;
 	}
 
+	/**
+	 * <p>Get name of this ForeignKeyDef.</p>
+	 * @return String
+	 */
 	@Override
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * <p>Get number of columns on this ForeignKeyDef.</p>
+	 * @return int
+	 */
 	@Override
 	public int getNumberOfColumns() {
 		return columns.length;
 	}
 
+	/**
+	 * @return Boolean
+	 */
 	@Override
 	public Boolean getDeferred() {
 		return deferred;
 	}
 
+	/**
+	 * @return ForeignKeyAction
+	 */
 	@Override
 	public ForeignKeyAction getDeleteAction() {
 		return delAction;
 	}
 
+	/**
+	 * @return String
+	 */
 	@Override
 	public String getTable() {
 		return table;
 	}
 
+	/**
+	 * @return Boolean
+	 */
 	@Override
 	public Boolean getUnique() {
 		return unique;
 	}
 
+	/**
+	 * @return ForeignKeyAction
+	 */
 	@Override
 	public ForeignKeyAction getUpdateAction() {
 		return updAction;
@@ -129,6 +159,7 @@ public class ForeignKeyDef extends ExtendableDef implements ForeignKeyMetadata {
 	}
 
 	/**
+	 * <p>This method is not supported and always throw JDOUnsupportedOptionException.</p>
 	 * @throws JDOUnsupportedOptionException
 	 */
 	@Override
@@ -137,6 +168,7 @@ public class ForeignKeyDef extends ExtendableDef implements ForeignKeyMetadata {
 	}
 
 	/**
+	 * <p>This method is not supported and always throw JDOUnsupportedOptionException.</p>
 	 * @throws JDOUnsupportedOptionException
 	 */
 	@Override
@@ -144,52 +176,92 @@ public class ForeignKeyDef extends ExtendableDef implements ForeignKeyMetadata {
 		throw new javax.jdo.JDOUnsupportedOptionException("ForeignKeyMetadata.newPropertyMetadata() is not implemented");
 	}
 
+	/**
+	 * @param defered boolean
+	 * @return ForeignKeyMetadata <b>this</b>
+	 */
 	@Override
 	public ForeignKeyMetadata setDeferred(boolean defered) {
 		deferred = defered;
 		return this;
 	}
 
+	/**
+	 * @param action ForeignKeyAction
+	 * @return ForeignKeyMetadata <b>this</b>
+	 */
 	@Override
 	public ForeignKeyMetadata setDeleteAction(ForeignKeyAction action) {
 		delAction = action;
 		return this;
 	}
 
+	/**
+	 * @param foreignKeyName String
+	 * @return ForeignKeyMetadata <b>this</b>
+	 */
 	@Override
 	public ForeignKeyMetadata setName(String foreignKeyName) {
 		name = foreignKeyName;
 		return this;
 	}
 
+	/**
+	 * @param tableName String
+	 * @return ForeignKeyMetadata <b>this</b>
+	 */
 	@Override
 	public ForeignKeyMetadata setTable(String tableName) {
 		table = tableName;
 		return this;
 	}
 
+	/**
+	 * @param isUnique boolean
+	 * @return ForeignKeyMetadata <b>this</b>
+	 */
 	@Override
 	public ForeignKeyMetadata setUnique(boolean isUnique) {
 		unique = isUnique;
 		return this;
 	}
 
+	/**
+	 * @param action ForeignKeyAction
+	 * @return ForeignKeyMetadata <b>this</b>
+	 */
 	@Override
 	public ForeignKeyMetadata setUpdateAction(ForeignKeyAction action) {
 		updAction = action;
 		return this;
 	}
 
+	/**
+	 * <p>This method always returns <b>null</b>.</p>
+	 * @return <b>null</b> 
+	 */
 	@Override
 	public MemberMetadata[] getMembers() {
 		return null;
 	}
 
+	/**
+	 * <p>This method always returns zero.</p>
+	 * @return 0 
+	 */
 	@Override
 	public int getNumberOfMembers() {
 		return 0;
 	}
 
+	/**
+	 * <p>The returned string will be like:</p>
+	 * &lt;foreign-key table="<i>tableName</i>" deferred="false" delete-action="NONE" update-action="NONE" unique="false" name="<i>fkName</i>" &gt;<br/>
+	 * &lt;column name="column1" /&gt;<br/>
+	 * &lt;column name="column2" /&gt;<br/>
+	 * &lt;/foreign-key&gt;
+	 * @return String
+	 */
 	public String toJdoXml() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("      <foreign-key");

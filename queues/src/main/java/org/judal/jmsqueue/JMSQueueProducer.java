@@ -58,7 +58,7 @@ public class JMSQueueProducer implements RecordQueueProducer {
 
   private String sLoginId;
   private String sAuthStr;
-  private Hashtable oEnv;
+  private Hashtable<String,String> oEnv;
   private Context oCtx;
   private ConnectionFactory oCnf;
   private Queue oQue;
@@ -66,7 +66,7 @@ public class JMSQueueProducer implements RecordQueueProducer {
   private Properties oDefaultProps = new Properties();
   
   public JMSQueueProducer(String engineName, Map<String,String> properties) throws JDOException, InstantiationException {
-    oEnv = new Hashtable();
+    oEnv = new Hashtable<String,String>();
     oCtx = null;
     oCnf = null;
     oQue = null;
@@ -78,7 +78,7 @@ public class JMSQueueProducer implements RecordQueueProducer {
   	throws NamingException,JDOException,InstantiationException {
   	sLoginId = userId;
   	sAuthStr = passwd;
-    oEnv = new Hashtable();
+    oEnv = new Hashtable<String,String>();
     if (connectionFactoryName!=null && queueName!=null && directoryPath!=null) {
       oEnv.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.fscontext.RefFSContextFactory");
       oEnv.put(Context.PROVIDER_URL, "file://"+directoryPath);

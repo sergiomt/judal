@@ -3,6 +3,7 @@ package org.judal.storage.java.test;
 import java.math.BigDecimal;
 import java.util.Date;
 
+import org.judal.metadata.TableDef;
 import org.judal.storage.table.Record;
 
 public interface TestRecord1 extends Record {
@@ -31,4 +32,5 @@ public interface TestRecord1 extends Record {
 
 	void setAmount(BigDecimal n);
 	
+	TableDef getTableDef();
 }

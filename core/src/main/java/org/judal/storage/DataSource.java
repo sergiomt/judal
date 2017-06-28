@@ -20,7 +20,7 @@ import javax.jdo.datastore.Sequence;
 import javax.transaction.TransactionManager;
 
 /**
- * Basic interface for DataSource implementations
+ * Base interface for DataSource implementations
  * @author Sergio Montoro Ten
  * @version 1.0
  */
@@ -93,62 +93,101 @@ public interface DataSource extends AutoCloseable {
 	boolean inTransaction() throws JDOException;
 	
     /**
-     * Used by Amazon S3 properties
+     * Configuration property used by Amazon S3
      */
 	public static final String ACCESSKEY = "accessKey";
     /**
-     * Used by Amazon S3 properties
+     * Configuration property used by JDBC. Boolean (true/false). Default true.
+     */
+    public static final String AUTOCOMMIT = "autocommit";
+    /**
+     * Configuration property used by Amazon S3
      */
     public static final String BUCKET = "bucket";
     /**
-     * Used by Amazon S3 properties
+     * Configuration property used by Amazon S3
      */
     public static final String REGION = "region";
     /**
-     * Used by Amazon S3 properties
+     * Configuration property used by Amazon S3
      */
     public static final String SECRETKEY = "secretKey";
     /**
-     * Used by HBASE properties
+     * Configuration property used by HBASE. String. Path to HBASE XML configuration file.
      */
     public static final String CONFIG = "config";
     /**
-     * Used by JDBC properties
+     * Configuration property used by JDBC. String. Fully qualified name of JDBC driver class.
      */
     public static final String DRIVER = "driver";
     /**
-     * Used by Berkeley DB properties
+     * Configuration property used by Berkeley DB. String. Path to Berkeley DB base directory.
      */
     public static final String DBENV = "dbenvironment";
     /**
-     * Used by JDBC properties
+     * Configuration property used by JDBC. Database connection string.
      */
     public static final String URI = "uri";
     /**
-     * Used by JDBC properties
+     * Configuration property used by JDBC. Catalog name.
      */
     public static final String CATALOG = "catalog";
     /**
-     * Used by JDBC properties
+     * Configuration property used by JDBC. Boolean (true/false). Default true.
      */
     public static final String USE_DATABASE_METADATA = "useDatabaseMetadata";
     /**
-     * Used by JDBC properties
+     * Configuration property used by JDBC. Schema name.
      */    
     public static final String SCHEMA = "schema";
+    /**
+     * Configuration property. Name of file describing schema metadata. Default "metadata.xml"
+     */    
     public static final String METADATA = "metadata";
+    /**
+     * Configuration property. Path of package containing metadata like "com/acme/app/model"
+     */    
     public static final String PACKAGE = "package";
+    /**
+     * Configuration property. Username.
+     */    
     public static final String USER = "user";
+    /**
+     * Configuration property. Clear Password.
+     */    
     public static final String PASSWORD = "password";
+    /**
+     * Configuration property
+     */    
     public static final String STORED = "stored";
+    /**
+     * Configuration property
+     */    
     public static final String EXTURL = "exturl";
+    /**
+     * Configuration property. int [-1..n] Seconds.
+     */    
     public static final String LOGINTIMEOUT = "logintimeout";
+    /**
+     * Configuration property. int [-1..n] Seconds.
+     */    
     public static final String CONNECTIONTIMEOUT = "connectiontimeout";
+    /**
+     * Configuration property. int [0..n] Size of JDBC connection pool.
+     */    
     public static final String POOLSIZE = "poolsize";
+    /**
+     * Configuration property. int [POOLSIZE..n] Maximum size of JDBC connection pool.
+     */    
     public static final String MAXPOOLSIZE = "maxpoolsize";
+    /**
+     * Configuration property. int [MAXPOOLSIZE..n] Maximum number of allowed JDBC connections.
+     */    
     public static final String MAXCONNECTIONS = "maxconnections";
+    /**
+     * Configuration property. Boolean (true/false) Default true
+     */
     public static final String TRANSACTIONAL = "transactional";
-    public static final String AUTOCOMMIT = "autocommit";
     
     public static String DEFAULT_POOLSIZE = "10";
     public static String DEFAULT_MAXPOOLSIZE = "100";
@@ -159,6 +198,7 @@ public interface DataSource extends AutoCloseable {
     public static String DEFAULT_TRANSACTIONAL = "true";
     public static String DEFAULT_USE_DATABASE_METADATA = "true";
     public static String DEFAULT_AUTOCOMMIT = "false";
+    public static String DEFAULT_METADATA = "metadata.xml";
     
     /**
      * List of supported property names

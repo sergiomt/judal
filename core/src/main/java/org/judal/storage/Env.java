@@ -31,7 +31,9 @@ import static org.judal.storage.DataSource.PropertyNames;
 import static org.judal.storage.DataSource.DefaultValues;
 
 /**
- * <p>Read properties from environment to create data sources and other objects.</p>
+ * <p>Helper methods to read properties from environment to create data sources and other objects.</p>
+ * The list of recognized properties and their default values are kept as static variables at
+ * org.judal.storage.DataSource class
  * @author Sergio Montoro Ten
  * @version 1.0
  */
@@ -168,6 +170,7 @@ public class Env {
 	   * <p>This method ensures that a file separator is always appended to the end of the read value.</p>
 	   * @param oProperties Map&lt;String,String&gt;
 	   * @param sVarName Property Name
+	   * @param iDefault int
 	   * @return Value terminated with a file separator or <b>null</b> if no property with such name was found.
 	   * @throws NumberFormatException
 	   */
