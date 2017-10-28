@@ -99,30 +99,6 @@ public class TableDef extends ViewDef {
 	}
 
 	/**
-	 * Walk the list of columns of this TableDef and auto-generate the corresponding PrimaryKeyMetadata.
-	 */
-	public void autoSetPrimaryKey() {
-		if (getPrimaryKeyMetadata()!=null) {
-			getPrimaryKeyMetadata().clear();
-			for (ColumnDef c : getColumns()) {
-				if (c.isPrimaryKey()) {
-					ColumnDef newPkCol = getPrimaryKeyMetadata().newColumnMetadata();
-					newPkCol.setFamily(c.getFamily());
-					newPkCol.setName(c.getName());
-					newPkCol.setType(c.getType());
-					newPkCol.setJDBCType(c.getJDBCType());
-					newPkCol.setSQLType(c.getSQLType());
-					newPkCol.setPosition(c.getPosition());
-					newPkCol.setLength(c.getLength());
-					newPkCol.setScale(c.getScale());
-					newPkCol.setAllowsNull(c.getAllowsNull());
-					newPkCol.setAutoIncrement(c.getAutoIncrement());
-				}
-			}
-		}
-	}
-
-	/**
 	 * <p>Get the name of the column which will never be modified by update writes of a Record.</p>
 	 * @return String Column Name or <b>null</b> if no column in the Record is prevented from being modified upon update.
 	 */

@@ -1,12 +1,15 @@
 package org.judal.jdbc.jdc;
 
-
 import java.math.BigDecimal;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-import java.util.ListIterator;
+import java.util.HashMap;
+
+import java.sql.Types;
+import java.sql.SQLException;
+import java.sql.PreparedStatement;
 
 import javax.jdo.metadata.ColumnMetadata;
 
@@ -20,12 +23,6 @@ import org.judal.storage.table.Table;
 
 import javax.jdo.JDOException;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.sql.Types;
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
-
 import com.knowgate.debug.DebugFile;
 
 /**
@@ -34,6 +31,8 @@ import com.knowgate.debug.DebugFile;
  * @version 7.0
  */
 public class JDCTableLoader extends SQLTableDef implements ImportLoader {
+
+	private static final long serialVersionUID = 1L;
 
 	private JDCConnection jConn;
 	private Object[] aValues;
@@ -47,7 +46,7 @@ public class JDCTableLoader extends SQLTableDef implements ImportLoader {
 
 	// ---------------------------------------------------------------------------
 
-	public JDCTableLoader(RDBMS eDBMS, String sTableName) {
+	public JDCTableLoader(RDBMS eDBMS, String sTableName) throws SQLException {
 		super(eDBMS, sTableName);
 		jConn = null;
 	}
@@ -78,7 +77,6 @@ public class JDCTableLoader extends SQLTableDef implements ImportLoader {
 
 		try {
 			readCols(oConn, oConn.getMetaData());
-			precomputeSqlStatements(getRDBMSId(oConn));
 		} catch (SQLException  sqle) {
 			throw new JDOException("SQLException "+sqle.getMessage(), sqle);
 		}

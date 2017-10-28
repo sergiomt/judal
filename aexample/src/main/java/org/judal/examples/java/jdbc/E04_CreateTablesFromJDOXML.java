@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+
 import org.judal.storage.DataSource;
 import org.judal.storage.relational.RelationalDataSource;
 import org.judal.metadata.TableDef;
@@ -48,6 +50,10 @@ public class E04_CreateTablesFromJDOXML {
 		// Create tables in the database
 		for (TableDef tdef : metadata.tables())
 			dataSource.createTable(tdef, options);
+		
+		assertTrue(dataSource.exists("student", "U"));
+		assertTrue(dataSource.exists("course", "U"));
+		assertTrue(dataSource.exists("student_x_course", "U"));
 	}
 
 	public static void dropSchemaObjects(RelationalDataSource dataSource) throws JDOException, IOException {

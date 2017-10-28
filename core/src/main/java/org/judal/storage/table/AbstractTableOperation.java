@@ -142,6 +142,17 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 	public abstract Object fetch(FetchGroup fetchGroup, String columnName, Object valueSearched) throws JDOException;
 
 	/**
+	 * <p>Fetch records which contain a certain value at a given column.</p>
+	 * @param fetchGroup FetchGroup Columns to be fetched
+	 * @param columnName String Column name
+	 * @param valueSearched Object Value that must be present at column columnName
+	 * @param sortBy Optional. String column and direction (ASC or DESC) used to sort the values. Must be present in the FetchGroup
+	 * @return R extends Record.
+	 * @throws JDOException
+	 */
+	public abstract R fetchFirst(FetchGroup fetchGroup, String columnName, Object valueSearched, String... sortBy) throws JDOException;
+
+	/**
 	 * <p>Fetch records which contain a certain value at a given column and return results sorted in ascending order.</p>
 	 * @param fetchGroup FetchGroup Columns to be fetched
 	 * @param columnName String Column name

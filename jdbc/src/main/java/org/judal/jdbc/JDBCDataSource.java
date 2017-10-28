@@ -1,14 +1,15 @@
 package org.judal.jdbc;
 
 /**
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
  * http://www.apache.org/licenses/LICENSE-2.0
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- * either express or implied.
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
  */
 
 import java.io.PrintWriter;
@@ -62,7 +63,7 @@ import com.knowgate.debug.StackTraceUtil;
 import com.knowgate.stringutils.Str;
 
 /**
- * Abstract base class for JDBC DataSource implementations
+ * <p>Abstract base class for JDBC DataSource implementations.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */
@@ -421,7 +422,6 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		try {
 			oTable.readCols(oConn, oMData);
 			oTable.readIndexes(oConn, oMData);
-			oTable.precomputeSqlStatements(oTable.getRDBMSId(oConn));
 		} catch (SQLException sqle) {
 			added = false;
 			if (DebugFile.trace) {

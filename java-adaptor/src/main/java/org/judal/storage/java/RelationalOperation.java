@@ -2,6 +2,7 @@ package org.judal.storage.java;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 
 import org.judal.storage.Param;
 import org.judal.storage.table.Record;
@@ -9,6 +10,10 @@ import org.judal.storage.table.RecordSet;
 
 import org.judal.storage.relational.AbstractRelationalOperation;
 import org.judal.storage.relational.RelationalDataSource;
+
+import static org.judal.storage.query.SortDirection.ASC;
+import static org.judal.storage.query.SortDirection.DESC;
+import static org.judal.storage.query.SortDirection.same;
 
 public class RelationalOperation<R extends Record> extends AbstractRelationalOperation<R> {
 
@@ -38,7 +43,7 @@ public class RelationalOperation<R extends Record> extends AbstractRelationalOpe
 	}
 
 	@Override
-	public Object fetchAsc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
+	public RecordSet<R> fetchAsc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
 			throws JDOException {
 		RecordSet<R> retval = getTable().fetch(fetchGroup, columnName, valueSearched);
 		retval.sort(sortByColumn);
@@ -46,11 +51,32 @@ public class RelationalOperation<R extends Record> extends AbstractRelationalOpe
 	}
 
 	@Override
-	public Object fetchDesc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
+	public RecordSet<R> fetchDesc(FetchGroup fetchGroup, String columnName, Object valueSearched, String sortByColumn)
 			throws JDOException {
 		RecordSet<R> retval = getTable().fetch(fetchGroup, columnName, valueSearched);
 		retval.sort(sortByColumn);
 		return retval;
 	}
 
+	@Override
+	public R fetchFirst(FetchGroup fetchGroup, String columnName, Object valueSearched, String... sortBy)
+			throws JDOException {
+		R retval = null;
+		RecordSet<R> rst;
+		if (sortBy==null || sortBy.length==0)
+			rst = fetch(fetchGroup, columnName, valueSearched);
+		else if (sortBy.length==1)
+			rst = fetchAsc(fetchGroup, columnName, valueSearched, sortBy[0]);
+		else
+			if (same(ASC,sortBy[1]))
+				rst = fetchAsc(fetchGroup, columnName, valueSearched, sortBy[0]);
+			else if (same(DESC,sortBy[1]))
+				rst = fetchDesc(fetchGroup, columnName, valueSearched, sortBy[0]);
+			else
+				throw new JDOUserException("Unrecognized sort direction " + sortBy[1]);
+		if (rst.size()>0)
+			retval = rst.get(0);
+		return retval;
+	}
+	
 }

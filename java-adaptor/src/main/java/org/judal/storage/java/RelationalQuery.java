@@ -1,12 +1,12 @@
 package org.judal.storage.java;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.jdo.JDOException;
 
 import org.judal.storage.EngineFactory;
+import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.relational.AbstractRelationalQuery;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
@@ -63,6 +63,21 @@ public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R
 	public RecordSet<R> fetch() {
 		qry.setFilter(prd);
 		return viw.fetch(qry);
+	}
+
+	@Override
+	public R fetchFirst() {
+		RecordSet<R> rst;
+		AbstractQuery qry1;
+		qry.setFilter(prd);
+		if (qry.getRangeFromIncl()==0l && qry.getRangeToExcl()==1l) {
+			qry1 = qry;
+		} else {
+			qry1= qry.clone();
+			qry.setRange(0l, 1l);
+		}			
+		rst = viw.fetch(qry1);
+		return rst.isEmpty() ? null : rst.get(0);
 	}
 
 	@SuppressWarnings("unchecked")

@@ -19,6 +19,8 @@ import org.judal.metadata.ColumnDef;
 
 public class S3TableDef extends TableDef {
 
+	private static final long serialVersionUID = 1L;
+
 	public S3TableDef(String name) {
 		super(name);
 	}

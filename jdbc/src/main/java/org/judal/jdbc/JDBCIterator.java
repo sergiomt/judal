@@ -1,6 +1,7 @@
 package org.judal.jdbc;
 
 /**
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -20,25 +21,43 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import javax.jdo.JDOException;
 
-import org.judal.jdbc.metadata.SQLTableDef;
+import org.judal.metadata.SelectableDef;
+
 import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.table.Record;
 import org.judal.storage.StorageObjectFactory;
 
+/**
+ * <p>Iterator over an open SQL ResultSet.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 
 	protected Constructor<? extends Record> recordConstructor;
-	protected SQLTableDef tableDef;
+	protected SelectableDef tableDef;
 	private Class<? extends Record> resultClass;
 	private Statement stmt;
 	private ResultSet rset;
 	private Record nextRow;
+	private Boolean isNext;
 
+	/**
+	 * <p>Constructor.</p>
+	 * @param resultClass Class&lt;? extends Record&gt;
+	 * @param tableDef SQLSelectableDef
+	 * @param stmt PreparedStatement
+	 * @param rset ResultSet
+	 * @throws NoSuchMethodException if resultClass has no default constructor nor a constructor compatible with a SelectableDef argument
+	 * @throws SecurityException
+	 * @throws NullPointerException if resultClass or stmt or rset are null
+	 */
 	@SuppressWarnings("unchecked")
-	public JDBCIterator(Class<? extends Record> resultClass, SQLTableDef tableDef, PreparedStatement stmt, ResultSet rset)
+	public JDBCIterator(Class<? extends Record> resultClass, SelectableDef tableDef, PreparedStatement stmt, ResultSet rset)
 		throws NoSuchMethodException, SecurityException, NullPointerException {
 
 		if (null==resultClass)
@@ -55,7 +74,8 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 		this.nextRow = null;
 		this.resultClass = resultClass;
 		this.recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(resultClass, new Class<?>[]{tableDef.getClass()});
-		
+		this.isNext = null;
+
 		try {
 			if (null==recordConstructor)
 				this.recordConstructor = resultClass.getConstructor();
@@ -65,8 +85,20 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 			throw new NoSuchMethodException("Cannot find a suitable construct for "+resultClass.getName());	
 	}
 
+	/**
+	 * @return boolean
+	 */
 	@Override
-	public boolean hasNext() {
+	public boolean hasNext()  {
+		if (null==isNext)
+			return moveToNext();
+		else if (isNext)
+			return true;
+		else
+			return moveToNext();
+	}
+
+	private boolean moveToNext() {
 		boolean retval = false;
 		try {
 			retval = rset.next();
@@ -90,11 +122,20 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | SQLException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
-		return retval;
+		isNext = retval;
+		return retval;		
 	}
 
+	/**
+	 * @return Record
+	 * @throws NoSuchElementException
+	 */
 	@Override
-	public Record next() {
+	public Record next() throws NoSuchElementException {
+		if (null==isNext || !isNext)
+			if (!moveToNext())
+				throw new NoSuchElementException("Attempt to move cursor beyond last record");				
+		isNext = Boolean.FALSE;
 		return nextRow;
 	}
 

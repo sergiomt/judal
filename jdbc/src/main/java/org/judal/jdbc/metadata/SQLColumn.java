@@ -10,6 +10,7 @@ package org.judal.jdbc.metadata;
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.
  */
+
 import java.sql.DatabaseMetaData;
 import java.sql.Types;
 
@@ -29,6 +30,17 @@ public final class SQLColumn extends ColumnDef {
 
 	//-----------------------------------------------------------
 
+	/**
+	 * <p>Constructor for non incremental autonumeric column</p>
+	 * @param sTable String Table Name
+	 * @param sColName String Column Name
+	 * @param iColType short Column Type from java.sql.Types
+	 * @param sColType String Column Type Name : ARRAY, BIGINT, BINARY, BIT, BLOB, BOOLEAN, CHAR, CLOB, DATE, DECIMAL, DOUBLE, FLOAT, INTEGER, JAVA_OBJECT, LONGVARBINARY, LONGVARCHAR, NCHAR, NVARCHAR, NULL, NUMERIC, REAL, SMALLINT, SQLXML, STRUCT, TIME, TIMESTAMP, TINYINT, VARBINARY, VARCHAR 
+	 * @param iPrecision int
+	 * @param iDecDigits int
+	 * @param iNullable int DatabaseMetaData.columnNullable or DatabaseMetaData.columnNoNulls
+	 * @param iColPos int Column Position 1&hellip;n
+	 */
 	public SQLColumn(String sTable, String sColName,
 			short iColType, String sColType,
 			int iPrecision, int iDecDigits,
@@ -40,6 +52,18 @@ public final class SQLColumn extends ColumnDef {
 
 	//-----------------------------------------------------------
 
+	/**
+	 * <p>Constructor for incremental autonumeric column</p>
+	 * @param sTable String Table Name
+	 * @param sColName String Column Name
+	 * @param iColType short Column Type from java.sql.Types
+	 * @param sColType String Column Type Name : ARRAY, BIGINT, BINARY, BIT, BLOB, BOOLEAN, CHAR, CLOB, DATE, DECIMAL, DOUBLE, FLOAT, INTEGER, JAVA_OBJECT, LONGVARBINARY, LONGVARCHAR, NCHAR, NVARCHAR, NULL, NUMERIC, REAL, SMALLINT, SQLXML, STRUCT, TIME, TIMESTAMP, TINYINT, VARBINARY, VARCHAR 
+	 * @param iPrecision int
+	 * @param iDecDigits int
+	 * @param iNullable int DatabaseMetaData.columnNullable or DatabaseMetaData.columnNoNulls
+	 * @param bIsAutoInc boolean <b>true</b> if column is incremental autonumeric 
+	 * @param iColPos int Column Position 1&hellip;n
+	 */
 	public SQLColumn(String sTable, String sColName,
 			short iColType, String sColType,
 			int iPrecision, int iDecDigits,
@@ -47,6 +71,33 @@ public final class SQLColumn extends ColumnDef {
 		super(sTable, sColName,iColType, iPrecision, iDecDigits, iNullable==DatabaseMetaData.columnNullable, null, null, null, false, iColPos);
 		setJDBCType(sColType);
 		setAutoIncrement(bIsAutoInc);
+	}
+
+	/**
+	 * <p>Constructor for nullable column with default precision</p>
+	 * The precision is set by calling ColumnDef.getDefaultPrecision(iColType)
+	 * @param sColName String Column Name
+	 * @param iColPos int Column Position 1&hellip;n
+	 * @param iColType short Column Type from java.sql.Types
+	 */
+	//-----------------------------------------------------------
+
+	public SQLColumn(String sColName, int iColPos, short iColType) {
+		super(null, sColName,iColType, ColumnDef.getDefaultPrecision(iColType), 0, true, null, null, null, false, iColPos);
+		setJDBCType(SQLColumn.typeName(iColType));
+		setAutoIncrement(false);
+	}
+
+	//-----------------------------------------------------------
+
+	/**
+	 * <p>Clone an existing column</p>
+	 * @param source SQLColumn
+	 */
+	public SQLColumn(SQLColumn source) {
+		super(source);
+		setJDBCType(source.getJDBCType());
+		setAutoIncrement(source.getAutoIncrement());
 	}
 
 	//-----------------------------------------------------------
@@ -67,14 +118,17 @@ public final class SQLColumn extends ColumnDef {
 		setJDBCType(ColumnDef.typeName(getSqlType()));
 	}
 
+	/**
+	 * @param iType int from java.sql.Types
+	 * @see java.sql.Types
+	 */
 	public void setSqlType(int iType) {
 		setType(iType);
 		setJDBCType(ColumnDef.typeName(getSqlType()));
 	}
 
 	/**
-	 *
-	 * @return SQL Type Name
+	 * @return String SQL Type Name
 	 */
 	public String getSqlTypeName() { return getJDBCType(); }
 

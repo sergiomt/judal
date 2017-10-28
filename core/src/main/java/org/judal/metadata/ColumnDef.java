@@ -1045,6 +1045,9 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		case Types.JAVA_OBJECT:
 			maxLength = Integer.MAX_VALUE;
 			break;
+		case Types.NULL:
+			maxLength = 0;
+			break;
 		default:
 			throw new IllegalArgumentException("Unrecognized SQL type "+String.valueOf(columnType));
 		}
@@ -1089,4 +1092,11 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	else
 		return Types.JAVA_OBJECT;
 	}
+	
+	public static final String OPTION_FAMILY_NAME = "family";
+	public static final String OPTION_NULLABLE = "nullable";
+	public static final String OPTION_LENGTH = "nullable";
+	public static final String OPTION_PRIMARYKEY = "primarykey";
+	public static final String OPTION_DEFAULT_VALUE = "defaultvalue";
+	
 }

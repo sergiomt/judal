@@ -1,7 +1,5 @@
 package org.judal.examples.scala.model
 
-import javax.jdo.JDOException
-
 import org.judal.storage.EngineFactory
 import org.judal.storage.scala.MapRecord
 import org.judal.storage.relational.RelationalDataSource

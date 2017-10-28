@@ -41,13 +41,21 @@ public interface RelationalView extends IndexableView {
 	  Predicate newPredicate();
 	  
 	  /**
-	   * <p>Fetch records.</p>
+	   * <p>Fetch records which match a given query.</p>
 	   * @param query AbstractQuery
 	   * @return RecordSet&lt;&lt;? extends Record&gt;&gt;
 	   * @throws JDOException
 	   */
 	  <R extends Record> RecordSet<R> fetch(AbstractQuery query) throws JDOException;
 	
+	  /**
+	   * <p>Fetch first record which matches a given query.</p>
+	   * @param query AbstractQuery
+	   * @return R extends Record or null if no record was returned by the query
+	   * @throws JDOException
+	   */
+	  <R extends Record> R fetchFirst(AbstractQuery query) throws JDOException;
+
 	  /**
 	   * <p>Count records matching a Predicate.</p>
 	   * @param filterPredicate Predicate

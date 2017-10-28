@@ -11,6 +11,7 @@ package org.judal.transaction;
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.
  */
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;

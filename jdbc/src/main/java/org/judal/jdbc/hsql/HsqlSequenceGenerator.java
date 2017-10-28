@@ -1,5 +1,17 @@
 package org.judal.jdbc.hsql;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,6 +22,11 @@ import javax.jdo.datastore.Sequence;
 import org.judal.jdbc.JDBCDataSource;
 import org.judal.jdbc.jdc.JDCConnection;
 
+/**
+ * <p>Sequence for HSQL.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class HsqlSequenceGenerator implements Sequence {
 
 	private JDBCDataSource dataSource;

@@ -22,7 +22,9 @@ import javax.transaction.SystemException;
 import javax.transaction.TransactionManager;
 
 import org.judal.jdbc.jdc.JDCConnection;
+import org.judal.jdbc.metadata.SQLColumn;
 import org.judal.jdbc.metadata.SQLTableDef;
+import org.judal.jdbc.metadata.SQLViewDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.ForeignKeyDef;
 import org.judal.metadata.JoinDef;
@@ -32,7 +34,6 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
 import org.judal.storage.relational.RelationalView;
-import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 
@@ -40,14 +41,14 @@ import com.knowgate.debug.DebugFile;
 import com.knowgate.tuples.Pair;
 
 /**
- * Implementation of JDBC table data source
+ * <p>Implementation of JDBC table data source</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */
 public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDataSource {
 	
 	/**
-	 * Constructor
+	 * <p>Constructor</p>
 	 * @param properties Map&lt;String, String&gt; As listed in DataSource.PropertyNames
 	 * @param transactManager TransactionManager
 	 * @throws SQLException
@@ -62,8 +63,10 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	}
 
 	/**
-	 * Open relational table for read/write.
-	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the relational table
+	 * <p>Open table for read/write.</p>
+	 * Each table uses its own java.sql.Connection.
+	 * If this data source is inTransaction() Then the underlying connection will be enlisted in the resources participating in the transaction.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the table
 	 * @return JDBCRelationalTable
 	 * @throws JDOException
 	 */
@@ -85,8 +88,9 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	}
 
 	/**
-	 * Open relational table for read/write.
-	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the relational table
+	 * <p>Open table for read/write.</p>
+	 * The implementation of this method is exactly the same as openTable()
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the table
 	 * @return JDBCRelationalTable
 	 * @throws JDOException
 	 */
@@ -96,8 +100,9 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	}
 	
 	/**
-	 * Open relational view for read-only.
-	 * @param recordInstance Record Instance of the Record subclass that will be used to read the relational view
+	 * <p>Open view for read-only.</p>
+	 * Each view uses its own java.sql.Connection.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read the view
 	 * @return JDBCRelationalView
 	 * @throws JDOException
 	 */
@@ -107,7 +112,8 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	}
 
 	/**
-	 * Open relational view for read-only.
+	 * <p>Open indexable view for read-only.</p>
+	 * The implementation of this method is exactly the same as openView()
 	 * @param recordInstance Record Instance of the Record subclass that will be used to read the relational view
 	 * @return JDBCRelationalView
 	 * @throws JDOException
@@ -117,6 +123,9 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		return new JDBCIndexableView(this, viewRecord);
 	}
 
+	/**
+	 * 
+	 */
 	@SuppressWarnings("unchecked")
 	@Override
 	public RelationalView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) throws JDOException {
@@ -152,14 +161,29 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			if (tbl!=null) tbl.close();			
 		}
 
-		SQLTableDef tdef = tbl.getTableDef().clone();
+		SQLViewDef tdef = tbl.getViewDef().clone();
+		tdef.setAlias(baseTable.getAlias());
+
 		ForeignKeyDef fk = null;
 
-		for (int f=0; f<tdef.getNumberOfForeignKeys() && fk==null; f++) 
-			if (tdef.getForeignKeys()[f].getTable().equalsIgnoreCase(joinedTable.getName()))
+		if (DebugFile.trace)
+			DebugFile.writeln(String.valueOf(tdef.getNumberOfForeignKeys()) + " foreign keys found");
+
+		for (int f=0; f<tdef.getNumberOfForeignKeys() && fk==null; f++) {
+			if (DebugFile.trace)
+				DebugFile.writeln("check " + tdef.getForeignKeys()[f].getTable() + " vs " + joinedTable.getName());
+			if (tdef.getForeignKeys()[f].getTable().equalsIgnoreCase(joinedTable.getName())) {
 				fk = tdef.getForeignKeys()[f];
+				if (DebugFile.trace)
+					DebugFile.writeln("using foreign key " + joinedTable.getName());
+			}
+		}
 		
 		if (null==fk) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("no suitable foreign key found");
+				DebugFile.writeln("set foreign key table " + joinedTable.toString());
+			}
 			fk = tdef.newForeignKeyMetadata();
 			fk.setTable(joinedTable.toString());
 			int pos = 0;
@@ -169,22 +193,39 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 					cdef.setPosition(++pos);
 					cdef.setName(column.$2());
 					fk.addColumn(cdef);
+					if (DebugFile.trace)
+						DebugFile.writeln("set foreign key column name " + column.$2());
 				} catch (ArrayIndexOutOfBoundsException aiob) {
-					throw new JDOUserException(aiob.getMessage(), aiob);
+					if (DebugFile.trace)
+						DebugFile.writeln("ArrayIndexOutOfBoundsException " + aiob.getMessage() + " {" + tdef.getColumnsStr() + "}");
+					throw new JDOUserException(aiob.getMessage() + " {" + tdef.getColumnsStr() + "}", aiob);
 				}
 			}
 		}
 
+		if (DebugFile.trace)
+			DebugFile.writeln(String.valueOf(tdef.getNumberOfJoins()) + " joins found");
+
 		JoinDef jn = null;
-		for (int j=0; j<tdef.getNumberOfJoins() && jn==null; j++)
-			if (tdef.getJoins()[j].getTable().equalsIgnoreCase(joinedTable.getName()))
+		for (int j=0; j<tdef.getNumberOfJoins() && jn==null; j++) {
+			if (DebugFile.trace)
+				DebugFile.writeln("check " + tdef.getJoins()[j].getTable() + " vs " + joinedTable.getName());
+			if (tdef.getJoins()[j].getTable().equalsIgnoreCase(joinedTable.getName())) {
 				jn = tdef.getJoins()[j];
+			}
+		}
 		
 		if (null==jn) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("no suitable predefined join found");
+				DebugFile.writeln("set join table " + joinedTable.toString());
+			}
 			jn = tdef.newJoinMetadata();
 			jn.setOuter(joinType.equals(JoinType.OUTER));
 			jn.setTable(joinedTable.toString());
 			for (Pair<String,String> column : onColumns) {
+				if (DebugFile.trace)
+					DebugFile.writeln("add column " + column.$2());
 				jn.addColumn(column.$2());
 			}
 		}
@@ -192,7 +233,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		tbl = new JDBCRelationalView(this, tdef, result.getClass());
 		
 		if (DebugFile.trace) {
-			DebugFile.writeln(tdef.getTable());
+			DebugFile.writeln("joined tables are " + tdef.getTables());
 			DebugFile.decIdent();
 			DebugFile.writeln("End JDBCTableDataSource.openJoinView()");
 		}
@@ -215,7 +256,20 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		metaData = smd;
 	}
 
-	
+	/**
+	 * Create new SQL column definition
+	 * @param tableName String Column Name
+	 * @param position int [1..n]
+	 * @param colType short java.sql.Types
+	 * @param options Map&lt;String,Object&gt; Unused
+	 * @return SQLTableDef
+	 * @throws JDOException
+	 */
+	@Override
+	public SQLColumn createColumnDef(String columnName, int position, short sqlType, Map<String,Object> options) throws JDOException {
+		return new SQLColumn(columnName, position, sqlType);
+	}
+
 	/**
 	 * Create new SQL table definition
 	 * @param tableName String Table Name

@@ -98,9 +98,9 @@ class MapRecord(tableDefinition: ViewDef) extends AbstractRecord(tableDefinition
 	 */
 	@throws(classOf[JDOException])
 	def this(dataSource: TableDataSource, tableName:String , columnNames:String*) = {
-		this(new TableDef(tableName, asJavaCollection(dataSource.getTableOrViewDef(tableName).filterColumns(columnNames.map(c => AbstractRecord.getColumnAlias(c)).toArray[String]).toSeq)))
+		this(new TableDef(tableName, MapRecordStatic.filterColumns(dataSource,  tableName, columnNames)))
 	}
-
+	
 	/**
 	 * Alternative constructor
 	 * @param tableDefinition ViewDef
@@ -310,4 +310,39 @@ class MapRecord(tableDefinition: ViewDef) extends AbstractRecord(tableDefinition
    */	
   def iterator: Iterator[(String, AnyRef)] = valuesMap.iterator
 
+}
+
+private object MapRecordStatic {
+
+	def filterColumns(dataSource: TableDataSource, tableName: String , columnNames: Seq[String]) = {
+		var retval : Array[ColumnDef] = null
+		val vdef = dataSource.getTableOrViewDef(tableName)
+		if (null==vdef) {
+			retval = new Array[ColumnDef](columnNames.length)
+			for (c <- 0 to columnNames.length-1)
+				retval(c) = dataSource.createColumnDef(columnNames(c), c+1, Types.NULL, null)
+		} else {
+			retval = vdef.filterColumns(columnAliases(columnNames))
+		}
+		asJavaCollection(retval.toSeq)
+	}
+
+	def columnAliases(columnNames: Seq[String]) : Array[String] = {
+		val colCount = columnNames.length
+		val aliases = new Array[String](colCount)
+		for (c <- 0 to colCount-1)
+			aliases(c) = getColumnAlias(columnNames(c))
+		return aliases;
+	}
+
+	def getColumnAlias(columnName: String) : String = {
+		for (n <- 0 to columnName.length-6)
+			if (columnName.charAt(n)==' ' &&
+			   (columnName.charAt(n+1)=='A' || columnName.charAt(n+1)=='a') &&
+			   (columnName.charAt(n+2)=='S' || columnName.charAt(n+2)=='s') &&
+			    columnName.charAt(n+3)==' ')
+			  return columnName.substring(n+4)
+		return columnName
+	}
+	
 }

@@ -70,8 +70,15 @@ public class MetadataObjectFactory extends ObjectFactory {
 	 * @throws JDOException
 	 */
 	public static <T extends ViewDef> T newViewDef(Class<T> viewDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
-		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newTableDef("+viewDefSubclass.getName()+","+constructorParameters+")");
+		if (DebugFile.trace) {
+			StringBuilder paramClasses = new StringBuilder();
+			if (null!=constructorParameters && constructorParameters.length>0) {
+				paramClasses.append(constructorParameters[0].getClass().getName());
+				for (int p=1; p<constructorParameters.length; p ++)
+					paramClasses.append(",").append(constructorParameters[p].getClass().getName());					
+			}
+			DebugFile.writeln("StorageObjectFactory.newViewDef("+viewDefSubclass.getName()+","+paramClasses.toString()+")");
+		}
 		@SuppressWarnings("unchecked")
 		Constructor<T> viewDefConstructor = (Constructor<T>) getConstructor(viewDefSubclass, getParameterClasses(constructorParameters));
 		if (null==viewDefConstructor)
@@ -90,6 +97,35 @@ public class MetadataObjectFactory extends ObjectFactory {
 		return retval;
 	}
 
+	/**
+	 * <p>Find a suitable constructor using reflection and create an instance of a subclass of IndexDef</p>
+	 * @param indexDefSubclass Subclass of org.judal.metadata.IndexDef
+	 * @param constructorParameters Parameters for the constructor
+	 * @return T extends IndexDef
+	 * @throws NoSuchMethodException
+	 * @throws JDOException
+	 */
+	public static <T extends IndexDef> T newIndexDef(Class<T> indexDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
+		if (DebugFile.trace)
+			DebugFile.writeln("StorageObjectFactory.newIndexDef("+indexDefSubclass.getName()+","+constructorParameters+")");
+		@SuppressWarnings("unchecked")
+		Constructor<T> indexDefConstructor = (Constructor<T>) getConstructor(indexDefSubclass, getParameterClasses(constructorParameters));
+		if (null==indexDefConstructor)
+			throw new NoSuchMethodException("No suitable constructor found for "+indexDefSubclass.getName());
+		T retval = null;
+		final int parameterCount = indexDefConstructor.getParameterCount();
+		try {
+			if (parameterCount==0)
+				retval = indexDefConstructor.newInstance();
+			else
+				retval = indexDefConstructor.newInstance(filterParameters(indexDefConstructor.getParameters(), constructorParameters));
+		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | IllegalArgumentException xcpt) {
+			if (DebugFile.trace)
+				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" MetadataObjectFactory.newIndexDef(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
+		}
+		return retval;
+	}
+	
 	/**
 	 * <p>Find a suitable constructor using reflection and create an instance of a subclass of ProcedureDef</p>
 	 * @param procedureDefSubclass Subclass of org.judal.metadata.ProcedureDef

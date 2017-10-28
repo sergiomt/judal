@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.jdo.JDOException;
 
+import org.judal.metadata.ColumnDef;
 import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
@@ -70,6 +71,17 @@ public interface TableDataSource extends DataSource {
 	 */
 	void setMetaData(SchemaMetaData smd) throws JDOException;
 	
+	/**
+	 * Create new column definition
+	 * @param columnName String
+	 * @param position int [1..n]
+	 * @param colType short java.sql.Types
+	 * @param options Map&lt;String,Object&gt;
+	 * @return ColumnDef
+	 * @throws JDOException
+	 */
+	ColumnDef createColumnDef(String columnName, int position, short colType, Map<String,Object> options) throws JDOException;
+
 	/**
 	 * Create new table definition
 	 * @param tableName String

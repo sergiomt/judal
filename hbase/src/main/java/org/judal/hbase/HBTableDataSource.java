@@ -35,6 +35,7 @@ import org.judal.storage.table.View;
 import org.judal.storage.Param;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.NameAlias;
+import org.judal.metadata.NonUniqueIndexDef;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
@@ -134,6 +135,19 @@ public class HBTableDataSource implements TableDataSource {
 							" hfile.block.cache.size is " + blockCacheUpperLimit);
 		}
 		if (DebugFile.trace) DebugFile.writeln("finished checkForClusterFreeMemoryLimit");
+	}
+
+	@Override
+	public ColumnDef createColumnDef(String columnName, int position, short colType, Map<String, Object> options) {
+		if (options==null)
+			throw new NullPointerException("HBTableDataSource.createColumnDef options parameter is required");
+		if (!options.containsKey(ColumnDef.OPTION_FAMILY_NAME))
+			throw new JDOUserException("HBTableDataSource.createColumnDef family name is required");
+		int colLen = options.containsKey(ColumnDef.OPTION_LENGTH) ? Integer.parseInt(options.get(ColumnDef.OPTION_LENGTH).toString()) : ColumnDef.getDefaultPrecision(colType);
+		boolean nullable = options.containsKey(ColumnDef.OPTION_NULLABLE) ? Boolean.parseBoolean(options.get(ColumnDef.OPTION_NULLABLE).toString()) : true;
+		boolean isPk = options.containsKey(ColumnDef.OPTION_PRIMARYKEY) ? Boolean.parseBoolean(options.get(ColumnDef.OPTION_PRIMARYKEY).toString()) : false;
+		return new ColumnDef(position, (String) options.get(ColumnDef.OPTION_FAMILY_NAME), columnName, colType, colLen,
+				nullable, null, null, null, options.get(ColumnDef.OPTION_DEFAULT_VALUE), isPk);
 	}
 
 	/**

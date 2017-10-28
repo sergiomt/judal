@@ -492,6 +492,14 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	public String getFilter() {
 		return filter;
 	}
+
+	/**
+	 * <p>Get filter Predicate.</p>
+	 * @return Predicate
+	 */
+	public Predicate getFilterPredicate() {
+		return filterPredicate;
+	}
 	
 	/**
 	 * <p>Set grouping expression using native query language.</p>

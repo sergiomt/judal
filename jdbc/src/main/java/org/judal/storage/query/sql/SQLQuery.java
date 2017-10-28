@@ -36,7 +36,7 @@ import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.SingleColumnRecord;
 
 import org.judal.jdbc.RDBMS;
-import org.judal.jdbc.JDBCRelationalView;
+import org.judal.jdbc.JDBCIndexableView;
 
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;
@@ -83,8 +83,8 @@ public class SQLQuery extends AbstractQuery {
 		return theClone;
 	}
 	
-	private JDBCRelationalView getView() {
-		return (JDBCRelationalView) getCandidates();
+	private JDBCIndexableView getView() {
+		return (JDBCIndexableView) getCandidates();
 	}
 	
 	/**
@@ -110,16 +110,17 @@ public class SQLQuery extends AbstractQuery {
 	@Override
 	public Record newRecord() {
 		if (null==recordConstructor) {
-			recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(getResultClass(), new Class<?>[]{getView().getDataSource().getClass(), getView().getTableDef().getClass()});
+			JDBCIndexableView v = getView();
+			recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(getResultClass(), new Class<?>[]{v.getDataSource().getClass(), v.getViewDef().getClass()});
 			try {
-				constructorParameters = StorageObjectFactory.filterParameters(recordConstructor.getParameters(), new Object[]{getView().getDataSource(), getView().getTableDef()});
+				constructorParameters = StorageObjectFactory.filterParameters(recordConstructor.getParameters(), new Object[]{getView().getDataSource(), getView().getViewDef()});
 			} catch (InstantiationException e) {
 				StringBuilder constructorSignature = new StringBuilder();
 				constructorSignature.append(getResultClass()==null ? "null" : getResultClass().getName());
 				constructorSignature.append("(");
 				constructorSignature.append(getView().getDataSource().getClass().getName());
 				constructorSignature.append(",");
-				constructorSignature.append(getView().getTableDef().getClass().getName());
+				constructorSignature.append(getView().getViewDef().getClass().getName());
 				constructorSignature.append(")");
 				throw new JDOException(e.getMessage() + " getting constructor " + constructorSignature.toString(), e);
 			}
@@ -252,7 +253,7 @@ public class SQLQuery extends AbstractQuery {
 				throw new JDOException(sqle.getSQLState()+" "+sqle.getMessage(), sqle);
 			}
 		}
-		catch (IllegalAccessException | InstantiationException | ArrayIndexOutOfBoundsException | NullPointerException xcpt) {
+		catch (IllegalAccessException | InstantiationException | ArrayIndexOutOfBoundsException xcpt) {
 			try { 
 				if (DebugFile.trace) DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+"\n"+StackTraceUtil.getStackTrace(xcpt));
 			} catch (java.io.IOException ignore) {}
@@ -283,6 +284,13 @@ public class SQLQuery extends AbstractQuery {
 	@Override
 	public String source() throws JDOException {
 		int dbms;
+		if (getView()==null)
+			throw new JDOException("SQLQuery.source() table or view not set");
+		if (getView().getViewDef()==null)
+			throw new JDOException("SQLQuery.source() table or view definition not set");
+		final String tables = getView().getViewDef().getTables();
+		if (tables==null || tables.length()==0)
+			throw new JDOException("SQLQuery.source() No table or view provided for query");
 		try {
 			dbms = getView().getConnection().getDataBaseProduct();
 		} catch (SQLException sqle) {
@@ -294,9 +302,7 @@ public class SQLQuery extends AbstractQuery {
 		query.append("SELECT ");
 		query.append(getResult());
 		query.append(" FROM ");
-		query.append(getView().getTableDef().getTable());
-		if (getView().getAlias()!=null)
-			query.append(" ").append(getView().getAlias());
+		query.append(tables);
 		if (getFilter()!=null) {
 			if (getFilter().length()>0) {
 				query.append(" WHERE ");
@@ -513,9 +519,11 @@ public class SQLQuery extends AbstractQuery {
 		}
 	} // setFetchSize
 
+	/**
+	 * <p>This function will always return <b>null</b>
+	 */
 	@Override
 	public FetchPlan getFetchPlan() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 

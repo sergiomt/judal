@@ -1,5 +1,17 @@
 package org.judal.jdbc.metadata;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,6 +31,12 @@ import org.judal.metadata.ViewDef;
 
 import com.knowgate.io.StreamPipe;
 
+/**
+ * <p>Read SQL object definition from an InputStream.</p>
+ * The InputStream must contain only one object which may be SEQUENCE, VIEW, PROCEDURE, FUNCTION or TRIGGER
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class SQLDdlMetadata implements MetadataScanner {
 
 	private RDBMS dbms;
@@ -36,6 +54,11 @@ public class SQLDdlMetadata implements MetadataScanner {
 		return contents;
 	}
 
+	/**
+	 * <p>Read SQL object definition from an InputStream.</p>
+	 * @param instrm InputStream Stream contents must be UTF-8 encoded.
+	 * @return SchemaMetaData
+	 */
 	@Override
 	public SchemaMetaData readMetadata(InputStream instrm) throws JDOUserException, JDOException, IOException {
 		try {
@@ -45,15 +68,24 @@ public class SQLDdlMetadata implements MetadataScanner {
 		}
 	}
 
+	/**
+	 * <p>Read SQL object definition from a String.</p>
+	 * @param sql String SEQUENCE, VIEW, PROCEDURE, FUNCTION or TRIGGER definition
+	 * @return SchemaMetaData
+	 * @throws JDOUserException
+	 * @throws JDOException
+	 * @throws IOException
+	 * @throws NoSuchMethodException
+	 */
 	public SchemaMetaData readMetadata(String sql) throws JDOUserException, JDOException, IOException, NoSuchMethodException {
 		Matcher match;
 		SchemaMetaData metadata = new SchemaMetaData();
 		if (sql.trim().length()>0) {
 			Pattern seq = Pattern.compile("CREATE +SEQUENCE +(\\S+)", Pattern.CASE_INSENSITIVE);
-			Pattern view = Pattern.compile("CREATE +VIEW +(\\S+)", Pattern.CASE_INSENSITIVE);
-			Pattern proc = Pattern.compile("CREATE +PROCEDURE +(\\S+)", Pattern.CASE_INSENSITIVE);
-			Pattern func = Pattern.compile("CREATE +FUNCTION +(\\S+)", Pattern.CASE_INSENSITIVE);
-			Pattern trig = Pattern.compile("CREATE +TRIGGER +(\\S+)", Pattern.CASE_INSENSITIVE);
+			Pattern view = Pattern.compile("CREATE +(OR +REPLACE +)?VIEW +(\\S+)", Pattern.CASE_INSENSITIVE);
+			Pattern proc = Pattern.compile("CREATE +(OR +REPLACE +)?PROCEDURE +(\\S+)", Pattern.CASE_INSENSITIVE);
+			Pattern func = Pattern.compile("CREATE +(OR +REPLACE +)?FUNCTION +(\\S+)", Pattern.CASE_INSENSITIVE);
+			Pattern trig = Pattern.compile("CREATE +(OR +REPLACE +)?TRIGGER +(\\S+)", Pattern.CASE_INSENSITIVE);
 			int seqCount = 0, viewCount = 0, procCount = 0, funcCount = 0, trigCount = 0;
 			match = seq.matcher(sql);
 			while (match.find()) seqCount++;

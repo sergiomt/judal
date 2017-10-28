@@ -44,11 +44,9 @@ import org.judal.storage.table.TableDataSource;
 
 
 /**
-* <p>JDBC Connection Pool</p>
 * <p>Implementation of a standard JDBC connection pool.</p>
 * @version 1.0
 */
-
 public class JDCConnectionPool implements ConnectionPoolDataSource {
 
 	private Vector<JDCConnection> connections;
@@ -161,6 +159,9 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 
 	// ---------------------------------------------------------
 
+	/**
+	 * @return boolean
+	 */
 	public boolean isClosed() {
 		return (reaper==null);
 	}
@@ -180,9 +181,9 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 	// ---------------------------------------------------------
 
 	/**
-	 * <p>Set prefered open connections limit</p>
+	 * <p>Set preferred open connections limit</p>
 	 * <p>Additional connections beyond PoolSize may be opened but they
-	 * will closed inmediately after use and not pooled.<br>The default value is 32.<br>
+	 * will closed immediately after use and not pooled.<br>The default value is 32.<br>
 	 * Connections not being used can only be in the pool for a maximum of five minutes.<br>
 	 * After a connection is not used for over 5 minutes it will be closed so the actual
 	 * pool size will eventually go down to zero after a period of inactivity.</p>
@@ -334,8 +335,7 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 	 * Close and remove one connection from the pool
 	 * @param conn Connection to close
 	 */
-
-	protected void disposeConnection(JDCConnection conn) {
+	public void disposeConnection(JDCConnection conn) {
 		boolean bClosed;
 		String sCaller = "";
 
@@ -373,7 +373,6 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 	/**
 	 * Called from the connection reaper daemon thread every n-minutes for maintaining the pool clean
 	 */
-
 	synchronized void reapConnections() {
 
 		if (DebugFile.trace) {
@@ -411,7 +410,6 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 	/**
 	 * Close all connections from the pool regardless of their current state
 	 */
-
 	public void closeConnections() {
 
 		Enumeration connlist;
@@ -447,7 +445,6 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 	 * Close connections from the pool not used for a longer time
 	 * @return Count of staled connections closed
 	 */
-
 	public int closeStaledConnections() {
 
 		JDCConnection conn;

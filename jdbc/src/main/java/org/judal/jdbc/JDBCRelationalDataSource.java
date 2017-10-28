@@ -27,15 +27,14 @@ import org.judal.metadata.IndexDef;
 import org.judal.storage.relational.RelationalDataSource;
 
 /**
- * Implementation of JDBC relational data source
- * 
+ * <p>Implementation of JDBC relational data source.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */
 public class JDBCRelationalDataSource extends JDBCTableDataSource implements RelationalDataSource {
 
 	/**
-	 * Constructor
+	 * <p>Constructor.</p>
 	 * @param properties Map&lt;String, String&gt; As listed in DataSource.PropertyNames
 	 * @param transactManager TransactionManager
 	 * @throws SQLException
@@ -51,7 +50,12 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * <p>Open JDBC relational table for read/write.</p>
+	 * Each table uses its own java.sql.Connection.
+	 * If this data source is inTransaction() Then the underlying connection will be enlisted in the resources participating in the transaction.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the table
+	 * @return JDBCRelationalTable
+	 * @throws JDOException
 	 */
 	@Override
 	public JDBCRelationalTable openRelationalTable(Record tableRecord) throws JDOException {
@@ -59,7 +63,11 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * <p>Open JDBC relational view for read only.</p>
+	 * Each view uses its own java.sql.Connection.
+	 * @param recordInstance Record Instance of the Record subclass that will be used to read the view
+	 * @return JDBCRelationalView
+	 * @throws JDOException
 	 */
 	@Override
 	public JDBCRelationalView openRelationalView(Record viewRecord) throws JDOException {
@@ -67,18 +75,36 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * @return int Value of org.judal.jdbc.RDBMS enum
 	 */
 	@Override
 	public int getRdbmsId() {
 		return databaseProductId.intValue();
 	}
 
+	/**
+	 * <p>Create index definition (not the index itself).</p>
+	 * @param indexName String
+	 * @param tableName String
+	 * @param columns String[]
+	 * @param unique boolean
+	 * @return SQLIndex
+	 * @throws JDOException
+	 */
 	@Override
 	public SQLIndex createIndexDef(String indexName, String tableName, String[] columns, boolean unique) throws JDOException {
-		return new SQLIndex(tableName, indexName, columns, unique);
+		try {
+			return JDBCMetadataObjectFactory.newIndexDef(RDBMS.valueOf(getRdbmsId()), tableName, indexName, columns, unique);
+		} catch (NoSuchMethodException e) {
+			throw new JDOException(e.getMessage(), e);
+		}
 	}
 
+	/**
+	 * <p>Create index in the database.</p>
+	 * @param indexDef IndexDef
+	 * @throws JDOException
+	 */
 	@Override
 	public void createIndex(IndexDef indexDef) throws JDOException {
 		try {
@@ -100,6 +126,12 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 		}
 	}
 
+	/**
+	 * <p>Drop index from the database.</p>
+	 * @param indexName String
+	 * @param tableName String
+	 * @throws JDOException
+	 */
 	@Override
 	public void dropIndex(String indexName, String tableName) throws JDOException {
 		execute("DROP INDEX " + indexName);

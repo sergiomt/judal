@@ -28,7 +28,7 @@ public interface Bucket extends ReadOnlyBucket {
 	void store(Stored target) throws JDOException;
 
 	/**
-	 * <p>delete key-value pair given its key.</p>
+	 * <p>Delete key-value pair given its key.</p>
 	 * @param key Object
 	 * @throws JDOException
 	 */

@@ -359,6 +359,8 @@ public abstract class AbstractRelationalQuery<R extends Record> implements Clone
 
 	public abstract Object fetch();
 
+	public abstract R fetchFirst();
+
 	public boolean eof() {
 		return qry.eof();
 	}

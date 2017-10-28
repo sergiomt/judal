@@ -13,7 +13,10 @@ package org.judal.storage.query;
 
 public class SortDirection {
 
-	public static final String ASC = "";
-	public static final String DESC = "DESC";
+	public static final String ASC = " ASC";
+	public static final String DESC = " DESC";
 
+	public static boolean same(final String direction1, final String direction2) {
+		return direction1.trim().equalsIgnoreCase(direction2);
+	}
 }

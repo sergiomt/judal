@@ -1,5 +1,17 @@
 package org.judal.jdbc;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,6 +32,11 @@ import javax.jdo.JDOException;
 
 import com.knowgate.debug.DebugFile;
 
+/**
+ * <p>JDBC implementation of BucketDataSource</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSource {
 
 	public JDBCBucketDataSource(Map<String, String> properties, TransactionManager transactManager)
@@ -27,6 +44,13 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 		super(properties, transactManager);
 	}
 
+	/**
+	 * <p>Translate generic SQL into RDBMS specific SQL</p>
+	 * Calls JDBCModelManager.translate to perform the translation.
+	 * @param sql String
+	 * @return String
+	 * @throws JDOException
+	 */
 	public String translate(String sql) throws JDOException {
 		String translatedSql = sql;
 		JDCConnection conn = null;
@@ -42,6 +66,12 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 		return translatedSql;
 	}
 	
+	
+	/**
+	 * <p>Execute SQL statement.</p>
+	 * @param sql String
+	 * @throws JDOException if this data source is in the middle of a transaction
+	 */
 	public void execute(String sql) throws JDOException {
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCBucketDataSource.execute("+sql+")");
@@ -73,6 +103,13 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 		}
 	}
 
+	/**
+	 * <p>Create a database table to act as a bucket.</p>
+	 * The table will contain a VARCHAR(255) column as key and a LONGVARBINARY as value.
+	 * @param bucketName String
+	 * @param options Map&lt;String,Object&gt; Optional. If not <b>null</b> Then it may contain two entries named "key" and "value". The value of each of these entries will be the name given to the key and value columns respectively. 
+	 * @throws JDOException
+	 */
 	@Override
 	public void createBucket(String bucketName, Map<String,Object> options) throws JDOException {
 		String keyfield;
@@ -112,6 +149,12 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 		}
 	}
 
+	/**
+	 * <p>Open bucket.</p>
+	 * When a Bucket is open it takes a connection from a pool and it the current thread has an active transaction then the connection is enlisted in the list of resources of the transaction
+	 * @param bucketName String Table Name
+	 * @throws JDOException
+	 */
 	@Override
 	public Bucket openBucket(String bucketName) throws JDOException {
 		JDBCBucket bckt = new JDBCBucket(this, bucketName);
@@ -127,11 +170,21 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 		return bckt;
 	}
 
+	/**
+	 * <p>Drop table used as a bucket.</p>
+	 * @param bucketName String Table Name
+	 * @throws JDOException
+	 */
 	@Override
 	public void dropBucket(String bucketName) throws JDOException {
 		execute("DROP TABLE "+bucketName);
 	}
 
+	/**
+	 * <p>Truncate table used as a bucket.</p>
+	 * @param bucketName String Table Name
+	 * @throws JDOException
+	 */
 	@Override
 	public void truncateBucket(String bucketName) throws JDOException {
 		execute("TRUNCATE TABLE "+bucketName);

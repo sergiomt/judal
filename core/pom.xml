@@ -128,7 +128,7 @@
     <dependency>
       <groupId>com.knowgate</groupId>
       <artifactId>knowgate-base</artifactId>
-      <version>9.0</version>
+      <version>9.0.1</version>
     </dependency>
     <dependency>
       <groupId>jibx</groupId>

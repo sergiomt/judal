@@ -23,7 +23,7 @@ import javax.transaction.TransactionManager;
 import org.judal.transaction.DataSourceTransactionManager;
 
 /**
- * JDBC Engine to create relational data sources.
+ * <p>JDBC Engine to create relational data sources.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */

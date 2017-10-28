@@ -13,11 +13,9 @@ package org.judal.jdbc;
  */
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,9 +25,9 @@ import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
 import org.judal.jdbc.jdc.JDCConnection;
+import org.judal.jdbc.metadata.SQLHelper;
+import org.judal.jdbc.metadata.SQLSelectableDef;
 import org.judal.jdbc.metadata.SQLTableDef;
-import org.judal.metadata.ColumnDef;
-import org.judal.metadata.TableDef;
 import org.judal.storage.Param;
 
 import javax.jdo.FetchPlan;
@@ -41,65 +39,89 @@ import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.impl.AbstractRecord;
 
-import com.knowgate.debug.DebugFile;
-
 /**
  * <p>JDBC implementation of org.judal.storage.keyvalue.Bucket interface.</p>
+ * Every JDBCBucket contains an org.judal.jdbc.jdc.JDCConnection from a pool.
+ * The connection will be fetched from the pool when the JDBCBucket is constructed
+ * and returned to the pool when the JDBCBucket is closed. Therefore JDBCBuckets
+ * must be always closed in order to avoid potential connection leaks.
+ * A relational table used as a bucket must have two columns "key" and "value".
+ * The actual name of the columns at the RDBMS table may be specified when the
+ * bucket is created using JDBCBucketDataSource.createBucket() or might have been created
+ * by an external SQL-DDL script.
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public class JDBCBucket implements Bucket {
+public class JDBCBucket extends JDBCBase implements Bucket {
 
 	protected JDBCBucketDataSource dataSource;
 	protected SQLTableDef tableDef;
 	protected String alias;
-	protected JDCConnection jdcConn;
 	protected Class<? extends Stored> candidateClass;
 	protected Collection<JDBCIterator> iterators;
 
+	/**
+	 * <p>Constructor.</p>
+	 * @param dataSource JDBCBucketDataSource
+	 * @param bucketName String Table Name
+	 * @throws JDOException if no table with given name can be found at dataSource
+	 */
 	public JDBCBucket(JDBCBucketDataSource dataSource, String bucketName) throws JDOException {
+		super(dataSource, bucketName);
 		this.dataSource = dataSource;
 		tableDef = dataSource.getTableDef(bucketName);
 		alias = null;
 		if (null==tableDef)
 			throw new JDOException("Table "+bucketName+" not found");
-		try {
-			jdcConn = dataSource.getConnection(bucketName);
-		} catch (SQLException sqle) {
-			throw new JDOException(sqle.getMessage(), sqle);
-		}
 		iterators = null;
 	}
 
-	 public JDBCBucket(JDBCBucketDataSource dataSource, SQLTableDef tableDef) throws JDOException {
+	/**
+	 * <p>Constructor.</p>
+	 * @param dataSource JDBCBucketDataSource
+	 * @param tableDef SQLTableDef
+	 * @throws JDOException
+	 */
+	public JDBCBucket(JDBCBucketDataSource dataSource, SQLTableDef tableDef) throws JDOException {
+		super(dataSource, tableDef.getName());
 		this.dataSource = dataSource;
 		this.tableDef = tableDef;
-		try {
-			jdcConn = dataSource.getConnection(tableDef.getName());
-		} catch (SQLException sqle) {
-			throw new JDOException(sqle.getMessage(), sqle);
-		}
 		candidateClass = null;
 		iterators = null;
 	}
 
-	public JDCConnection getConnection() {
-		return jdcConn;
-	}
-
+	/**
+	 * @return JDBCBucketDataSource
+	 */
 	public JDBCBucketDataSource getDataSource() {
 		return dataSource;
 	}
 	
+	/**
+	 * <p>Set connection.</p>
+	 * Use this method with care.
+	 * Explicitly setting a new connection will not release the connection already in use by this instance.
+	 * Therefore getConnection().close(getTableDef().getName()) must be called before explicitly setting a
+	 * new connection in order to avoid a connection leak.
+	 * @param conn JDCConnection
+	 */
 	public void setConnection(JDCConnection conn) {
 		this.jdcConn = conn;
 	}
 
-	public SQLTableDef getTableDef() {
+	/**
+	 * @return SQLSelectableDef
+	 */
+	public SQLSelectableDef getTableDef() {
 		return tableDef;
 	}
 
-	public void setTableDef(TableDef proxy) throws JDOException {
+	/**
+	 * <p>Set TableDef by cloning a given one.</p>
+	 * @param proxy SQLSelectableDef
+	 * @throws JDOException
+	 */
+	public void setTableDef(SQLSelectableDef proxy) throws JDOException {
 		try {
 			tableDef = new SQLTableDef(RDBMS.valueOf(jdcConn.getDataBaseProduct()), proxy.getName(), proxy.getColumns());
 		} catch (SQLException sqle) {
@@ -107,14 +129,23 @@ public class JDBCBucket implements Bucket {
 		}
 	}
 	
+	/**
+	 * @return String
+	 */
 	public String getAlias() {
 		return alias;
 	}
 	
+	/**
+	 * @param alias String
+	 */
 	public void setAlias(String alias) {
 		this.alias = alias;
 	}
 
+	/**
+	 * @return String Name
+	 */
 	@Override
 	public String name() {
 		if (null==getAlias())
@@ -123,6 +154,10 @@ public class JDBCBucket implements Bucket {
 			return tableDef.getName() + " " + getAlias();
 	}
 
+	/**
+	 * <p>Commit transaction on this bucket connection.</p>
+	 * @throws JDOException
+	 */
 	public void commit() throws JDOException {
 		try {
 			getConnection().commit();
@@ -131,6 +166,10 @@ public class JDBCBucket implements Bucket {
 		}
 	}
 
+	/**
+	 * <p>Rollback transaction on this bucket connection.</p>
+	 * @throws JDOException
+	 */
 	public void rollback() throws JDOException {
 		try {
 			getConnection().rollback();
@@ -139,15 +178,24 @@ public class JDBCBucket implements Bucket {
 		}
 	}
 	
+	/**
+	 * <p>Close all iterators and return the internal JDBC connection to the pool.</p>
+	 * @throws JDOException
+	 */
 	@Override
 	public void close() throws JDOException {
-		try {
-			jdcConn.close(tableDef.getName());
-		} catch (SQLException sqle) {
-			throw new JDOException(sqle.getMessage(), sqle);
-		}
+		closeAll();
+		super.close();
 	}
 
+	/**
+	 * <p>Load Stored instance from a table row.</p>
+	 * If no row is found with the given primary key then target is not modified.
+	 * @param key Object Primary key of row to be loaded.
+	 * @param target Stored
+	 * @return boolean <b>true</b> if a row with the given primary key was found
+	 * @throws JDOException
+	 */
 	@Override
 	public boolean load(Object key, Stored target) throws JDOException {
 		boolean found = false;
@@ -163,6 +211,12 @@ public class JDBCBucket implements Bucket {
 		return found;
 	}
 
+	/**
+	 * <p>Store into database.</p>
+	 * Store will either update (if it already exists) or insert (if it does not exist) the value held by the Stored instance.
+	 * @param target Stored
+	 * @throws JDOException
+	 */
 	@Override
 	public void store(Stored target) throws JDOException {
 		boolean bHasLongVarBinaryData = false;
@@ -199,15 +253,12 @@ public class JDBCBucket implements Bucket {
 	}
 
 	/**
-	 * <p>Check whether a register with a given primary key exists at the underlying table</p>
+	 * <p>Check whether a value with a given key exists at a table</p>
 	 * @param key Object Primary Key Value
 	 * @throws JDOException
 	 */
 	@Override
 	public boolean exists(Object key) throws JDOException {
-		boolean retval;
-		ResultSet rset = null;
-		PreparedStatement stmt = null;		
 		PrimaryKeyMetadata pk = tableDef.getPrimaryKeyMetadata();
 
 		if (pk.getNumberOfColumns()==0)
@@ -217,54 +268,19 @@ public class JDBCBucket implements Bucket {
 
 		Object value = key instanceof Param ? ((Param) key).getValue() : key;
 			
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDCBucket.exists("+value+")");
-			DebugFile.incIdent();
-			DebugFile.writeln("Connection.prepareStatement(SELECT NULL AS void FROM "+name()+" WHERE "+pk.getColumn()+"="+value+")");
-		}
-
-		int sqlType;
-		if (value instanceof Boolean)
-			sqlType = Types.BOOLEAN;
-		else if (value instanceof Short)
-			sqlType = Types.SMALLINT;
-		else if (value instanceof Integer)
-			sqlType = Types.INTEGER;
-		else if (value instanceof Long)
-			sqlType = Types.BIGINT;
-		else if (value instanceof Float)
-			sqlType = Types.FLOAT;
-		else if (value instanceof Double)
-			sqlType = Types.DOUBLE;
-		else if (value instanceof BigDecimal)
-			sqlType = Types.DECIMAL;
-		else
-			sqlType = Types.VARCHAR;
-
 		try {
-			stmt = jdcConn.prepareStatement("SELECT NULL AS void FROM "+name()+" WHERE "+pk.getColumn()+"=?");
-			if (DebugFile.trace) DebugFile.writeln("PreparedStatement.setObject(1,"+value+","+ ColumnDef.typeName(sqlType) +")");
-			stmt.setObject(1, value, sqlType);
-			rset = stmt.executeQuery();
-			retval = rset.next();
-			rset.close();
-			rset = null;
-			stmt.close();
-			stmt=null;
+			return new SQLHelper(dataSource.getDatabaseProductId(), tableDef, null).existsRegister(jdcConn, " WHERE "+pk.getColumn()+"=?", new Object[] {value});
 		} catch (SQLException sqle) {
-			try { if (rset!=null) rset.close(); } catch (Exception ignore) { }
-			try { if (stmt!=null) stmt.close(); } catch (Exception ignore) { }
-			if (DebugFile.trace) DebugFile.decIdent();
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
-
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End JDCBucket.exists() : "+String.valueOf(retval));
-		}
-		return retval;
+		
 	}
 
+	/**
+	 * <p>Delete value with given key.</p>
+	 * @param key Object
+	 * @throws JDOException
+	 */
 	@Override
 	public void delete(Object key) throws JDOException {
 		PrimaryKeyMetadata pk = tableDef.getPrimaryKeyMetadata();
@@ -292,11 +308,19 @@ public class JDBCBucket implements Bucket {
 		}
 	}
 
+	/**
+	 * <p>Close a bucket iterator.</p>
+	 * @param iterator JDBCIterator
+	 * @throws ClassCastException if iterator is not instance of JDBCIterator 
+	 */
 	@Override
 	public void close(Iterator<Stored> iterator) {
 		((JDBCIterator) iterator).close();
 	}
 
+	/**
+	 * <p>Close all iterators over this bucket.</p>
+	 */
 	@Override
 	public void closeAll() {
 		if (null!=iterators)
@@ -304,32 +328,55 @@ public class JDBCBucket implements Bucket {
 				iterator.close();
 	}
 
+	/**
+	 * @return Class&lt;Stored&gt;
+	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public Class<Stored> getCandidateClass() {
 		return (Class<Stored>) candidateClass;
 	}
 
+	/**
+	 * @param candidateClass Class&lt;Stored&gt;
+	 */
 	public void setCandidateClass(Class<Stored> candidateClass) {
 		this.candidateClass = candidateClass;
 	}
 	
+	/**
+	 * @return This function always returns <b>null</b>
+	 */
 	@Override
 	public FetchPlan getFetchPlan() {
 		return null;
 	}
 
+	/**
+	 * @return This function always returns <b>null</b>
+	 */
 	@Override
 	public PersistenceManager getPersistenceManager() {
 		return null;
 	}
 
+	/**
+	 * @return This function always returns <b>false</b>
+	 */
 	@Override
 	public boolean hasSubclasses() {
 		return false;
 	}
 
+	/**
+	 * <p>Open iterator.</p>
+	 * Each iterator will open a new java.sql.ResultSet over the underlying table using this bucket connection.
+	 * The ResultSet will remain open until the iterator is closed.
+	 * @return JDBCIterator
+	 */
 	@Override
-	public Iterator<Stored> iterator() {
+	@SuppressWarnings("unchecked")
+	public JDBCIterator iterator() {
 		JDBCIterator retval = null;
 		if (null==iterators)
 			iterators = new LinkedList<JDBCIterator>();
@@ -346,9 +393,12 @@ public class JDBCBucket implements Bucket {
 		return retval;
 	}
 
+	/**
+	 * @param candidateClass Class&lt;? extends Stored&gt;
+	 */
 	@Override
 	public void setClass(Class<? extends Stored> candidateClass) {
-		this.candidateClass = candidateClass;		
+		this.candidateClass = candidateClass;	
 	}
 
 }

@@ -27,6 +27,8 @@ import java.util.HashMap;
 public class SQLFunctions {
 
   public static Map<RDBMS,SQLFunctions> DB = init();
+  
+  private RDBMS rdbms;
 
   public SQLFunctions(RDBMS dbms) {
     setForDBMS(dbms);
@@ -82,6 +84,11 @@ public class SQLFunctions {
    */
   public String LENGTH;
 
+  /**
+   * <p>n leftmost characters of a string</p>
+   * LEFT(str, length)
+   */
+  public String LEFT;
 
   /**
    * <p>Get character from ASCII code</p>
@@ -104,6 +111,8 @@ public class SQLFunctions {
 		DebugFile.writeln("Setting functions for "+dbms);
 	}
 
+	rdbms = dbms;
+
     if (dbms.equals(RDBMS.MSSQL)) {
       iDBMS = RDBMS.MSSQL.intValue();
       ISNULL = "ISNULL";
@@ -114,6 +123,7 @@ public class SQLFunctions {
       LENGTH = "LEN";
       CHR = "CHAR";
       ILIKE = "LIKE";
+      LEFT = "LEFT";
 
     } else if (dbms.equals(RDBMS.ORACLE)) {
       iDBMS = RDBMS.ORACLE.intValue();
@@ -125,6 +135,7 @@ public class SQLFunctions {
       LENGTH = "LENGTH";
       CHR = "CHR";
       ILIKE = "LIKE";
+      LEFT = "SUBSTR";
 
     } else if (dbms.equals(RDBMS.POSTGRESQL)) {
       iDBMS = RDBMS.POSTGRESQL.intValue();
@@ -136,6 +147,7 @@ public class SQLFunctions {
       LENGTH = "char_length";
       CHR = "chr";
       ILIKE = "ILIKE";
+      LEFT = "LEFT";
 
     } else if (dbms.equals(RDBMS.MYSQL)) {
       iDBMS = RDBMS.MYSQL.intValue();
@@ -147,6 +159,7 @@ public class SQLFunctions {
       LOWER = "LCASE";
       UPPER = "UCASE";
       ILIKE = "LIKE";
+      LEFT = "LEFT";
 
     } else if (dbms.equals(RDBMS.ACCESS)) {
       iDBMS = RDBMS.ACCESS.intValue();
@@ -158,6 +171,7 @@ public class SQLFunctions {
       LOWER = "LCASE";
       UPPER = "UCASE";
       ILIKE = "LIKE";
+      LEFT = "Left";
 
     } else if (dbms.equals(RDBMS.SQLITE)) {
       iDBMS = RDBMS.SQLITE.intValue();
@@ -169,6 +183,7 @@ public class SQLFunctions {
       LOWER = "lower";
       UPPER = "upper";
       ILIKE = "LIKE";
+      LEFT = "SUBSTR";
 
     } else if (dbms.equals(RDBMS.XBASE)) {
       iDBMS = RDBMS.XBASE.intValue();
@@ -180,6 +195,7 @@ public class SQLFunctions {
       LOWER = "LOWER";
       UPPER = "UPPER";
       ILIKE = "LIKE";
+      LEFT = "LEFT";
 
     } else if (dbms.equals(RDBMS.HSQLDB)) {
         iDBMS = RDBMS.HSQLDB.intValue();
@@ -191,6 +207,7 @@ public class SQLFunctions {
         LOWER = "LOWER";
         UPPER = "UPPER";
         ILIKE = "LIKE";
+        LEFT = "LEFT";
 
     } else
       throw new UnsupportedOperationException("Unsupported DBMS " + dbms);
@@ -204,10 +221,28 @@ public class SQLFunctions {
   // -------------------------------------------------------------------------
 
   public String apply(String func, String... values) throws IllegalArgumentException, UnsupportedOperationException {
+	  if (func.equalsIgnoreCase(ISNULL)) {
+		  if (values==null || values.length<1)
+			  throw new IllegalArgumentException("SQLFunctions.apply("+ISNULL+", ...) needs one or more values");
+		  StringBuilder expr = new StringBuilder();
+		  expr.append(ISNULL).append("(").append(String.join(",", values)).append(")");
+		  return expr.toString();
+	  }
 	  if (func.equalsIgnoreCase(LENGTH)) {
 		  if (values==null || values.length!=1)
 			  throw new IllegalArgumentException("SQLFunctions.apply("+LENGTH+", ...) needs exactly one value");
 		  return LENGTH + "(" + values[0] + ")";
+	  }
+	  if (func.equalsIgnoreCase(LEFT)) {
+			if (values==null || values.length!=2)
+				throw new IllegalArgumentException("SQLFunctions.apply("+LEFT+", ...) needs exactly two values");
+		  switch (rdbms) {
+		  	case ORACLE:
+		  	case SQLITE:
+		  		return LEFT + "(" + values[0] + ",1," + values[1] + ")";
+		  	default:
+		  		return LEFT + "(" + values[0] + "," + values[1] + ")";
+		  }
 	  }
 	  throw new UnsupportedOperationException("Unrecognized function "+func);
   }

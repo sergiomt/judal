@@ -126,14 +126,14 @@ public class TestJDBCQuery {
 	
     JDBCRelationalView jobAtomsJoin = (JDBCRelationalView) dts.openJoinView(JoinType.INNER, jobRec, AS(jobRec,"j"), AS("k_jobs_atoms_by_day","a"), P$("gu_job","gu_job"));
     
-    assertNotNull(jobAtomsJoin.getTableDef());
-    assertEquals(Job.tableName, jobAtomsJoin.getTableDef().getName());
-    assertEquals(1, jobAtomsJoin.getTableDef().getNumberOfJoins());
-    assertEquals(1, jobAtomsJoin.getTableDef().getNumberOfForeignKeys());
-    assertEquals("k_jobs_atoms_by_day", jobAtomsJoin.getTableDef().getForeignKeys()[0].getTable());
-    assertEquals("k_jobs_atoms_by_day", jobAtomsJoin.getTableDef().getJoins()[0].getTable());
-    assertEquals("gu_job", jobAtomsJoin.getTableDef().getForeignKeys()[0].getColumns()[0].getName());
-    assertEquals("gu_job", jobAtomsJoin.getTableDef().getJoins()[0].getColumn());
+    assertNotNull(jobAtomsJoin.getViewDef());
+    assertEquals(Job.tableName, jobAtomsJoin.getViewDef().getName());
+    assertEquals(1, jobAtomsJoin.getViewDef().getNumberOfJoins());
+    assertEquals(1, jobAtomsJoin.getViewDef().getNumberOfForeignKeys());
+    assertEquals("k_jobs_atoms_by_day", jobAtomsJoin.getViewDef().getForeignKeys()[0].getTable());
+    assertEquals("k_jobs_atoms_by_day", jobAtomsJoin.getViewDef().getJoins()[0].getTable());
+    assertEquals("gu_job", jobAtomsJoin.getViewDef().getForeignKeys()[0].getColumns()[0].getName());
+    assertEquals("gu_job", jobAtomsJoin.getViewDef().getJoins()[0].getColumn());
 
     qry = new SQLQuery(jobAtomsJoin);
 	qry.setResult(jobsByHourCols.getMembers());

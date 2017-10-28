@@ -289,5 +289,20 @@ public class DBTableDataSource extends DBDataSource implements TableDataSource {
 			Pair<String, String>... onColumns) throws JDOException {
 		throw new JDOUnsupportedOptionException("Berkley DB does not natively supports joins");
 	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public ColumnDef createColumnDef(String columnName, int position, short colType, Map<String, Object> options)
+			throws JDOException {
+		if (options==null) {
+			return new ColumnDef(columnName, position, colType);
+		} else {
+			int colLen = options.containsKey(ColumnDef.OPTION_LENGTH) ? Integer.parseInt(options.get(ColumnDef.OPTION_LENGTH).toString()) : ColumnDef.getDefaultPrecision(colType);
+			boolean nullable = options.containsKey(ColumnDef.OPTION_NULLABLE) ? Boolean.parseBoolean(options.get(ColumnDef.OPTION_NULLABLE).toString()) : true;
+			boolean isPk = options.containsKey(ColumnDef.OPTION_PRIMARYKEY) ? Boolean.parseBoolean(options.get(ColumnDef.OPTION_PRIMARYKEY).toString()) : false;
+			return new ColumnDef(position, "", columnName, colType, colLen, nullable, null, null, null, options.get(ColumnDef.OPTION_DEFAULT_VALUE), isPk);			
+		}
+	}
 	
 }

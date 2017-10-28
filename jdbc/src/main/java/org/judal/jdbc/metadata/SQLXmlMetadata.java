@@ -1,5 +1,17 @@
 package org.judal.jdbc.metadata;
 
+/**
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.io.FileNotFoundException;
@@ -16,12 +28,9 @@ import javax.jdo.metadata.ColumnMetadata;
 import org.judal.jdbc.JDBCTableDataSource;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.ForeignKeyDef;
-import org.judal.metadata.NonUniqueIndexDef;
 import org.judal.metadata.MetadataScanner;
 import org.judal.metadata.PrimaryKeyDef;
 import org.judal.metadata.SchemaMetaData;
-import org.judal.metadata.UniqueIndexDef;
-import org.judal.metadata.IndexDef.Type;
 
 import com.pureperfect.ferret.ScanFilter;
 import com.pureperfect.ferret.Scanner;

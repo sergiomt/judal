@@ -14,6 +14,7 @@ package org.judal.metadata;
 
 import java.util.Collection;
 
+import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
 
 import com.knowgate.debug.DebugFile;
@@ -23,7 +24,7 @@ import com.knowgate.debug.DebugFile;
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public class ViewDef extends TypeDef {
+public class ViewDef extends TypeDef implements SelectableDef {
 
 	private static final long serialVersionUID = 10000l;
 
@@ -83,6 +84,31 @@ public class ViewDef extends TypeDef {
 	}
 
 	/**
+	 * Walk the list of columns of this ViewDef and auto-generate the corresponding PrimaryKeyMetadata.
+	 */
+	public void autoSetPrimaryKey() {
+		if (getPrimaryKeyMetadata()!=null)
+			getPrimaryKeyMetadata().clear();
+		else
+			pk = new PrimaryKeyDef();
+		for (ColumnDef c : getColumns()) {
+			if (c.isPrimaryKey()) {
+				ColumnDef newPkCol = getPrimaryKeyMetadata().newColumnMetadata();
+				newPkCol.setFamily(c.getFamily());
+				newPkCol.setName(c.getName());
+				newPkCol.setType(c.getType());
+				newPkCol.setJDBCType(c.getJDBCType());
+				newPkCol.setSQLType(c.getSQLType());
+				newPkCol.setPosition(c.getPosition());
+				newPkCol.setLength(c.getLength());
+				newPkCol.setScale(c.getScale());
+				newPkCol.setAllowsNull(c.getAllowsNull());
+				newPkCol.setAutoIncrement(c.getAutoIncrement());
+			}
+		} // next
+	}
+	
+	/**
 	 * @return ViewDef
 	 */
 	@Override
@@ -107,7 +133,7 @@ public class ViewDef extends TypeDef {
 	 * @return String
 	 */
 	public String getAlias() {
-		return alias==null ? getName() : alias;
+		return alias==null || alias.length()==0 ? getName() : alias;
 	}
 
 	/**

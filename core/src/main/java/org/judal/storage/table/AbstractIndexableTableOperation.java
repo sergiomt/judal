@@ -117,7 +117,7 @@ public abstract class AbstractIndexableTableOperation<R extends Record> extends 
 	 * @return Object an Iterable which type depends on whether the implementation is done by the Java or by the Scala adaptor.
 	 */
 	public abstract Object fetch(final int maxrows, final int offset, Param... keys);
-	
+
 	public int update(Param[] values, Param[] where) {
 		return getTable().update(values, where);
 	}

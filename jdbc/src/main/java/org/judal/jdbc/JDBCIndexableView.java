@@ -1,6 +1,7 @@
 package org.judal.jdbc;
 
 /**
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -16,14 +17,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.jdo.FetchGroup;
+import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
+import javax.jdo.PersistenceManager;
 
 import com.knowgate.debug.DebugFile;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.ViewDef;
 import org.judal.storage.Param;
+import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Expression;
@@ -34,57 +42,143 @@ import org.judal.storage.query.sql.SQLQuery;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
-
+import org.judal.storage.table.impl.AbstractRecord;
 import org.judal.jdbc.metadata.SQLTableDef;
+import org.judal.jdbc.metadata.SQLViewDef;
 
 import static org.judal.storage.query.Operator.BETWEEN;
 import static org.judal.storage.query.Operator.EQ;
 import static org.judal.storage.query.Operator.GTE;
 import static org.judal.storage.query.Operator.LTE;
 
-public class JDBCIndexableView extends JDBCBucket implements IndexableView {
+/**
+ * <p>Implementation of IndexableView.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
+public class JDBCIndexableView extends JDBCBase implements IndexableView {
 
+	protected JDBCTableDataSource dataSource;
+	private SQLViewDef viewDef;
+	protected String alias;
+	protected Class<? extends Record> candidateClass;
+	protected Collection<JDBCIterator> iterators;
 	private Class<? extends Record> recordClass;
 	
+	/**
+	 * <p>Constructor.</p>
+	 * @param dataSource JDBCTableDataSource
+	 * @param recordInstance Record Instance of the Record implementation that will be used to fetch, load, store and delete records from the RDBMS view.
+	 * @throws JDOException
+	 */
 	public JDBCIndexableView(JDBCTableDataSource dataSource, Record recordInstance) throws JDOException {
 		super(dataSource, recordInstance.getTableName());
+		this.dataSource = dataSource;
 		candidateClass = recordClass = recordInstance.getClass();
+		ViewDef tov = dataSource.getTableOrViewDef(recordInstance.getTableName());
+		if (tov instanceof SQLViewDef)
+			viewDef = (SQLViewDef) tov;
+		else if (tov instanceof SQLTableDef)
+			viewDef = ((SQLTableDef) tov).asView();
+		if (null==viewDef)
+			throw new JDOException("JDBCIndexableView Table or View not found "+recordInstance.getTableName());
 	}
 
-	public JDBCIndexableView(JDBCTableDataSource dataSource, SQLTableDef tableDef, Class<? extends Record> recClass) throws JDOException {
-		super(dataSource, tableDef);
+	/**
+	 * <p>Constructor.</p>
+	 * @param dataSource JDBCTableDataSource
+	 * @param viewDef SQLViewDef
+	 * @param recClass Class&lt;? extends Record&gt; Class of the Record implementation that will be used to fetch, load, store and delete records from the RDBMS table.
+	 * @throws JDOException
+	 * @throws NullPointerException
+	 */
+	public JDBCIndexableView(JDBCTableDataSource dataSource, SQLViewDef viewDef, Class<? extends Record> recClass) throws JDOException, NullPointerException {
+		super(dataSource, viewDef.getName());
+		this.dataSource = dataSource;
+		this.viewDef = viewDef;
+		iterators = null;		
 		candidateClass = recordClass = recClass;
 	}	
+
+	/**
+	 * <p>Get view alias.</p>
+	 * @return String
+	 */
+	public String getAlias() {
+		return alias;
+	}
 	
+	/**
+	 * <p>Set view alias.</p>
+	 * @param alias String
+	 */
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+	
+	/**
+	 * @return JDBCTableDataSource
+	 */
+	public JDBCTableDataSource getDataSource() {
+		return dataSource;
+	}
+	
+	/**
+	 * <p>Get columns of the ViewDef used to describe this IndexableView.</p>
+	 * @return ColumnDef[]
+	 */
 	@Override
 	public ColumnDef[] columns() {
-		return tableDef.getColumns();
+		return viewDef.getColumns();
 	}
 
+	/**
+	 * <p>Get count of columns of the ViewDef used to describe this IndexableView.</p>
+	 * @return int
+	 */
 	@Override
 	public int columnsCount() {
-		return tableDef.getNumberOfColumns();
+		return viewDef.getNumberOfColumns();
 	}
 
+	/**
+	 * @return ColumnDef
+	 */
 	@Override
 	public ColumnDef getColumnByName(String columnName) throws IllegalStateException {
-		return tableDef.getColumnByName(columnName);
+		return viewDef.getColumnByName(columnName);
 	}
 	
+	/**
+	 * @return int
+	 */
 	@Override
 	public int getColumnIndex(String columnName) throws IllegalStateException {
-		return tableDef.getColumnIndex(columnName);
+		return viewDef.getColumnIndex(columnName);
 	}
 
+	/**
+	 * @return Class&lt;? extends Record&gt;
+	 */
 	@Override
 	public Class<? extends Record> getResultClass() {
 		return recordClass;
 	}
 
+	/**
+	 * @param recordClass Class&lt;? extends Record&gt;
+	 */
 	public void setResultClass(Class<? extends Record> recordClass) {
 		this.recordClass = recordClass;
 	}
-	
+
+	/**
+	 * @return SQLViewDef
+	 */
+	public SQLViewDef getViewDef() {
+		return viewDef;
+	}
+
 	/**
 	 * <p>Count number of rows having a given value for a column</p>
 	 * @param indexColumnName String column name
@@ -101,7 +195,7 @@ public class JDBCIndexableView extends JDBCBucket implements IndexableView {
 				stmt = getConnection().prepareStatement("SELECT COUNT(*) AS NUM_ROWS FROM "+name());
 			} else {
 				stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"=?");
-				ColumnDef cdef = getTableDef().getColumnByName(indexColumnName);
+				ColumnDef cdef = getViewDef().getColumnByName(indexColumnName);
 				if (null==valueSearched) {
 					if (null==cdef)
 						throw new JDOException("Type could not be infered for null value");
@@ -193,18 +287,45 @@ public class JDBCIndexableView extends JDBCBucket implements IndexableView {
 		return retval;
 	}
 
+	/**
+	 * <p>Fetch RecordSet filtering by a column value.</p>
+	 * @param fetchGroup FetchGroup Columns to fetch
+	 * @param indexColumnName String Index column Name
+	 * @param valueSearched Object value that the the fetched records must have
+	 * @return RecordSet&lt;? extends Record&gt;
+	 * @throws JDOException
+	 */
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched) throws JDOException {
 		return fetch(fetchGroup, indexColumnName, valueSearched, Integer.MAX_VALUE, 0);
 	}
 
+	/**
+	 * <p>Fetch RecordSet filtering by a column value range.</p>
+	 * @param fetchGroup FetchGroup Columns to fetch
+	 * @param indexColumnName String Index column Name
+	 * @param valueFrom Object value from (inclusive)
+	 * @param valueTo Object value to (inclusive)
+	 * @return RecordSet&lt;? extends Record&gt;
+	 * @throws JDOException
+	 */
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo) throws JDOException {
 		return fetch(fetchGroup, indexColumnName, valueFrom, valueTo, Integer.MAX_VALUE, 0);
 	}
 
-	@SuppressWarnings("unchecked")
+	/**
+	 * <p>Fetch RecordSet filtering by a column value.</p>
+	 * @param fetchGroup FetchGroup Columns to fetch
+	 * @param indexColumnName String Index column Name
+	 * @param valueSearched Object value that the the fetched records must have
+	 * @param maxrows int Maximum numbers of records to return
+	 * @param offset int First record to read from [0..n]
+	 * @return RecordSet&lt;? extends Record&gt;
+	 * @throws JDOException
+	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched, int maxrows, int offset)
 		throws JDOException {
 		SQLQuery qry = new SQLQuery(this);
@@ -227,6 +348,17 @@ public class JDBCIndexableView extends JDBCBucket implements IndexableView {
 		return fetchQuery(qry);		
 	}
 	
+	/**
+	 * <p>Fetch RecordSet filtering by a column value range.</p>
+	 * @param fetchGroup FetchGroup Columns to fetch
+	 * @param indexColumnName String Index column Name
+	 * @param valueFrom Object value from (inclusive)
+	 * @param valueTo Object value to (inclusive)
+	 * @param maxrows int Maximum numbers of records to return
+	 * @param offset int First record to read from [0..n]
+	 * @return RecordSet&lt;? extends Record&gt;
+	 * @throws JDOException
+	 */
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo, int maxrows, int offset)
 		throws JDOException {
@@ -256,6 +388,14 @@ public class JDBCIndexableView extends JDBCBucket implements IndexableView {
 		return fetchQuery(qry);		
 	}
 
+	/**
+	 * <p>Fetch RecordSet filtering by several column values.</p>
+	 * @param fetchGroup FetchGroup Columns to fetch
+	 * @param maxrows int Maximum numbers of records to return
+	 * @param offset int First record to read from [0..n]
+	 * @param params Param&hellip; Each Param name must match a column name in the table
+	 * @throws JDOException
+	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, int maxrows, int offset, Param... params)
@@ -280,6 +420,11 @@ public class JDBCIndexableView extends JDBCBucket implements IndexableView {
 		return fetchQuery(qry);
 	}
 	
+	/**
+	 * <p>Fetch RecordSet filtering records with a query.</p>
+	 * @param qry AbstractQuery
+	 * @throws JDOException
+	 */
 	@SuppressWarnings("unchecked")
 	protected <R extends Record> RecordSet<R> fetchQuery(AbstractQuery qry)
 		throws JDOException {
@@ -295,5 +440,167 @@ public class JDBCIndexableView extends JDBCBucket implements IndexableView {
 		}
 		return (RecordSet<R>) results;	
 	} // fetch
+
+	/**
+	 * @return String Name
+	 */
+	@Override
+	public String name() {
+		if (null==getAlias())
+			return viewDef.getName();
+		else
+			return viewDef.getName() + " " + getAlias();
+	}
+
+	/**
+	 * <p>Check whether a record with given key exists at database table or view.</p>
+	 * @param key Object May be Param[] or Object[] if the key has several columns
+	 * @throws JDOException
+	 */
+	@Override
+	public boolean exists(Object key) throws JDOException {
+		boolean bExists = false;
+		try {
+			if (key instanceof Param[]) {
+				Param[] peys = (Param[]) key;
+				if (peys.length<1)
+					throw new JDOException("Key must have at least one value");
+				StringBuilder queryString = new StringBuilder();
+				queryString.append(peys[0].getName()).append("=?");
+				for (int p=1; p<peys.length; p++)
+					queryString.append(" AND ").append(peys[0].getName()).append("=?");			
+				try (PreparedStatement stmt = jdcConn.prepareStatement("SELECT NULL FROM " + name() + " WHERE " + queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+					for (int p=0; p<peys.length; p++)
+						stmt.setObject(p+1, peys[p].getValue(), peys[p].getType());
+					ResultSet rset = stmt.executeQuery();
+					bExists = rset.next();
+					rset.close();				
+				}
+			} else if (key.getClass().isArray()) {
+				Object[] keys = (Object[]) key;
+				if (keys.length<1)
+					throw new JDOException("Key must have at least one value");				
+				if (viewDef.getPrimaryKeyMetadata()==null)
+					throw new JDOException("View "+name()+" has no primary key");
+				if (viewDef.getPrimaryKeyMetadata().getNumberOfColumns()!=keys.length)
+					throw new JDOException("Expected "+String.valueOf(viewDef.getPrimaryKeyMetadata().getNumberOfColumns())+" key column but got "+String.valueOf(keys.length));
+				StringBuilder queryString = new StringBuilder();
+				bExists = viewDef.existsRegister(jdcConn, queryString.toString(), keys);
+			} else {
+				bExists = viewDef.existsRegister(jdcConn, viewDef.getPrimaryKeyMetadata().getColumn() + " =?", new Object[]{key});
+			}
+		} catch (SQLException sqle) {
+			throw new JDOException(sqle.getMessage(), sqle);
+		}
+		return bExists;
+	}
+
+	/**
+	 * <p>Load Record instance from a table row.</p>
+	 * If no row is found with the given primary key then target is not modified.
+	 * @param key Object Primary key of row to be loaded.
+	 * @param target Record
+	 * @return boolean <b>true</b> if a row with the given primary key was found
+	 * @throws JDOException
+	 */
+	@Override
+	public boolean load(Object key, Stored target) throws JDOException {
+		boolean found = false;
+		AbstractRecord mapRecord = (AbstractRecord) target;
+		try {
+			if (key.getClass().isArray())
+				found = viewDef.loadRegister(jdcConn, (Object[]) key, mapRecord);
+			else
+				found = viewDef.loadRegister(jdcConn, new Object[] { key }, mapRecord);
+		} catch (SQLException sqle) {
+			throw new JDOException(sqle.getMessage(), sqle);
+		}
+		return found;
+	}
+
+	/**
+	 * @param candidateClass Class&lt;? extends Record&gt;
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public void setClass(Class<? extends Stored> candidateClass) {
+		this.candidateClass = (Class<? extends Record>) candidateClass;
+	}
+
+	/**
+	 * <p>Open iterator.</p>
+	 * Each iterator will open a new java.sql.ResultSet over the underlying table using this view connection.
+	 * The ResultSet will remain open until the iterator is closed.
+	 * @return JDBCIterator
+	 */
+	@Override
+	public JDBCIterator iterator() {
+		JDBCIterator retval = null;
+		if (null==iterators)
+			iterators = new LinkedList<JDBCIterator>();
+		PreparedStatement stmt = null;
+		ResultSet rset = null;
+		try {
+			stmt = getConnection().prepareStatement("SELECT * FROM "+name(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			rset = stmt.executeQuery();
+			retval = new JDBCIterator(candidateClass, viewDef, stmt, rset);
+			iterators.add(retval);
+		} catch (SQLException | NoSuchMethodException | SecurityException xcpt) {
+			throw new JDOException(xcpt.getMessage(), xcpt);
+		}
+		return retval;
+	}
+
+	/**
+	 * @return This function always returns <b>false</b>
+	 */
+	public boolean hasSubclasses() {
+		return false;
+	}
+
+	/**
+	 * @return Class&lt;Record&gt;
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public Class<Stored> getCandidateClass() {
+		return (Class<Stored>) candidateClass;
+	}
+
+	/**
+	 * @return This function always returns <b>null</b>
+	 */
+	@Override
+	public PersistenceManager getPersistenceManager() {
+		return null;
+	}
+
+	/**
+	 * <p>Close all iterators over this view.</p>
+	 */
+	@Override
+	public void closeAll() {
+		if (null!=iterators)
+			for (JDBCIterator iterator : iterators)
+				iterator.close();		
+	}
+
+	/**
+	 * <p>Close a view iterator.</p>
+	 * @param iterator JDBCIterator
+	 * @throws ClassCastException if iterator is not instance of JDBCIterator 
+	 */
+	@Override
+	public void close(Iterator<Stored> iterator) {
+		((JDBCIterator) iterator).close();
+	}
+
+	/**
+	 * @return This function always returns <b>null</b>
+	 */
+	@Override
+	public FetchPlan getFetchPlan() {
+		return null;
+	}
 	
 }

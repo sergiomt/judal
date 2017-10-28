@@ -13,6 +13,7 @@ package org.judal.metadata;
  */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -108,6 +109,29 @@ public abstract class BaseDef extends ExtendableDef implements Cloneable {
 			return NoColumns;
 	}
 
+	/**
+	 * <p>Make a copy of coldefs and set it as the list of columns for this instance.</p>
+	 * @param coldefs ColumnDef[]
+	 */
+	public void setColumns(ColumnDef[] coldefs) {
+		if (null==coldefs || coldefs.length==0)
+			columns = new ArrayList<ColumnDef>(0);
+		else
+			columns = new ArrayList<>(Arrays.asList(coldefs));
+	}
+
+	/**
+	 * <p>Assign a reference to a column list.</p>
+	 * Changes made in coldefs will be reflected in this instance.
+	 * @param coldefs ArrayList&lt;ColumnDef&gt;
+	 */
+	public void setColumns(ArrayList<ColumnDef> coldefs) {
+		if (null==coldefs)
+			columns = new ArrayList<ColumnDef>(0);
+		else
+			columns = coldefs;
+	}
+	
 	/**
 	 * <p>Filter columns with given names.</p>
 	 * Name matching is case insensitive.

@@ -176,7 +176,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker, String... columnNames) throws JDOException {
-		super(new TableDef(tableName, dataSource.getTableOrViewDef(tableName).filterColumns(columnAliases(columnNames))), fieldHelper, constraintsChecker);
+		super(new TableDef(tableName, filterColumns(dataSource, tableName, columnAliases(columnNames))), fieldHelper, constraintsChecker);
 		values = new CaseInsensitiveValuesMap();
 		columnIndexes = new HashMap<Integer, String>();
 		int c = 0;
@@ -184,7 +184,20 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 			columnIndexes.put(new Integer(++c), getColumnAlias(columnName));
 	}
 	
-	private static String[] columnAliases(String... columnNames) {
+	private static ColumnDef[] filterColumns(TableDataSource dataSource, String tableName, String[] columnNames) {
+		ColumnDef[] retval;
+		ViewDef vdef = dataSource.getTableOrViewDef(tableName);
+		if (null==vdef) {
+			retval = new ColumnDef[columnNames.length];
+			for (int c=columnNames.length-1; c>=0; c--)
+				retval[c] = dataSource.createColumnDef(columnNames[c], c+1, (short) Types.NULL, null);
+		} else {
+			retval = vdef.filterColumns(columnAliases(columnNames));
+		}
+		return retval;
+	}
+
+	private static String[] columnAliases(String[] columnNames) {
 		final int colCount = columnNames.length;
 		String[] aliases = new String[colCount];
 		for (int c=0; c<colCount; c++)
