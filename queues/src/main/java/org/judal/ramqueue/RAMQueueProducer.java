@@ -73,6 +73,7 @@ public class RAMQueueProducer implements RecordQueueProducer {
 			oEng = EngineFactory.getEngine(engineName);
 			oCon.start(oEng, properties);
 			oDts = (TableDataSource) oEng.getDataSource(properties);
+			if (DebugFile.trace) DebugFile.writeln("RAMQueueConsumer using dataSource at "+properties.getOrDefault(DataSource.URI, "null")+" with "+oDts.getMetaData().getTablesCount()+" tables found");
 		} catch (NullPointerException | IllegalAccessException xcpt) {
 			try { if (DebugFile.trace) DebugFile.writeln(com.knowgate.debug.StackTraceUtil.getStackTrace(xcpt)); } catch (Exception ignore) { }
 			throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
