@@ -43,8 +43,8 @@ public class E06_CreateTablesFromDDLXML {
 		SchemaMetaData metadata = xmlMeta.readMetadata(getResourceAsStream("ddlmetadata.xml"));
 
 		Map<String,Object> options = new HashMap<>();
-		options.put(DataSource.CATALOG, "PUBLIC");
-		options.put(DataSource.SCHEMA, "PUBLIC");
+		options.put(DataSource.CATALOG, dataSource.getProperties().getOrDefault(DataSource.CATALOG, ""));
+		options.put(DataSource.SCHEMA, dataSource.getProperties().getOrDefault(DataSource.CATALOG, "PUBLIC"));
 		
 		// Create tables in the database
 		for (TableDef tdef : metadata.tables())

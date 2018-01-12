@@ -25,14 +25,18 @@ import static org.judal.transaction.DataSourceTransactionManager.Transact;
  */
 public class E01_CreateDefaultRelationalDataSource {
 
+	private static Engine<JDBCRelationalDataSource> jdbc;
+
 	public static JDBCRelationalDataSource create() throws Exception {
 		
 		// Create a JDBC Engine
-		Engine<JDBCRelationalDataSource> jdbc = new JDBCEngine();
+		jdbc = new JDBCEngine();
 		
 		// Register the JDBC Engine (this is optional)
 		EngineFactory.registerEngine(jdbc.name(), jdbc.getClass().getName());
 
+		assertNotNull(EngineFactory.getEngine(jdbc.name()));
+		
 		// Use the Engine to create an instance of a RelationalDataSource
 		JDBCRelationalDataSource dataSource = jdbc.getDataSource(dataSourceProperties(), Transact);
 		
@@ -46,7 +50,9 @@ public class E01_CreateDefaultRelationalDataSource {
 	}
 
 	public static void close() throws Exception {
+		assertNotNull(EngineFactory.getEngine(jdbc.name()));
 		EngineFactory.DefaultThreadDataSource.get().close();
+		EngineFactory.deregisterEngine(jdbc.name());
 	}
 
 	public static Map<String, String> dataSourceProperties() {

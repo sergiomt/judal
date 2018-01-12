@@ -73,7 +73,7 @@ public class E34_RecordManager {
 			// Active wait for demo purposes only
 			// don't do while (!op.exists()) in production
 			final long waitms = 100l;
-			final long timeout = 2000l;
+			final long timeout = 3000l;
 			long elapsed = 0l;
 			try (TableOperation<Course> op = new TableOperation<Course>(dataSource, c)) {
 				while (!op.exists(k) && elapsed<timeout) {

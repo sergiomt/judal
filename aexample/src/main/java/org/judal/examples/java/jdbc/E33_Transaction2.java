@@ -110,13 +110,14 @@ public class E33_Transaction2 {
 		JdoXmlMetadata xmlMeta;
 		SchemaMetaData metadata;
 		Map<String,Object> options = new HashMap<>();
-		options.put(DataSource.CATALOG, "PUBLIC");
-		options.put(DataSource.SCHEMA, "PUBLIC");
 
 		Engine<JDBCRelationalDataSource> jdbc = new JDBCEngine();
 		
 		dataSource1 = jdbc.getDataSource(dataSourceProperties("demo1"), Transact);
 
+		options.put(DataSource.CATALOG, dataSource1.getProperties().getOrDefault(DataSource.CATALOG, ""));
+		options.put(DataSource.SCHEMA, dataSource1.getProperties().getOrDefault(DataSource.CATALOG, "PUBLIC"));
+		
 		xmlMeta = new JdoXmlMetadata (dataSource1);		
 		metadata = xmlMeta.readMetadata(getResourceAsStream("jdometadata.xml"));
 		dataSource1.createTable(metadata.getTable(Student.TABLE_NAME), options);

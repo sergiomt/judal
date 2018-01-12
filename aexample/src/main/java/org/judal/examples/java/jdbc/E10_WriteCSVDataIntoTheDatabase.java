@@ -116,6 +116,9 @@ public class E10_WriteCSVDataIntoTheDatabase {
 
 	public static void tearDown() throws Exception {
 		E04_CreateTablesFromJDOXML.dropSchemaObjects(EngineFactory.getDefaultRelationalDataSource());
+		JDBCRelationalDataSource dts = (JDBCRelationalDataSource) EngineFactory.getDefaultRelationalDataSource();
+		dts.execute("DROP SEQUENCE seq_course");
+		dts.execute("DROP SEQUENCE seq_student");
 		E01_CreateDefaultRelationalDataSource.close();
 	}
 

@@ -8,10 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.jdo.JDOException;
 
@@ -21,7 +18,6 @@ import org.junit.Before;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.Transaction;
 import org.openjdk.jmh.annotations.Benchmark;
 
 import org.judal.benchmark.java.MediumRecordData;
@@ -182,8 +178,7 @@ public class B01_WriteRead {
 	@Benchmark
 	public void insertJDBCOne(JDBCRelationalDataSource dts, MediumRecordData d) throws SQLException {
 
-		final String sql = "INSERT INTO " + MediumRecordData.TABLE_NAME + " VALUES (?"
-				+ String.format("%0" + 70 + "d", 0).replace("0", ",?") + ")";
+		final String sql = "INSERT INTO " + MediumRecordData.TABLE_NAME + " VALUES (?" + String.format("%0" + 70 + "d", 0).replace("0", ",?") + ")";
 		Connection conn = dts.getConnection();
 		PreparedStatement stmt = conn.prepareStatement(sql);
 

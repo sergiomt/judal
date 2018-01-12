@@ -34,6 +34,8 @@ public class E26_StoredProcedureOutParameters {
 			new Param("column1_name", Types.VARCHAR, 1, Direction.IN, paramValue),
 			new Param("column2_name", Types.VARCHAR, 2, Direction.OUT) };
 	
+	public E26_StoredProcedureOutParameters() { }
+
 	@Test
 	public void demo() {
 
