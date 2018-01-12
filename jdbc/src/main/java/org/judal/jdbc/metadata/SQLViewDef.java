@@ -21,12 +21,12 @@ import javax.jdo.metadata.ForeignKeyMetadata;
 import javax.jdo.metadata.JoinMetadata;
 
 import org.judal.jdbc.RDBMS;
-import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.ViewDef;
 import org.judal.storage.Param;
-import org.judal.storage.table.Record;
+
+import com.knowgate.debug.DebugFile;
 
 public class SQLViewDef extends ViewDef implements SQLSelectableDef {
 
@@ -35,17 +35,19 @@ public class SQLViewDef extends ViewDef implements SQLSelectableDef {
 	private RDBMS dbms;
 	private String aliasedName;
 	private String viewSource;
-	private SQLHelper helper;
 	
 	public SQLViewDef(RDBMS dbms, String aliasedName, String viewSource) throws JDOUserException, SQLException {
 		super(aliasedName);
+		final NameAlias nameAlias = NameAlias.parse(aliasedName);
 		this.dbms = dbms;
 		this.viewSource = viewSource;
 		this.aliasedName = aliasedName;
-		setName(NameAlias.parse(aliasedName).getName());
+		setName(nameAlias.getName());
+		setAlias(nameAlias.getAlias());
 		setCatalog(null);
 		setSchema(null);
-		helper = null;
+		if (DebugFile.trace)
+			DebugFile.writeln("new SQLViewDef(" + dbms + "," + aliasedName + "," + viewSource + ")");
 	}
 
 	/**
@@ -80,9 +82,6 @@ public class SQLViewDef extends ViewDef implements SQLSelectableDef {
 		else
 			columns = coldefs;
 		autoSetPrimaryKey();
-		try {
-			helper = new SQLHelper(dbms, this, null);
-		} catch (SQLException neverthrown) { }
 	}
 	
 	public String getSource() {
@@ -106,8 +105,22 @@ public class SQLViewDef extends ViewDef implements SQLSelectableDef {
 	 */
 	@Override
 	public String getTables() throws JDOUserException,JDOUnsupportedOptionException {
+
+		String retval = null;
+
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin SQLViewDef.getTables()");
+			DebugFile.incIdent();
+			DebugFile.writeln("Name is " + getName());
+			DebugFile.writeln("Alias is " + getAlias());
+			DebugFile.writeln("Number of joins is " + getNumberOfJoins());
+		}
+			
 		if (getNumberOfJoins()==0) {
-			return getName();
+			if (getAlias()==null || getAlias().length()==0 || getName().equals(getAlias()))
+				retval = getName();
+			else
+				retval = getName() + " " + getAlias();
 		} else if (getNumberOfJoins()==1) {
 			JoinMetadata join = getJoins()[0];
 			for (ForeignKeyMetadata fk : getForeignKeys()) {
@@ -133,28 +146,24 @@ public class SQLViewDef extends ViewDef implements SQLSelectableDef {
 							joinSql.append(".").append(join.getColumns()[c]);
 						}							
 					}
-					return joinSql.toString();
+					retval = joinSql.toString();
 				}
 			}
-			throw new JDOUserException("Cannot find a foreign key corresponding to join definition");
+			if (null==retval) {
+				if (DebugFile.trace) DebugFile.decIdent();
+				throw new JDOUserException("Cannot find a foreign key corresponding to join definition");
+			}
 		} else {
+			if (DebugFile.trace) DebugFile.decIdent();
 			throw new JDOUnsupportedOptionException("Only one join at a time is supported");
 		}
-	}
-	
-	@Override
-	public boolean existsRegister(JDCConnection oConn, String sQueryString, Object[] oQueryParams) throws SQLException, IllegalStateException {
-		if (null==helper)
-			throw new IllegalStateException("Primary key not set for view " + getName());
-		return helper.existsRegister(oConn, sQueryString, oQueryParams);
-	}
-	
-	@Override
-	public boolean loadRegister(JDCConnection oConn, Object[] PKValues, Record AllValues)
-			throws SQLException, NullPointerException, IllegalStateException, ArrayIndexOutOfBoundsException {
-		if (null==helper)
-			throw new IllegalStateException("Primary key not set for view " + getName());
-		return helper.loadRegister(oConn, PKValues, AllValues);
+
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End SQLViewDef.getTables() : " + retval);
+		}
+		
+		return retval;
 	}
 	
 }

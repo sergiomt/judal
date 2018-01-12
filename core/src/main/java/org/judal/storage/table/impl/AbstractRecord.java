@@ -288,10 +288,18 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 */
 	@Override
 	public void store(DataSource oDts) throws JDOException,ClassCastException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin AbstractRecord.store(DataSource) " + getClass().getName());
+			DebugFile.incIdent();
+		}
 		if (getConstraintsChecker()!=null)
 			getConstraintsChecker().check(oDts, this);
 		try (Table oTbl = ((TableDataSource) oDts).openTable(this)) {
 			oTbl.store(this);
+		}
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End AbstractRecord.store(DataSource) : " +  getKey());
 		}
 	}
 
@@ -429,6 +437,8 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 			retval = null;
 		} else if (pk.getNumberOfColumns()==1) {
 			retval = apply(pk.getColumn());
+			if (DebugFile.trace)
+				DebugFile.writeln(pk.getColumn() + "=" + retval);
 			if (retval instanceof String) {
 				try {
 					retval = pk.getColumns()[0].convert((String) retval);

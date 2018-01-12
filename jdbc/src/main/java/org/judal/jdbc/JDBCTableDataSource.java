@@ -79,6 +79,8 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			try {
 				getTransactionManager().getTransaction().enlistResource(tbl.getConnection());
 			} catch (IllegalStateException | RollbackException | SystemException e) {
+				if (DebugFile.trace)
+					DebugFile.writeln(e.getClass().getName()+" at JDBCTableDataSource.openTable("+tableRecord.getTableName()+") "+e.getMessage());
 				tbl.close();
 				tbl = null;
 				throw new JDOException(e.getMessage(), e);
@@ -253,10 +255,13 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 */
 	@Override
 	public void setMetaData(SchemaMetaData smd) {
-		metaData = smd;
+		if (null==smd)
+			throw new NullPointerException("JDBCTableDataSource.setMetaData() SchemaMetaData cannot be null");
+		metaData.clear();
+		metaData.addMetadata(smd);
 	}
 
-	/**
+  	/**
 	 * Create new SQL column definition
 	 * @param tableName String Column Name
 	 * @param position int [1..n]
@@ -307,7 +312,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			}
 			String ddl = ((SQLTableDef) tableDef).getSource();
 			execute(ddl);
-			addTableToCache((SQLTableDef) tableDef);
+			cacheTableMetadata((SQLTableDef) tableDef);
 			conn = getConnection("JDBCTableDataSource");
 			addColumnsToCache((SQLTableDef) tableDef, conn, conn.getMetaData());
 			conn.close("JDBCTableDataSource");

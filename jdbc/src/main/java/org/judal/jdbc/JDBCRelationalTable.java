@@ -32,6 +32,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
+import org.judal.jdbc.jdc.JDCDAO;
+import org.judal.jdbc.metadata.SQLBuilder;
 import org.judal.jdbc.metadata.SQLIndex;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.metadata.IndexDef.Using;
@@ -87,6 +89,23 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 		super(dataSource, tableDef.asView(), recClass);
 		this.tableDef = tableDef;
 	}	
+
+	/**
+	 * <p>Get data access object for this view.</p>
+	 * The DAO may be provided by the DataSource or created once on the fly for each view.
+	 * @return JDCDAO
+	 * @throws SQLException
+	 */
+	public JDCDAO getDao() throws SQLException {
+		if (null==dao) {
+			if (dataSource.daos.containsKey(tableDef.getName())) {
+				dao = dataSource.daos.get(tableDef.getName());
+			} else {
+				dao = new JDCDAO(tableDef, new SQLBuilder(dataSource.getDatabaseProductId(), tableDef, SQLTableDef.DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME).getSqlStatements());
+			}
+		}
+		return dao;
+	}
 	
 	/**
 	 * <p>Close prepared statements and return the internal JDBC connection to the pool.</p>
@@ -224,6 +243,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 	@Override
 	public int update(Param[] aValues, AbstractQuery oQry) throws JDOException {
 		int iAffected = 0;
+		String sSQL = null;
 		if (oQry==null) throw new NullPointerException("JDBCIndexableTable.update() filter query cannot be null");
 
 		if (DebugFile.trace) {
@@ -246,19 +266,24 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 					}
 				}
 				PreparedStatement oStmt = null;
-				String sSQL = "UPDATE "+name()+" SET "+oVals.substring(1)+" WHERE "+oQry.getFilter();
+				sSQL = "UPDATE "+name()+" SET "+oVals.substring(1)+" WHERE "+oQry.getFilter();
 				try {
 					if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
 					oStmt = getConnection().prepareStatement(sSQL);
 					int p = 0;
 					for (Param v : aValues) {
 						Object oVal = v.getValue();
-						if (oVal==null)
+						if (oVal==null) {
+							if (DebugFile.trace) DebugFile.writeln("PreparedStatement.setNull("+p+","+v.getType()+")");
 							oStmt.setNull(++p, v.getType());
-						else if (!(oVal instanceof LatLong) && !(oVal instanceof Expression))
+						} else if (!(oVal instanceof LatLong) && !(oVal instanceof Expression)) {
+							if (DebugFile.trace) DebugFile.writeln("PreparedStatement.setObject("+p+","+v.getValue()+","+v.getType()+")");
 							oStmt.setObject(++p, v.getValue(), v.getType());
+						} else {
+							if (DebugFile.trace) DebugFile.writeln("skipped parameter "+v.getPosition()+" of class "+oVal.getClass().getName());							
+						}
 					}
-					((SQLQuery) oQry).setParameters(oStmt);
+					((SQLQuery) oQry).setParameters(oStmt, ++p);
 					iAffected = oStmt.executeUpdate();
 					oStmt.close();
 					oStmt=null;
@@ -268,7 +293,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 						DebugFile.decIdent();
 					}
 					try { if (oStmt!=null) oStmt.close(); } catch (Exception ignore) { }
-					throw new JDOException(sqle.getMessage(), sqle);
+					throw new JDOException(sqle.getMessage()+" "+sSQL, sqle);
 				}
 			}
 		}
@@ -447,7 +472,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 
 		if (bHasLongVarBinaryData) {
 			try {
-				tableDef.storeRegisterLong(jdcConn, mapRecord, mapRecord.longDataLengths());
+				getDao().storeRegisterLong(jdcConn, mapRecord, mapRecord.longDataLengths());
 			} catch (IOException ioe) {
 				throw new JDOException(ioe.getMessage(), ioe);
 			} catch (SQLException sqle) {
@@ -458,7 +483,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 			}
 		} else {
 			try {
-				tableDef.storeRegister(jdcConn, (AbstractRecord) target);
+				getDao().storeRegister(jdcConn, (AbstractRecord) target);
 			} catch (SQLException sqle) {
 				throw new JDOException(sqle.getMessage(), sqle);
 			}
@@ -483,9 +508,9 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 		HashMap<String,Object> keymap = new HashMap<String,Object>(5);
 		if (pk.getNumberOfColumns()==1) {
 			if (key instanceof Param)
-				keymap.put(pk.getColumn(), key);
-			else
 				keymap.put(pk.getColumn(), ((Param) key).getValue());
+			else
+				keymap.put(pk.getColumn(), key);
 		} else {
 			Object[] keyvals;
 			if (key instanceof Param[]) {
@@ -503,7 +528,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 				keymap.put(colDef.getName(), keyvals[k++]);
 		}
 		try {
-			tableDef.deleteRegister(jdcConn, keymap);
+			getDao().deleteRegister(jdcConn, keymap);
 		} catch (SQLException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
 		}

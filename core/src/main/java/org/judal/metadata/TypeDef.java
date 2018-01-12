@@ -27,7 +27,6 @@ import javax.jdo.metadata.DatastoreIdentityMetadata;
 import javax.jdo.metadata.ForeignKeyMetadata;
 import javax.jdo.metadata.IndexMetadata;
 import javax.jdo.metadata.InheritanceMetadata;
-import javax.jdo.metadata.MemberMetadata;
 import javax.jdo.metadata.PropertyMetadata;
 import javax.jdo.metadata.QueryMetadata;
 import javax.jdo.metadata.TypeMetadata;

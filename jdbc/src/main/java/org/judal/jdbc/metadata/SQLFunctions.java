@@ -431,7 +431,7 @@ public class SQLFunctions {
 			"sql_sizing", "sql_sizing_profiles",
 			"pg_ts_cfg", "pg_logdir_ls",
 			"pg_ts_cfgmap", "pg_ts_dict", "pg_ts_parses",
-			"pg_ts_parser", "pg_reload_conf", "spatial_ref_sys" };
+			"pg_ts_parser", "pg_reload_conf", "spatial_ref_sys", "layer", "topology" };
   
   private static final String[] sqlServerSystemTables = new String[]{ "syscolumns", "syscomments", "sysdepends",
 			"sysfilegroups", "sysfiles" , "sysfiles1",

@@ -1153,7 +1153,7 @@ public void scriptData (String sTableName, String sWhere, String sFilePath)
   sColumns = "";
 
   for (int c=1; c<=iCols; c++) {
-    if (!oMDat.getColumnName(c).equalsIgnoreCase("dt_created")) {
+    if (!oMDat.getColumnName(c).equalsIgnoreCase(SQLTableDef.DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME)) {
       if (c!=1) sColumns += ",";
       sColumns += oMDat.getColumnName(c);
     }
@@ -1168,7 +1168,7 @@ public void scriptData (String sTableName, String sWhere, String sFilePath)
 
     for (int c=1; c<=iCols; c++) {
 
-      if (!oMDat.getColumnName(c).equalsIgnoreCase("dt_created")) {
+      if (!oMDat.getColumnName(c).equalsIgnoreCase(SQLTableDef.DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME)) {
 
         if (c!=1) oWriter.write(byComma);
 

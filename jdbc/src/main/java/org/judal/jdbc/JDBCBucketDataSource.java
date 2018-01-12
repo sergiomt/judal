@@ -139,7 +139,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 			SQLColumn valcolumn = new SQLColumn(bucketName, valfield, (short) Types.LONGVARBINARY, "LONGVARBINARY", 2147483647, 0, DatabaseMetaData.columnNullable, 2);
 			tblDef.addColumnMetadata(valcolumn);
 			execute(tblDef.getSource());		
-			addTableToCache(tblDef);
+			cacheTableMetadata(tblDef);
 			addColumnsToCache(tblDef, conn, conn.getMetaData());
 			conn.close("JDBCBucketDataSource");
 			conn = null;

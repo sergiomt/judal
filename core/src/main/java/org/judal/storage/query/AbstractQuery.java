@@ -33,6 +33,7 @@ import org.judal.storage.Param;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 
+import com.knowgate.debug.DebugFile;
 import com.knowgate.typeutils.ObjectFactory;
 
 /**
@@ -92,7 +93,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 
 	public abstract AbstractQuery clone();
 
-	protected void clone(AbstractQuery source) {
+	public void clone(AbstractQuery source) {
 		if (source.extensions==null) {
 			this.extensions = null;
 		} else {
@@ -666,16 +667,19 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	public void setResultClass(Class<? extends Record> resultClass, Class<?>... constructorParameterClasses) {
 		if (null==resultClass)
 			throw new NullPointerException("Result Class cannot be null");
-		if (null==recordConstructor || null==constructorParameters || null==constructorParameterClasses) {
-			if (Record.class.isAssignableFrom(resultClass)) {
-				recordConstructor = (Constructor<? extends Record>) ObjectFactory.getConstructor((Class<? extends Object>) resultClass, new Class[0]);
-				this.resultClass = resultClass;
-			} else {
-				throw new ClassCastException("Cannot cast from "+resultClass.getClass().getName()+" to "+Record.class.getName());
-			}
-		} else {
+		if (DebugFile.trace) {
+			StringBuilder paramClsses = new StringBuilder();
+			if (constructorParameterClasses!=null && constructorParameterClasses.length>0)
+				for (Class<?> clzz : constructorParameterClasses)
+					paramClsses.append(",").append(clzz.getName());
+			DebugFile.writeln("AbstractQuery.setResultClass("+resultClass.getName()+paramClsses.toString()+")");
+		}
+		if (Record.class.isAssignableFrom(resultClass)) {
 			this.resultClass = resultClass;
-			recordConstructor = (Constructor<? extends Record>) ObjectFactory.getConstructor((Class<? extends Object>) resultClass, constructorParameterClasses);
+			this.recordConstructor = (Constructor<? extends Record>) ObjectFactory.getConstructor((Class<? extends Object>) resultClass, null==constructorParameterClasses ? new Class[0] : constructorParameterClasses);
+		}
+		else {
+			throw new ClassCastException("Cannot cast from "+resultClass.getClass().getName()+" to "+Record.class.getName());
 		}
 	}
 	

@@ -14,7 +14,6 @@ package org.judal.metadata;
 
 import java.util.Collection;
 
-import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
 
 import com.knowgate.debug.DebugFile;
@@ -44,6 +43,7 @@ public class ViewDef extends TypeDef implements SelectableDef {
 		NameAlias nameAndAlias = NameAlias.parse(aliasedName);
 		setName(nameAndAlias.getName());
 		setAlias(nameAndAlias.getAlias());
+		setTable(nameAndAlias.getName());
 	}
 
 	/**
@@ -81,6 +81,9 @@ public class ViewDef extends TypeDef implements SelectableDef {
 		alias = source.alias;
 		recordClass = source.recordClass;
 		recordClassName  = source.recordClassName;		
+		setName(source.getName());
+		setAlias(source.getAlias());
+		setTable(source.getTable());
 	}
 
 	/**
@@ -125,6 +128,7 @@ public class ViewDef extends TypeDef implements SelectableDef {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.alias = alias;
+		if (DebugFile.trace) DebugFile.writeln("ViewDef.setAlias(" + alias + ")");
 		return this;
 	}
 

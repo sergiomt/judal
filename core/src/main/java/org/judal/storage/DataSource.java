@@ -188,7 +188,19 @@ public interface DataSource extends AutoCloseable {
      * Configuration property. Boolean (true/false) Default true
      */
     public static final String TRANSACTIONAL = "transactional";
-    
+    /**
+     * LDAP Connection string. For example ldap://192.168.101.110:389/dc=auth,dc=com 
+     */
+    public static final String LDAPCONNECT = "ldapconnect";
+    /**
+     * LDAP Admin user.  For example cn=Manager,dc=auth,dc=com
+     */
+    public static final String LDAPUSER = "ldapuser";
+    /**
+     * LDAP Admin user pasword
+     */
+    public static final String LDAPPASSWORD = "ldappassword";
+
     public static String DEFAULT_POOLSIZE = "10";
     public static String DEFAULT_MAXPOOLSIZE = "100";
     public static String DEFAULT_MAXCONNECTIONS = "100";
@@ -203,7 +215,7 @@ public interface DataSource extends AutoCloseable {
     /**
      * List of supported property names
      */
-    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA};
+    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD};
 
     /**
      * List of default property values

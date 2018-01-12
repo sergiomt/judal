@@ -30,11 +30,9 @@ import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Expression;
-import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.SingleColumnRecord;
-
 import org.judal.jdbc.RDBMS;
 import org.judal.jdbc.JDBCIndexableView;
 
@@ -62,13 +60,13 @@ public class SQLQuery extends AbstractQuery {
 	private Constructor<? extends Record> recordConstructor;
 	private Object[] constructorParameters;
 	
-	public SQLQuery(IndexableView view) throws JDOException {
+	public SQLQuery(JDBCIndexableView view) throws JDOException {
 		if (view.getResultClass()==null)
 			throw new NullPointerException("SQLQuery() IndexableView.getResultClass() cannot be null");
 		setCandidates(view);
 		setRange(0, Integer.MAX_VALUE);
 		recordConstructor = null;
-		setResultClass(view.getResultClass());
+		setResultClass(view.getResultClass(), view.getDataSource().getClass(), view.getClass());
 	}
 
 	@Override
@@ -122,6 +120,8 @@ public class SQLQuery extends AbstractQuery {
 				constructorSignature.append(",");
 				constructorSignature.append(getView().getViewDef().getClass().getName());
 				constructorSignature.append(")");
+				if (DebugFile.trace)
+					DebugFile.writeln(e.getMessage() + " getting constructor " + constructorSignature.toString());
 				throw new JDOException(e.getMessage() + " getting constructor " + constructorSignature.toString(), e);
 			}
 		}
@@ -144,9 +144,9 @@ public class SQLQuery extends AbstractQuery {
 		final int dbms = getView().getConnection().getDataBaseProduct();
 		return dbms==RDBMS.POSTGRESQL.intValue() || dbms==RDBMS.MYSQL.intValue() || dbms==RDBMS.HSQLDB.intValue();
 	}
-
-	public void setParameters(PreparedStatement stmt) throws SQLException {		
-		int p = 1;
+	
+	public void setParameters(PreparedStatement stmt, int offset) throws SQLException {		
+		int p = offset;
 		for (Object oParam : getParameters()) {
 			if (null==oParam) {
 				ParameterMetaData oParMDat = stmt.getParameterMetaData();
@@ -167,6 +167,10 @@ public class SQLQuery extends AbstractQuery {
 				stmt.setObject(p++, oParam);
 			} // fi
 		} // next
+	}
+
+	public void setParameters(PreparedStatement stmt) throws SQLException {		
+		setParameters(stmt,1);
 	}
 
 	@Override
@@ -348,6 +352,11 @@ public class SQLQuery extends AbstractQuery {
 	private <R extends Record> int fetchRowsAsArrays(ResultSet oRSet, RecordSet<R> recordSet, int iMaxRow) throws SQLException {
 		int iRetVal = 0;
 		boolean bHasNext = true;
+
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin SQLQuery.fetchRowsAsArrays([ResultSet], RecordSet<R>, " + String.valueOf(iMaxRow) + ")");
+			DebugFile.incIdent();
+		}
 		
 		R oRow = (R) newRecord();
 		final int iColCount = Math.min(oRow.columns().length, oRSet.getMetaData().getColumnCount());
@@ -364,8 +373,13 @@ public class SQLQuery extends AbstractQuery {
 
 			if (bHasNext = oRSet.next())
 				oRow = (R) newRecord();
-			// if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" has next="+String.valueOf(bHasNext));
 		} // wend			
+
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End SQLQuery.fetchRowsAsArrays() : " + iRetVal);
+		}
+
 		return iRetVal;
 	}
 
@@ -373,6 +387,11 @@ public class SQLQuery extends AbstractQuery {
 	private <R extends Record> int fetchRowsAsMaps(ResultSet oRSet, RecordSet<R> recordSet, int iMaxRow) throws SQLException {
 		int iRetVal = 0;
 		boolean bHasNext = true;
+
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin SQLQuery.fetchRowsAsMaps([ResultSet], RecordSet<R>, " + String.valueOf(iMaxRow) + ")");
+			DebugFile.incIdent();
+		}
 		
 		ResultSetMetaData oMDat = oRSet.getMetaData();
 		final int iColCount = oMDat.getColumnCount();
@@ -395,8 +414,13 @@ public class SQLQuery extends AbstractQuery {
 
 			if (bHasNext = oRSet.next())
 				oRow = (R) newRecord();
-			// if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" has next="+String.valueOf(bHasNext));
 		} // wend			
+
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End SQLQuery.fetchRowsAsMaps() : " + iRetVal);
+		}
+
 		return iRetVal;
 	}
 	
@@ -435,16 +459,14 @@ public class SQLQuery extends AbstractQuery {
 			throw new NullPointerException("SQLQuery.fetchResultSet() getResultClass() cannot be null");
 			
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDBCQuery.fetchResultSet([ResultSet], " + String.valueOf(iMaxRow) + ", " + String.valueOf(getRangeFromIncl()) + ")");
+			DebugFile.writeln("Begin SQLQuery.fetchResultSet([ResultSet], " + String.valueOf(iMaxRow) + ", " + String.valueOf(getRangeFromIncl()) + ")");
+			DebugFile.incIdent();
 		}
-		
 		
 		RecordSet<R> recordSet = StorageObjectFactory.newRecordSetOf(getResultClass(), new Integer(iMaxRow));
 		
-		if (DebugFile.trace) {
-			DebugFile.incIdent();
+		if (DebugFile.trace)
 			lFetchTime = System.currentTimeMillis();
-		}
 
 		boolean bHasNext = true;
 		
@@ -482,7 +504,7 @@ public class SQLQuery extends AbstractQuery {
 		if (DebugFile.trace) {
 			DebugFile.writeln("fetching done in " + String.valueOf(System.currentTimeMillis()-lFetchTime) + " ms");
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDBCQuery.fetchResultSet() : " + String.valueOf(iRetVal));
+			DebugFile.writeln("End SQLQuery.fetchResultSet() : " + String.valueOf(iRetVal));
 		}
 
 		return recordSet;

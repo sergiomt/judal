@@ -1,5 +1,9 @@
 package org.judal.jdbc;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+
 /**
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
@@ -35,6 +39,7 @@ import java.util.logging.Logger;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
+import javax.jdo.JDOUserException;
 import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 
@@ -45,6 +50,8 @@ import javax.transaction.TransactionManager;
 import org.judal.jdbc.hsql.HsqlSequenceGenerator;
 import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.jdc.JDCConnectionPool;
+import org.judal.jdbc.jdc.JDCDAO;
+import org.judal.jdbc.metadata.SQLBuilder;
 import org.judal.jdbc.metadata.SQLFunctions;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.jdbc.metadata.SQLViewDef;
@@ -54,6 +61,8 @@ import org.judal.jdbc.postgresql.PgSequenceGenerator;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
+import org.judal.metadata.bind.JdoPackageMetadata;
+import org.judal.metadata.bind.JdoXmlMetadata;
 import org.judal.storage.Env;
 import org.judal.storage.Param;
 import org.judal.storage.DataSource;
@@ -79,8 +88,9 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 	protected String databaseProductName;
 	protected RDBMS databaseProductId;
-	protected SchemaMetaData metaData;
-	protected boolean useDatabaseMetadata;
+	protected final SchemaMetaData metaData;
+	protected final HashMap<String,JDCDAO> daos;
+	protected final boolean useDatabaseMetadata;
 	protected boolean autocommit;
 
 	private static final String VERSION = "1.0.0";
@@ -115,7 +125,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		useDatabaseMetadata = metaDataFromDb.equalsIgnoreCase("true") || metaDataFromDb.equalsIgnoreCase("yes") || metaDataFromDb.equalsIgnoreCase("1") || metaDataFromDb.equalsIgnoreCase("");
 		transactMan = transactManager;
 		metaData = new SchemaMetaData();
-		initialize();
+		daos = new HashMap<String,JDCDAO>(349);
+		initialize(properties);
 	}
 
 	private Object resultSetToListOfMap(Object result) throws SQLException {
@@ -310,10 +321,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 		connectXcpt = null;
 
-		if (metaData!=null) {
-			metaData.clear();
-			metaData = null;
-		}
+		metaData.clear();
 
 		super.close();
 
@@ -340,10 +348,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 		connectXcpt = null;
 
-		if (metaData!=null) {
-			metaData.clear();
-			metaData = null;
-		}
+		metaData.clear();
 
 		try {
 			super.close();
@@ -352,7 +357,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			if (DebugFile.trace)  DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
 		}
 
-		initialize ();
+		initialize (getProperties());
 
 		if (DebugFile.trace)  {
 			DebugFile.incIdent();
@@ -381,7 +386,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 	// ----------------------------------------------------------
 
-	protected boolean addTableToCache(TableDef tableDef) {
+	protected boolean cacheTableMetadata(TableDef tableDef) {
 		boolean retval;
 		final String tableName = tableDef.getName().toLowerCase();
 		
@@ -485,7 +490,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 					sTableSchema = oRSet.getString(2);
 					if (oRSet.wasNull()) sTableSchema = getProperty(SCHEMA, "");
 					oTable = new SQLTableDef(getDatabaseProductId(), sCatalog, sTableSchema, oRSet.getString(3));
-					addTableToCache(oTable);
+					cacheTableMetadata(oTable);
+					cacheDaoForTable(oTable);
 				}
 				else if (DebugFile.trace)
 					DebugFile.writeln("Skipping table " + oRSet.getString(3));
@@ -517,7 +523,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 						sTableSchema = oRSet.getString(2);
 						if (oRSet.wasNull()) sTableSchema = getProperty(SCHEMA, "dbo");
 						oTable = new SQLTableDef (getDatabaseProductId(), sCatalog, sTableSchema, sTableName);
-						addTableToCache(oTable);
+						cacheTableMetadata(oTable);
+						cacheDaoForTable(oTable);
 					} // fi (!oRSet.wasNull())
 				} // wend
 			}
@@ -531,7 +538,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 					if (!oRSet.wasNull()) {
 						oTable = new SQLTableDef (getDatabaseProductId(), sCatalog, sTableSchema, sTableName);
-						addTableToCache(oTable);						
+						cacheTableMetadata(oTable);
 					} // fi (!oRSet.wasNull())
 				} // wend
 			} // fi (sSchema == "")
@@ -556,6 +563,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 				nWarnings++;
 				oUnreadableTables.add(oTable.getName());
 			}
+			cacheDaoForTable(oTable);
 			oTable.setUnmodifiable();
 		} // wend
 
@@ -572,28 +580,68 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	}
 
 	// ----------------------------------------------------------
-	
-	protected void initialize()
+
+	public void readMetadataFromFile(Map<String,String> properties) throws JDOException {
+		SchemaMetaData fileMetadata;
+		try {
+			String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
+			String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
+			if (metadataPackage.length()==0) {
+				FileInputStream fin = new FileInputStream(new File(metadataFilePath));
+				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(null);
+				fileMetadata = xmlMeta.readMetadata(fin);
+				fin.close();
+				metaData.addMetadata(fileMetadata);
+			} else if (metadataPackage.length()>0) {
+				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);
+				InputStream instrm = packMeta.openStream();
+				if (instrm!=null) {
+					fileMetadata = packMeta.readMetadata(instrm);
+					instrm.close();
+					metaData.addMetadata(fileMetadata);
+				} else {
+					throw new JDOUserException("Could not load metadata for package " + metadataPackage + " file " + metadataFilePath);					
+				}
+			} else {
+				throw new JDOUserException("Missing metadata package and no schema file specified");					
+			}
+			for (TableDef tableDef : metaData.tables()) {
+				cacheTableMetadata(tableDef);
+				cacheDaoForTable(tableDef);
+			}
+		} catch (Exception xcpt) {
+			throw new JDOException(xcpt.getMessage(), xcpt);
+		}
+	}
+
+	// ----------------------------------------------------------
+
+	protected void cacheDaoForTable(TableDef tableDef) throws SQLException {
+		final SQLBuilder sqlBuilder = new SQLBuilder(getDatabaseProductId(), tableDef, SQLTableDef.DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME);
+		daos.put(tableDef.getName(), new JDCDAO(tableDef, sqlBuilder.getSqlStatements()));		
+	}
+
+	// ----------------------------------------------------------
+
+	protected void initialize(Map<String,String> properties)
 			throws ClassNotFoundException, SQLException, NullPointerException,
 			AccessControlException,UnsatisfiedLinkError,NumberFormatException {
 
 		Connection oConn;
 		DatabaseMetaData oMData;
 
-		if (useDatabaseMetadata) {
-			metaData = new SchemaMetaData();
-			metaData.addPackage("default");
-		} else {
-			metaData = null;
-		}
-
 		if (DebugFile.trace)
 		{
 			DebugFile.writeln("JDBCDataSource build " + JDBCDataSource.VERSION);
 			DebugFile.envinfo();
 
-			DebugFile.writeln("Begin JDBCDataSource.initialize()");
+			DebugFile.writeln("Begin JDBCDataSource.initialize() useDatabaseMetadata = " + useDatabaseMetadata);
 			DebugFile.incIdent();
+		}
+
+		metaData.clear();
+		if (useDatabaseMetadata) {
+			metaData.addPackage("default");
 		}
 
 		if (DebugFile.trace) DebugFile.writeln("Load Driver " + getProperty(DRIVER) + " : OK\n" );
@@ -663,12 +711,13 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 		Functions = SQLFunctions.DB.get(databaseProductId);
 
-		if (useDatabaseMetadata) {
+		if (useDatabaseMetadata)
 			readMetadataFromDatabase(oConn, oMData);
-		}
+		else
+			readMetadataFromFile(properties);
 
 		oConn.close();
-		oConn=null;
+		oConn = null;
 
 		if (DebugFile.trace)
 		{
@@ -934,7 +983,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		}
 
 		oConn = super.getConnection(sCaller);
-		oConn.setAutoCommit(autocommit);
+		oConn.setAutoCommit(inTransaction() ? false : autocommit);
 
 		if (DebugFile.trace) {
 			if (oConn!=null) DebugFile.writeln("Connection process id. is " + oConn.pid());

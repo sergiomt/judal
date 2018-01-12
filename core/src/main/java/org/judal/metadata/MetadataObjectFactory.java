@@ -42,11 +42,11 @@ public class MetadataObjectFactory extends ObjectFactory {
 	 */
 	public static <T extends TableDef> T newTableDef(Class<T> tableDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newTableDef("+tableDefSubclass.getName()+","+constructorParameters+")");
+			DebugFile.writeln("MetadataObjectFactory.newTableDef("+tableDefSubclass.getName()+","+constructorParameters+")");
 		@SuppressWarnings("unchecked")
 		Constructor<T> tableDefConstructor = (Constructor<T>) getConstructor(tableDefSubclass, getParameterClasses(constructorParameters));
 		if (null==tableDefConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+tableDefSubclass.getName());
+			throw new NoSuchMethodException("MetadataObjectFactory.newTableDef No suitable constructor found for "+tableDefSubclass.getName());
 		T retval = null;
 		final int parameterCount = tableDefConstructor.getParameterCount();
 		try {
@@ -77,12 +77,12 @@ public class MetadataObjectFactory extends ObjectFactory {
 				for (int p=1; p<constructorParameters.length; p ++)
 					paramClasses.append(",").append(constructorParameters[p].getClass().getName());					
 			}
-			DebugFile.writeln("StorageObjectFactory.newViewDef("+viewDefSubclass.getName()+","+paramClasses.toString()+")");
+			DebugFile.writeln("MetadataObjectFactory.newViewDef("+viewDefSubclass.getName()+","+paramClasses.toString()+")");
 		}
 		@SuppressWarnings("unchecked")
 		Constructor<T> viewDefConstructor = (Constructor<T>) getConstructor(viewDefSubclass, getParameterClasses(constructorParameters));
 		if (null==viewDefConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+viewDefSubclass.getName());
+			throw new NoSuchMethodException("MetadataObjectFactory.newViewDef No suitable constructor found for "+viewDefSubclass.getName());
 		T retval = null;
 		final int parameterCount = viewDefConstructor.getParameterCount();
 		try {
@@ -107,11 +107,11 @@ public class MetadataObjectFactory extends ObjectFactory {
 	 */
 	public static <T extends IndexDef> T newIndexDef(Class<T> indexDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newIndexDef("+indexDefSubclass.getName()+","+constructorParameters+")");
+			DebugFile.writeln("MetadataObjectFactory.newIndexDef("+indexDefSubclass.getName()+","+constructorParameters+")");
 		@SuppressWarnings("unchecked")
 		Constructor<T> indexDefConstructor = (Constructor<T>) getConstructor(indexDefSubclass, getParameterClasses(constructorParameters));
 		if (null==indexDefConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+indexDefSubclass.getName());
+			throw new NoSuchMethodException("MetadataObjectFactory.newIndexDef No suitable constructor found for "+indexDefSubclass.getName());
 		T retval = null;
 		final int parameterCount = indexDefConstructor.getParameterCount();
 		try {
@@ -136,11 +136,11 @@ public class MetadataObjectFactory extends ObjectFactory {
 	 */
 	public static <T extends ProcedureDef> T newProcedureDef(Class<T> procedureDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newProcedureDef("+procedureDefSubclass.getName()+","+constructorParameters+")");
+			DebugFile.writeln("MetadataObjectFactory.newProcedureDef("+procedureDefSubclass.getName()+","+constructorParameters+")");
 		@SuppressWarnings("unchecked")
 		Constructor<T> procedureDefConstructor = (Constructor<T>) getConstructor(procedureDefSubclass, getParameterClasses(constructorParameters));
 		if (null==procedureDefConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+procedureDefSubclass.getName());
+			throw new NoSuchMethodException("MetadataObjectFactory.newProcedureDef No suitable constructor found for "+procedureDefSubclass.getName());
 		T retval = null;
 		final int parameterCount = procedureDefConstructor.getParameterCount();
 		try {
@@ -165,11 +165,11 @@ public class MetadataObjectFactory extends ObjectFactory {
 	 */
 	public static <T extends TriggerDef> T newTriggerDef(Class<T> triggerDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newTriggerDef("+triggerDefSubclass.getName()+","+constructorParameters+")");
+			DebugFile.writeln("MetadataObjectFactory.newTriggerDef("+triggerDefSubclass.getName()+","+constructorParameters+")");
 		@SuppressWarnings("unchecked")
 		Constructor<T> triggerDefConstructor = (Constructor<T>) getConstructor(triggerDefSubclass, getParameterClasses(constructorParameters));
 		if (null==triggerDefConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+triggerDefSubclass.getName());
+			throw new NoSuchMethodException("MetadataObjectFactory.newTriggerDef No suitable constructor found for "+triggerDefSubclass.getName());
 		T retval = null;
 		final int parameterCount = triggerDefConstructor.getParameterCount();
 		try {
@@ -194,11 +194,11 @@ public class MetadataObjectFactory extends ObjectFactory {
 	 */
 	public static <T extends SequenceDef> T newSequenceDef(Class<T> sequenceDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newSequenceDef("+sequenceDefSubclass.getName()+","+constructorParameters+")");
+			DebugFile.writeln("MetadataObjectFactory.newSequenceDef("+sequenceDefSubclass.getName()+","+constructorParameters+")");
 		@SuppressWarnings("unchecked")
 		Constructor<T> sequenceDefConstructor = (Constructor<T>) getConstructor(sequenceDefSubclass, getParameterClasses(constructorParameters));
 		if (null==sequenceDefConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+sequenceDefSubclass.getName());
+			throw new NoSuchMethodException("MetadataObjectFactory.newSequenceDef No suitable constructor found for "+sequenceDefSubclass.getName());
 		T retval = null;
 		final int parameterCount = sequenceDefConstructor.getParameterCount();
 		try {

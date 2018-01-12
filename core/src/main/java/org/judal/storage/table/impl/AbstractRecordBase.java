@@ -587,7 +587,7 @@ import com.knowgate.stringutils.XML;
 	@Override
 	public Short put(String sColName, short iVal) {
 		Object prev = put(sColName, new Short(iVal));
-		return isNullOrNone(prev) ? null : (Short) prev;
+		return isNullOrNone(prev) ? null : new Short(prev.toString());
 	}
 
 	/** <p>Set int value at internal collection</p>
@@ -598,7 +598,7 @@ import com.knowgate.stringutils.XML;
 	@Override
 	public Integer put(String sColName, int iVal) {
 		Object prev = put(sColName, new Integer(iVal));
-		return isNullOrNone(prev) ? null : (Integer) prev;
+		return isNullOrNone(prev) ? null : new Integer(prev.toString());
 	}
 
 	/** <p>Set long value at internal collection</p>
@@ -609,7 +609,7 @@ import com.knowgate.stringutils.XML;
 	@Override
 	public Long put(String sColName, long lVal) {
 		Object prev = put(sColName, new Long(lVal));
-		return isNullOrNone(prev) ? null : (Long) prev;
+		return isNullOrNone(prev) ? null : new Long(prev.toString());
 	}
 
 	/** <p>Set float value at internal collection</p>
@@ -620,7 +620,7 @@ import com.knowgate.stringutils.XML;
 	@Override
 	public Float put(String sColName, float fVal) {
 		Object prev = put(sColName, new Float(fVal));
-		return isNullOrNone(prev) ? null : (Float) prev;
+		return isNullOrNone(prev) ? null : new Float(prev.toString());
 	}
 
 	/** <p>Set double value at internal collection</p>
@@ -631,7 +631,7 @@ import com.knowgate.stringutils.XML;
 	@Override
 	public Double put(String sColName, double dVal) {
 		Object prev = put(sColName, new Double(dVal));
-		return isNullOrNone(prev) ? null : (Double) prev;
+		return isNullOrNone(prev) ? null : new Double(prev.toString());
 	}
 
 	/**

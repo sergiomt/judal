@@ -12,7 +12,6 @@ package org.judal.jdbc.metadata;
  * KIND, either express or implied.
  */
 
-import java.io.IOException;
 import java.io.StringBufferInputStream;
 import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
@@ -23,7 +22,6 @@ import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
@@ -35,16 +33,14 @@ import javax.jdo.metadata.JoinMetadata;
 import com.knowgate.debug.*;
 
 import org.judal.jdbc.RDBMS;
-import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef.Type;
 import org.judal.metadata.TableDef;
 import org.judal.storage.Param;
-import org.judal.storage.table.Record;
 
 /**
  * <p>Represent database table structure as a Java object</p>
- * @author Sergio Montoro Ten
+ * @author Sergio Montoro Ten new SQLTableDef
  * @version 1.0
  */
 
@@ -55,8 +51,6 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 	public static String DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME = "dt_created";
 
 	private RDBMS dbms;
-	
-	private SQLHelper helper;
 
 	/**
 	 * <p>Constructor</p>
@@ -69,7 +63,6 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 		setCatalog(null);
 		setSchema(null);
 		setCreationTimestampColumnName(DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME);
-		helper = null;
 	}
 
 	// ---------------------------------------------------------------------------
@@ -89,18 +82,16 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 		setCreationTimestampColumnName(DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME);
 		setCatalog(sCatalogName);
 		setSchema(sSchemaName);
-		helper = null;
 	}
 
 	// ---------------------------------------------------------------------------
 
-	public SQLTableDef(RDBMS eDbms, String sTableName, ColumnDef[] oCols) throws SQLException {
+	public SQLTableDef(RDBMS eDbms, String sCatalogName, String sSchemaName, String sTableName, ColumnDef[] oCols) throws SQLException {
 		super(sTableName, oCols);
 		dbms = eDbms;
-		setCatalog(null);
-		setSchema(null);
+		setCatalog(sCatalogName);
+		setSchema(sSchemaName);
 		setCreationTimestampColumnName(DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME);
-
 		int iPos = 0;
 		for (ColumnDef oCol : oCols) {
 			SQLColumn oDbc = new SQLColumn(sTableName, oCol.getName(), oCol.getType().shortValue(), ColumnDef.typeName(oCol.getType()), oCol.getLength(), oCol.getScale(), oCol.getAllowsNull() ? DatabaseMetaData.columnNullable : DatabaseMetaData.columnNoNulls, ++iPos);
@@ -109,9 +100,8 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 			if (oCol.isIndexed())
 				addIndexMetadata(new SQLIndex(sTableName, "i"+String.valueOf(oCol.getPosition())+"_"+sTableName, oCol.getName(), oCol.getIndexType()==Type.ONE_TO_ONE));
 		}    
-		helper = new SQLHelper(eDbms, this, DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME);
 	}
-
+	
 	// ---------------------------------------------------------------------------
 	/**
 	 * <p>Constructor</p>
@@ -120,6 +110,9 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 	public SQLTableDef(SQLTableDef source) {
 		super(source);
 		dbms = source.dbms;
+		setCatalog(getCatalog());
+		setSchema(getSchema());
+		setCreationTimestampColumnName(getCreationTimestampColumnName());		
 	}
 	
 	// ---------------------------------------------------------------------------
@@ -190,156 +183,6 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 	// ---------------------------------------------------------------------------
 
 	/**
-	 * <p>Load a single table register into a Record</p>
-	 * @param oConn Database Connection
-	 * @param PKValues Primary key values of register to be read, in the same order as they appear in table source.
-	 * @param AllValues Record Output parameter. Read values.
-	 * @return <b>true</b> if register was found <b>false</b> otherwise.
-	 * @throws NullPointerException If all objects in PKValues array are null (only debug version)
-	 * @throws ArrayIndexOutOfBoundsException if the length of PKValues array does not match the number of primary key columns of the table
-	 * @throws IllegalStateException if columns list has not been set for this TableDef
-	 * @throws SQLException
-	 */
-	public boolean loadRegister(JDCConnection oConn, Object[] PKValues, Record AllValues)
-			throws SQLException, NullPointerException, IllegalStateException, ArrayIndexOutOfBoundsException {
-		if (null==helper)
-			throw new IllegalStateException("Column list is not set");
-		return helper.loadRegister(oConn, PKValues, AllValues);
-	} // loadRegister
-
-	// ---------------------------------------------------------------------------
-
-	/**
-	 * <p>Store a single register at the database representing a Java Object</p>
-	 * for register containing LONGVARBINARY, IMAGE, BYTEA or BLOB fields use
-	 * storeRegisterLong() method.
-	 * Columns with auto increment serial are not written by this storeRegister().
-	 * Columns named "dt_created" are also invisible for storeRegister() method so that
-	 * register creation timestamp is not altered by afterwards updates.
-	 * @param oConn Database Connection
-	 * @param Record Values to assign to fields.
-	 * @return <b>true</b> if register was inserted for first time, <false> if it was updated.
-	 * @throws IllegalStateException if columns list has not been set for this TableDef
-	 * @throws SQLException
-	 */
-
-	public boolean storeRegister(JDCConnection oConn, Record AllValues) throws SQLException, IllegalStateException {
-		if (null==helper)
-			throw new IllegalStateException("Column list is not set");
-		return helper.storeRegister(oConn, AllValues);
-	} // storeRegister
-
-	// ---------------------------------------------------------------------------
-
-	/**
-	 * <p>Store a single register at the database representing a Java Object</p>
-	 * for register NOT containing LONGVARBINARY, IMAGE, BYTEA or BLOB fields use
-	 * storeRegister() method witch is faster than storeRegisterLong().
-	 * Columns named "dt_created" are invisible for storeRegisterLong() method so that
-	 * register creation timestamp is not altered by afterwards updates.
-	 * @param oConn Database Connection
-	 * @param Record Values to assign to fields.
-	 * @param BinaryLengths map of lengths for long fields.
-	 * @return <b>true</b> if register was inserted for first time, <false> if it was updated.
-	 * @throws IllegalStateException if columns list has not been set for this TableDef
-	 * @throws SQLException
-	 */
-
-	public boolean storeRegisterLong(JDCConnection oConn, Record AllValues, Map<String,Long> BinaryLengths) throws IOException, SQLException, IllegalStateException {
-		if (null==helper)
-			throw new IllegalStateException("Column list is not set");
-		return helper.storeRegisterLong(oConn, AllValues, BinaryLengths);
-	} // storeRegisterLong
-
-	// ---------------------------------------------------------------------------
-
-	/**
-	 * <p>Delete a single register from this table at the database</p>
-	 * @param oConn Database connection
-	 * @param AllValues Record with, at least, the primary key values for the register. Other Record values are ignored.
-	 * @return <b>true</b> if register was delete, <b>false</b> if register to be deleted was not found.
-	 * @throws IllegalStateException if columns list has not been set for this TableDef
-	 * @throws SQLException
-	 */
-	public boolean deleteRegister(JDCConnection oConn, Map<String,Object> AllValues) throws SQLException,IllegalStateException {
-		if (null==helper)
-			throw new IllegalStateException("Column list is not set");
-		return helper.deleteRegister(oConn, AllValues);
-	} // deleteRegister
-
-	// ---------------------------------------------------------------------------
-
-	/**
-	 * <p>Checks if register exists at this table</p>
-	 * @param oConn Database Connection
-	 * @param sQueryString Register Query String, as a SQL WHERE clause syntax
-	 * @return <b>true</b> if register exists, <b>false</b> otherwise.
-	 * @throws IllegalStateException if columns list has not been set for this TableDef
-	 * @throws SQLException
-	 */
-
-	public boolean existsRegister(JDCConnection oConn, String sQueryString) throws SQLException,IllegalStateException {
-		if (null==helper)
-			throw new IllegalStateException("Column list is not set");
-		return helper.existsRegister(oConn, sQueryString);
-	}
-
-	// ---------------------------------------------------------------------------
-
-	/**
-	 * <p>Checks if register exists at this table</p>
-	 * @param oConn Database Connection
-	 * @param sQueryString Register Query String, as a SQL WHERE clause syntax
-	 * @return <b>true</b> if register exists, <b>false</b> otherwise.
-	 * @throws IllegalStateException if columns list has not been set for this TableDef
-	 * @throws SQLException
-	 */
-
-	public boolean existsRegister(JDCConnection oConn, String sQueryString, Object[] oQueryParams) throws SQLException,IllegalStateException {
-		if (null==helper)
-			throw new IllegalStateException("Column list is not set");
-		return helper.existsRegister(oConn, sQueryString, oQueryParams);
-	}
-
-	// ---------------------------------------------------------------------------
-
-	/**
-	 * <p>Checks if register exists at this table</p>
-	 * @param oConn Database Connection
-	 * @param AllValues Map<String,Object>
-	 * @return <b>true</b> if register exists, <b>false</b> otherwise.
-	 * @throws IllegalStateException if columns list has not been set for this TableDef
-	 * @throws SQLException
-	 */
-
-	public boolean existsRegister(JDCConnection oConn, Map<String,Object> AllValues) throws SQLException,IllegalStateException {
-		if (null==helper)
-			throw new IllegalStateException("Column list is not set");
-		return helper.existsRegister(oConn, AllValues);
-	} // existsRegister
-
-
-	public int getRDBMSId(Connection conn) throws SQLException {
-		final String productName = conn.getMetaData().getDatabaseProductName();
-		if (productName.equals(RDBMS.POSTGRESQL.toString()))
-			return RDBMS.POSTGRESQL.intValue();
-		else if (productName.equals(RDBMS.ORACLE.toString()))
-			return RDBMS.ORACLE.intValue();
-		else if (productName.equals(RDBMS.MYSQL.toString()))
-			return RDBMS.MYSQL.intValue();
-		else if (productName.equals(RDBMS.ACCESS.toString()))
-			return RDBMS.ACCESS.intValue();
-		else if (productName.equals(RDBMS.MSSQL.toString()))
-			return RDBMS.MSSQL.intValue();
-		else if (productName.equals(RDBMS.SQLITE.toString()))
-			return RDBMS.SQLITE.intValue();
-		else if (productName.equals(RDBMS.HSQLDB.toString()))
-			return RDBMS.HSQLDB.intValue();
-		else
-			return 0;
-	}
-
-	/**
 	 * <p>Read JDCColumn List from DatabaseMetaData</p>
 	 * @param conn Database Connection
 	 * @param mdata DatabaseMetaData
@@ -370,16 +213,12 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 			DebugFile.writeln("DatabaseMetaData.getColumns(" + getCatalog() + "," + getSchema() + "," + getName() + ",%)");
 		}
 
-		final int iDBMS = getRDBMSId(conn);
-
-		if (DebugFile.trace) DebugFile.writeln("RDBMS code is "+String.valueOf(iDBMS));
-
 		stmt = conn.createStatement();
 
 		try {
 			String ssql;
 
-			if (iDBMS==RDBMS.POSTGRESQL.intValue()) {
+			if (dbms.equals(RDBMS.POSTGRESQL)) {
 				if (getSchema()==null) {
 					ssql = "SELECT * FROM " + getName() + " WHERE 1=0";
 				} else if (getSchema().length()==0) {
@@ -422,14 +261,14 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 
 			columns = new ArrayList<SQLColumn>(ncols);
 
-			if (DebugFile.trace) DebugFile.writeln("table has " + String.valueOf(ncols) + " columns");
+			if (DebugFile.trace) DebugFile.writeln("table " + getName() + " has " + String.valueOf(ncols) + " columns");
 
 			for (int c=1; c<=ncols; c++) {
 				columnName = rdata.getColumnName(c).toLowerCase();
 				typeName = rdata.getColumnTypeName(c);
 				sqlType = (short) rdata.getColumnType(c);
-
-				if (iDBMS==RDBMS.POSTGRESQL.intValue())
+				
+				if (dbms.equals(RDBMS.POSTGRESQL))
 					switch (sqlType) {
 					case Types.CHAR:
 					case Types.VARCHAR:
@@ -450,12 +289,17 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 				autoInc = rdata.isAutoIncrement(c);
 				colPos = c;
 
-				if (RDBMS.ORACLE.intValue()==iDBMS && sqlType==Types.NUMERIC && precision<=6 && digits==0) {
+				if (DebugFile.trace) DebugFile.writeln("reading column "+columnName+" with type name "+typeName+" and SQL type "+sqlType+" precision "+precision+" digits "+digits);
+				
+				if (dbms.equals(RDBMS.ORACLE) && sqlType==Types.NUMERIC && precision<=6 && digits==0) {
 					// Workaround for an Oracle 9i bug witch is unable to convert from Short to NUMERIC but does understand SMALLINT
 					col = new SQLColumn (getName(), columnName, (short) Types.SMALLINT, ColumnDef.typeName(Types.SMALLINT), precision, digits, nullabla, autoInc, colPos-nreadonly);
 				}
 				else {
-					col = new SQLColumn (getName(), columnName, sqlType, ColumnDef.typeName(sqlType), precision, digits, nullabla, autoInc, colPos-nreadonly);
+					String columnTypeName = ColumnDef.typeName(sqlType);
+					if (columnTypeName.equals("OTHER"))
+						columnTypeName = typeName.toUpperCase();
+					col = new SQLColumn (getName(), columnName, sqlType, columnTypeName, precision, digits, nullabla, autoInc, colPos-nreadonly);
 				}
 
 				if (columnName.equals(getCreationTimestampColumnName()))
@@ -472,7 +316,7 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 			stmt.close();
 			stmt = null;
 
-			if (RDBMS.ORACLE.intValue()==iDBMS) /* Oracle */ {
+			if (dbms.equals(RDBMS.ORACLE)) /* Oracle */ {
 
 				stmt = conn.createStatement();
 
@@ -488,10 +332,10 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 				else
 					rset = stmt.executeQuery("SELECT NULL AS TABLE_CAT, COLS.OWNER AS TABLE_SCHEM, COLS.TABLE_NAME, COLS.COLUMN_NAME, COLS.POSITION AS KEY_SEQ, COLS.CONSTRAINT_NAME AS PK_NAME FROM USER_CONS_COLUMNS COLS, USER_CONSTRAINTS CONS WHERE CONS.OWNER=COLS.OWNER AND CONS.CONSTRAINT_NAME=COLS.CONSTRAINT_NAME AND CONS.CONSTRAINT_TYPE='P' AND CONS.OWNER='" + getSchema().toUpperCase() + "' AND CONS.TABLE_NAME='" + getName().toUpperCase()+ "'");
 			}
-			else if (RDBMS.ACCESS.intValue()==iDBMS) { // Microsoft Access
+			else if (dbms.equals(RDBMS.ACCESS)) { // Microsoft Access
 				rset=null;
 			}
-			else if (RDBMS.HSQLDB.intValue()==iDBMS) {
+			else if (dbms.equals(RDBMS.HSQLDB)) {
 				if (DebugFile.trace)
 					DebugFile.writeln("DatabaseMetaData.getPrimaryKeys("+getCatalog()+","+getSchema()+","+getName().toUpperCase()+")");
 				rset = mdata.getPrimaryKeys(getCatalog(), getSchema(), getName().toUpperCase());
@@ -532,8 +376,6 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 		for (SQLColumn jcol : columns)
 			addColumnMetadata(jcol);
 
-		helper = new SQLHelper(dbms, this, getCreationTimestampColumnName());
-
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End SQLTableDef.readCols()");
@@ -561,11 +403,9 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 			DebugFile.incIdent();
 		}
 
-		final int dbms = getRDBMSId(conn);
-
 		try {
 			switch (dbms) {
-			case 1: // MySQL
+			case MYSQL:
 				oStmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 				if (DebugFile.trace)
 					DebugFile.writeln("Statement.executeQuery(SELECT COLUMN_NAME,COLUMN_KEY FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME ='"+getName()+"' AND COLUMN_KEY!='')");
@@ -582,7 +422,7 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 				oStmt.close();
 				oStmt=null;
 				break;
-			case 2: // PostgreSQL
+			case POSTGRESQL:
 				oStmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 				if (DebugFile.trace)
 					DebugFile.writeln("Statement.executeQuery(SELECT indexname,indexdef FROM pg_indexes WHERE tablename='"+getName()+"')");

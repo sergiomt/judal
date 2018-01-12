@@ -11,6 +11,7 @@ import javax.jdo.JDOException;
 import javax.transaction.SystemException;
 
 import org.judal.jdbc.JDBCEngine;
+import org.judal.jdbc.JDBCIndexableView;
 import org.judal.jdbc.JDBCRelationalView;
 
 import org.judal.metadata.JoinDef;
@@ -28,7 +29,6 @@ import org.judal.storage.relational.RelationalDataSource;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.IndexableView;
-import org.judal.storage.table.TableDataSource;
 
 import org.judal.storage.java.test.Job;
 import org.judal.storage.java.test.AdhocMailing;
@@ -104,7 +104,7 @@ public class TestJDBCQuery {
     where.add("gu_mailing", Operator.IN, "k_jobs", "gu_job_group", subselect);
 	
     IndexableView mailingsTbl = dts.openIndexedView(mailingsRec);
-    SQLQuery qry = new SQLQuery(mailingsTbl);
+    SQLQuery qry = new SQLQuery((JDBCIndexableView) mailingsTbl);
 	qry.setResult(adhocCols.getMembers());
 	qry.setRange(0, 100);
     qry.setFilter(where);
@@ -175,7 +175,7 @@ public class TestJDBCQuery {
 		ArrayRecord mailingsRec = new ArrayRecord(dts.getTableDef(AdhocMailing.tableName));
 	    
 	    RelationalView mailingsTbl = dts.openRelationalView(mailingsRec);
-	    SQLQuery qry = new SQLQuery(mailingsTbl);
+	    SQLQuery qry = new SQLQuery((JDBCIndexableView) mailingsTbl);
 	    qry.setFilter(where);
 	    
 	    System.out.println(qry.source());

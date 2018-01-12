@@ -81,6 +81,8 @@ public class StorageObjectFactory extends ObjectFactory {
 	public static <R extends Record> R newRecord(Constructor<R> recordConstructor, Object... constructorParameters) {
 		R retval = null;
 		final int parameterCount = recordConstructor.getParameterCount();
+		if (DebugFile.trace)
+			DebugFile.writeln("StorageObjectFactory.newStored("+recordConstructor.getName()+","+constructorParameters+")");
 		try {
 			if (parameterCount==0)
 				retval = recordConstructor.newInstance();
@@ -105,10 +107,10 @@ public class StorageObjectFactory extends ObjectFactory {
 	@SuppressWarnings("unchecked")
 	public static <R extends Stored> R newStored(Class<R> storedClass, Object... constructorParameters) throws NoSuchMethodException {
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newRecord("+storedClass.getName()+","+constructorParameters+")");
+			DebugFile.writeln("StorageObjectFactory.newStored("+storedClass.getName()+","+constructorParameters+")");
 		Constructor<R> storedConstructor = (Constructor<R>) getConstructor(storedClass, getParameterClasses(constructorParameters));
 		if (null==storedConstructor)
-			throw new NoSuchMethodException("No suitable constructor found for "+storedClass.getName());
+			throw new NoSuchMethodException("StorageObjectFactory.newStored No suitable constructor found for "+storedClass.getName());
 		return newStored(storedConstructor, constructorParameters);
 	}
 
@@ -135,7 +137,7 @@ public class StorageObjectFactory extends ObjectFactory {
 				throw new NoSuchMethodException("StorageObjectFactory.newRecord() No suitable constructor found for "+recordClass.getName());
 			} else {
 				if (DebugFile.trace)
-					DebugFile.writeln("no matching constructor found for "+recordClass.getName()+" using default constructor");				
+					DebugFile.writeln("StorageObjectFactory.newRecord No matching constructor found for "+recordClass.getName()+" using default constructor");				
 			}
 		}
 		return newRecord(recordConstructor, constructorParameters);
@@ -144,6 +146,13 @@ public class StorageObjectFactory extends ObjectFactory {
 	public static <R extends Record> RecordSet<R> newRecordSet(Constructor<RecordSet<R>> recordsetConstructor, Object... constructorParameters) throws NoSuchMethodException {
 		RecordSet<R> retval = null;
 		final int parameterCount = recordsetConstructor.getParameterCount();
+		if (DebugFile.trace) {
+			StringBuilder paramsStr = new StringBuilder();
+			if (constructorParameters!=null && constructorParameters.length>0)
+				for (Object param : constructorParameters)
+					paramsStr.append(",").append(param.getClass().getName());
+			DebugFile.writeln("Begin StorageObjectFactory.newRecordSet(Constructor<RecordSet<"+recordsetConstructor.getName()+">>"+paramsStr.toString()+")");
+		}
 		try {
 			if (parameterCount==0)
 				retval = recordsetConstructor.newInstance();
@@ -154,7 +163,7 @@ public class StorageObjectFactory extends ObjectFactory {
 				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" StorageObjectFactory.newRecordSet(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
 		}
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newRecordSet() : " + retval.getClass().getName());
+			DebugFile.writeln("End StorageObjectFactory.newRecordSet() : " + retval.getClass().getName());
 		return retval;
 		
 	}
@@ -168,6 +177,8 @@ public class StorageObjectFactory extends ObjectFactory {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <R extends Record> RecordSet<R> newRecordSetOf(Class<R> recordClass, Object... constructorParameters) throws NoSuchMethodException {
+		if (DebugFile.trace)
+			DebugFile.writeln("Begin StorageObjectFactory.newRecordSetOf(" + recordClass.getName() + "...)");
 		Constructor<RecordSet<R>> recordsetConstructor;
 		Class<RecordSet<R>> recordsetClass;
 		if (ScalaRecord!=null && recordClass.isAssignableFrom(ScalaRecord))
@@ -194,6 +205,11 @@ public class StorageObjectFactory extends ObjectFactory {
 				constParameters[p+1] = constructorParameters[p];
 		}
 			
-		return newRecordSet(recordsetConstructor, constParameters);
+		RecordSet<R> retval = newRecordSet(recordsetConstructor, constParameters);
+
+		if (DebugFile.trace)
+			DebugFile.writeln("End StorageObjectFactory.newRecordSetOf(" + recordClass.getName() + "...) : " + retval);
+		
+		return retval;
 	}
 }

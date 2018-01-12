@@ -29,6 +29,8 @@ import org.judal.storage.relational.RelationalDataSource;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
 
+import com.knowgate.debug.DebugFile;
+
 /**
  * <p>Base class for relational query wrappers.</p>
  * @author Sergio Montoro Ten
@@ -91,6 +93,7 @@ public abstract class AbstractRelationalQuery<R extends Record> implements Clone
 	 */
 	public AbstractRelationalQuery(RelationalDataSource dts, Class<R> recClass, String alias) throws JDOException {
 		this(dts, recClass);
+		if (DebugFile.trace) DebugFile.writeln("new AbstractRelationalQuery(" + recClass.getName() + "," + alias + ")");
 		if (alias!=null && alias.length()>0) {
 			try {
 				viw.getClass().getMethod("setAlias", String.class).invoke(viw, alias);

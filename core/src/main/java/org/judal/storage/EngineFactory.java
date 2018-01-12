@@ -48,10 +48,22 @@ public class EngineFactory {
 		Class<Engine<? extends DataSource>> engineClass = engines.get(engineName);
 		if (engineClass==null)
 			engines.put(engineName, (Class<Engine<? extends DataSource>>) Class.forName(engineClassName));
-		else if (engineClass.getName().equals(engineClassName))
+		else if (!engineClass.getName().equals(engineClassName))
 			throw new IllegalArgumentException("EngineFactory.registerEngine() Engine " + engineName + " is already registered for class " + engineClassName);
 	}
 	
+	/**
+	 * <p>Deregister Engine.</p>
+	 * @param engineName String Engine name.
+	 * @throws IllegalArgumentException If no Engine is registered with given name.
+	 */
+	public static void deregisterEngine(String engineName) throws IllegalArgumentException{
+		if (engines.containsKey(engineName))
+			engines.remove(engineName);
+		else
+			throw new IllegalArgumentException("EngineFactory.deregisterEngine() Engine " + engineName + " is not registered");
+	}
+
 	/**
 	 * <p>Get implementation for a given named Engine</p>
 	 * @param engineName String

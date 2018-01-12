@@ -38,13 +38,14 @@ import com.knowgate.debug.DebugFile;
 
 public class RecordManager implements AutoCloseable {
 
-	private Properties properties;
-	private Cache<Object, Record> cache;
-	private TableDataSource dataSource;
-	private RecordQueueProducer storageQueue;
+	private final Properties properties;
+	private final Cache<Object, Record> cache;
+	private final TableDataSource dataSource;
+	private final RecordQueueProducer storageQueue;
+	private boolean closed;
 	
-	public RecordManager(TableDataSource dataSource, RecordQueueProducer storageQueue,
-                         Cache<Object, Record> cache, Map<String,String> propsMap) {
+	public RecordManager(final TableDataSource dataSource, final RecordQueueProducer storageQueue,
+                         final Cache<Object, Record> cache, final Map<String,String> propsMap) {
 		this.dataSource = dataSource;
 		this.storageQueue = storageQueue;
 		this.cache = cache;
@@ -52,22 +53,27 @@ public class RecordManager implements AutoCloseable {
 		if (propsMap!=null)
 			for (Map.Entry<String,String> e : propsMap.entrySet())
 				properties.put(e.getKey(), e.getValue());
+		closed = false;
 	}
 
 	public void close() {
 		cache.close();
 		storageQueue.close();
 		dataSource.close();
-		dataSource = null;
+		closed = true;
 	}	
 
 	public void deletePersistent(Object obj) {
+		if (closed)
+			throw new IllegalStateException("RecordManager.deletePersistent() RecordManager has been closed");
 		Record rec = (Record) obj;
 		evict(rec);
 		storageQueue.delete(rec, new String[]{rec.getKey().toString()}, properties);
 	}
 
 	public void updatePersistent(Object obj, Param... params) {
+		if (closed)
+			throw new IllegalStateException("RecordManager.updatePersistent() RecordManager has been closed");
 		Record rec = (Record) obj;
 		evict(rec);
 		TableDef tdef = dataSource.getMetaData().getTable(rec.getTableName());
@@ -83,6 +89,8 @@ public class RecordManager implements AutoCloseable {
 	}
 
 	public void deletePersistentAll(Object... objs) {
+		if (closed)
+			throw new IllegalStateException("RecordManager.deletePersistentAll() RecordManager has been closed");
 		String[] keys = new String[objs.length];
 		for (int k=0; k<objs.length; k++) {
 			Record rec = (Record) objs[k];
@@ -94,6 +102,8 @@ public class RecordManager implements AutoCloseable {
 
 
 	public void deletePersistentAll(@SuppressWarnings("rawtypes") Collection objs) {
+		if (closed)
+			throw new IllegalStateException("RecordManager.deletePersistentAll() RecordManager has been closed");
 		if (objs.size()>0) {
 			String[] keys = new String[objs.size()];
 			int k = 0;
@@ -109,11 +119,17 @@ public class RecordManager implements AutoCloseable {
 
 
 	public void evict(Object rec) {
-		cache.remove(((Record) rec).getKey());
+		if (closed)
+			throw new IllegalStateException("RecordManager.evict() RecordManager has been closed");
+		Object key = ((Record) rec).getKey();
+		if (key!=null)
+			cache.remove(key);
 	}
 
 
 	public void evictAll() {
+		if (closed)
+			throw new IllegalStateException("RecordManager.evictAll() RecordManager has been closed");
 		cache.clear();
 	}
 
@@ -149,25 +165,25 @@ public class RecordManager implements AutoCloseable {
 	}
 
 	public TableDataSource getDataSource() {
-		return dataSource;
+		return closed ?  null : dataSource;
 	}
 
 	public JDOConnection getDataStoreConnection() {
-		return dataSource.getJdoConnection();
+		return closed ?  null : dataSource.getJdoConnection();
 	}
 
 	public boolean getIgnoreCache() {
 		return false;
 	}
 
-
 	public Object getObjectById(Object id) throws JDOUserException {
+		if (closed)
+			throw new IllegalStateException("RecordManager.getObjectById() RecordManager has been closed");
 		Object obj = cache.get(id);
 		if (null==obj)
 			throw new JDOUserException("Object "+id+" not found in cache");
 		return obj;
 	}
-
 
 	public Map<String, Object> getProperties() {
 		HashMap<String, Object> props  = new HashMap<String, Object>();
@@ -176,18 +192,20 @@ public class RecordManager implements AutoCloseable {
 		return Collections.unmodifiableMap(props);
 	}
 
-
 	public Sequence getSequence(String name) {
+		if (closed)
+			throw new IllegalStateException("RecordManager.getSequence() RecordManager has been closed");
 		return dataSource.getSequence(name);
 	}
 
 
 	public boolean isClosed() {
-		return dataSource == null;
+		return closed;
 	}
 
-
 	public <T> T makePersistent(T obj) {
+		if (closed)
+			throw new IllegalStateException("RecordManager.makePersistent() RecordManager has been closed");
 		if (((Record) obj).getKey()==null)
 			throw new NullPointerException("Record key may not be null");
 		evict(obj);
@@ -195,8 +213,20 @@ public class RecordManager implements AutoCloseable {
 		return obj; 
 	}
 
-
 	public <T> T[] makePersistentAll(T... objs) {
+		
+		if (closed)
+			throw new IllegalStateException("RecordManager.makePersistentAll() RecordManager has been closed");
+
+		if (DebugFile.trace) {
+			StringBuilder objClss = new StringBuilder();
+			if (objs!=null)
+				for (T obj : objs)
+					objClss.append(objClss.length()==0 ? "" : ",").append(obj.getClass().getName());
+			DebugFile.writeln("Begin RecordManager.makePersistentAll("+objClss.toString()+")");
+			DebugFile.incIdent();
+		}
+		
 		Record[] recs = new Record[objs.length];
 		int r = 0;
 		for (T obj : objs) {
@@ -204,11 +234,20 @@ public class RecordManager implements AutoCloseable {
 			evict(obj);
 		}
 		storageQueue.store(recs);
+		
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End RecordManager.makePersistentAll()");
+		}
+		
 		return objs;
 	}
 
-
 	public <T> Collection<T> makePersistentAll(Collection<T> objs) {
+
+		if (closed)
+			throw new IllegalStateException("RecordManager.makePersistentAll() RecordManager has been closed");
+		
 		Record[] recs = new Record[objs.size()];
 		int r = 0;
 		for (T obj : objs) {
@@ -222,7 +261,6 @@ public class RecordManager implements AutoCloseable {
 	public Record newInstance(Class<? extends Record> recordClass, String tableName) throws NoSuchMethodException, JDOException {
 		return StorageObjectFactory.newRecord(recordClass, dataSource.getMetaData().getTable(tableName));
 	}
-
 
 	@SuppressWarnings("unchecked")
 	public void refresh(Object obj) {		

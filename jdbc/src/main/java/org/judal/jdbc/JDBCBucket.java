@@ -25,7 +25,8 @@ import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
 import org.judal.jdbc.jdc.JDCConnection;
-import org.judal.jdbc.metadata.SQLHelper;
+import org.judal.jdbc.jdc.JDCDAO;
+import org.judal.jdbc.metadata.SQLBuilder;
 import org.judal.jdbc.metadata.SQLSelectableDef;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.storage.Param;
@@ -55,6 +56,7 @@ import org.judal.storage.table.impl.AbstractRecord;
 public class JDBCBucket extends JDBCBase implements Bucket {
 
 	protected JDBCBucketDataSource dataSource;
+	protected JDCDAO dao;
 	protected SQLTableDef tableDef;
 	protected String alias;
 	protected Class<? extends Stored> candidateClass;
@@ -74,6 +76,7 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 		if (null==tableDef)
 			throw new JDOException("Table "+bucketName+" not found");
 		iterators = null;
+		dao = null;
 	}
 
 	/**
@@ -88,6 +91,24 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 		this.tableDef = tableDef;
 		candidateClass = null;
 		iterators = null;
+		dao = null;
+	}
+
+	/**
+	 * <p>Get data access object for this bucket.</p>
+	 * The DAO may be provided by the DataSource or created once on the fly for each bucket.
+	 * @return JDCDAO
+	 * @throws SQLException
+	 */
+	public JDCDAO getDao() throws SQLException {
+		if (null==dao) {
+			if (dataSource.daos.containsKey(tableDef.getName())) {
+				dao = dataSource.daos.get(tableDef.getName());
+			} else {
+				dao = new JDCDAO(tableDef, new SQLBuilder(dataSource.getDatabaseProductId(), tableDef, null).getSqlStatements());
+			}
+		}
+		return dao;
 	}
 
 	/**
@@ -123,7 +144,8 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 	 */
 	public void setTableDef(SQLSelectableDef proxy) throws JDOException {
 		try {
-			tableDef = new SQLTableDef(RDBMS.valueOf(jdcConn.getDataBaseProduct()), proxy.getName(), proxy.getColumns());
+			
+			tableDef = new SQLTableDef(RDBMS.valueOf(jdcConn.getDataBaseProduct()), proxy.getSchema(), proxy.getCatalog(), proxy.getName(), proxy.getColumns());
 		} catch (SQLException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
@@ -202,9 +224,9 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 		AbstractRecord mapRecord = (AbstractRecord) target;
 		try {
 			if (key.getClass().isArray())
-				found = tableDef.loadRegister(jdcConn, (Object[]) key, mapRecord);
+				found = getDao().loadRegister(jdcConn, (Object[]) key, mapRecord);
 			else
-				found = tableDef.loadRegister(jdcConn, new Object[] { key }, mapRecord);
+				found = getDao().loadRegister(jdcConn, new Object[] { key }, mapRecord);
 		} catch (SQLException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
@@ -234,7 +256,7 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 
 		if (bHasLongVarBinaryData) {
 			try {
-				tableDef.storeRegisterLong(jdcConn, mapRecord, mapRecord.longDataLengths());
+				getDao().storeRegisterLong(jdcConn, mapRecord, mapRecord.longDataLengths());
 			} catch (IOException ioe) {
 				throw new JDOException(ioe.getMessage(), ioe);
 			} catch (SQLException sqle) {
@@ -245,7 +267,7 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 			}
 		} else {
 			try {
-				tableDef.storeRegister(jdcConn, (AbstractRecord) target);
+				getDao().storeRegister(jdcConn, (AbstractRecord) target);
 			} catch (SQLException sqle) {
 				throw new JDOException(sqle.getMessage(), sqle);
 			}
@@ -269,7 +291,7 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 		Object value = key instanceof Param ? ((Param) key).getValue() : key;
 			
 		try {
-			return new SQLHelper(dataSource.getDatabaseProductId(), tableDef, null).existsRegister(jdcConn, " WHERE "+pk.getColumn()+"=?", new Object[] {value});
+			return getDao().existsRegister(jdcConn, " WHERE "+pk.getColumn()+"=?", new Object[] {value});
 		} catch (SQLException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
@@ -302,7 +324,7 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 				keymap.put(colDef.getName(), keyvals[k++]);
 		}
 		try {
-			tableDef.deleteRegister(jdcConn, keymap);
+			getDao().deleteRegister(jdcConn, keymap);
 		} catch (SQLException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
 		}

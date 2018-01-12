@@ -328,6 +328,8 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			}
 			
 			try {
+				if (DebugFile.trace)
+					DebugFile.writeln("XAResource.start("+tid.toString()+","+XAResource.TMJOIN+")");
 				res.start(tid, XAResource.TMJOIN);
 			} catch (XAException xcpt) {
 				throw new SystemException(xcpt.getMessage());
@@ -335,12 +337,15 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			resources.add(res);
 			retval = true;
 		} else {
+			if (DebugFile.trace) {
+				DebugFile.writeln("Warning, DataSourceTransaction resources already contains " + res);
+			}
 			retval = false;
 		}
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.enlistResource()");
+			DebugFile.writeln("End DataSourceTransaction.enlistResource() : " + retval);
 		}
 		
 		return retval;

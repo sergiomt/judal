@@ -43,6 +43,8 @@ import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.impl.AbstractRecord;
+import org.judal.jdbc.jdc.JDCDAO;
+import org.judal.jdbc.metadata.SQLBuilder;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.jdbc.metadata.SQLViewDef;
 
@@ -58,10 +60,10 @@ import static org.judal.storage.query.Operator.LTE;
  */
 public class JDBCIndexableView extends JDBCBase implements IndexableView {
 
-	protected JDBCTableDataSource dataSource;
 	private SQLViewDef viewDef;
-	protected String alias;
-	protected Class<? extends Record> candidateClass;
+	protected JDBCTableDataSource dataSource;
+	protected JDCDAO dao;
+	protected Class<? extends Stored> candidateClass;
 	protected Collection<JDBCIterator> iterators;
 	private Class<? extends Record> recordClass;
 	
@@ -82,6 +84,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			viewDef = ((SQLTableDef) tov).asView();
 		if (null==viewDef)
 			throw new JDOException("JDBCIndexableView Table or View not found "+recordInstance.getTableName());
+		dao = null;
 	}
 
 	/**
@@ -98,14 +101,32 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 		this.viewDef = viewDef;
 		iterators = null;		
 		candidateClass = recordClass = recClass;
+		dao = null;
 	}	
+
+	/**
+	 * <p>Get data access object for this view.</p>
+	 * The DAO may be provided by the DataSource or created once on the fly for each view.
+	 * @return JDCDAO
+	 * @throws SQLException
+	 */
+	public JDCDAO getDao() throws SQLException {
+		if (null==dao) {
+			if (dataSource.daos.containsKey(viewDef.getName())) {
+				dao = dataSource.daos.get(viewDef.getName());
+			} else {
+				dao = new JDCDAO(viewDef, new SQLBuilder(dataSource.getDatabaseProductId(), viewDef, null).getSqlStatements());
+			}			
+		}
+		return dao;
+	}
 
 	/**
 	 * <p>Get view alias.</p>
 	 * @return String
 	 */
 	public String getAlias() {
-		return alias;
+		return getViewDef().getAlias();
 	}
 	
 	/**
@@ -113,7 +134,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	 * @param alias String
 	 */
 	public void setAlias(String alias) {
-		this.alias = alias;
+		getViewDef().setAlias(alias);
 	}
 	
 	/**
@@ -429,14 +450,14 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	protected <R extends Record> RecordSet<R> fetchQuery(AbstractQuery qry)
 		throws JDOException {
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDBCIndexableView.fetch()");
+			DebugFile.writeln("Begin JDBCIndexableView.fetchQuery(AbstractQuery)");
 			DebugFile.incIdent();
 		}
-		qry.setResultClass(recordClass);
+		qry.setResultClass(recordClass, getDataSource().getClass());
 		Object results = qry.execute();
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDBCIndexableView.fetch()");
+			DebugFile.writeln("End JDBCIndexableView.fetchQuery()");
 		}
 		return (RecordSet<R>) results;	
 	} // fetch
@@ -485,9 +506,9 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 				if (viewDef.getPrimaryKeyMetadata().getNumberOfColumns()!=keys.length)
 					throw new JDOException("Expected "+String.valueOf(viewDef.getPrimaryKeyMetadata().getNumberOfColumns())+" key column but got "+String.valueOf(keys.length));
 				StringBuilder queryString = new StringBuilder();
-				bExists = viewDef.existsRegister(jdcConn, queryString.toString(), keys);
+				bExists = getDao().existsRegister(jdcConn, queryString.toString(), keys);
 			} else {
-				bExists = viewDef.existsRegister(jdcConn, viewDef.getPrimaryKeyMetadata().getColumn() + " =?", new Object[]{key});
+				bExists = getDao().existsRegister(jdcConn, viewDef.getPrimaryKeyMetadata().getColumn() + " =?", new Object[]{key});
 			}
 		} catch (SQLException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
@@ -509,9 +530,9 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 		AbstractRecord mapRecord = (AbstractRecord) target;
 		try {
 			if (key.getClass().isArray())
-				found = viewDef.loadRegister(jdcConn, (Object[]) key, mapRecord);
+				found = getDao().loadRegister(jdcConn, (Object[]) key, mapRecord);
 			else
-				found = viewDef.loadRegister(jdcConn, new Object[] { key }, mapRecord);
+				found = getDao().loadRegister(jdcConn, new Object[] { key }, mapRecord);
 		} catch (SQLException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
 		}
@@ -561,8 +582,8 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	/**
 	 * @return Class&lt;Record&gt;
 	 */
-	@Override
 	@SuppressWarnings("unchecked")
+	@Override
 	public Class<Stored> getCandidateClass() {
 		return (Class<Stored>) candidateClass;
 	}

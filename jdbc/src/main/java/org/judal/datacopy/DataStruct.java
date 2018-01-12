@@ -464,7 +464,7 @@ public class DataStruct extends DefaultHandler implements ContentHandler {
         if (DebugFile.trace) DebugFile.writeln ("Column count = " + String.valueOf(iTrCols));
 
         // Preparar las sentencias de lectura
-        if (getRowSet(s).FieldList.compareTo("*")!=0) {
+        if (!"*".equals(getRowSet(s).FieldList)) {
           sSQL = "SELECT " + getRowSet(s).FieldList + " ";
         }
         else {

@@ -1,4 +1,4 @@
-package org.judal.jdbc.metadata;
+package org.judal.jdbc.jdc;
 
 /**
  * © Copyright 2016 the original author.
@@ -36,6 +36,8 @@ import javax.jdo.metadata.ColumnMetadata;
 
 import org.judal.jdbc.RDBMS;
 import org.judal.jdbc.jdc.JDCConnection;
+import org.judal.jdbc.metadata.SQLColumn;
+import org.judal.jdbc.metadata.SQLStatements;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TypeDef;
 import org.judal.storage.table.Record;
@@ -48,158 +50,18 @@ import com.knowgate.debug.DebugFile;
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public class SQLHelper {
+public class JDCDAO {
 
-	private String sqlSelect;
-	private String sqlInsert;
-	private String sqlUpdate;
-	private String sqlDelete;
-	private String sqlExists;
+	private SQLStatements sqlStatements;
 	private TypeDef tdef;
-	private String timestampColumn;
 	
 	// ----------------------------------------------------------
 
-	/**
-	 * @param dbms int Integer code from RDMBS enum
-	 * @param tdef TypeDef
-	 * @param timestampColumn String Name of creation timestamp column. If provided, the value of this column will not be updated after it has been initially set.
-	 * @throws SQLException
-	 */
-	public SQLHelper(int dbms, TypeDef tdef, String timestampColumn) throws SQLException {
+	public JDCDAO(TypeDef tdef, SQLStatements sqlStatements) throws SQLException {
 		this.tdef = tdef;
-		this.timestampColumn= timestampColumn;
-		precomputeSqlStatements(dbms);
+		this.sqlStatements = sqlStatements;
 	}
 
-	// ----------------------------------------------------------
-
-	/**
-	 * @param dbms RDBMS
-	 * @param tdef TypeDef
-	 * @param timestampColumn String Name of creation timestamp column. If provided, the value of this column will not be updated after it has been initially set.
-	 * @throws SQLException
-	 */
-	public SQLHelper(RDBMS dbms, TypeDef tdef, String timestampColumn) throws SQLException {
-		this.tdef = tdef;
-		this.timestampColumn= timestampColumn;
-		precomputeSqlStatements(dbms.intValue());
-	}
-	
-	// ----------------------------------------------------------
-
-	private void precomputeSqlStatements(int dbms) throws SQLException {
-
-		String insertAllCols = "";
-		String getAllCols = "";
-		String setAllCols = "";
-		String setPkCols = "";
-		String setNoPkCols = "";
-
-		if (DebugFile.trace)
-		{
-			DebugFile.writeln("Begin SQLHelper.precomputeSqlStatements([DatabaseMetaData])" );
-			DebugFile.incIdent();
-			DebugFile.writeln("DatabaseMetaData.getColumns(" + tdef.getCatalog() + "," + tdef.getSchema() + "," + tdef.getName() + ",%)");
-		}
-
-
-		for (ColumnDef column : tdef.getColumns()) {
-			String columnName = column.getName();
-
-			if (column.isPrimaryKey())
-				setPkCols += column.getName() + "=? AND ";
-
-			if (dbms==RDBMS.POSTGRESQL.intValue()) {
-				if (((SQLColumn) column).getSqlTypeName().equalsIgnoreCase("geography")) {
-					insertAllCols  += columnName+",";
-					getAllCols  += "ST_X("+columnName+"::geometry)||' '||ST_Y("+columnName+"::geometry) AS "+columnName+",";        	  
-					setAllCols  += "ST_SetSRID(ST_MakePoint(?,?),4326),";
-					setNoPkCols += columnName + "=ST_SetSRID(ST_MakePoint(?,?),4326),";
-				} else if (((SQLColumn) column).getSqlTypeName().equalsIgnoreCase("serial")) {
-					getAllCols += columnName + ",";
-				} else {
-					insertAllCols += columnName + ",";        	 
-					getAllCols += columnName + ",";
-					setAllCols += "?,";
-					if (!column.isPrimaryKey() && !columnName.equalsIgnoreCase(timestampColumn))
-						setNoPkCols += columnName + "=?,";
-				}  
-			} else {
-				if (column.getAutoIncrement()) {
-					getAllCols += columnName + ",";        		
-				} else {
-					insertAllCols += columnName + ",";        	 
-					getAllCols += columnName + ",";
-					setAllCols += "?,";
-					if (!column.isPrimaryKey() && !columnName.equalsIgnoreCase(timestampColumn))
-						setNoPkCols += columnName + "=?,";        		
-				}
-			}
-		} // wend
-
-		if (setPkCols.length()>0)
-			setPkCols = setPkCols.substring(0, setPkCols.length()-5);
-
-		if (DebugFile.trace) DebugFile.writeln("get all cols " + getAllCols );
-
-		if (getAllCols.length()>0)
-			getAllCols = getAllCols.substring(0, getAllCols.length()-1);
-		else
-			getAllCols = "*";
-
-		if (insertAllCols.length()>0)
-			insertAllCols = insertAllCols.substring(0, insertAllCols.length()-1);
-
-		if (DebugFile.trace) DebugFile.writeln("set all cols " + setAllCols );
-
-		if (setAllCols.length()>0)
-			setAllCols = setAllCols.substring(0, setAllCols.length()-1);
-
-		if (DebugFile.trace) DebugFile.writeln("set no pk cols " + setNoPkCols );
-
-		if (setNoPkCols.length()>0)
-			setNoPkCols = setNoPkCols.substring(0, setNoPkCols.length()-1);
-
-		if (DebugFile.trace) DebugFile.writeln("set pk cols " + setPkCols );
-
-		if (setPkCols.length()>0) {
-			sqlSelect = "SELECT " + getAllCols + " FROM " + tdef.getName() + " WHERE " + setPkCols;
-			sqlInsert = "INSERT INTO " + tdef.getName() + "(" + insertAllCols + ") VALUES (" + setAllCols + ")";
-			if (setNoPkCols.length()>0)
-				sqlUpdate = "UPDATE " + tdef.getName() + " SET " + setNoPkCols + " WHERE " + setPkCols;
-			else
-				sqlUpdate = null;
-			sqlDelete = "DELETE FROM " + tdef.getName() + " WHERE " + setPkCols;
-			sqlExists = "SELECT NULL FROM " + tdef.getName() + " WHERE " + setPkCols;
-		}
-		else {
-			sqlSelect = null;
-			sqlInsert = "INSERT INTO " + tdef.getName() + "(" + insertAllCols + ") VALUES (" + setAllCols + ")";
-			sqlUpdate = null;
-			sqlDelete = null;
-			sqlExists = null;
-		}
-
-
-		if (null==sqlSelect) {
-			throw new SQLException("NO PK FOUND!");
-		}
-
-		if (DebugFile.trace)
-		{
-			DebugFile.writeln(sqlSelect!=null ? sqlSelect : "NO SELECT STATEMENT");
-			DebugFile.writeln(sqlInsert!=null ? sqlInsert : "NO INSERT STATEMENT");
-			DebugFile.writeln(sqlUpdate!=null ? sqlUpdate : "NO UPDATE STATEMENT");
-			DebugFile.writeln(sqlDelete!=null ? sqlDelete : "NO DELETE STATEMENT");
-			DebugFile.writeln(sqlExists!=null ? sqlExists : "NO EXISTS STATEMENT");
-
-			DebugFile.decIdent();
-			DebugFile.writeln("End SQLHelper.precomputeSqlStatements()");
-		}
-
-	} // precomputeSqlStatements
-	
 	// ---------------------------------------------------------------------------
 
 	/**
@@ -239,7 +101,7 @@ public class SQLHelper {
 				throw new NullPointerException(tdef.getName() + " cannot retrieve register, value supplied for primary key is NULL.");
 		}
 
-		if (sqlSelect==null) {
+		if (sqlStatements.getSelect()==null) {
 			throw new SQLException("SQLHelper.loadRegister() Primary key not found", "42S12");
 		}
 
@@ -249,10 +111,10 @@ public class SQLHelper {
 
 		try {
 
-			if (DebugFile.trace) DebugFile.writeln("  Connection.prepareStatement(" + sqlSelect + ")");
+			if (DebugFile.trace) DebugFile.writeln("  Connection.prepareStatement(" + sqlStatements.getSelect() + ")");
 
 			// Prepare SELECT sentence for reading
-			oStmt = oConn.prepareStatement(sqlSelect);
+			oStmt = oConn.prepareStatement(sqlStatements.getSelect());
 
 			// Bind primary key values
 			for (int p=0; p<tdef.getPrimaryKeyMetadata().getNumberOfColumns(); p++) {
@@ -349,10 +211,10 @@ public class SQLHelper {
 		}
 
 		try {
-			if (null!=sqlUpdate) {
-				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlUpdate + ")");
+			if (null!=sqlStatements.getUpdate()) {
+				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getUpdate() + ")");
 
-				sSQL = sqlUpdate;
+				sSQL = sqlStatements.getUpdate();
 
 				oStmt = oConn.prepareStatement(sSQL);
 
@@ -369,7 +231,7 @@ public class SQLHelper {
 						}
 
 					if (!isPkCol &&
-						(sCol.compareTo(timestampColumn)!=0) &&
+						(!sCol.equals(sqlStatements.getTimestampColumn())) &&
 						!oCol.getAutoIncrement()) {
 
 						if (DebugFile.trace) {
@@ -426,11 +288,11 @@ public class SQLHelper {
 			if (iAffected<=0) {
 				bNewRow = true;
 
-				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlInsert + ")");
+				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getInsert() + ")");
 
-				sSQL = sqlInsert;
+				sSQL = sqlStatements.getInsert();
 
-				oStmt = oConn.prepareStatement(sqlInsert);
+				oStmt = oConn.prepareStatement(sqlStatements.getInsert());
 
 				c = 1;
 
@@ -520,11 +382,11 @@ public class SQLHelper {
 
 		oStreams  = new LinkedList<InputStream>();
 
-		if (null!=sqlUpdate) {
+		if (null!=sqlStatements.getUpdate()) {
 
-			if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlUpdate + ")");
+			if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getUpdate() + ")");
 
-			oStmt = oConn.prepareStatement(sqlUpdate);
+			oStmt = oConn.prepareStatement(sqlStatements.getUpdate());
 
 			try { if (oConn.getDataBaseProduct()!=RDBMS.POSTGRESQL.intValue()) oStmt.setQueryTimeout(20); } catch (SQLException sqle) { if (DebugFile.trace) DebugFile.writeln("Error at PreparedStatement.setQueryTimeout(20)" + sqle.getMessage()); }
 
@@ -540,7 +402,7 @@ public class SQLHelper {
 					}
 				
 				if (!isPkCol &&
-					(!sCol.equalsIgnoreCase(timestampColumn)) &&
+					(!sCol.equalsIgnoreCase(sqlStatements.getTimestampColumn())) &&
 					!oCol.getAutoIncrement()) {
 
 					if (DebugFile.trace) {
@@ -638,9 +500,9 @@ public class SQLHelper {
 		{
 			bNewRow = true;
 
-			if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlInsert + ")");
+			if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getInsert() + ")");
 
-			oStmt = oConn.prepareStatement(sqlInsert);
+			oStmt = oConn.prepareStatement(sqlStatements.getInsert());
 
 			c = 1;
 			for (ColumnDef oCol : tdef.getColumns()) {
@@ -654,7 +516,7 @@ public class SQLHelper {
 						else
 							DebugFile.writeln("Binding " + sCol + "=NULL");
 					}
-					short cType = ((SQLColumn)oCol).getSqlType();
+					short cType = ((SQLColumn) oCol).getSqlType();
 					if (cType==java.sql.Types.LONGVARCHAR ||
 							cType==java.sql.Types.CLOB ||
 							cType==java.sql.Types.BINARY ||
@@ -758,15 +620,15 @@ public class SQLHelper {
 			DebugFile.incIdent();
 		}
 
-		if (sqlDelete==null) {
+		if (sqlStatements.getDelete()==null) {
 			throw new SQLException("SQLHelper.deleteRegister() Primary key not found", "42S12");
 		}
 
 		// Begin SQLException
 
-		if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlDelete + ")");
+		if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getDelete() + ")");
 
-		oStmt = oConn.prepareStatement(sqlDelete);
+		oStmt = oConn.prepareStatement(sqlStatements.getDelete());
 
 		c = 1;
 
@@ -885,7 +747,7 @@ public class SQLHelper {
 			DebugFile.incIdent();
 		}
 
-		oStmt = oConn.prepareStatement(sqlExists, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		oStmt = oConn.prepareStatement(sqlStatements.getExists(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
 		c = 1;
 		while (c<=tdef.getPrimaryKeyMetadata().getNumberOfColumns()) {
@@ -908,5 +770,5 @@ public class SQLHelper {
 
 		return bExists;
 	} // existsRegister
-	
+
 }

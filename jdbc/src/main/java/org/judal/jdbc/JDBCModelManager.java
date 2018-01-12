@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import com.knowgate.debug.DebugFile;
 
 import org.judal.jdbc.jdc.JDCConnection;
+import org.judal.jdbc.metadata.SQLTableDef;
 
 
 /**
@@ -1131,7 +1132,7 @@ public abstract class JDBCModelManager {
 		sColumns = "";
 
 		for (int c=1; c<=iCols; c++) {
-			if (!oMDat.getColumnName(c).equalsIgnoreCase("dt_created")) {
+			if (!oMDat.getColumnName(c).equalsIgnoreCase(SQLTableDef.DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME)) {
 				if (c!=1) sColumns += ",";
 				sColumns += oMDat.getColumnName(c);
 			}
@@ -1146,7 +1147,7 @@ public abstract class JDBCModelManager {
 
 			for (int c=1; c<=iCols; c++) {
 
-				if (!oMDat.getColumnName(c).equalsIgnoreCase("dt_created")) {
+				if (!oMDat.getColumnName(c).equalsIgnoreCase(SQLTableDef.DEFAULT_CREATION_TIMESTAMP_COLUMN_NAME)) {
 
 					if (c!=1) oWriter.write(byComma);
 

@@ -38,9 +38,9 @@ import org.judal.storage.StorageObjectFactory;
  */
 public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 
-	protected Constructor<? extends Record> recordConstructor;
+	protected Constructor<? extends Stored> recordConstructor;
 	protected SelectableDef tableDef;
-	private Class<? extends Record> resultClass;
+	private Class<? extends Stored> resultClass;
 	private Statement stmt;
 	private ResultSet rset;
 	private Record nextRow;
@@ -57,7 +57,7 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 	 * @throws NullPointerException if resultClass or stmt or rset are null
 	 */
 	@SuppressWarnings("unchecked")
-	public JDBCIterator(Class<? extends Record> resultClass, SelectableDef tableDef, PreparedStatement stmt, ResultSet rset)
+	public JDBCIterator(Class<? extends Stored> resultClass, SelectableDef tableDef, PreparedStatement stmt, ResultSet rset)
 		throws NoSuchMethodException, SecurityException, NullPointerException {
 
 		if (null==resultClass)
@@ -73,7 +73,7 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 		this.rset = rset;
 		this.nextRow = null;
 		this.resultClass = resultClass;
-		this.recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(resultClass, new Class<?>[]{tableDef.getClass()});
+		this.recordConstructor = (Constructor<? extends Stored>) StorageObjectFactory.getConstructor(resultClass, new Class<?>[]{tableDef.getClass()});
 		this.isNext = null;
 
 		try {
@@ -105,10 +105,10 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 			if (retval) {
 				switch (recordConstructor.getParameterCount()) {
 					case 0:
-						nextRow = recordConstructor.newInstance();
+						nextRow = (Record) recordConstructor.newInstance();
 						break;
 					case 1:
-						nextRow = recordConstructor.newInstance(tableDef);
+						nextRow = (Record) recordConstructor.newInstance(tableDef);
 						break;
 					default:
 						throw new JDOException("Cannot instantiate "+resultClass.getName()+" from "+tableDef.getClass().getName());
