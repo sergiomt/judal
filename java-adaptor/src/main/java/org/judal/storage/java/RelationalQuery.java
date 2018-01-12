@@ -73,7 +73,7 @@ public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R
 		if (qry.getRangeFromIncl()==0l && qry.getRangeToExcl()==1l) {
 			qry1 = qry;
 		} else {
-			qry1= qry.clone();
+			qry1 = qry.clone();
 			qry.setRange(0l, 1l);
 		}			
 		rst = viw.fetch(qry1);

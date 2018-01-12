@@ -4,6 +4,7 @@ import javax.jdo.JDOException
 
 import org.judal.storage.EngineFactory
 import org.judal.storage.StorageObjectFactory
+import org.judal.storage.query.AbstractQuery
 import org.judal.storage.query.relational.AbstractRelationalQuery
 import org.judal.storage.table.Record
 import org.judal.storage.table.RecordSet
@@ -24,14 +25,13 @@ class RelationalQuery[R >: Null <: Record](dts: RelationalDataSource , recClass:
 	  viw = dts.openRelationalView(rec)
 	  if (alias!=null && alias.length()>0)
 		  viw.getClass().getMethod("setAlias", classOf[String]).invoke(viw, alias)
-		qry = viw.newQuery()
-		prd = qry.newPredicate()
+		qry = viw.newQuery
+		prd = qry.newPredicate
 	}
 	
 	def this(rec: R, alias: String) = this(EngineFactory.getDefaultRelationalDataSource, rec, alias)
 
-	def this(rec: R) =
-		this(rec, null)
+	def this(rec: R) = this(rec, null)
 	
 	def this(dts: RelationalDataSource, rec: R) = this(dts, rec, null);
   
@@ -56,6 +56,19 @@ class RelationalQuery[R >: Null <: Record](dts: RelationalDataSource , recClass:
 	def fetchWithMap(params: scala.collection.mutable.LinkedHashMap[String,AnyRef]) = {
 	  qry.declareParameters(params.keysIterator.mkString(","))
 		qry.executeWithArray(params.values.toSeq:_*).asInstanceOf[RecordSet[R]].asScala
+	}
+
+	def fetchFirst() : R = {
+		var rst : RecordSet[R] = null
+	  qry.setFilter(prd)
+		if (qry.getRangeFromIncl==0l && qry.getRangeToExcl==1l) {
+		  rst = viw.fetch(qry)
+		} else {
+		  val q1 = clone
+		  q1.setRange(0l, 1l)
+		  rst = viw.fetch(q1.qry)
+		}			
+		  if (rst.isEmpty()) null else rst.get(0)
 	}
 	
 }
