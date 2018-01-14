@@ -6,6 +6,7 @@
   <version>1.0</version>
   <packaging>jar</packaging>
   <name>judal-jdbc</name>
+  <description>Java Universal Data Access - JDBC Implementation</description>
   <url>http://maven.apache.org</url>
   <licenses>
     <license>
