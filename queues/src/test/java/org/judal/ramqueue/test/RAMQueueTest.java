@@ -18,6 +18,7 @@ import java.util.Map;
 
 import javax.jdo.JDOException;
 
+import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
 import org.judal.storage.Param;
 import org.judal.storage.Param.Direction;
@@ -25,17 +26,15 @@ import org.judal.storage.table.Table;
 import org.judal.storage.table.TableDataSource;
 import org.judal.ramqueue.RAMQueueProducer;
 
-import static org.junit.Assert.assertTrue;
-
 public class RAMQueueTest {
 
 	private static Map<String,String> properties;
 	
-	@BeforeClass
+	// @BeforeClass
 	public static void init() throws IOException, ClassNotFoundException {
 		InputStream inStrm = RAMQueueTest.class.getResourceAsStream("datasource.properties");
 		properties = Env.getDataSourceProperties(inStrm, "test");
-		Class.forName(properties.get("driver"));
+		Class.forName(properties.get(DataSource.DRIVER));
 		EngineFactory.registerEngine("JDBC", "org.judal.jdbc.JDBCEngine");
 	}
 

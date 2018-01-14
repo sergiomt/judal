@@ -222,7 +222,7 @@ public class RAMQueueProducer implements RecordQueueProducer {
 	/**
 	 * <p>Perform asynchronous store operation.</p>
 	 * A store operation will update the given Records if they already exist or insert it if no previous records with the same primary key exist.
-	 * @param oRec Record[] Instances of a Record subclass
+	 * @param aRecs Record[] Instances of a Record subclass
 	 * @throws IllegalStateException if the queue is closed
 	 * @throws JDOException
 	 */
@@ -254,7 +254,7 @@ public class RAMQueueProducer implements RecordQueueProducer {
 	/**
 	 * <p>Perform synchronous or asynchronous store operation.</p>
 	 * A store operation will update the given Records if they already exist or insert it if no previous records with the same primary key exist.
-	 * @param oRec Record[] Instances of a Record subclass
+	 * @param aRecs Record[] Instances of a Record subclass
 	 * @param oProps Properties If property "synchronous" is set to "true" then the operation will be performed synchronously using the current thread
 	 * otherwise the store operation will be sent to the RAMQueueConsumer queue.
 	 * @throws IllegalStateException if the queue is closed
