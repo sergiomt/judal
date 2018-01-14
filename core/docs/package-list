@@ -1,5 +1,6 @@
 org.judal.metadata
 org.judal.metadata.bind
+org.judal.serialization
 org.judal.storage
 org.judal.storage.keyvalue
 org.judal.storage.query
