@@ -170,7 +170,7 @@ public class PostgreSQLFieldHelper implements FieldHelper {
 	/**
 	 * <p>Get value of an HStore field<p>
 	 * This method is only supported for PostgreSQL HStore fields
-	 * @param sKey JavaRecord Record instance
+	 * @param oRec JavaRecord Record instance
 	 * @param sKey String Field Name
 	 * @return Field value or <b>null</b>.
 	 * @throws ClassNotFoundException 

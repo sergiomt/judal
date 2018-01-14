@@ -400,8 +400,9 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 
 	/**
 	 * 
-	 * @colpos int [1..columnCount()]
-	 * @obj Object
+	 * @param colpos int [1..columnCount()]
+	 * @param obj Object
+	 * @return Former value of field
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
 	@Override
