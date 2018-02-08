@@ -44,7 +44,6 @@ import com.knowgate.debug.DebugFile;
 * <p>This class is used for creating a RDBMS data model from SQL scripts.</p>
 * @author Sergio Montoro ten
 */
-
 public abstract class SQLModelManager {
 
 private static final String VERSION = "8.0.0";
@@ -584,7 +583,7 @@ private boolean isDoubleQuote(StringBuffer oBuffer, int iLen, int iPos) {
     bRetVal = false;
   else
   	bRetVal = (oBuffer.charAt(++iPos)==(char)39);    
-	if (DebugFile.trace) DebugFile.writeln("found double quoute at position "+String.valueOf(iPos));
+	// if (DebugFile.trace) DebugFile.writeln("found double quoute at position "+String.valueOf(iPos));
 	return bRetVal;
 } // isDoubleQuote
 

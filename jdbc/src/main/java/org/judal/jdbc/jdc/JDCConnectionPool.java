@@ -39,6 +39,7 @@ import javax.jdo.JDOException;
 import com.knowgate.debug.Chronometer;
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;
+
 import org.judal.storage.Env;
 import org.judal.storage.table.TableDataSource;
 
@@ -120,15 +121,15 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 			Long iRefCount = new Long(((Long) callers.get(sCaller)).longValue()+iAction);
 			callers.remove(sCaller);
 			callers.put(sCaller, iRefCount);
-			DebugFile.writeln("  " + sCaller + " reference count is " + iRefCount.toString());
+			DebugFile.writeln(sCaller + " reference count is " + iRefCount.toString());
 		}
 		else {
 			if (1==iAction) {
 				callers.put(sCaller, new Long(1l));
-				DebugFile.writeln("  " + sCaller + " reference count is 1");
+				DebugFile.writeln(sCaller + " reference count is 1");
 			}
 			else {
-				DebugFile.writeln("  ERROR: JDCConnectionPool get/close connection mismatch for " + sCaller);
+				DebugFile.writeln("ERROR: JDCConnectionPool get/close connection mismatch for " + sCaller);
 			}
 		}
 	} // modifyMap
@@ -353,7 +354,6 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 		catch (SQLException e) {
 			bClosed = false;
 
-			
 			if (errorlog.size()>100) errorlog.poll();
 			
 			errorlog.add(new Date().toString() + " " + sCaller + " Connection.close() " + e.getMessage());
@@ -387,9 +387,9 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 		while((connlist != null) && (connlist.hasMoreElements())) {
 			conn = (JDCConnection) connlist.nextElement();
 
-			// Remove each connection that is not in use or
-			// is stalled for more than maximum usage timeout (default 10 mins)
-			if (!conn.inUse())
+			// Remove each connection that is not in use and not participating in a transaction
+			// or is stalled for more than maximum usage timeout (default 10 mins)
+			if (!conn.inUse() && !conn.isStarted())
 				disposeConnection(conn);
 			else if (stale>conn.getLastUse()) {
 				if (DebugFile.trace) DebugFile.writeln("Connection "+conn.getName()+" was staled since "+new Date(conn.getLastUse()).toString());
@@ -495,6 +495,91 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 
 	// ---------------------------------------------------------
 
+	private JDCConnection leaseExistingConnection(String sCaller) {
+		final int s = connections.size();
+		final long tid = Thread.currentThread().getId();
+		if (DebugFile.trace) {
+			StringBuilder pcnns = new StringBuilder();
+			pcnns.append("Pooled connections for " + sCaller + " [");
+			for (int i = 0; i < s; i++) {
+				JDCConnection j = (JDCConnection) connections.elementAt(i);
+				boolean closed = true;
+				try {
+					closed = j.isClosed();
+				} catch (SQLException e) { }
+				if (i>0) pcnns.append(",");
+				pcnns.append("{").append(j.getId()).append(" : ").append(j.isStarted() ? "started" : "not started").append(" ").append(j.inUse() ? "in use" : "not in use").append(" ").append(closed ? "closed" : "open").append("}");
+			}
+			pcnns.append("]");
+			DebugFile.writeln(pcnns.toString());
+		}
+		for (int i = 0; i < s; i++) {
+			JDCConnection j = (JDCConnection) connections.elementAt(i);
+			if (j.isStarted() && j.getThreadId()==tid) {
+				if (j.lease(sCaller)) {
+					if (DebugFile.trace) DebugFile.writeln("leaseExistingConnection(" + sCaller + ") cid=" + j.getId() + " " + (j.isStarted() ? "started" : "not started") + " for thread " + j.getThreadId());
+					return j;
+				}
+			}
+		}
+		for (int i = 0; i < s; i++) {
+			JDCConnection j = (JDCConnection) connections.elementAt(i);
+			if (j.getThreadId()==-1l) {
+				if (j.lease(sCaller)) {
+					if (DebugFile.trace) DebugFile.writeln("leaseExistingConnection(" + sCaller + ") cid=" + j.getId() + " " + (j.isStarted() ? "started" : "not started") + " for thread " + j.getThreadId());
+					return j;
+				}
+			}
+		}
+		return null;
+	}
+
+    // ---------------------------------------------------------
+
+	private JDCConnection leaseNewConnection(String sCaller) throws SQLException {
+		JDCConnection j;
+		Connection c;
+
+		if (openconns==hardlimit) {
+			if (DebugFile.trace) DebugFile.decIdent();
+			throw new SQLException ("Maximum number of " + String.valueOf(hardlimit) + " concurrent connections exceeded","08004");
+		}
+
+		if (DebugFile.trace) DebugFile.writeln("  DriverManager.getConnection(" + url + ", ...)");
+
+		if (user==null && password==null)
+			c = DriverManager.getConnection(url);
+		else
+			c = DriverManager.getConnection(url, user, password);
+
+		if (null!=c) {
+			j = new JDCConnection(c, this);
+			j.lease(sCaller);
+
+			if (DebugFile.trace) {
+				DebugFile.writeln("  JDCConnectionPool miss for (" + url + ", ...)");
+				DebugFile.writeln("  Vector<JDCConnection>.addElement("+j+")");
+			}
+
+			connections.addElement(j);
+			c = null;
+
+			if (DebugFile.trace) DebugFile.writeln("leaseNewConnection " + j.getId() +  " " + (j.isStarted()? "started" : "not started"));
+
+		} else {
+
+			if (DebugFile.trace) DebugFile.writeln("JDCConnectionPool.getConnection() DriverManager.getConnection() returned null value");
+			j = null;
+
+		}
+
+		if (null!=j) openconns++;
+		
+		return j;
+	}
+
+	// ---------------------------------------------------------
+
 	/**
 	 * Get a connection from the pool
 	 * @param sCaller This is just an information parameter used for open/closed
@@ -508,7 +593,6 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 
 	public synchronized JDCConnection getConnection(String sCaller) throws SQLException {
 
-		int i, s;
 		JDCConnection j;
 		Connection c;
 		Chronometer oChn = null;
@@ -517,6 +601,7 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 			oChn = new Chronometer();
 			DebugFile.writeln("Begin JDCConnectionPool.getConnection(" + (sCaller!=null ? sCaller : "") + ")");
 			DebugFile.incIdent();
+			DebugFile.writeln("Thread Id = " + Thread.currentThread().getId());
 		}
 
 		if (hardlimit==0) {
@@ -531,57 +616,10 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 
 		} else {
 
-			j = null;
+			j = leaseExistingConnection(sCaller);
 
-			s = connections.size();
-			
-			if (DebugFile.trace) DebugFile.writeln("there are "+String.valueOf(s)+" pooled connections");
-				
-			for (i = 0; i < s; i++) {
-				j = (JDCConnection) connections.elementAt(i);
-				if (j.lease(sCaller)) {
-					if (DebugFile.trace)
-						DebugFile.writeln("  JDCConnectionPool hit for (" + url + ", ...) on pooled connection #" + String.valueOf(i));
-					break;
-				}
-				else
-					j = null;
-			} // endfor
-
-			if (null==j) {
-				if (openconns==hardlimit) {
-					if (DebugFile.trace) DebugFile.decIdent();
-					throw new SQLException ("Maximum number of " + String.valueOf(hardlimit) + " concurrent connections exceeded","08004");
-				}
-
-				if (DebugFile.trace) DebugFile.writeln("  DriverManager.getConnection(" + url + ", ...)");
-
-				if (user==null && password==null)
-					c = DriverManager.getConnection(url);
-				else
-					c = DriverManager.getConnection(url, user, password);
-
-				if (null!=c) {
-					j = new JDCConnection(c, this);
-					j.lease(sCaller);
-
-					if (DebugFile.trace) {
-						DebugFile.writeln("  JDCConnectionPool miss for (" + url + ", ...)");
-						DebugFile.writeln("  Vector<JDCConnection>.addElement("+j+")");
-					}
-
-					connections.addElement(j);
-					c = null;
-
-				} else {
-
-					if (DebugFile.trace) DebugFile.writeln("JDCConnectionPool.getConnection() DriverManager.getConnection() returned null value");
-					j = null;
-
-				}
-
-				if (null!=j) openconns++;
-			} // endif (null==j)
+			if (null==j)
+				j = leaseNewConnection(sCaller);
 
 			if (DebugFile.trace ) {
 				if (sCaller!=null) modifyMap(sCaller, 1);
@@ -589,9 +627,9 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 		} // fi (hardlimit==0)
 
 		if (DebugFile.trace ) {
-			DebugFile.writeln("connection got in "+String.valueOf(oChn.stop())+" ms");
+			DebugFile.writeln("got " + (j.isStarted() ? "started" : "not started") + " connection in "+String.valueOf(oChn.stop())+" ms");
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCConnectionPool.getConnection() : "+j);
+			DebugFile.writeln("End JDCConnectionPool.getConnection() : " + j.getId());
 		} // DebugFile()
 
 		return j;
@@ -674,9 +712,10 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 
 	public synchronized void returnConnection(JDCConnection conn) {
 		if (DebugFile.trace) {
-			DebugFile.writeln("JDCConnectionPool.returnConnection(["+conn+"])");
-			if (!connections.contains(conn)) DebugFile.writeln("Warning: JDCConnection "+conn+" "+(conn.getName()==null ? "" : conn.getName())+" is not pooled");
-			DebugFile.writeln("JDCConnection.expireLease()");
+			DebugFile.writeln("JDCConnectionPool.returnConnection(["+conn.getId()+"])");
+			if (!connections.contains(conn))
+				DebugFile.writeln("Warning: JDCConnection "+conn.getId()+" "+(conn.getName()==null ? "" : conn.getName())+" is not pooled");
+			DebugFile.writeln("JDCConnection.expireLease() on connection " + conn.getId() + (conn.getThreadId()==-1l ? "" : " for thread " + conn.getThreadId()));
 		}
 		
 		conn.expireLease();
@@ -699,9 +738,10 @@ public class JDCConnectionPool implements ConnectionPoolDataSource {
 	public synchronized void returnConnection(JDCConnection conn, String sCaller) {
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("JDCConnectionPool.returnConnection(["+conn+"], "+sCaller+")");
-			if (!connections.contains(conn)) DebugFile.writeln("Warning: JDCConnection "+conn+" "+sCaller+" is not pooled");
-			DebugFile.writeln("JDCConnection.expireLease()");
+			DebugFile.writeln("JDCConnectionPool.returnConnection(["+conn.getId()+"], "+sCaller+")");
+			if (!connections.contains(conn))
+				DebugFile.writeln("Warning: JDCConnection "+conn.getId()+" "+sCaller+" is not pooled");
+			DebugFile.writeln("JDCConnection.expireLease()  on connection " + conn.getId() + (conn.getThreadId()==-1l ? "" : " for thread " + conn.getThreadId()));
 		}
 		
 		conn.expireLease();

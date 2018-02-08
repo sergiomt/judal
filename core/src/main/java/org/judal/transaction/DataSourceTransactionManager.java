@@ -76,12 +76,36 @@ public class DataSourceTransactionManager implements TransactionManager {
 	}
 
 	private void requireTransaction(String action) throws IllegalStateException, SystemException {
-		if (threadTransaction.get()==null)
+		final Transaction trn = threadTransaction.get();
+		if (trn==null) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("There is no active transaction to " + action);
+				DebugFile.decIdent();
+			}
 			throw new IllegalStateException("There is no active transaction to " + action);
-		else if (threadTransaction.get().getStatus()==Status.STATUS_NO_TRANSACTION || 
-				 threadTransaction.get().getStatus()==Status.STATUS_COMMITTED ||
-				 threadTransaction.get().getStatus()==Status.STATUS_ROLLEDBACK)
-			throw new IllegalStateException("There is no active transaction to " + action);
+		}
+		else {
+			switch (trn.getStatus()) {
+				case Status.STATUS_NO_TRANSACTION:
+					if (DebugFile.trace) {
+						DebugFile.writeln("Can't " + action + "transaction with status no transaction");
+						DebugFile.decIdent();
+					}
+					throw new IllegalStateException("Can't " + action + "transaction with status no transaction");
+				case Status.STATUS_COMMITTED:
+					if (DebugFile.trace) {
+						DebugFile.writeln("Can't " + action + "transaction with status comitted");
+						DebugFile.decIdent();
+					}
+					throw new IllegalStateException("Can't " + action + "transaction with status comitted");
+				case Status.STATUS_ROLLEDBACK:
+					if (DebugFile.trace) {
+						DebugFile.writeln("Can't " + action + "transaction with status rolled back");
+						DebugFile.decIdent();
+					}
+					throw new IllegalStateException("Can't " + action + "transaction with status comitted");
+			}
+		}
 	}
 
 	/**
@@ -188,8 +212,13 @@ public class DataSourceTransactionManager implements TransactionManager {
 		}
 
 		requireTransaction("rollback");
-		if (getStatus()==Status.STATUS_COMMITTING)
-			throw new IllegalStateException("Cannot rollback a transaction while it's committing");
+		if (getStatus()==Status.STATUS_COMMITTING) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("Cannot rollback transaction while it's committing");
+				DebugFile.decIdent();
+			}			
+			throw new IllegalStateException("Cannot rollback transaction while it's committing");
+		}
 		getTransaction().rollback();
 		setNewTransaction();
 
@@ -235,4 +264,12 @@ public class DataSourceTransactionManager implements TransactionManager {
 		return suspended;
 	}
 
+	/**
+	 * <p>Delete reference to the ThreadLocal transaction.</p>
+	 * This method is intended only for clean up after an exception.
+	 * Do not call it while a transaction in ongoing.
+	 */
+	public void reset() {
+		threadTransaction.set(null);		
+	}
 }

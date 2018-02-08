@@ -45,6 +45,7 @@ import javax.jdo.datastore.Sequence;
 
 import javax.transaction.Status;
 import javax.transaction.SystemException;
+import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.judal.jdbc.hsql.HsqlSequenceGenerator;
@@ -65,6 +66,7 @@ import org.judal.metadata.bind.JdoPackageMetadata;
 import org.judal.metadata.bind.JdoXmlMetadata;
 import org.judal.storage.Env;
 import org.judal.storage.Param;
+import org.judal.transaction.TransactionalResource;
 import org.judal.storage.DataSource;
 
 import com.knowgate.debug.DebugFile;
@@ -216,16 +218,20 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		try {
 			if (getTransactionManager()==null)
 				return false;
-			else if (getTransactionManager().getTransaction()==null)
-				return false;
 			else {
-				final int status = getTransactionManager().getTransaction().getStatus();				
-				if (DebugFile.trace)
-					DebugFile.writeln("JDBCBucketDataSource.inTransaction() transaction status is " + String.valueOf(status));
-				if (status==Status.STATUS_UNKNOWN)
-					throw new JDOException("Transaction status is unknown");
-				return status!=Status.STATUS_NO_TRANSACTION && status!=Status.STATUS_COMMITTED && status!=Status.STATUS_ROLLEDBACK;
-			}
+				final Transaction trn = getTransactionManager().getTransaction();
+				if (trn==null)
+					return false;
+				else {
+				
+					final int status = trn.getStatus();				
+					if (DebugFile.trace)
+						DebugFile.writeln("JDBCDataSource.inTransaction() transaction " + trn.toString() + " status is " + TransactionalResource.getStatusAsString(status));
+					if (status==Status.STATUS_UNKNOWN)
+						throw new JDOException("Transaction status is unknown");
+					return status!=Status.STATUS_NO_TRANSACTION && status!=Status.STATUS_COMMITTED && status!=Status.STATUS_ROLLEDBACK;
+				}				
+			}				
 		} catch (SystemException e) {
 			throw new JDOException(e.getMessage(), e);
 		}
@@ -298,7 +304,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	// ----------------------------------------------------------
 
 	/**
-	 * <p>Get a property representing a file path from the .CNF file for this DBBind.</p>
+	 * <p>Get a property representing a file path from the .CNF file for this JDBCDataSource.</p>
 	 * @param sVarName Property Name
 	 * @return Value of property or <b>null</b> if no property with such name was found.
 	 */
@@ -960,7 +966,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		JDCConnection oConn;
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DBBind.getConnection(" + sCaller + ")");
+			DebugFile.writeln("Begin JDBCDataSource.getConnection(" + sCaller + ")");
 			DebugFile.incIdent();
 		}
 
@@ -988,7 +994,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		if (DebugFile.trace) {
 			if (oConn!=null) DebugFile.writeln("Connection process id. is " + oConn.pid());
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBBind.getConnection(" + sCaller + ") : " + (null==oConn ? "null" : "[Connection]") );
+			DebugFile.writeln("End JDBCDataSource.getConnection(" + sCaller + ") : " + (null==oConn ? "null" : oConn.getId()) );
 		}
 
 		return oConn;
@@ -1027,7 +1033,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		Connection oConn;
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DBBind.getConnection(" + sUser + ", ...)");
+			DebugFile.writeln("Begin JDBCDataSource.getConnection(" + sUser + ", ...)");
 			DebugFile.incIdent();
 
 			if (null!=connectXcpt) {
@@ -1052,7 +1058,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBBind.getConnection() : " + (null==oConn ? "null" : "[Connection]") );
+			DebugFile.writeln("End JDBCDataSource.getConnection() : " + (null==oConn ? "null" : "[Connection]") );
 		}
 
 		return (Connection) new JDCConnection(oConn, null);

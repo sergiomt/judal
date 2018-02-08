@@ -37,7 +37,7 @@ import com.knowgate.gis.LatLong;
 
 import org.judal.jdbc.HStore;
 import org.judal.jdbc.RDBMS;
-
+import org.judal.metadata.ColumnDef;
 import org.judal.transaction.TransactionalResource;
 
 
@@ -66,6 +66,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	private int dbms;
 	private String schema;
 	private String name;
+	private long thid;
 
 	private Connection conn;	
 	private JDCConnectionPool pool;
@@ -96,6 +97,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		this.timestamp=0;
 		this.name = null;
 		this.schema=schemaname;
+		this.thid = -1l;
 		listeners = new LinkedList<ConnectionEventListener>();
 	}
 
@@ -113,6 +115,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		this.timestamp=0;
 		this.name = null;
 		this.schema=null;
+		this.thid = -1l;
 		listeners = new LinkedList<ConnectionEventListener>();
 	}
 
@@ -125,19 +128,22 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	protected void startResource(int flags) throws XAException {
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDCConnection.startResource("+String.valueOf(flags)+")");
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new XAException("JDCConnection.startResource() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
 			DebugFile.incIdent();
+			DebugFile.writeln("cid=" + getId().toString());
 			DebugFile.writeln("JDCConnection.setAutoCommit(false)");
 		}
 		try {
 			conn.setAutoCommit(false);
 		} catch (SQLException sqle) {
 			if (DebugFile.trace) DebugFile.decIdent();
-			throw new XAException(sqle.getMessage());
+			throw new XAException(sqle.getMessage() + "cid=" + getId().toString());
 		}
 		started = true;
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCConnection.startResource()");
+			DebugFile.writeln("End JDCConnection.startResource() : " + getId().toString());
 		}
 	}
 	
@@ -146,24 +152,33 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 */
 	@Override
 	protected int prepareResource() throws XAException {
+		if (DebugFile.trace) {
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new XAException("JDCConnection.prepareResource() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
+		}
 		try {
 			return conn.isReadOnly() ? XAResource.XA_RDONLY : XAResource.XA_OK;
 		} catch (SQLException sqle) {
-			throw new XAException(sqle.getMessage());
+			throw new XAException(sqle.getMessage()+ " cid=" + getId().toString());
 		}
 	}
 
 	/**
 	 * <p>Commit transaction.</p>
-	 * @throws XAException if startResource() has not been previously called
+	 * @throws XAException if startResource() has not been previously called or connection is not in autocommit=true
 	 */
 	@Override
 	protected void commitResource() throws XAException {
-		if (!started)
-			throw new XAException("JDCConnection.commitResource() Resource is not started");
+		if (DebugFile.trace) {
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new XAException("JDCConnection.commitResource() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
+		}
+		if (!isStarted())
+			throw new XAException("JDCConnection.commitResource() JDCConnection " + getId().toString() + " is not started");
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDCConnection.commitResource()");
 			DebugFile.incIdent();
+			DebugFile.writeln("cid=" + getId().toString());
 		}
 		try {
 			commit();
@@ -174,51 +189,59 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			}
 			throw new XAException(sqle.getMessage());
 		}
-		started = false;
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCConnection.commitResource()");
+			DebugFile.writeln("End JDCConnection.commitResource() : " + getId().toString());
 		}
 	}
 
 	/**
 	 * <p>Rollback transaction.</p>
-	 * @throws XAException if startResource() has not been previously called
+	 * @throws XAException if startResource() has not been previously called or connection is not in autocommit=true
 	 */
 	@Override
 	protected void rollbackResource() throws XAException {
+		if (DebugFile.trace) {
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new XAException("JDCConnection.rollbackResource() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
+		}
 		if (!started)
-			throw new XAException("JDCConnection.rollbackResource() Resource is not started");
+			throw new XAException("JDCConnection.rollbackResource() JDCConnection " + getId().toString() + " is not started");
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDCConnection.rollbackResource()");
 			DebugFile.incIdent();
+			DebugFile.writeln("cid=" + getId().toString());
 		}
 		try {
 			rollback();
 		} catch (SQLException sqle) {
 			if (DebugFile.trace) {
-				DebugFile.writeln("SQLException " + sqle.getMessage());
+				DebugFile.writeln("SQLException " + sqle.getMessage() + "cid=" + getId().toString());
 				DebugFile.decIdent();
 			}
 			throw new XAException(sqle.getMessage());
 		}
-		started = false;
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCConnection.rollbackResource()");
+			DebugFile.writeln("End JDCConnection.rollbackResource() : " + getId().toString());
 		}
 	}
 	
 	/**
-	 * <p>End participation of this connection in a trasaction.</p>
+	 * <p>End participation of this connection in a transaction.</p>
 	 * Set autocommit on
 	 * @throws XAException
 	 */
 	@Override
 	protected void endResource(int flag) throws XAException {
+		if (!started)
+			throw new XAException("JDCConnection.endResource() JDCConnection " + getId().toString() + " is not started");
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDCConnection.endResource("+String.valueOf(flag)+")");
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new XAException("JDCConnection.endResource() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
 			DebugFile.incIdent();
+			DebugFile.writeln("cid=" + getId().toString());
 			try {
 				DebugFile.writeln("autocommit = "+String.valueOf(conn.getAutoCommit()));
 			} catch (SQLException ignore) { }
@@ -230,12 +253,14 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			if (DebugFile.trace) DebugFile.decIdent();
 			throw new XAException(sqle.getMessage());
 		}		
+		started = false;
+		thid = -1l;
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCConnection.endResource()");
+			DebugFile.writeln("End JDCConnection.endResource() : " + getId().toString());
 		}
 	}
-	
+
 	/**
 	 * Each connection may be given a name useful to trace it in case there is a connection leak
 	 * @return String Connection name
@@ -309,14 +334,19 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 * <p>Set connection as in use.</p>
 	 * @param sConnectionName String Connection name
 	 * @return <b>true</b> if connection was set to in use, <b>false</b> if connection was already in use.
+	 * @throws IllegalStateException If the connection was already leased by another thread and it is still participating in a transaction
 	 */
 	public boolean lease(String sConnectionName) {
 		if (inuse) {
 			return false;
 		} else {
-			inuse=true;
+			final long cthid = Thread.currentThread().getId();
+			if (thid!=-1l && thid!=cthid)
+				throw new IllegalStateException("JDCConnection " + getId() + " was already leased by another thread " + thid + " and it is participating in a transaction");
+			inuse = true;
+			thid = cthid;
 			name = sConnectionName;
-			timestamp=System.currentTimeMillis();
+			timestamp = System.currentTimeMillis();
 			return true;
 		}
 	}
@@ -382,6 +412,10 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 				return RDBMS.SQLITE.intValue();
 			else if (prod.equals(DBMSNAME_HSQLDB))
 				return RDBMS.HSQLDB.intValue();
+			else if (prod.equals(DBMSNAME_ACCESS))
+				return RDBMS.ACCESS.intValue();
+			else if (prod.equals(DBMSNAME_XBASE))
+				return RDBMS.XBASE.intValue();
 			else
 				return RDBMS.GENERIC.intValue();
 		}
@@ -467,8 +501,9 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		}
 
 		if (DebugFile.trace) {
+			DebugFile.writeln("JDCConnection " + getId() + " " + (started ? "is" : "is not") + " started and " + (inuse ? "in use" : "not in use"));
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCConnection.close()");
+			DebugFile.writeln("End JDCConnection.close() : " + (getId()!=null ? getId().toString() : "no cid"));
 		}
 	}
 
@@ -486,6 +521,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDCConnection.close("+sCaller+")");
 			DebugFile.incIdent();
+			DebugFile.writeln((getId()==null ? "No cid" : "cid=" + getId()) + " " + (started ? "started" : "non started") + " " + (pool!=null ? "pooled" : "non pooled") + " JDCConnection");
 		}
 		if (pool==null) {
 			inuse = false;
@@ -504,8 +540,9 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		}
 
 		if (DebugFile.trace) {
+			DebugFile.writeln("JDCConnection " + getId() + " " + (started ? "is" : "is not") + " started and " + (inuse ? "in use" : "not in use"));
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDCConnection.close("+sCaller+")");
+			DebugFile.writeln("End JDCConnection.close("+sCaller+") : " + (getId()!=null ? getId().toString() : "no cid"));
 		}
 	}
 
@@ -516,8 +553,9 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 */
 	public void dispose() {
 		try { if (!getAutoCommit()) rollback(); } catch (SQLException ignore) { }		
+		thid = -1l;
+		started = false;
 		if (pool!=null) {
-			pool.returnConnection(this);
 			pool.disposeConnection(this);
 		}
 	}
@@ -537,8 +575,10 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	}
 
 	protected void expireLease() {
-		inuse=false;
-		name =null ;
+		if (!isStarted())
+			thid = -1l;
+		inuse = false;
+		name = null ;
 	}
 
 	/**
@@ -559,6 +599,14 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		return conn;		
 	}
 	
+	/**
+	 * <p>Get id of thread for which this connection was started or -1 if connection is not started for any thread.</p>
+	 * @return long Thread Id
+	 */
+	public long getThreadId() {
+		return thid;		
+	}
+
 	/**
 	 * @param c Class
 	 * @return boolean <b>true</b> if c is of class java.sql.Connection
@@ -679,6 +727,11 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql) throws SQLException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDCConnection.prepareStatement()");
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new SQLException("JDCConnection.prepareStatement() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
+		}
 		return conn.prepareStatement(sql);
 	}
 
@@ -694,6 +747,11 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDCConnection.prepareStatement()");
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new SQLException("JDCConnection.prepareStatement() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
+		}
 		return conn.prepareStatement(sql,columnNames);
 	}
 
@@ -708,6 +766,11 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDCConnection.prepareStatement()");
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new SQLException("JDCConnection.prepareStatement() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
+		}
 		return conn.prepareStatement(sql,autoGeneratedKeys);
 	}
 
@@ -737,6 +800,11 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 */
 	@Override
 	public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDCConnection.prepareStatement()");
+			if (getThreadId()!=-1l && getThreadId()!=Thread.currentThread().getId())
+				throw new SQLException("JDCConnection.prepareStatement() JDCConnection " + getId() + " is already in use by thread " + getThreadId());
+		}
 		return conn.prepareStatement(sql,resultSetType, resultSetConcurrency, resultSetHoldability);
 	}
 
@@ -895,7 +963,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	@Override
 	public void setAutoCommit(boolean autoCommit) throws SQLException {
 		if (DebugFile.trace)
-			DebugFile.writeln("JDCConnection.setAutoCommit(" + String.valueOf(autoCommit)+ ") " + (this.name!=null ? this.name: "") + " " + this);
+			DebugFile.writeln("JDCConnection.setAutoCommit(" + String.valueOf(autoCommit)+ ") " + (this.name!=null ? this.name: "") + " " + (getId()!=null ? getId().toString() : "no Xid"));
 		conn.setAutoCommit(autoCommit);
 	}
 
@@ -1024,6 +1092,14 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	@Override
 	public boolean isClosed() throws SQLException {
 		return conn.isClosed();
+	}
+
+	/**
+	 * <p>Get whether this connection has been started as a transaction resource.</p>
+	 * @return boolean
+	 */
+	public boolean isStarted() {
+		return started;
 	}
 
 	/**
@@ -1283,11 +1359,11 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 
 		} else {
 			
-			// if (DebugFile.trace) {
-			// DebugFile.writeln("JDCConnection.bindParameter("+iParamIndex+"," +
-			// 		(null==oParamValue ? "null" : oParamValue.getClass().getName()+" "+oParamValue.toString()) + ","+ 
-			// 		ColumnDef.typeName(iSQLType)+")");
-			// }
+			if (DebugFile.trace) {
+				DebugFile.writeln("JDCConnection.bindParameter("+iParamIndex+"," +
+			 		(null==oParamValue ? "null" : oParamValue.getClass().getName()+" "+oParamValue.toString()) + ","+ 
+			 		ColumnDef.typeName(iSQLType)+")");
+			}
 
 			String sParamClassName;
 			if (null!=oParamValue)

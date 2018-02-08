@@ -482,7 +482,16 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	public boolean exists(Object key) throws JDOException {
 		boolean bExists = false;
 		try {
-			if (key instanceof Param[]) {
+			if (key instanceof Param) {
+				Param pkey = (Param) key;
+				try (PreparedStatement stmt = jdcConn.prepareStatement("SELECT NULL FROM " + name() + " WHERE " + pkey.getName() + "=?", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+					stmt.setObject(1, pkey.getValue(), pkey.getType());
+					ResultSet rset = stmt.executeQuery();
+					bExists = rset.next();
+					rset.close();
+				}				
+			}
+			else if (key instanceof Param[]) {
 				Param[] peys = (Param[]) key;
 				if (peys.length<1)
 					throw new JDOException("Key must have at least one value");

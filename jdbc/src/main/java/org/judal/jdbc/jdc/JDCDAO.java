@@ -202,11 +202,11 @@ public class JDCDAO {
 		PreparedStatement oStmt = null;
 
 		if (null==oConn)
-			throw new NullPointerException("SQLHelper.storeRegister() Connection is null");
+			throw new NullPointerException("JDCDAO.storeRegister() Connection is null");
 
 		if (DebugFile.trace)
 		{
-			DebugFile.writeln("Begin DBTable.storeRegister([Connection:"+oConn.pid()+"], {" + AllValues.toString() + "})" );
+			DebugFile.writeln("Begin JDCDAO.storeRegister([Connection:"+oConn.getId().toString()+"], {" + AllValues.toString() + "})" );
 			DebugFile.incIdent();
 		}
 
@@ -239,13 +239,13 @@ public class JDCDAO {
 									oCol.getType()==java.sql.Types.NCHAR || oCol.getType()==java.sql.Types.NVARCHAR ) {
 
 								if (AllValues.apply(sCol)!=null) {
-									DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
+									// DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
 
 									if (AllValues.apply(sCol).toString().length() > oCol.getLength())
 										DebugFile.writeln("ERROR: value for " + oCol.getName() + " exceeds columns precision of " + String.valueOf(oCol.getLength()));
 								} // fi (AllValues.get(sCol)!=null)
-								else
-									DebugFile.writeln("Binding " + sCol + "=NULL");
+								// else
+								//	DebugFile.writeln("Binding " + sCol + "=NULL");
 							}
 						} // fi (DebugFile.trace)
 
@@ -300,12 +300,13 @@ public class JDCDAO {
 					sCol = oCol.getName();
 
 					if (!oCol.getAutoIncrement()) {
-						if (DebugFile.trace) {
-							if (null!=AllValues.apply(sCol))
-								DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
-							else
-								DebugFile.writeln("Binding " + sCol + "=NULL");
-						} // fi
+						
+						// if (DebugFile.trace) {
+						//	if (null!=AllValues.apply(sCol))
+						//		DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
+						//	else
+						//		DebugFile.writeln("Binding " + sCol + "=NULL");
+						// }
 
 						c += oConn.bindParameter (oStmt, c, AllValues.apply(sCol), oCol.getType());            	
 					} // fi autoincrement
@@ -340,7 +341,7 @@ public class JDCDAO {
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End SQLHelper.storeRegister() : " + String.valueOf(bNewRow && (iAffected>0)));
+			DebugFile.writeln("End JDCDAO.storeRegister() : " + String.valueOf(bNewRow && (iAffected>0)));
 		}
 
 		return bNewRow && (iAffected>0);
@@ -372,11 +373,11 @@ public class JDCDAO {
 		String sClassName;
 
 		if (null==oConn)
-			throw new NullPointerException("SQLHelper.storeRegisterLong() Connection is null");
+			throw new NullPointerException("JDCDAO.storeRegisterLong() Connection is null");
 
 		if (DebugFile.trace)
 		{
-			DebugFile.writeln("Begin SQLHelper.storeRegisterLong([Connection:"+oConn.pid()+"], {" + AllValues.toString() + "})" );
+			DebugFile.writeln("Begin JDCDAO.storeRegisterLong([Connection:"+oConn.getId().toString()+"], {" + AllValues.toString() + "})" );
 			DebugFile.incIdent();
 		}
 
@@ -408,12 +409,12 @@ public class JDCDAO {
 					if (DebugFile.trace) {
 						if (oCol.getType()==java.sql.Types.CHAR || oCol.getType()==java.sql.Types.VARCHAR) {
 							if (AllValues.apply(sCol) != null) {
-								DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
+								// DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
 								if (AllValues.apply(sCol).toString().length() > oCol.getLength())
 									DebugFile.writeln("ERROR: value for " + oCol.getName() + " exceeds columns precision of " + String.valueOf(oCol.getLength()));
 							} // fi (AllValues.get(sCol)!=null)
-							else
-								DebugFile.writeln("Binding " + sCol + "=NULL");
+							// else
+							//	DebugFile.writeln("Binding " + sCol + "=NULL");
 						}
 					} // fi (DebugFile.trace)
 
@@ -511,10 +512,11 @@ public class JDCDAO {
 
 				if (!oCol.getAutoIncrement()) {
 					if (DebugFile.trace) {
-						if (null!=AllValues.apply(sCol))
-							DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
-						else
-							DebugFile.writeln("Binding " + sCol + "=NULL");
+						
+						// if (null!=AllValues.apply(sCol))
+						//	 DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
+						// else
+						//	 DebugFile.writeln("Binding " + sCol + "=NULL");
 					}
 					short cType = ((SQLColumn) oCol).getSqlType();
 					if (cType==java.sql.Types.LONGVARCHAR ||
@@ -592,7 +594,7 @@ public class JDCDAO {
 		if (DebugFile.trace)
 		{
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBTable.storeRegisterLong() : " + String.valueOf(bNewRow));
+			DebugFile.writeln("End JDCDAO.storeRegisterLong() : " + String.valueOf(bNewRow));
 		}
 
 		return bNewRow;
@@ -616,12 +618,12 @@ public class JDCDAO {
 
 		if (DebugFile.trace)
 		{
-			DebugFile.writeln("Begin DBTable.deleteRegister([Connection], {" + AllValues.toString() + "})" );
+			DebugFile.writeln("Begin JDCDAO.deleteRegister([Connection], {" + AllValues.toString() + "})" );
 			DebugFile.incIdent();
 		}
 
 		if (sqlStatements.getDelete()==null) {
-			throw new SQLException("SQLHelper.deleteRegister() Primary key not found", "42S12");
+			throw new SQLException("JDCDAO.deleteRegister() Primary key not found", "42S12");
 		}
 
 		// Begin SQLException
@@ -648,7 +650,7 @@ public class JDCDAO {
 		if (DebugFile.trace)
 		{
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBTable.deleteRegister() : " + (bDeleted ? "true" : "false"));
+			DebugFile.writeln("End JDCDAO.deleteRegister() : " + (bDeleted ? "true" : "false"));
 		}
 
 		return bDeleted;

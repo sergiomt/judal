@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static javax.transaction.Status.*;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
@@ -30,7 +31,7 @@ import javax.transaction.xa.Xid;
  */
 public abstract class TransactionalResource implements XAResource {
 
-	private Xid id;
+	private Xid trid;
 	private int flags;
 	private long created;
 	private int timeout;
@@ -52,7 +53,7 @@ public abstract class TransactionalResource implements XAResource {
 	 * @param tid Xid
 	 */
 	public TransactionalResource(Xid tid) {
-		id = tid;
+		trid = tid;
 		prepared = false;
 		timeout = -1;
 		created = System.currentTimeMillis();
@@ -83,7 +84,7 @@ public abstract class TransactionalResource implements XAResource {
 	 * @return Xid
 	 */
 	public Xid getId() {
-		return id;
+		return trid;
 	}
 
 	/**
@@ -192,6 +193,48 @@ public abstract class TransactionalResource implements XAResource {
 	@Override
 	public void start(Xid tid, int flag) throws XAException {
 		startResource(flag);
+	}
+
+	/**
+	 * <p>Get text describing this transaction status.</p>
+	 * @param status int Value from javax.transaction.Status
+	 * <table summary="Transaction status text for int code">
+	 * <tr><th>Status Code</th><th>Text</th></tr>
+	 * <tr><td>STATUS_NO_TRANSACTION</td><td>no transaction</td></tr>
+	 * <tr><td>STATUS_ACTIVE</td><td>active</td></tr>
+	 * <tr><td>STATUS_PREPARING</td><td>preparing</td></tr>
+	 * <tr><td>STATUS_PREPARED</td><td>prepared</td></tr>
+	 * <tr><td>STATUS_COMMITTING</td><td>committing</td></tr>
+	 * <tr><td>STATUS_COMMITTED</td><td>committed</td></tr>
+	 * <tr><td>STATUS_MARKED_ROLLBACK</td><td>marked rollback</td></tr>
+	 * <tr><td>STATUS_ROLLEDBACK</td><td>rolledback</td></tr>
+	 * <tr><td>STATUS_ROLLING_BACK</td><td>rolling back</td></tr>
+	 * </table>
+	 * @return String
+	 */
+	public static String getStatusAsString(final int status) {
+		switch (status) {
+		case STATUS_NO_TRANSACTION:
+			return "no transaction";
+		case STATUS_ACTIVE:
+			return "active";
+		case STATUS_PREPARING:
+			return "preparing";
+		case STATUS_PREPARED:
+			return "prepared";
+		case STATUS_COMMITTING:
+			return "committing";
+		case STATUS_COMMITTED:
+			return "commited";
+		case STATUS_MARKED_ROLLBACK:
+			return "marked rollback";
+		case STATUS_ROLLEDBACK:
+			return "rolledback";
+		case STATUS_ROLLING_BACK:
+			return "rolling back";
+		default:
+			return "unknown";
+		}
 	}
 
 }

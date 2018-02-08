@@ -34,9 +34,9 @@ import org.judal.jms.ObjectMessageImpl;
  */
 public class RAMQueueConsumer extends ThreadPoolExecutor implements RecordQueueConsumer {
 
-	private static final int DEFAULT_CORE_POOL_SIZE = 5;
-	private static final int DEFAULT_MAX_POOL_SIZE = 10;
-	private static final int DEFAULT_MAX_QUEUE_SIZE = 10000;
+	private static final int DEFAULT_CORE_POOL_SIZE = 2;
+	private static final int DEFAULT_MAX_POOL_SIZE = 2;
+	private static final int DEFAULT_MAX_QUEUE_SIZE = 100000;
 	
 	/**
 	 * <p>Constructor.</p>

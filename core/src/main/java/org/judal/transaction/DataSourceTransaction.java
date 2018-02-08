@@ -57,7 +57,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 		sync = null;
 		status = Status.STATUS_NO_TRANSACTION;
 		resources = new LinkedList<XAResource>();
-		if (DebugFile.trace) DebugFile.writeln("new DataSourceTransaction with Xid = "+tid.toString());
+		if (DebugFile.trace) DebugFile.writeln("new DataSourceTransaction with Xid = "+tid.toString() + " for thread " + thid);
 	}
 
 	/**
@@ -85,14 +85,14 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 				DebugFile.writeln("IllegalStateException Transaction "+tid.toString()+" status is unknown");
 				DebugFile.decIdent();
 			}
-			throw new IllegalStateException("Transaction status is unknown");
+			throw new IllegalStateException("Transaction "+tid.toString()+" status is unknown");
 		}
 		if (isActive()) {
 			if (DebugFile.trace) {
 				DebugFile.writeln("Transaction "+tid.toString()+" has been already activated");
 				DebugFile.decIdent();
 			}
-			throw new IllegalStateException("IllegalStateException Transaction has been already activated");
+			throw new IllegalStateException("IllegalStateException Transaction "+tid.toString()+" has been already activated");
 		}
 		
 		for (XAResource res : resources) {
@@ -103,7 +103,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.begin()");
+			DebugFile.writeln("End DataSourceTransaction.begin() : " + tid.toString());
 		}
 	}
 
@@ -126,7 +126,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.close()");
+			DebugFile.writeln("End DataSourceTransaction.close() : " + tid.toString());
 		}
 	}
 
@@ -167,10 +167,10 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 
 		if (status!=Status.STATUS_ACTIVE && status!=Status.STATUS_PREPARED) {
 			if (DebugFile.trace) {
-				DebugFile.writeln("IllegalStateException Invalid transaction status for commit "+String.valueOf(status)+")");
+				DebugFile.writeln("IllegalStateException Invalid status for commit "+ getStatusAsString() + " at transaction " + tid.toString());
 				DebugFile.decIdent();
 			}
-			throw new IllegalStateException("Invalid transaction status for commit "+String.valueOf(status));
+			throw new IllegalStateException("Invalid status for commit " + getStatusAsString() + " at transaction " + tid.toString());
 		}
 
 		try {
@@ -207,7 +207,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.commit()");
+			DebugFile.writeln("End DataSourceTransaction.commit() " + tid.toString());
 		}
 	}
 
@@ -247,7 +247,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			DebugFile.incIdent();
 		}
 
-		if (resources.contains(res)) {
+		if (contains(res)) {
 			if (tid.getFormatId()==TransactionId.NO_TRANSACTION_ID) {
 				if (DebugFile.trace) {
 					DebugFile.writeln("IllegalStateException Invalid transaction id format");
@@ -277,9 +277,32 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 		return retval;
 	}
 
+	private boolean contains(XAResource res){
+		if (res instanceof TransactionalResource) {
+			TransactionalResource trs = (TransactionalResource) res;
+			for (XAResource xrs : resources) {
+				if (xrs instanceof TransactionalResource) {
+					if (trs.getId().equals(((TransactionalResource) xrs).getId())) {
+						return true;
+					}
+				} else {
+					if (trs.equals(xrs))
+						return true;
+				}
+			}			
+		} else {
+			for (XAResource xrs : resources) {
+				if (res.equals(xrs))
+					return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * <p>Enlist resource.</p>
 	 * Enlist a resource to this transaction and start it with XAResource.TMJOIN.
+	 * If resource is already enlisted then nothing is done.
 	 * @param res XAResource
 	 * @throws NullPointerException if resource is <b>null</b>
 	 * @throws RollbackException if Transaction Status is STATUS_MARKED_ROLLBACK or STATUS_ROLLING_BACK
@@ -287,7 +310,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	 * @throws SystemException if there is an exception during resource start
 	 */
 	@Override
-	public boolean enlistResource(XAResource res) throws NullPointerException, RollbackException, IllegalStateException, SystemException {
+	public boolean enlistResource(XAResource res) throws NullPointerException, RollbackException, IllegalArgumentException, IllegalStateException, SystemException {
 		
 		boolean retval;
 
@@ -311,13 +334,13 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 		
 		if (status==Status.STATUS_PREPARED) {
 			if (DebugFile.trace) {
-				DebugFile.writeln("IllegalStateException Cannot enlist resources in a prepared transaction");
+				DebugFile.writeln("IllegalStateException Cannot enlist resources in prepared transaction " + tid.toString());
 				DebugFile.decIdent();
 			}
-			throw new IllegalStateException("Cannot enlist resources in a prepared transaction");
+			throw new IllegalStateException("Cannot enlist resources in a prepared transaction " + tid.toString());
 		}
-		
-		if (!resources.contains(res)) {
+
+		if (!contains(res)) {
 			
 			if (tid.getFormatId()==TransactionId.NO_TRANSACTION_ID) {
 				if (DebugFile.trace) {
@@ -337,9 +360,8 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			resources.add(res);
 			retval = true;
 		} else {
-			if (DebugFile.trace) {
-				DebugFile.writeln("Warning, DataSourceTransaction resources already contains " + res);
-			}
+			if (DebugFile.trace)
+				DebugFile.writeln("DataSourceTransaction " + tid.toString() + " resources already contains resource " + res);
 			retval = false;
 		}
 
@@ -376,28 +398,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	 * @return String
 	 */
 	public String getStatusAsString() {
-		switch (status) {
-		case Status.STATUS_NO_TRANSACTION:
-			return "no transaction";
-		case Status.STATUS_ACTIVE:
-			return "active";
-		case Status.STATUS_PREPARING:
-			return "preparing";
-		case Status.STATUS_PREPARED:
-			return "prepared";
-		case Status.STATUS_COMMITTING:
-			return "committing";
-		case Status.STATUS_COMMITTED:
-			return "commited";
-		case Status.STATUS_MARKED_ROLLBACK:
-			return "marked rollback";
-		case Status.STATUS_ROLLEDBACK:
-			return "rolledback";
-		case Status.STATUS_ROLLING_BACK:
-			return "rolling back";
-		default:
-			return "unknown";
-		}
+		return TransactionalResource.getStatusAsString(status);
 	}
 	
 	/**
@@ -412,7 +413,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 		if (status==Status.STATUS_MARKED_ROLLBACK || status==Status.STATUS_ROLLING_BACK)
 			throw new RollbackException("Cannot register synchronization because transaction was set to rollback only");
 		if (status==Status.STATUS_NO_TRANSACTION || status==Status.STATUS_PREPARING || status==Status.STATUS_PREPARED)
-			throw new IllegalStateException("Invalid transaction status "+String.valueOf(status));
+			throw new IllegalStateException("Invalid transaction status " + getStatusAsString());
 		this.sync = sync;
 	}
 
@@ -430,7 +431,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	@Override
 	public void rollback() throws JDOException {
 		if (status!=Status.STATUS_ACTIVE && status!=Status.STATUS_PREPARED && status!=Status.STATUS_MARKED_ROLLBACK)
-			throw new IllegalStateException("Invalid transaction status for rollback "+String.valueOf(status));
+			throw new IllegalStateException("Invalid transaction status for rollback " + getStatusAsString());
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin DataSourceTransaction.rollback()");
 			DebugFile.incIdent();
@@ -541,6 +542,11 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 				throw new JDOUnsupportedOptionException(sqle.getMessage(), sqle);				
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "Xid=" + tid.toString() + " Thread=" + thid;
 	}
 	
 }

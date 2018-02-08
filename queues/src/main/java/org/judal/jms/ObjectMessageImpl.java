@@ -13,6 +13,7 @@ package org.judal.jms;
  */
 
 import javax.jms.ObjectMessage;
+import javax.transaction.TransactionManager;
 
 import org.judal.storage.Param;
 import org.judal.storage.table.IndexableTable;
@@ -22,6 +23,8 @@ import org.judal.storage.table.TableDataSource;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import javax.jms.JMSException;
 import javax.jms.Destination;
@@ -480,6 +483,8 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 	@Override
 	@SuppressWarnings("unchecked")
 	public void run() {
+		TransactionManager oTrnMan = oDts.getTransactionManager();
+
 		try {
 			final int iCmd = getIntProperty("command");
 			Object oObj = getObject();
@@ -537,9 +542,9 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 				DebugFile.writeln("Perform " + sCmd + " on " + String.valueOf(nRecs) + " record"
 						+ (nRecs > 1 ? "s" : "") + " of class " + sRtp);
 			}
-
-			if (oDts.getTransactionManager()!=null)
-				oDts.getTransactionManager().begin();
+			
+			if (oTrnMan!=null)
+				oTrnMan.begin();
 
 			for (int r = 0; r < nRecs; r++) {
 				oRec = aRecs[r];
@@ -622,18 +627,30 @@ public class ObjectMessageImpl implements ObjectMessage, Runnable {
 				} // end switch
 			}
 
-			if (oDts.getTransactionManager()!=null)
-				oDts.getTransactionManager().commit();
+			if (oTrnMan!=null)
+				oTrnMan.commit();
 			
 		} catch (Exception xcpt) {
 			if (DebugFile.trace) {
 				DebugFile.writeln("ObjectMessageImpl.run() " + xcpt.getClass().getName() + " " + xcpt.getMessage());
-				try { DebugFile.writeln(StackTraceUtil.getStackTrace(xcpt)); } catch (IOException ignore) { }
+				DebugFile.writeStackTrace(xcpt);
 			}
 			try {
-				if (oDts.getTransactionManager()!=null)
-					if (oDts.inTransaction()) oDts.getTransactionManager().rollback();
-			} catch (Exception ignore) { }
+				if (oTrnMan!=null)
+					if (oDts.inTransaction()) oTrnMan.rollback();
+			} catch (Exception rbx) {
+				if (DebugFile.trace)
+					DebugFile.writeln(rbx.getClass().getName()+" at TransactionManager.rollback() "+rbx.getMessage());
+			}			
+		} finally {
+			if (oTrnMan!=null) {
+				try {
+					Method reset = oTrnMan.getClass().getMethod("reset");
+					if (reset!=null)
+						reset.invoke(oTrnMan);
+				} catch (NoSuchMethodException | SecurityException | IllegalAccessException |
+						 IllegalArgumentException | InvocationTargetException ignore) { }
+			}			
 		}
 		if (DebugFile.trace)
 			DebugFile.writeln("End ObjectMessageImpl.run()");

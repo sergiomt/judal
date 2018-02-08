@@ -289,18 +289,18 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	@Override
 	public void store(DataSource oDts) throws JDOException,ClassCastException {
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin AbstractRecord.store(DataSource) " + getClass().getName());
+			DebugFile.writeln("Begin AbstractRecord.store(" + oDts.getClass().getName() + ") " + getClass().getName());
 			DebugFile.incIdent();
 		}
 		if (getConstraintsChecker()!=null)
 			getConstraintsChecker().check(oDts, this);
 		try (Table oTbl = ((TableDataSource) oDts).openTable(this)) {
 			oTbl.store(this);
+		} finally {
+			if (DebugFile.trace) DebugFile.decIdent();			
 		}
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End AbstractRecord.store(DataSource) : " +  getKey());
-		}
+		if (DebugFile.trace)
+			DebugFile.writeln("End AbstractRecord.store(" + oDts.getClass().getName() + ") : " +  getKey());
 	}
 
 	/**
@@ -428,17 +428,19 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 		PrimaryKeyDef pk = tableDef.getPrimaryKeyMetadata();
 		if (null==pk)
 			throw new JDOUserException("Table or view "+getTableName()+"  has no primary key");
+		/*
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin AbstractRecord.getKey()");
 			DebugFile.incIdent();
 			DebugFile.writeln("primary key has " +  String.valueOf(pk.getNumberOfColumns()) + " columns");
 		}
+		*/
+
 		if (pk.getNumberOfColumns()==0) {
 			retval = null;
 		} else if (pk.getNumberOfColumns()==1) {
 			retval = apply(pk.getColumn());
-			if (DebugFile.trace)
-				DebugFile.writeln(pk.getColumn() + "=" + retval);
+			// if (DebugFile.trace) DebugFile.writeln(pk.getColumn() + "=" + retval);
 			if (retval instanceof String) {
 				try {
 					retval = pk.getColumns()[0].convert((String) retval);
@@ -463,10 +465,13 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 			retval = (Object) retvals;
 		}
 
+		/*
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End AbstractRecord.getKey() : " + retval + (retval!=null ? " of class " + retval.getClass().getName() : ""));
 		}
+		*/
+
 		return (Object) retval;
 	}
 

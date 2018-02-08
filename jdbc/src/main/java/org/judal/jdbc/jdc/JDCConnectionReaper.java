@@ -1,5 +1,7 @@
 package org.judal.jdbc.jdc;
 
+import com.knowgate.debug.DebugFile;
+
 /**
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -75,11 +77,15 @@ public class JDCConnectionReaper extends Thread {
 	 * Reap connections every n-minutes
 	 */
 	public void run() {
+		if (DebugFile.trace)
+			DebugFile.writeln("Begin JDCConnectionReaper.run() delay=" + delay);
 		while (keepruning) {
 			try {
 				sleep(delay);
 			} catch( InterruptedException e) { }
 			if (keepruning) pool.reapConnections();
 		} // wend
+		if (DebugFile.trace)
+			DebugFile.writeln("End JDCConnectionReaper.run()");
 	} // run
 } // ConnectionReaper
