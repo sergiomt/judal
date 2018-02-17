@@ -111,7 +111,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 */
 	public AbstractRecord(ViewDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOUserException {
 		if (null==tableDefinition)
-			throw new JDOUserException("AbstractRecord constructor. TableDef cannot be null");
+			throw new JDOUserException("AbstractRecord constructor. ViewDef cannot be null");
 		tableDef = tableDefinition;
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);

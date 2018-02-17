@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
@@ -117,23 +118,34 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	
 	/**
 	 * Constructor
+	 * @param dataSource TableDataSource
+	 * @param tableName String
 	 * @throws JDOException 
+	 * @throws JDOUserException if table or view is not found at DataSource metadata
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		this(dataSource.getTableOrViewDef(tableName));		
+		this(getViewDefForName(dataSource, tableName));		
 	}
 
 	/**
 	 * Constructor
+	 * @param dataSource TableDataSource
+	 * @param tableName String
+	 * @param fieldHelper FieldHelper
 	 * @throws JDOException 
+	 * @throws JDOUserException if table or view is not found at DataSource metadata
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper) throws JDOException {
-		this(dataSource.getTableOrViewDef(tableName), fieldHelper);
+		this(getViewDefForName(dataSource, tableName), fieldHelper);
 	}
 
 	/**
 	 * Constructor
+	 * @param dataSource TableDataSource
+	 * @param tableName String
+	 * @param constraintsChecker ConstraintsChecker
 	 * @throws JDOException 
+	 * @throws JDOUserException if table or view is not found at DataSource metadata
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
 		this(dataSource, tableName, null, constraintsChecker);
@@ -141,10 +153,15 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	
 	/**
 	 * Constructor
+	 * @param dataSource TableDataSource
+	 * @param tableName String
+	 * @param fieldHelper FieldHelper
+	 * @param constraintsChecker ConstraintsChecker
 	 * @throws JDOException 
+	 * @throws JDOUserException if table or view is not found at DataSource metadata
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
-		this(dataSource.getTableOrViewDef(tableName), fieldHelper, constraintsChecker);
+		this(getViewDefForName(dataSource, tableName), fieldHelper, constraintsChecker);
 	}
 	
 	/**
@@ -357,4 +374,10 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 		}
 	}
 	
+	private static ViewDef getViewDefForName(TableDataSource dataSource, String name) {
+		final ViewDef vdef = dataSource.getTableOrViewDef(name);
+		if (null==vdef)
+			throw new JDOUserException("MapRecord constructor. Table or view " + name + " not found");
+		return vdef;
+	}
 }

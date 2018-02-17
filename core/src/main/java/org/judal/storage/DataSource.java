@@ -201,6 +201,16 @@ public interface DataSource extends AutoCloseable {
      */
     public static final String LDAPPASSWORD = "ldappassword";
 
+    public static final String MAIL_STORE_PROTOCOL = "mail.store.protocol";
+    public static final String MAIL_TRANSPORT_PROTOCOL = "mail.transport.protocol";
+    public static final String MAIL_INCOMING = "mail.incoming";
+    public static final String MAIL_OUTGOING = "mail.outgoing";
+    public static final String MAIL_ACCOUNT = "mail.account";
+    public static final String MAIL_PASSWORD = "mail.password";
+    public static final String MAIL_USER = "mail.user";
+    public static final String MAIL_SMTP_HOST = "mail.smtp.host";
+    public static final String MAIL_SMTP_PORT = "mail.smtp.port";
+
     public static String DEFAULT_POOLSIZE = "10";
     public static String DEFAULT_MAXPOOLSIZE = "100";
     public static String DEFAULT_MAXCONNECTIONS = "100";
@@ -212,10 +222,14 @@ public interface DataSource extends AutoCloseable {
     public static String DEFAULT_AUTOCOMMIT = "false";
     public static String DEFAULT_METADATA = "metadata.xml";
     
+    public static final String DEFAULT_MAIL_STORE_PROTOCOL = "pop3";
+    public static final String DEFAULT_MAIL_TRANSPORT_PROTOCOL = "smtp";
+    public static final String DEFAULT_MAIL_SMTP_PORT = "25";
+
     /**
      * List of supported property names
      */
-    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD};
+    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD,MAIL_STORE_PROTOCOL, MAIL_TRANSPORT_PROTOCOL, MAIL_INCOMING, MAIL_OUTGOING, MAIL_ACCOUNT, MAIL_PASSWORD, MAIL_USER, MAIL_SMTP_HOST, MAIL_SMTP_PORT};
 
     /**
      * List of default property values

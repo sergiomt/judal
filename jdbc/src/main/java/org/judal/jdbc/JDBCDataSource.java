@@ -925,14 +925,16 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		if (null==metaData)
 			throw new JDOException("JDBCDataSource internal table map not initialized, call DBDataSource constructor first");
 
+		ViewDef retobj = null;
+		
 		if (metaData.containsTable(sObjectName))
-			return metaData.getTable(sObjectName.toLowerCase());
+			retobj = metaData.getTable(sObjectName);
 		else if (metaData.containsView(sObjectName))
-			return metaData.getView(sObjectName.toLowerCase());
-		else 
-			return null;
+			retobj = metaData.getView(sObjectName);
+
+		return retobj;
 	} 
-	
+
 	// ----------------------------------------------------------
 
 	/**
