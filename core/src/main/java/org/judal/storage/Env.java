@@ -69,8 +69,8 @@ public class Env {
 			String prop = cfg.getInitParameter(prefix + propName);
 			if (DebugFile.trace)
 				DebugFile.writeln(prop==null ? "init parameter "+propName+" not found" : "read init parameter "+propName+"="+prop);
-			if (prop!=null) setProperty(props, propName, prop);
-			setProperty(props, propName, prop);
+			if (prop!=null)
+				setProperty(props, propName, prop);
 		}
 		return props;
 	}
@@ -97,7 +97,8 @@ public class Env {
 			String prop = reader.getProperty(prefix + propName);
 			if (DebugFile.trace)
 				DebugFile.writeln(prop==null ? "property "+propName+" not found" : "read "+propName+"="+prop);
-			if (prop!=null) setProperty(props, propName, prop);
+			if (prop!=null)
+				setProperty(props, propName, prop);
 		}
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
