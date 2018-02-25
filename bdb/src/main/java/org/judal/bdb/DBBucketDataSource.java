@@ -23,6 +23,7 @@ import javax.transaction.TransactionManager;
 
 import org.judal.metadata.IndexDef.Type;
 import org.judal.storage.keyvalue.BucketDataSource;
+import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 
 import com.sleepycat.db.DatabaseException;
@@ -33,6 +34,10 @@ public class DBBucketDataSource extends DBDataSource implements BucketDataSource
 	
 	public DBBucketDataSource(Map<String, String> properties, TransactionManager transactManager) throws JDOException {
 		super(properties, transactManager, null);
+	}
+
+	protected DBBucketDataSource(Map<String, String> properties, TransactionManager transactManager, SchemaMetaData metaData) throws JDOException {
+		super(properties, transactManager, metaData);
 	}
 
 	public static TableDef getKeyValueDef(String bucketName) {

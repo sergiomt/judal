@@ -31,7 +31,7 @@ import com.knowgate.debug.DebugFile;
 import com.knowgate.tuples.Pair;
 import com.sleepycat.db.DatabaseException;
 
-public class DBTableDataSource extends DBDataSource implements TableDataSource {
+public class DBTableDataSource extends DBBucketDataSource implements TableDataSource {
 
 	private SchemaMetaData oSmd;
 	
