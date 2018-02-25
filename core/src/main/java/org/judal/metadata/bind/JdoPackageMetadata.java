@@ -14,10 +14,7 @@ package org.judal.metadata.bind;
 
 import java.io.IOException;
 import java.io.InputStream;
-
-import java.net.URL;
-
-import java.util.Enumeration;
+import java.io.FileNotFoundException;
 
 import javax.jdo.JDOException;
 
@@ -26,9 +23,7 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.storage.DataSource;
 
 import com.knowgate.debug.DebugFile;
-import com.pureperfect.ferret.ScanFilter;
-import com.pureperfect.ferret.Scanner;
-import com.pureperfect.ferret.vfs.PathElement;
+import com.knowgate.stringutils.Str;
 
 /**
  * <p>Load schema metadata from a JDO XML resource file of a package.</p>
@@ -41,13 +36,6 @@ public class JdoPackageMetadata implements MetadataScanner {
 	private String packagePath;
 	private String xmlFileName;
 	
-	protected final ScanFilter any = new ScanFilter() {
-		@Override
-		public boolean accept(final PathElement resource) {
-			return true;
-		}
- 	};
- 	
  	/**
  	 * <p>Constructor.</p>
  	 * @param dataSource DataSource
@@ -79,32 +67,22 @@ public class JdoPackageMetadata implements MetadataScanner {
  	 * If XML file name was set to <b>null</b> in the constructor then metadata.xml is used as file name by default.
  	 * @return InputStream
  	 * @throws IOException
+ 	 * @throws FileNotFoundException
  	 */
  	public InputStream openStream() throws IOException {
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JdoPackageMetadata.openStream()");
 			DebugFile.incIdent();
 		}
-		InputStream retval;
- 		Scanner scn = new Scanner();
- 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		final String resourcePath = getPackagePath()+"/"+(getFileName()==null ? "metadata.xml" : getFileName());
-		if (DebugFile.trace)
-			DebugFile.writeln("ClassLoader.getResources("+resourcePath+")");
- 		Enumeration<URL> urls = cl.getResources(resourcePath);
-		if (urls.hasMoreElements()) {
-			URL resUrl = urls.nextElement();
-			if (DebugFile.trace)
-				DebugFile.writeln("Scanner.add("+resUrl.toString()+")");
-			scn.add(resUrl);
-			PathElement xml = scn.scan(any).iterator().next();
-			retval = xml.openStream();
-		}  else {
-			retval = null;
+ 		final ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		final String resourcePath = String.join("/", Str.dechomp(getPackagePath(),'/'), getFileName()==null ? "metadata.xml" : getFileName());
+		if (DebugFile.trace) {
+			DebugFile.writeln("ClassLoader..getResourceAsStream(" + resourcePath +")");
 		}
+		InputStream retval = cl.getResourceAsStream(resourcePath);
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JdoPackageMetadata.openStream() : "+retval);
+			DebugFile.writeln("End JdoPackageMetadata.openStream() : " + retval);
 		}
 		return retval;
  	}
