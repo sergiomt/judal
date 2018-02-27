@@ -49,7 +49,7 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 	/**
 	 * <p>Constructor.</p>
 	 * @param resultClass Class&lt;? extends Record&gt;
-	 * @param tableDef SQLSelectableDef
+	 * @param tableDef SelectableDef
 	 * @param stmt PreparedStatement
 	 * @param rset ResultSet
 	 * @throws NoSuchMethodException if resultClass has no default constructor nor a constructor compatible with a SelectableDef argument
@@ -63,6 +63,9 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 		if (null==resultClass)
 			throw new NullPointerException("JDBCIterator result class cannot be null");
 
+		if (null==tableDef)
+			throw new NullPointerException("JDBCIterator SelectableDef cannot be null");
+
 		if (null==stmt)
 			throw new NullPointerException("JDBCIterator Statement is required");
 		
@@ -73,6 +76,7 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 		this.rset = rset;
 		this.nextRow = null;
 		this.resultClass = resultClass;
+		this.tableDef = tableDef;
 		this.recordConstructor = (Constructor<? extends Stored>) StorageObjectFactory.getConstructor(resultClass, new Class<?>[]{tableDef.getClass()});
 		this.isNext = null;
 
@@ -108,7 +112,10 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 						nextRow = (Record) recordConstructor.newInstance();
 						break;
 					case 1:
-						nextRow = (Record) recordConstructor.newInstance(tableDef);
+						if (recordConstructor.getParameterTypes()[0].isAssignableFrom(tableDef.getClass()))
+							nextRow = (Record) recordConstructor.newInstance(tableDef);
+						else
+							throw new JDOException("Cannot instantiate "+resultClass.getName()+" because it lacks a constructor from "+tableDef.getClass().getName());
 						break;
 					default:
 						throw new JDOException("Cannot instantiate "+resultClass.getName()+" from "+tableDef.getClass().getName());

@@ -573,7 +573,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 		try {
 			stmt = getConnection().prepareStatement("SELECT * FROM "+name(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			rset = stmt.executeQuery();
-			retval = new JDBCIterator(candidateClass, viewDef, stmt, rset);
+			retval = new JDBCIterator(candidateClass, getViewDef(), stmt, rset);
 			iterators.add(retval);
 		} catch (SQLException | NoSuchMethodException | SecurityException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
