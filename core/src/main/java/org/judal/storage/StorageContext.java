@@ -74,14 +74,14 @@ public class StorageContext implements AutoCloseable {
 	 * @throws IllegalStateException if key-value data source has not been initialized
 	 */
 	public void closeKeyValueDataSource() throws IllegalStateException {
-		if (null!=keyValueDataSource)
+		if (null==keyValueDataSource)
 			throw new IllegalStateException("Key-Value Data Source has not been initialized");
 		try {
 			keyValueDataSource.close();
+			keyValueDataSource = null;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getClass().getName()+" closing DataSource of StorageContext");
 		}
-		keyValueDataSource = null;
 	}
 
 	/**
@@ -123,14 +123,14 @@ public class StorageContext implements AutoCloseable {
 	 * @throws IllegalStateException if table data source has not been initialized
 	 */
 	public void closeTableDataSource() throws IllegalStateException {
-		if (null!=tableDataSource)
+		if (null==tableDataSource)
 			throw new IllegalStateException("Table Data Source has not been initialized");
 		try {
 			tableDataSource.close();
+			tableDataSource = null;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getClass().getName()+" closing TableDataSource of StorageContext");
 		}
-		tableDataSource = null;
 	}
 
 	/**
@@ -172,14 +172,14 @@ public class StorageContext implements AutoCloseable {
 	 * @throws IllegalStateException if relational data source has not been initialized
 	 */
 	public void closeRelationalDataSource() throws IllegalStateException {
-		if (null!=relationalDataSource)
+		if (null==relationalDataSource)
 			throw new IllegalStateException("Relational Data Source has not been initialized");
 		try {
 			relationalDataSource.close();
+			relationalDataSource = null;
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getClass().getName()+" closing RelationalDataSource of StorageContext");
 		}
-		relationalDataSource = null;
 	}
 
 	/**
