@@ -215,10 +215,18 @@ public class StandardConstraintsChecker implements ConstraintsChecker {
 			}
 		} // fi
 
-		if (oRec.getKey()==null)
-			throw new IntegrityViolationException("Primary key not set and no default specified at table "+oRec.getTableName());
-		else if (oRec.getKey().toString().length()==0)
-			throw new IntegrityViolationException("Empty string not allowed as primary key at table "+oRec.getTableName());
+		boolean hasPrimaryKey = false;
+		for (ColumnDef cdef : oRec.columns()) {
+			hasPrimaryKey = cdef.isPrimaryKey();
+			if (hasPrimaryKey) break;
+		}
+
+		if (hasPrimaryKey) {
+			if (oRec.getKey()==null)
+				throw new IntegrityViolationException("Primary key not set and no default specified at table "+oRec.getTableName());
+			else if (oRec.getKey().toString().length()==0)
+				throw new IntegrityViolationException("Empty string not allowed as primary key at table "+oRec.getTableName());
+		}
 		
 	} // checkConstraints
 	
