@@ -86,7 +86,7 @@
     <dependency>
       <groupId>com.sleepycat</groupId>
       <artifactId>db</artifactId>
-      <version>6.1.19-nix</version>
+      <version>6.2.32-nix</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
