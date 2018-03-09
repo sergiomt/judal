@@ -13,9 +13,13 @@ package org.judal.bdb;
  */
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
+import java.util.Queue;
 
 import javax.jdo.JDOException;
 
+import org.judal.metadata.TableDef;
 import org.judal.storage.keyvalue.Stored;
 
 import com.knowgate.debug.DebugFile;
@@ -30,41 +34,37 @@ import com.sleepycat.db.OperationStatus;
 
 public class DBIterator implements AutoCloseable, Iterator<Stored> {
 
+	private String sTbl;
 	private Database oPdb;
 	private StoredClassCatalog oCtg;
 	private Cursor oCur = null;
-	private DBEntityWrapper oNxt;
+	private Queue<Stored> oNxt;
 	private DBEntityBinding oDbeb;
-	
-	public DBIterator(Database oPdb, StoredClassCatalog oCtg) {
+	private boolean isFirst;
+
+	public DBIterator(String sTbl, Database oPdb, StoredClassCatalog oCtg) {
+		this.sTbl = sTbl;
 		this.oPdb = oPdb;
 		this.oCtg = oCtg;
 		this.oCur = null;
-		this.oNxt = null;
+		this.oNxt = new LinkedList<Stored>();
 		oDbeb = new DBEntityBinding(oCtg);
 		open();
 	}
 
 	private void open() throws JDOException {
-		DatabaseEntry oDbKey = new DatabaseEntry();
-		DatabaseEntry oDbDat = new DatabaseEntry();
-		OperationStatus oOst;
 
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin DBIterator.open()");
 			DebugFile.incIdent();
 		}
 
+		isFirst = true;
+
 		try {
 			if (DebugFile.trace) DebugFile.writeln("Database.openCursor(null,null)");
-			
-			oCur = oPdb.openCursor(null,null);
 
-			oOst = oCur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
-			if (oOst == OperationStatus.SUCCESS)
-				oNxt = oDbeb.entryToObject(oDbKey,oDbDat);
-			else
-				oNxt = null;
+			oCur = oPdb.openCursor(null,null);
 
 		} catch (DeadlockException dlxc) {
 			if (DebugFile.trace) DebugFile.decIdent();
@@ -77,13 +77,31 @@ public class DBIterator implements AutoCloseable, Iterator<Stored> {
 			DebugFile.decIdent();
 			DebugFile.writeln("End DBIterator.open()");
 		}
-
 	} // open
-	
+
 	@Override
 	public boolean hasNext() {
+		boolean nextFound;
+		if (oNxt.isEmpty()) {
+			try {
+				oNxt.add(next());
+				nextFound = true;
+			} catch (NoSuchElementException nonext) {
+				nextFound =  false;
+			}
+		} else {
+			nextFound = true;
+		}
+		return nextFound;
+	}
+
+
+	@Override
+	public Stored next() throws NoSuchElementException {
+		Stored oNext;
 		DatabaseEntry oDbKey = new DatabaseEntry();
 		DatabaseEntry oDbDat = new DatabaseEntry();
+		DBEntityWrapper oDbWrp;
 		OperationStatus oOst;
 
 		if (DebugFile.trace) {
@@ -91,36 +109,50 @@ public class DBIterator implements AutoCloseable, Iterator<Stored> {
 			DebugFile.incIdent();
 		}
 
-		try {
-			if (DebugFile.trace) DebugFile.writeln("Database.openCursor(null,null)");
-			
-			oOst = oCur.getNext(oDbKey, oDbDat, LockMode.DEFAULT);
-			if (oOst == OperationStatus.SUCCESS)
-				oNxt = oDbeb.entryToObject(oDbKey,oDbDat);
-			else
-				oNxt = null;
+		oNext = oNxt.poll();
+		if (null==oNext) {
+			try {
+				if (DebugFile.trace) DebugFile.writeln("Database.openCursor(null,null)");
 
-		} catch (DeadlockException dlxc) {
-			if (DebugFile.trace) DebugFile.decIdent();
-			throw new JDOException(dlxc.getMessage(), dlxc);
-		} catch (DatabaseException xcpt) {
-			if (DebugFile.trace) DebugFile.decIdent();
-			throw new JDOException(xcpt.getMessage(), xcpt);
+				if (isFirst) {
+					oOst = oCur.getFirst(oDbKey, oDbDat, LockMode.DEFAULT);
+					isFirst = false;
+				} else {
+					oOst = oCur.getNext(oDbKey, oDbDat, LockMode.DEFAULT);
+				}
+
+				if (oOst == OperationStatus.SUCCESS) {
+					oDbWrp = oDbeb.entryToObject(oDbKey,oDbDat);
+					oNext = new DBStored(new TableDef(sTbl));
+					oNext.setKey(oDbWrp .getKey());
+					oNext.setValue(oDbWrp .getWrapped());
+				} else {
+					oNext = null;
+				}
+
+			} catch (DeadlockException dlxc) {
+				if (DebugFile.trace) DebugFile.decIdent();
+				throw new JDOException(dlxc.getMessage(), dlxc);
+			} catch (DatabaseException xcpt) {
+				if (DebugFile.trace) DebugFile.decIdent();
+				throw new JDOException(xcpt.getMessage(), xcpt);
+			}
+
 		}
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End DBIterator.hasNext()");
 		}
-		return oNxt!=null;
-	}
 
-	@Override
-	public Stored next() {
-		return (Stored) oNxt.getWrapped();
+		if (null==oNext) {
+			throw new NoSuchElementException();
+		}
+		return oNext;
 	}
 
 	@Override
 	public void close() {
+		oNxt.clear();
 		try { if (oCur!=null) oCur.close(); } catch (Exception ignore) { }
 	}
 

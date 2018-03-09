@@ -49,6 +49,8 @@ public class DBStored implements Stored {
   public void setKey(Object key) throws JDOException {
 	  if (null==key)
 	  	this.key = (String) key;
+	  else if (key instanceof byte[])
+		  this.key = new String((byte[]) key);
 	  else if (key instanceof String)
 		  this.key = (String) key;
 	  else

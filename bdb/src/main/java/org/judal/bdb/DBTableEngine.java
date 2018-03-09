@@ -2,6 +2,7 @@ package org.judal.bdb;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
@@ -33,11 +34,12 @@ public class DBTableEngine implements Engine<DBTableDataSource>  {
 				fin.close();
 				return new DBTableDataSource(properties, transactManager, metadata);
 			} else if (metadataPackage.length()>0) {
-				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);
+				DBTableDataSource retval = new DBTableDataSource(properties, transactManager, null);
+				JdoPackageMetadata packMeta = new JdoPackageMetadata(retval, metadataPackage, metadataFilePath);
 				InputStream instrm = packMeta.openStream();
 				if (instrm!=null) {
 					metadata = packMeta.readMetadata(instrm);
-					DBTableDataSource retval = new DBTableDataSource(properties, transactManager, metadata);
+					retval = new DBTableDataSource(properties, transactManager, metadata);
 					instrm.close();
 					return retval;
 				} else {
@@ -46,7 +48,7 @@ public class DBTableEngine implements Engine<DBTableDataSource>  {
 			} else {
 				throw new JDOUserException("Missing metadata package and no schema file specified");					
 			}
-		} catch (Exception xcpt) {
+		} catch (IOException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
 	}

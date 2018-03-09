@@ -46,11 +46,12 @@ public class DBEngine implements Engine<DBDataSource> {
 				fin.close();
 				return new DBTableDataSource(properties, transactManager, metadata);
 			} else if (metadataPackage.length()>0) {
-				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);
+				DBDataSource retval = new DBTableDataSource(properties, transactManager, null);
+				JdoPackageMetadata packMeta = new JdoPackageMetadata(retval, metadataPackage, metadataFilePath);
 				InputStream instrm = packMeta.openStream();
 				if (instrm!=null) {
 					metadata = packMeta.readMetadata(instrm);
-					DBDataSource retval = new DBTableDataSource(properties, transactManager, metadata);
+					retval = new DBTableDataSource(properties, transactManager, metadata);
 					instrm.close();
 					return retval;
 				} else {

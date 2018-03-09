@@ -371,90 +371,115 @@ public class DBTable extends DBBucket implements IndexableTable {
 	@Override
 	public void delete(Object oKey) throws JDOException {
 
-		byte[] byIndexValue;
-		String sIndexName = null;
-		Type eType;
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin DBTable.delete(" + oKey + ")");
+			DebugFile.incIdent();
+		}
+
 		if (oKey instanceof Param) {
-			Param oPar = ((Param) oKey);
-			byIndexValue = BytesConverter.toBytes(oPar.getValue(), Types.VARCHAR);
-			sIndexName = oPar.getName();
-			eType = oPar.getIndexType();
-		} else {
-			byIndexValue = BytesConverter.toBytes(oKey, Types.VARCHAR);
-			sIndexName = getPrimaryKey().getColumn();
-			if (null == sIndexName)
-				throw new JDOException("Cannot find primary key for table " + name());
-			eType = Type.ONE_TO_ONE;
-		}
+			String sSecIdxPath = null;
 
-		int iDeleted = 0;
-		SecondaryDatabase oSdb = null;
-		SecondaryCursor oCur = null;
-		SecondaryConfig oSec = new SecondaryConfig();
-		oSec.setAllowCreate(false);
-		oSec.setAllowPopulate(false);
-		oSec.setType(DatabaseType.BTREE);
-		oSec.setReadOnly(true);
+			final Param oPar = ((Param) oKey);
+			final byte[] byIndexValue = BytesConverter.toBytes(oPar.getValue(), Types.VARCHAR);
+			final String sIndexName = oPar.getName();
+			final Type eType = oPar.getIndexType();
 
-		try {
-			switch (eType) {
-			case ONE_TO_ONE:
-			case MANY_TO_ONE:
-				oSec.setKeyCreator(getDataSource().getKeyCreator(getResultClass(), oTbl, sIndexName,
-						          ((ColumnDef) getPrimaryKey().getColumns()[0]).getType()));
-				break;
-			case ONE_TO_MANY:
-			case MANY_TO_MANY:
-				oSec.setMultiKeyCreator(getDataSource().getMultiKeyCreator(getResultClass(), oTbl, sIndexName));
-				break;
-			default:
-				throw new JDOException("Unrecognized index type " + eType);
+			if (DebugFile.trace) {
+				DebugFile.writeln("index name is " + sIndexName);
+				DebugFile.writeln("index type is " + eType);
 			}
 
-			String sSecIdxPath = getDataSource().getPath() + getDatabase().getDatabaseName() + "." + sIndexName + ".db";
+			if (sIndexName.equalsIgnoreCase(getPrimaryKey().getColumn())) {
+				
+				super.delete(oKey);
 
-			oSdb = getDataSource().getEnvironment().openSecondaryDatabase(getTransaction(), sSecIdxPath,
-					getDatabase().getDatabaseName() + "_" + sIndexName, getDatabase(), oSec);
+			} else {
 
-			DBEntityBinding oDbeb = new DBEntityBinding(getCatalog());
-			DatabaseEntry oDbKey = new DatabaseEntry(byIndexValue);
-			DatabaseEntry oDbDat = new DatabaseEntry();
-			oCur = oSdb.openSecondaryCursor(getTransaction(), null);
+				int iDeleted = 0;
+				SecondaryDatabase oSdb = null;
+				SecondaryCursor oCur = null;
+				SecondaryConfig oSec = new SecondaryConfig();
+				oSec.setAllowCreate(false);
+				oSec.setAllowPopulate(false);
+				oSec.setType(DatabaseType.BTREE);
+				oSec.setReadOnly(true);
 
-			ArrayList<byte[]> aKeys = new ArrayList<byte[]>(1000);
+				try {
+					switch (eType) {
+					case ONE_TO_ONE:
+					case MANY_TO_ONE:
+						oSec.setKeyCreator(getDataSource().getKeyCreator(getResultClass(), oTbl, sIndexName,
+								((ColumnDef) getPrimaryKey().getColumns()[0]).getType()));
+						break;
+					case ONE_TO_MANY:
+					case MANY_TO_MANY:
+						oSec.setMultiKeyCreator(getDataSource().getMultiKeyCreator(getResultClass(), oTbl, sIndexName));
+						break;
+					default:
+						throw new JDOException("Unrecognized index type " + eType);
+					}
 
-			OperationStatus oOst = oCur.getSearchKey(oDbKey, oDbDat, LockMode.DEFAULT);
-			while (oOst == OperationStatus.SUCCESS) {
-				iDeleted++;
-				aKeys.add(oDbeb.objectToKey(oDbeb.entryToObject(oDbKey, oDbDat)));
-				oOst = oCur.getNextDup(oDbKey, oDbDat, LockMode.DEFAULT);
-			} // wend
+					sSecIdxPath = getDataSource().getPath() + getDatabase().getDatabaseName() + "." + sIndexName + ".db";
 
-			oCur.close();
-			oCur = null;
-			oSdb.close();
-			oSdb = null;
+					if (DebugFile.trace) {
+						if (new File(sSecIdxPath).exists())
+							DebugFile.writeln("openSecondaryDatabase( " + sSecIdxPath + ")");
+						else
+							DebugFile.writeln("FileNotFoundException " + sSecIdxPath);
+					}
 
-			for (byte[] k : aKeys) {
-				delete(k, getTransaction());
-			}
+					oSdb = getDataSource().getEnvironment().openSecondaryDatabase(getTransaction(), sSecIdxPath,
+							getDatabase().getDatabaseName() + "_" + sIndexName, getDatabase(), oSec);
 
-		} catch (DeadlockException dlxc) {
-			throw new JDOException(dlxc.getMessage(), dlxc);
-		} catch (Exception xcpt) {
-			throw new JDOException(xcpt.getMessage(), xcpt);
-		} finally {
-			try {
-				if (oCur != null)
+					DBEntityBinding oDbeb = new DBEntityBinding(getCatalog());
+					DatabaseEntry oDbKey = new DatabaseEntry(byIndexValue);
+					DatabaseEntry oDbDat = new DatabaseEntry();
+					oCur = oSdb.openSecondaryCursor(getTransaction(), null);
+
+					ArrayList<byte[]> aKeys = new ArrayList<byte[]>(1000);
+
+					OperationStatus oOst = oCur.getSearchKey(oDbKey, oDbDat, LockMode.DEFAULT);
+					while (oOst == OperationStatus.SUCCESS) {
+						iDeleted++;
+						aKeys.add(oDbeb.objectToKey(oDbeb.entryToObject(oDbKey, oDbDat)));
+						oOst = oCur.getNextDup(oDbKey, oDbDat, LockMode.DEFAULT);
+					} // wend
+
 					oCur.close();
-			} catch (Exception ignore) {
-			}
-			try {
-				if (oSdb != null)
+					oCur = null;
 					oSdb.close();
-			} catch (Exception ignore) {
+					oSdb = null;
+
+					for (byte[] k : aKeys) {
+						delete(k, getTransaction());
+					}
+
+				} catch (DeadlockException dlxc) {
+					throw new JDOException(dlxc.getMessage() + (sSecIdxPath==null  ? "" : sSecIdxPath), dlxc);
+				} catch (Exception xcpt) {
+					throw new JDOException(xcpt.getMessage() + (sSecIdxPath==null  ? "" : sSecIdxPath), xcpt);
+				} finally {
+					try {
+						if (oCur != null)
+							oCur.close();
+					} catch (Exception ignore) {
+					}
+					try {
+						if (oSdb != null)
+							oSdb.close();
+					} catch (Exception ignore) {
+					}
+				}
+
 			}
+
+
+		} else {
+			if (null == getPrimaryKey().getColumn())
+				throw new JDOException("Cannot find primary key for table " + name());
+			super.delete(oKey);
 		}
+
 	} // delete
 
 	// --------------------------------------------------------------------------
@@ -520,10 +545,14 @@ public class DBTable extends DBBucket implements IndexableTable {
 
 		final boolean usingPk = indexColumnName.equalsIgnoreCase(getPrimaryKey().getColumn());
 		
-		if (!usingPk && !oInd.containsKey(indexColumnName))
+		if (!usingPk && !oInd.containsKey(indexColumnName)) {
+			StringBuilder indexed = new StringBuilder();
+			for (String indexedColumn : oInd.keySet())
+				indexed.append(indexed.length()==0 ? "" : ",").append(indexedColumn);
 			throw new JDOException(
-					"DBTable.fetch() Column " + indexColumnName + " is not a primary key nor a secondary index");
-				
+					"DBTable.fetch() Column " + indexColumnName + " is not a primary key nor a secondary index on one of the following columns [" + indexed + "]");
+		}
+
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin DBTable.fetch(" + indexColumnName + "," + indexValue + "," + String.valueOf(maxRows) + "," + String.valueOf(offset) + ")");
 			DebugFile.incIdent();

@@ -1,5 +1,7 @@
 package org.judal.bdb;
 
+import java.util.Map;
+
 /**
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
@@ -32,14 +34,6 @@ public class DBSecondaryIndexCreator implements SecondaryKeyCreator {
 	private String sIndx;
 	private int iType;
 
-	public DBSecondaryIndexCreator(DBEntityBinding oBind, String sBucketName, int iColumnType) {
-		oDbeb = oBind;
-		sIndx = "key";
-		oTbl = DBBucketDataSource.getKeyValueDef(sBucketName);
-		oRecCls = null;
-		iType = iColumnType;
-	}
-
 	public DBSecondaryIndexCreator(DBEntityBinding oBind, Class<? extends Record> oRecClass, TableDef oTblDef, String sIndex, int iColumnType) {
 		oDbeb = oBind;
 		sIndx = sIndex;
@@ -56,9 +50,7 @@ public class DBSecondaryIndexCreator implements SecondaryKeyCreator {
 		}
 		DBEntityWrapper oEnt = oDbeb.entryToObject(keyEntry,dataEntry);
 		if (oRecCls==null) {
-			Stored oSto = new DBStored(oTbl);
-			oSto.setValue(oEnt.getWrapped());
-			resultEntry.setData(BytesConverter.toBytes(oSto.getKey(), iType));
+			throw new UnsupportedOperationException("Cannot create secondary index without a record class");
 		} else {
 			Record oRec;
 			try {
@@ -69,6 +61,7 @@ public class DBSecondaryIndexCreator implements SecondaryKeyCreator {
 					if (oRec.isNull(sIndx)) {
 						DebugFile.writeln("secondary key value is null");
 					} else {
+						DebugFile.writeln("indexing value " + sIndx + "=" + oRec.apply(sIndx) + " for " + oRec.getKey() + " on " + oRec.getTableName());
 						DebugFile.writeln("key class is "+oRec.apply(sIndx).getClass().getName());
 						DebugFile.writeln("key value is "+oRec.apply(sIndx));
 						DebugFile.writeln("sql type "+ColumnDef.typeName(iType));
@@ -76,7 +69,10 @@ public class DBSecondaryIndexCreator implements SecondaryKeyCreator {
 					}
 				}
 				resultEntry.setData(data);
-			} catch (NoSuchMethodException n) { }
+			} catch (NoSuchMethodException n) {
+				if (DebugFile.trace)
+					DebugFile.writeln("NoSuchMethodException " + n.getMessage());
+			}
 		}
 		if (DebugFile.trace) {
 			DebugFile.decIdent();

@@ -261,10 +261,10 @@ public class DBBucket implements Bucket {
 	public void close(Iterator<Stored> oIter) throws IllegalStateException,IllegalArgumentException {
 		if (null==oItr)
 			throw new IllegalStateException("No iterators have been created for this Berkeley DB table");
-		if (null==oItr)
-			throw new IllegalArgumentException("The Iterator does not belong to this table or it has been already closed");
 		if (oItr.contains(oIter))
 			oItr.remove(oIter);
+		else
+			throw new IllegalArgumentException("The Iterator does not belong to this table or it has been already closed");
 		((DBIterator) oIter).close();
 	}
 
@@ -313,7 +313,9 @@ public class DBBucket implements Bucket {
 
 	@Override
 	public Iterator<Stored> iterator() {
-		DBIterator oIter = new DBIterator(oPdb, oCtg);
+		DBIterator oIter = new DBIterator(name(), oPdb, oCtg);
+		if (oItr==null)
+			oItr = new HashSet<DBIterator>();
 		oItr.add(oIter);
 		return oIter;
 	}

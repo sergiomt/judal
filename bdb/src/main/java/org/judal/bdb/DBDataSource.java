@@ -96,9 +96,11 @@ public class DBDataSource implements DataSource {
 		return new DBSecondaryIndexCreator(new DBEntityBinding(oCtg), oRecCls, oTbl, sColumnName, iColumnType);
 	}
 
+	/*
 	public SecondaryKeyCreator getKeyCreator(String sBucketName, String sColumnName, int iColumnType) {
 		return new DBSecondaryIndexCreator(new DBEntityBinding(oCtg), sBucketName, iColumnType);
 	}
+	*/
 
 	public SecondaryMultiKeyCreator getMultiKeyCreator(Class<? extends Record> oRecCls, TableDef oTbl, String sIdx) {
 		return new DBSecondaryMultiIndexCreator(new DBEntityBinding(oCtg), oRecCls, oTbl, sIdx);
