@@ -13,6 +13,9 @@ package org.judal.jdbc;
  */
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.jdo.JDOException;
@@ -23,15 +26,18 @@ import javax.transaction.TransactionManager;
 
 import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.metadata.SQLColumn;
+import org.judal.jdbc.metadata.SQLIndex;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.jdbc.metadata.SQLViewDef;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.ForeignKeyDef;
+import org.judal.metadata.IndexDef;
 import org.judal.metadata.JoinDef;
 import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
+import org.judal.metadata.IndexDef.Using;
 import org.judal.storage.DataSource;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
@@ -273,6 +279,20 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	@Override
 	public SQLColumn createColumnDef(String columnName, int position, short sqlType, Map<String,Object> options) throws JDOException {
 		return new SQLColumn(columnName, position, sqlType);
+	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public IndexDef createIndexDef(String indexName, String tableName, Iterable<String> columns, IndexDef.Type indexType, IndexDef.Using using) throws JDOException {
+		Collection<String> cols = new ArrayList<String>();
+		for (String col : columns)
+			cols.add(col);
+		if (cols.size()==0) {
+			throw new JDOException("No columns specified for Index " + indexName + " on table " + tableName);
+		} else {
+			return new SQLIndex(tableName, indexName, cols.toArray(new String[cols.size()]), IndexDef.Type.ONE_TO_ONE.equals(indexType), using); 
+		}
 	}
 
 	/**

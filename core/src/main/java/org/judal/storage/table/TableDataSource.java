@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.IndexDef;
 import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
@@ -92,6 +93,18 @@ public interface TableDataSource extends DataSource {
 	TableDef createTableDef(String tableName, Map<String,Object> options) throws JDOException;
 
 	/**
+	 * Create new index definition
+	 * @param indexName String
+	 * @param tableName String
+	 * @param columns Iterable&ldquo;String&rdquo;
+	 * @param indexType IndexDef.Type
+	 * @param using IndexDef.Using
+	 * @return IndefDef
+	 * @throws JDOException
+	 */
+	IndexDef createIndexDef(String indexName, String tableName, Iterable<String> columns, IndexDef.Type indexType, IndexDef.Using using) throws JDOException;
+
+	/**
 	 * Create a new Table using the given definition
 	 * @param tableDef TableDef
 	 * @param options Map&lt;String,Object&gt;
@@ -115,6 +128,7 @@ public interface TableDataSource extends DataSource {
 	 */
 	void truncateTable(String tableName, boolean cascade) throws JDOException;
 
+	
 	/**
 	 * Open Table for Read/Write.
 	 * Basic tables only support seeking records by primary key.

@@ -34,6 +34,7 @@ import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.View;
 import org.judal.storage.Param;
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.IndexDef;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.NonUniqueIndexDef;
 import org.judal.metadata.SchemaMetaData;
@@ -435,6 +436,12 @@ public class HBTableDataSource implements TableDataSource {
 	@Override
 	public ViewDef getViewDef(String viewName) throws JDOException {
 		throw new JDOUserException("HBTableDataSource.getView() HBase does not support views");
+	}
+
+
+	@Override
+	public IndexDef createIndexDef(String indexName, String tableName, Iterable<String> columns, IndexDef.Type indexType, IndexDef.Using using) throws JDOException  {
+		throw new JDOUserException("HBTableDataSource.gcreateIndexDef() HBase does not support secondary indexes");
 	}
 
 	@Override
