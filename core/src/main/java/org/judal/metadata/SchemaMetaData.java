@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 
 import javax.jdo.JDOUserException;
 import javax.jdo.JDOUnsupportedOptionException;
+import javax.jdo.metadata.ColumnMetadata;
 
 import com.knowgate.debug.DebugFile;
 
@@ -338,8 +339,9 @@ public class SchemaMetaData {
 	 * @param indexDef IndexDef
 	 * @throws JDOUserException If the table referenced by the IndexDef is  not contained in this SchemaMetadata.
 	 * @throws JDOUnsupportedOptionException
+	 * @throws ArrayIndexOutOfBoundsException if any of the index columns does not exist on the indexed table
 	 */
-	public void addIndex(IndexDef indexDef) throws JDOUserException, JDOUnsupportedOptionException {
+	public void addIndex(IndexDef indexDef) throws JDOUserException, JDOUnsupportedOptionException, ArrayIndexOutOfBoundsException {
 		TableDef tdef = getTable(indexDef.getTable());
 		if (null==tdef)
 			throw new JDOUserException("Table "+indexDef.getTable()+" for index "+indexDef.getName());
@@ -349,6 +351,11 @@ public class SchemaMetaData {
 			tdef.addIndexMetadata((NonUniqueIndexDef) indexDef);
 		else
 			throw new JDOUnsupportedOptionException("Unsupported index type "+indexDef.getClass().getName());
+		for (ColumnMetadata cmeta : indexDef.getColumns()) {
+			ColumnDef cdef = tdef.getColumnByName(cmeta.getName());
+			if (!cdef.isIndexed() && !cdef.isPrimaryKey())
+				cdef.setIndexType(indexDef.getType());
+		}
 	}
 
 	/**
