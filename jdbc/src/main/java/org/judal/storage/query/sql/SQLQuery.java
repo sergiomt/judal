@@ -30,10 +30,12 @@ import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Expression;
+import org.judal.storage.query.Predicate;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.SingleColumnRecord;
 import org.judal.jdbc.RDBMS;
+import org.judal.jdbc.jdc.JDCDAO;
 import org.judal.jdbc.JDBCIndexableView;
 
 import com.knowgate.debug.DebugFile;
@@ -138,6 +140,11 @@ public class SQLQuery extends AbstractQuery {
 		default:
 			return new SQLPredicate();
 		}
+	}
+
+	@Override
+	public SQLPredicate newPredicate() throws JDOException {
+		return newPredicate(Connective.NONE);
 	}
 
 	private boolean supportLimitOffset() throws SQLException {
@@ -359,14 +366,15 @@ public class SQLQuery extends AbstractQuery {
 		}
 		
 		R oRow = (R) newRecord();
-		final int iColCount = Math.min(oRow.columns().length, oRSet.getMetaData().getColumnCount());
+		ResultSetMetaData oMDat = oRSet.getMetaData();
+		final int iColCount = Math.min(oRow.columns().length, oMDat.getColumnCount());
 		if (DebugFile.trace) DebugFile.writeln("retval = "+String.valueOf(iRetVal)+" maxrows="+String.valueOf(iMaxRow));			
 		while (bHasNext && iRetVal<iMaxRow) {
 			iRetVal++;
 			for (int iCol=1; iCol<=iColCount; iCol++) {
 				Object oFieldValue = oRSet.getObject(iCol);
 				if (DebugFile.trace) DebugFile.writeln("ResultSet.getObject("+iCol+") = "+oFieldValue);				
-				oRow.put (iCol, oRSet.wasNull() ? null : oFieldValue);
+				oRow.put (iCol, oRSet.wasNull() ? null : JDCDAO.toJavaObject(oFieldValue, oMDat.getColumnName(iCol), oMDat.getColumnType(iCol)));
 			} // next
 
 			recordSet.add(oRow);
@@ -407,7 +415,7 @@ public class SQLQuery extends AbstractQuery {
 			iRetVal++;
 			for (int iCol=1; iCol<=iColCount; iCol++) {
 				Object oFieldValue = oRSet.getObject(iCol);
-				oRow.put (aColNames[iCol-1], oRSet.wasNull() ? null : oFieldValue);
+				oRow.put (aColNames[iCol-1], oRSet.wasNull() ? null : JDCDAO.toJavaObject(oFieldValue, oMDat.getColumnName(iCol), oMDat.getColumnType(iCol)));
 			} // next
 
 			recordSet.add(oRow);
@@ -430,14 +438,19 @@ public class SQLQuery extends AbstractQuery {
 		boolean bHasNext = true;
 		String viewName = getView().getAlias();
 		if (null==viewName) viewName =  getView().name();
-		String colName = oRSet.getMetaData().getColumnName(1);
+		ResultSetMetaData oMDat = oRSet.getMetaData();
+		String colName = oMDat.getColumnName(1);
 		
 		recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(getResultClass(), new Class<?>[]{String.class.asSubclass(String.class)});
 		R oRow = (R) StorageObjectFactory.newRecord(recordConstructor, viewName, colName);
 
 		while (bHasNext && iRetVal<iMaxRow) {
 			iRetVal++;
-			oRow.setKey(oRSet.getObject(1));
+			Object oFieldValue = oRSet.getObject(1);
+			if (oRSet.wasNull())
+				oRow.setKey(null);
+			else
+				oRow.setKey(JDCDAO.toJavaObject(oFieldValue, colName, oMDat.getColumnType(1)));
 
 			recordSet.add(oRow);
 

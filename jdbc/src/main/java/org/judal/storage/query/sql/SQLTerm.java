@@ -15,6 +15,8 @@ import org.judal.storage.query.Part;
 import org.judal.storage.query.Predicate;
 import org.judal.storage.query.Term;
 
+import org.judal.jdbc.metadata.SQLFunctions;
+
 /*
 * Represents a fragment of the WHERE clause of a SQL statement
 * @author Sergio Montoro Ten
@@ -23,6 +25,8 @@ import org.judal.storage.query.Term;
 public class SQLTerm extends Term {
 
 	private static final long serialVersionUID = 1L;
+
+	private SQLFunctions sqlFuncts;
 
 	public SQLTerm(String columnName, String operator) throws ArrayIndexOutOfBoundsException {
 		super (columnName, operator);
@@ -181,11 +185,20 @@ public class SQLTerm extends Term {
 	}
 
 	protected SQLTerm() { }
-	
+
+	public SQLFunctions getSQLFunctions() {
+		return sqlFuncts;
+	}
+
+	public void setSQLFunctions(final SQLFunctions sqlFuncts) {
+		this.sqlFuncts = sqlFuncts;
+	}
+
 	@Override
 	public SQLTerm clone() {
 		SQLTerm theClone = new SQLTerm();
 		theClone.clone(this);
+		theClone.setSQLFunctions(getSQLFunctions());
 		return theClone;
 	}
 
@@ -200,50 +213,64 @@ public class SQLTerm extends Term {
 	 */
 	@Override
 	public String getText() {
-		String sTxt;
-		final Object value0 = (aValues==null ? null : aValues[0]);
+		StringBuilder oTxt = new StringBuilder(254);
+		final Object value0 = (aValues==null || aValues.length<1 ? null : aValues[0]);
+		final Object value1 = (aValues==null || aValues.length<2 ? null : aValues[1]);
 		if (value0 instanceof Term || value0 instanceof Predicate) {
 			if (sNestedColumn==null)
 				throw new NullPointerException("Column name for subquery cannot be null");
-			Part oNested = (Part) value0;			
-			return sColumn+" "+sOper +" (SELECT " + sNestedColumn +" FROM "+ getTableName() +" WHERE "+oNested.getText()+ ")";
+			Part oNested = (Part) value0;
+			if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS))
+				if (null==oNested)
+					oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(")");
+				else
+					oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getText()).append(")");
+			
 		} else {
 			if (sOper.equalsIgnoreCase(Operator.WITHIN)) {
-				sTxt = Operator.WITHIN+"("+sColumn+", ST_GeographyFromText('SRID=4326;POINT("+aValues[0].toString()+" "+aValues[1].toString()+")'),"+aValues[2].toString()+")";
+				final Object value2 = (aValues==null || aValues.length<3 ? null : aValues[2]);
+				oTxt.append(Operator.WITHIN).append(" (").append(sColumn).append(", ST_GeographyFromText('SRID=4326;POINT(").append(toSQLString(value0)).append(" ").append(toSQLString(value1)+")'),").append(toSQLString(value2)).append(") ");
 			} else if (sOper.equalsIgnoreCase(Operator.BETWEEN)) {
-				sTxt = sColumn+" "+Operator.BETWEEN+" "+value0.toString()+" AND "+value0.toString()+" ";
+				oTxt.append(sColumn).append(" ").append(Operator.BETWEEN).append(" ").append(toSQLString(value0)).append(" AND ").append(toSQLString(value1)).append(" ");
 			} else if (sOper.equalsIgnoreCase(Operator.EXISTS) || sOper.equalsIgnoreCase(Operator.NOTEXISTS)) {
-				sTxt = sOper+" ("+replaceParamaters(sColumn)+")";
+				oTxt.append(sOper).append(" (").append(replaceParamaters(sColumn)).append(") ");
 			} else if (sOper.equalsIgnoreCase(Operator.ISNULL) || sOper.equalsIgnoreCase(Operator.ISNOTNULL)) {
-				sTxt = sColumn+" "+sOper;
+				oTxt.append(sColumn).append(" ").append(sOper);
 			} else if (sOper.equalsIgnoreCase(Operator.IS) || sOper.equalsIgnoreCase(Operator.ISNOT)) {
-				sTxt = sColumn+" "+sOper+" "+(value0==null ? "NULL" : value0);
+				oTxt.append(sColumn).append(" ").append(sOper).append(" ").append(toSQLString(value0));
 			} else if (sOper.equalsIgnoreCase(Operator.IN) || sOper.equalsIgnoreCase(Operator.NOTIN)) {
-				if (aValues[0] instanceof String) {
-					sTxt = sColumn+" "+sOper+" ('"+value0.toString()+"'";
-					for (int v=1; v<nValues; v++)
-						sTxt += ",'"+aValues[v].toString()+"'";
-					sTxt += ")";				
+				if (null==aValues || aValues.length==0) {
+					oTxt.append(sColumn).append(" ").append(sOper).append("()");
 				} else {
-					sTxt = sColumn+" "+sOper+" ('"+value0.toString();
-					for (int v=1; v<nValues; v++)
-						sTxt += ","+aValues[v].toString();
-					sTxt += ")";				
+					oTxt.append(sColumn).append(" ").append(sOper).append(" (").append(toSQLString(aValues[0]));
+					for (int v = 1; v < nValues; v++)
+						oTxt.append(",").append(toSQLString(aValues[v]));
+					oTxt.append(")");
 				}
 			} else {
-				sTxt = sColumn+" "+sOper+" ";
-				if (aValues[0] instanceof String)
-					sTxt += "'" + aValues[0] + "'";
-				else
-					if (aValues[0]==null)
-						sTxt += "null";			
-					else
-						sTxt += aValues[0].toString();			
+				oTxt.append(sColumn).append(" ").append(sOper).append(" ").append(toSQLString(value0));
 			}
-			return sTxt;			
 		}
+		return oTxt.toString();
 	}
-	
+
+	private String toSQLString(Object value) {
+		if (null==value)
+			return null;
+		else if (value instanceof String)
+			return "'" + value + "'";
+		else if (value instanceof Timestamp)
+			return getSQLFunctions().escape((Timestamp) value);
+		else if (value instanceof java.sql.Date)
+			return getSQLFunctions().escape((java.sql.Date) value);
+		else if (value instanceof java.util.Date)
+			return getSQLFunctions().escape((java.util.Date) value, "ts");
+		else if (value instanceof java.util.Calendar)
+			return getSQLFunctions().escape((java.util.Calendar) value, "ts");
+		else
+			return value.toString();
+	}
+
 	/**
 	 * Get the term as a String with parameters as SQL question marks
 	 * @return String

@@ -594,12 +594,12 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
 			if (metadataPackage.length()==0) {
 				FileInputStream fin = new FileInputStream(new File(metadataFilePath));
-				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(null);
+				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(this);
 				fileMetadata = xmlMeta.readMetadata(fin);
 				fin.close();
 				metaData.addMetadata(fileMetadata);
 			} else if (metadataPackage.length()>0) {
-				JdoPackageMetadata packMeta = new JdoPackageMetadata(null, metadataPackage, metadataFilePath);
+				JdoPackageMetadata packMeta = new JdoPackageMetadata(this, metadataPackage, metadataFilePath);
 				InputStream instrm = packMeta.openStream();
 				if (instrm!=null) {
 					fileMetadata = packMeta.readMetadata(instrm);

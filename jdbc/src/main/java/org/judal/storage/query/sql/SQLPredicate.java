@@ -3,6 +3,8 @@ package org.judal.storage.query.sql;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.judal.jdbc.metadata.SQLFunctions;
+
 import org.judal.storage.query.Part;
 import org.judal.storage.query.Predicate;
 
@@ -12,6 +14,24 @@ import com.knowgate.typeutils.ObjectFactory;
 public class SQLPredicate extends Predicate {
 
 	private static final long serialVersionUID = 1L;
+
+	private SQLFunctions sqlFuncts;
+
+	public SQLPredicate() {
+		this.sqlFuncts = null;
+	}
+
+	public SQLPredicate(final SQLFunctions sqlFunctions) {
+		setSQLFunctions(sqlFunctions);
+	}
+
+	public SQLFunctions getSQLFunctions() {
+		return sqlFuncts;
+	}
+
+	public void setSQLFunctions(final SQLFunctions sqlFuncts) {
+		this.sqlFuncts = sqlFuncts;
+	}
 
 	/**
 	 * Add SQLTerm to predicate
@@ -47,8 +67,11 @@ public class SQLPredicate extends Predicate {
 				throw new NoSuchMethodException("Could not find suitable constructor for SQLTerm(" + paramClassNames.toString() + ")");
 			}
 		}
-		
-		super.addPart(constructor.newInstance(constructorParameters));
+
+		SQLTerm term = constructor.newInstance(constructorParameters);
+		term.setSQLFunctions(getSQLFunctions());
+
+		super.addPart(term);
 		
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
@@ -75,6 +98,7 @@ public class SQLPredicate extends Predicate {
 	public SQLPredicate clone() {
 		SQLPredicate theClone = new SQLPredicate();
 		theClone.clone(this);
+		theClone.setSQLFunctions(getSQLFunctions());
 		return theClone;
 	}
 

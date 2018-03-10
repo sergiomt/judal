@@ -247,6 +247,24 @@ public class SQLFunctions {
 	  throw new UnsupportedOperationException("Unrecognized function "+func);
   }
 
+    // -------------------------------------------------------------------------
+
+    public String escape(java.sql.Timestamp dt) throws UnsupportedOperationException {
+        return escape(new java.util.Date(dt.getTime()),"ts");
+  }
+
+    // -------------------------------------------------------------------------
+
+    public String escape(java.util.Calendar dt, String sFormat) throws UnsupportedOperationException {
+        return escape(new java.util.Date(dt.getTimeInMillis()), sFormat);
+    }
+
+    // -------------------------------------------------------------------------
+
+    public String escape(java.sql.Date dt) throws UnsupportedOperationException {
+        return escape(new java.sql.Date(dt.getTime()), "dt");
+    }
+
   // -------------------------------------------------------------------------
 
   public String escape(java.util.Date dt, String sFormat) throws UnsupportedOperationException {

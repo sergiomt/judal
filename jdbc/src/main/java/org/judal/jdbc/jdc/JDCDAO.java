@@ -21,6 +21,8 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.StringBufferInputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -34,6 +36,7 @@ import java.util.Map;
 
 import javax.jdo.metadata.ColumnMetadata;
 
+import org.judal.jdbc.HStore;
 import org.judal.jdbc.RDBMS;
 import org.judal.jdbc.jdc.JDCConnection;
 import org.judal.jdbc.metadata.SQLColumn;
@@ -44,6 +47,7 @@ import org.judal.storage.table.Record;
 
 import com.knowgate.debug.Chronometer;
 import com.knowgate.debug.DebugFile;
+import com.knowgate.gis.LatLong;
 
 /**
  * <p>Helper functions for loading, storing and deleting rows from a SQL table.</p>
@@ -60,6 +64,36 @@ public class JDCDAO {
 	public JDCDAO(TypeDef tdef, SQLStatements sqlStatements) throws SQLException {
 		this.tdef = tdef;
 		this.sqlStatements = sqlStatements;
+	}
+
+	// ---------------------------------------------------------------------------
+
+	public static Object toJavaObject(Object oObj, String sColName, int iColType) {
+		Object oRetVal = oObj;
+		if (iColType==Types.OTHER) {
+			final String pgObjectClass = oObj.getClass().getName();
+			if (pgObjectClass.equals("org.postgresql.util.PGobject") ||
+				pgObjectClass.equals("org.openstreetmap.osmosis.hstore.PGHStore")) {
+				try {
+					Method getType = oObj.getClass().getMethod("getType");
+					Method getValue = oObj.getClass().getMethod("getValue");
+					String pgObjectValue = (String) getValue.invoke(oObj);
+					String pgObjectType = (String) getType.invoke(oObj);
+					if (DebugFile.trace)
+						DebugFile.writeln("Column " + sColName + " is PGObject of type " + pgObjectType + " with value " + pgObjectValue);
+					if (pgObjectType.toLowerCase().indexOf("hstore")>=0) {
+						oRetVal = new HStore(pgObjectValue).asMap();
+					} else if (pgObjectValue.matches("-?\\d+(\\x2E\\d+)? -?\\d+(\\x2E\\d+)?")) {
+						String[] aLatLng = pgObjectValue.split(" ");
+						oRetVal = new LatLong(Float.parseFloat(aLatLng[0]), Float.parseFloat(aLatLng[1]));
+					}
+				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					if (DebugFile.trace)
+						DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
+				}
+			}
+		}
+		return oRetVal;
 	}
 
 	// ---------------------------------------------------------------------------
@@ -139,7 +173,7 @@ public class JDCDAO {
 					if (oRSet.wasNull()) {
 						if (DebugFile.trace) DebugFile.writeln("Value of column " + oDBCol.getName() + " is NULL");
 					} else {
-						AllValues.put(oDBCol.getName(), oVal);
+						AllValues.put(oDBCol.getName(), toJavaObject(oVal, oDBCol.getName(), oDBCol.getType()));
 					}// fi
 				}
 			}

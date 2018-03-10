@@ -42,11 +42,11 @@ import org.judal.transaction.TransactionalResource;
 
 
 /**
-* <p>JDBC Connection Wrapper</p>
-* This class is a wrapper over java.sql.Connection for connections managed by a pool
-* @author Sergio Montoro Ten
-* @version 1.0
-*/
+ * <p>JDBC Connection Wrapper</p>
+ * This class is a wrapper over java.sql.Connection for connections managed by a pool
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
 public class JDCConnection extends TransactionalResource implements Connection, PooledConnection, JDOConnection  {
 
 	public static final String CURRENT_TIMESTAMP = "CURRENT_TIMESTAMP";
@@ -60,7 +60,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	public static final String SERIAL = "SERIAL";
 	public static final String BLOB = "BLOB";
 	public static final String CLOB = "CLOB";
-	
+
 	private LinkedList<ConnectionEventListener> listeners;
 	private long timestamp;
 	private int dbms;
@@ -72,7 +72,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	private JDCConnectionPool pool;
 	private boolean inuse;
 	private boolean started;
-		
+
 	private static final String DBMSNAME_MSSQL = RDBMS.MSSQL.toString();
 	private static final String DBMSNAME_POSTGRESQL = RDBMS.POSTGRESQL.toString();
 	private static final String DBMSNAME_ORACLE = RDBMS.ORACLE.toString();
@@ -146,7 +146,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			DebugFile.writeln("End JDCConnection.startResource() : " + getId().toString());
 		}
 	}
-	
+
 	/**
 	 * @return int XAResource.XA_RDONLY if this connection is in read-only mode else XAResource.XA_OK
 	 */
@@ -226,7 +226,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			DebugFile.writeln("End JDCConnection.rollbackResource() : " + getId().toString());
 		}
 	}
-	
+
 	/**
 	 * <p>End participation of this connection in a transaction.</p>
 	 * Set autocommit on
@@ -276,14 +276,14 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	/**
 	 * @return boolean
 	 */
 	public boolean inUse() {
 		return inuse;
 	}	
-	
+
 	/**
 	 * @param listener ConnectionEventListener
 	 */
@@ -299,7 +299,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	public void removeConnectionEventListener(ConnectionEventListener listener) {
 		listeners.remove(listener);
 	} 
-	
+
 	protected void notifyClose() {
 		if (listeners.size()>0) {
 			Iterator<ConnectionEventListener> oIter = listeners.iterator();
@@ -357,7 +357,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	 */
 	public boolean validate() {
 		boolean bValid;
-		
+
 		try {
 			conn.getMetaData();
 			bValid = true;
@@ -598,7 +598,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	public Connection getNativeConnection() {
 		return conn;		
 	}
-	
+
 	/**
 	 * <p>Get id of thread for which this connection was started or -1 if connection is not started for any thread.</p>
 	 * @return long Thread Id
@@ -1264,7 +1264,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		ResultSet oRSet;
 		String sPId = "unknown";
 		final int rdbms = getDataBaseProduct();
-		
+
 		if (RDBMS.POSTGRESQL.intValue()==rdbms) {
 			oStmt = createStatement();
 			oRSet = oStmt.executeQuery("SELECT pg_backend_pid()");
@@ -1285,7 +1285,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	} // pid
 
 	// ---------------------------------------------------------------------------
-	
+
 	private int bindParameterOrcl (PreparedStatement oStmt, int iParamIndex, Object oParamValue, int iSQLType) throws SQLException {
 
 		if (oParamValue!=null) {
@@ -1338,7 +1338,98 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	}
 
 	// ---------------------------------------------------------------------------
+
+	private int bindPgGeography(String oParamValue, PreparedStatement oStmt, int iParamIndex, int iSQLType)
+		throws NumberFormatException, SQLException {
+		int nBinded;
+		String sParamValue = (String) oParamValue;
+		if (sParamValue.matches("-?\\d+(\\x2E\\d+)? -?\\d+(\\x2E\\d+)?")) {
+			String[] aLatLng = sParamValue.split(" ");
+			if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " String lattitude "+ aLatLng[0] +" as SQL DOUBLE");
+			oStmt.setDouble(iParamIndex, new Double(aLatLng[0]).doubleValue());
+			if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex+1) + " String longitude "+ aLatLng[1] +" as SQL DOUBLE");
+			oStmt.setDouble(iParamIndex+1, new Double(aLatLng[1]).doubleValue());
+			nBinded = 2;              		
+		} else if (sParamValue.equalsIgnoreCase("NULL NULL")) {
+			if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " String lattitude null as SQL DOUBLE");
+			oStmt.setNull(iParamIndex, Types.DOUBLE);
+			if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex+1) + " String longitude null as SQL DOUBLE");
+			oStmt.setNull(iParamIndex+1, Types.DOUBLE);
+			nBinded = 2;
+		} else {
+			oStmt.setObject(iParamIndex, oParamValue, iSQLType);
+			nBinded = 1;
+		}
+		return nBinded;
+	}
 	
+	// ---------------------------------------------------------------------------
+
+	private int bindPgGeography(LatLong oParamValue, PreparedStatement oStmt, int iParamIndex, int iSQLType) throws SQLException {
+		if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " LatLong lattitude "+ String.valueOf(oParamValue.getLattitude()) +" as SQL DOUBLE");
+		if (Double.isNaN(oParamValue.getLattitude()))
+			oStmt.setNull(iParamIndex, Types.DOUBLE);
+		else
+			oStmt.setDouble(iParamIndex, oParamValue.getLattitude());
+		if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex+1) + " LatLong longitude "+ String.valueOf(oParamValue.getLongitude()) +" as SQL DOUBLE");
+		if (Double.isNaN(oParamValue.getLongitude()))
+			oStmt.setNull(iParamIndex+1, Types.DOUBLE);
+		else
+			oStmt.setDouble(iParamIndex+1, oParamValue.getLongitude());
+		return 2;
+	}
+
+	// ---------------------------------------------------------------------------
+
+	private int bindPgHStore(Map oParamValue, PreparedStatement oStmt, int iParamIndex, int iSQLType) throws SQLException {
+		try {
+			Class<?> cPgObj = Class.forName("org.postgresql.util.PGobject");
+			Object oPgObj = cPgObj.newInstance();
+			Method oSetType = cPgObj.getMethod("setType", new Class[]{String.class});
+			oSetType.invoke(oPgObj, new Object[]{"hstore"});
+			Method oSetValue = cPgObj.getMethod("setValue", new Class[]{String.class});
+			oSetValue.invoke(oPgObj, new Object[]{new HStore((Map<String,String>) oParamValue).getValue()});
+			if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " " + oPgObj + " as HSTORE");
+			oStmt.setObject(iParamIndex, oPgObj, Types.OTHER);
+		} catch (ClassNotFoundException cnf) {
+			throw new SQLException("ClassNotFoundException org.postgresql.util.PGobject");
+		} catch (IllegalAccessException iae) {
+			throw new SQLException("IllegalAccessException PGobject "+iae.getMessage());
+		} catch (InstantiationException ine) {
+			throw new SQLException("InstantiationException PGobject "+ine.getMessage());
+		} catch (NoSuchMethodException nsm) {
+			throw new SQLException("NoSuchMethodException PGobject "+nsm.getMessage());						  
+		} catch (InvocationTargetException ite) {
+			throw new SQLException("InvocationTargetException PGobject "+ite.getMessage());						  
+		}
+		return 1;
+	}
+
+	// ---------------------------------------------------------------------------
+
+	private int bindPgObject(Object oParamValue, PreparedStatement oStmt, int iParamIndex, int iSQLType) throws SQLException {
+		int nBinded;
+		try {
+			Method getType = oParamValue.getClass().getMethod("getType");
+			String objType = (String) getType.invoke(oParamValue);
+			if (objType.toLowerCase().indexOf("hstore")>=0) {
+				if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " " + oParamValue + " as HSTORE");
+				oStmt.setObject(iParamIndex, oParamValue, Types.OTHER);
+				nBinded = 1;
+			} else {
+				Method getValue = oParamValue.getClass().getMethod("getValue");
+				String objValue = (String) getValue.invoke(oParamValue);
+				nBinded = bindPgGeography(objValue, oStmt, iParamIndex, iSQLType);
+			}
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new SQLException(e.getClass().getName() + " at org.postgresql.util.PGobject");
+		}
+		return nBinded;
+	}
+	
+
+	// ---------------------------------------------------------------------------
+
 	/**
 	 * <p>Bind parameter into a PreparedStatement</p>
 	 * @param oStmt PreparedStatement where values is to be binded
@@ -1352,17 +1443,17 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	public int bindParameter (PreparedStatement oStmt, int iParamIndex, Object oParamValue, int iSQLType) throws SQLException {
 
 		int nBinded = 1;
-				
+
 		if (RDBMS.ORACLE.intValue()==getDataBaseProduct()) {
 
-            nBinded = bindParameterOrcl (oStmt, iParamIndex, oParamValue, iSQLType);
+			nBinded = bindParameterOrcl (oStmt, iParamIndex, oParamValue, iSQLType);
 
 		} else {
-			
+
 			if (DebugFile.trace) {
 				DebugFile.writeln("JDCConnection.bindParameter("+iParamIndex+"," +
-			 		(null==oParamValue ? "null" : oParamValue.getClass().getName()+" "+oParamValue.toString()) + ","+ 
-			 		ColumnDef.typeName(iSQLType)+")");
+						(null==oParamValue ? "null" : oParamValue.getClass().getName()+" "+oParamValue.toString()) + ","+ 
+						ColumnDef.typeName(iSQLType)+")");
 			}
 
 			String sParamClassName;
@@ -1393,64 +1484,20 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			else if (Types.OTHER==iSQLType) { // PostgreSQL PGObject (may be interval, geoposition or hstore)
 				if (oParamValue!=null) {
 					if (oParamValue instanceof LatLong) {
-						LatLong oLatLng = (LatLong) oParamValue;
-						if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " LatLong lattitude "+ String.valueOf(oLatLng.getLattitude()) +" as SQL DOUBLE");
-						if (Double.isNaN(oLatLng.getLattitude()))
-						  oStmt.setNull(iParamIndex, Types.DOUBLE);
-						else
-						  oStmt.setDouble(iParamIndex, oLatLng.getLattitude());
-						if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex+1) + " LatLong longitude "+ String.valueOf(oLatLng.getLongitude()) +" as SQL DOUBLE");
-						if (Double.isNaN(oLatLng.getLongitude()))
-					      oStmt.setNull(iParamIndex+1, Types.DOUBLE);
-						else
-						  oStmt.setDouble(iParamIndex+1, oLatLng.getLongitude());
-						nBinded = 2;              		
-					} else if (oParamValue instanceof Map) {
-					  try {
-					    Class cPgObj = Class.forName("org.postgresql.util.PGobject");
-					    Object oPgObj = cPgObj.newInstance();
-						Method oSetType = cPgObj.getMethod("setType", new Class[]{String.class});
-						oSetType.invoke(oPgObj, new Object[]{"hstore"});
-						Method oSetValue = cPgObj.getMethod("setValue", new Class[]{String.class});
-						oSetValue.invoke(oPgObj, new Object[]{new HStore((Map<String,String>) oParamValue).getValue()});
-						if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " " + oPgObj + " as HSTORE");
-						oStmt.setObject(iParamIndex, oPgObj, Types.OTHER);
-					  } catch (ClassNotFoundException cnf) {
-						throw new SQLException("ClassNotFoundException org.postgresql.util.PGobject");
-					  } catch (IllegalAccessException iae) {
-					    throw new SQLException("IllegalAccessException PGobject "+iae.getMessage());
-					  } catch (InstantiationException ine) {
-						throw new SQLException("InstantiationException PGobject "+ine.getMessage());
-					  } catch (NoSuchMethodException nsm) {
-						throw new SQLException("NoSuchMethodException PGobject "+nsm.getMessage());						  
-					  } catch (InvocationTargetException ite) {
-						throw new SQLException("InvocationTargetException PGobject "+ite.getMessage());						  
-					  }
+						nBinded = bindPgGeography((LatLong) oParamValue, oStmt, iParamIndex, iSQLType);
 					} else if (oParamValue instanceof String) {
-						String sParamValue = (String) oParamValue;
-						if (sParamValue.matches("-?\\d+(\\x2E\\d+)? -?\\d+(\\x2E\\d+)?")) {
-							String[] aLatLng = sParamValue.split(" ");
-							if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " String lattitude "+ aLatLng[0] +" as SQL DOUBLE");
-							oStmt.setDouble(iParamIndex, new Double(aLatLng[0]).doubleValue());
-							if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex+1) + " String longitude "+ aLatLng[1] +" as SQL DOUBLE");
-							oStmt.setDouble(iParamIndex+1, new Double(aLatLng[1]).doubleValue());
-							nBinded = 2;              		
-						} else if (sParamValue.equalsIgnoreCase("NULL NULL")) {
-							if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex) + " String lattitude null as SQL DOUBLE");
-							oStmt.setNull(iParamIndex, Types.DOUBLE);
-							if (DebugFile.trace) DebugFile.writeln("binding parameter " + String.valueOf(iParamIndex+1) + " String longitude null as SQL DOUBLE");
-							oStmt.setNull(iParamIndex+1, Types.DOUBLE);
-							nBinded = 2;
-						} else {
-							oStmt.setObject(iParamIndex, oParamValue, iSQLType);
-						}
+						nBinded = bindPgGeography((String) oParamValue, oStmt, iParamIndex, iSQLType);
+					} else if (oParamValue instanceof Map) {
+						nBinded = bindPgHStore((Map) oParamValue, oStmt, iParamIndex, iSQLType);
+					} else if (oParamValue.getClass().getName().equals("org.postgresql.util.PGobject")) {
+						nBinded = bindPgObject(oParamValue, oStmt, iParamIndex, iSQLType);						
 					} else {
-					  if (DebugFile.trace) DebugFile.writeln("binding "+oParamValue.getClass().getName()+" as PGObject");
-					  oStmt.setObject(iParamIndex, oParamValue, iSQLType);                  
+						if (DebugFile.trace) DebugFile.writeln("binding "+oParamValue.getClass().getName()+" as PGObject");
+						oStmt.setObject(iParamIndex, oParamValue, iSQLType);                  
 					}
 				} else {
 					oStmt.setNull(iParamIndex, iSQLType);
-					nBinded = 1;              		
+					nBinded = 1;
 				}
 			}
 			else {
@@ -1461,9 +1508,9 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 				}
 			}
 		}
-		
+
 		if (DebugFile.trace) DebugFile.writeln("JDCConnection.bindParameter("+String.valueOf(iParamIndex)+","+oParamValue+","+String.valueOf(iSQLType)+") : "+String.valueOf(nBinded));
-		
+
 		return nBinded;
 	} // bindParameter
 
@@ -1500,7 +1547,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 	} // bindParameter
 
 	// ---------------------------------------------------------------------------
-	
+
 	/**
 	 * <p>Checks if an object exists.</p>
 	 * Checking is done directly against database catalog tables,
@@ -1537,7 +1584,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 		}
 
 		final int dbms = getDataBaseProduct();
-		
+
 		if (dbms==RDBMS.MSSQL.intValue()) {
 			if (DebugFile.trace)
 				DebugFile.writeln ("Connection.prepareStatement(SELECT id FROM sysobjects WHERE name='" + sObjectName + "' AND xtype='" + sObjectType + "' OPTION (FAST 1))");
@@ -1602,7 +1649,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			bRetVal = oRSet.next();
 			oRSet.close();
 			oStmt.close();
-			
+
 		} else {
 			throw new UnsupportedOperationException ("Unsupported DBMS");
 		} // end switch()
@@ -1614,7 +1661,7 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 
 		return bRetVal;
 	} // exists()
-	
+
 	// ---------------------------------------------------------------------------
 
 	/**

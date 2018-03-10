@@ -21,6 +21,7 @@ import org.judal.jdbc.metadata.SQLViewDef;
 import javax.jdo.JDOException;
 
 import org.judal.storage.query.sql.SQLQuery;
+import org.judal.storage.query.sql.SQLPredicate;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
@@ -188,7 +189,9 @@ import org.judal.storage.query.Predicate;
 	   */
 	  @Override
 	  public Predicate newPredicate() throws JDOException {
-		  return newQuery().newPredicate();
+		  SQLPredicate predicate = newQuery().newPredicate();
+		  predicate.setSQLFunctions(getDataSource().Functions);
+		  return predicate;
 	  }
 
 	  /**
