@@ -31,7 +31,7 @@ import com.knowgate.debug.DebugFile;
  *
  */
 public class SchemaMetaData {
-	
+
 	private String catalogName;
 	private String schemaName;
 	private LinkedList<ClassPackage> packages;
@@ -168,7 +168,7 @@ public class SchemaMetaData {
 				return true;
 		return false;
 	}
-	
+
 	/**
 	 * Add an existing TableDef instance to this SchemaMetaData.
 	 * If this instance already contains a TableDef with the same name as the provided then the existing TableDef is replaced.
@@ -176,7 +176,7 @@ public class SchemaMetaData {
 	 * @param packageName String
 	 */
 	public void addTable(TableDef tableDef, String packageName) {
-		
+
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin SchemaMetaData.addTable("+tableDef.getName()+","+packageName+")");
 			DebugFile.incIdent();
@@ -188,9 +188,9 @@ public class SchemaMetaData {
 						b.append(t.getName()).append(",");
 					if (b.length()>0) b.setLength(b.length()-1);
 					DebugFile.writeln(b.toString());
-			}
+				}
 		}
-		
+
 		final String key = tableDef.getName().toLowerCase();
 
 		if (tbleDefs.containsKey(key))
@@ -232,7 +232,7 @@ public class SchemaMetaData {
 					break;
 				}			
 		}
-		
+
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End SchemaMetaData.addTable()");
@@ -388,7 +388,7 @@ public class SchemaMetaData {
 	public ProcedureDef getProcedure(String procedureName) {
 		return procDefs.get(procedureName.toLowerCase());
 	}
-	
+
 	/**
 	 * Check whether this SchemaMetaData contains a ProcedureDef with the given name. Procedure names are case insensitive.
 	 * @param procedureName String ProcedureDef Name
@@ -427,7 +427,7 @@ public class SchemaMetaData {
 	public TriggerDef getTrigger(String triggerName) {
 		return trigDefs.get(triggerName.toLowerCase());
 	}
-	
+
 	/**
 	 * Get whether this SchemaMetadata contains a TriggerDef by the given name. Name lookup is case insensitive.
 	 * @param triggerName String
@@ -448,7 +448,7 @@ public class SchemaMetaData {
 		seqDefs.put(key, seqDef);
 	}
 
-	
+
 	/**
 	 * Remove sequence. I no sequence is found with the given name this method does nothing and does not return any error.
 	 * @param sequenceName String
@@ -467,7 +467,7 @@ public class SchemaMetaData {
 	public SequenceDef getSequence(String sequenceName) {
 		return seqDefs.get(sequenceName.toLowerCase());
 	}
-	
+
 	/**
 	 * Get whether this SchemaMetadata contains a SequenceDef by the given name. Name lookup is case insensitive.
 	 * @param sequenceName String
@@ -476,7 +476,7 @@ public class SchemaMetaData {
 	public boolean containsSequence(String sequenceName) {
 		return seqDefs.containsKey(sequenceName);
 	}
-	
+
 	/**
 	 * Remove all tables,views, procedures, triggers, sequences and packages
 	 */
@@ -496,7 +496,7 @@ public class SchemaMetaData {
 	public Collection<ClassPackage> packages() {
 		return Collections.unmodifiableCollection(packages);
 	}
-	
+
 	/**
 	 * Get unmodifiable collection of tables in this schema
 	 * @return Collection&lt;TableDef&gt;
@@ -512,7 +512,7 @@ public class SchemaMetaData {
 	public Collection<ViewDef> views() {
 		return Collections.unmodifiableCollection(viewDefs.values());
 	}
-	
+
 	/**
 	 * Get unmodifiable collection of indexes in this schema
 	 * @return Collection&lt;IndexDef&gt;
@@ -555,7 +555,7 @@ public class SchemaMetaData {
 	public int getTablesCount() {
 		return tbleDefs.size();
 	}
-	
+
 	/**
 	 * Get unmodifiable map of tables in this schema
 	 * @return Map&lt;String,TableDef&gt;
@@ -563,7 +563,7 @@ public class SchemaMetaData {
 	public Map<String,TableDef> tableMap() {
 		return Collections.unmodifiableMap(tbleDefs);
 	}
-	
+
 	/**
 	 * @return String catalogName
 	 */
@@ -577,7 +577,7 @@ public class SchemaMetaData {
 	public void setCatalog(String name) {
 		catalogName = name;
 	}
-	
+
 	/**
 	 * @return String schemaName
 	 */
@@ -588,7 +588,7 @@ public class SchemaMetaData {
 	public void setSchema(String name) {
 		schemaName = name;
 	}
-	
+
 	/**
 	 * Get columns of a given table.
 	 * @param tableName String
@@ -596,26 +596,23 @@ public class SchemaMetaData {
 	 * @throws ArrayIndexOutOfBoundsException If no table with the given name is contained at this SchemaMetadata
 	 */
 	public ColumnDef[] getColumns(String tableName)
-		throws ArrayIndexOutOfBoundsException {
+			throws ArrayIndexOutOfBoundsException {
 		final String key = tableName.toLowerCase();
 		boolean matches = ymd.matcher(tableName).find();
 		if (DebugFile.trace)
 			DebugFile.writeln(tableName+" matches "+ymd.toString()+" "+String.valueOf(matches));
-		if (matches)
-			if (DebugFile.trace)
-				DebugFile.writeln("Catalog contains key "+tableName.substring(0, tableName.length()-ymd.toString().length())+" "+tbleDefs.containsKey(key.substring(0, key.length()-ymd.toString().length())));
 		if (tbleDefs.containsKey(tableName))
 			return tbleDefs.get(key).getColumns();
 		else {
 			boolean bTimeRollingTable = ymd.matcher(tableName).find();
 			if (bTimeRollingTable) {
-			  String baseTable = key.substring(0, key.lastIndexOf('_'));
-			  if (tbleDefs.containsKey(baseTable))
-		        return tbleDefs.get(baseTable).getColumns();
-		      else
-		        throw new ArrayIndexOutOfBoundsException("No base Table found with name "+baseTable);
+				String baseTable = key.substring(0, key.lastIndexOf('_'));
+				if (tbleDefs.containsKey(baseTable))
+					return tbleDefs.get(baseTable).getColumns();
+				else
+					throw new ArrayIndexOutOfBoundsException("No base Table found with name "+baseTable);
 			} else {
-		        throw new ArrayIndexOutOfBoundsException("No Table nor Record found with name "+tableName);			
+				throw new ArrayIndexOutOfBoundsException("No Table nor Record found with name "+tableName);			
 			}
 		}	
 	}
@@ -633,9 +630,9 @@ public class SchemaMetaData {
 		if (ymd.matcher(tableName).find())
 			tableName = tableName.substring(0, tableName.lastIndexOf('_'));
 		if (!tbleDefs.containsKey(tableName.toLowerCase())) {
-		  columnNames = new String[columnsList.length];
-		  for (int nCol=0; nCol<columnsList.length; nCol++)
-		    columnNames[nCol] = columnsList[nCol].getName();
+			columnNames = new String[columnsList.length];
+			for (int nCol=0; nCol<columnsList.length; nCol++)
+				columnNames[nCol] = columnsList[nCol].getName();
 		} else {
 			columnNames = new String[0];
 		}
