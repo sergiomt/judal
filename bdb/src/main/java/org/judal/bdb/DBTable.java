@@ -148,7 +148,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 				SchemaMetaData metaData = ((DBTableDataSource) getDataSource()).getMetaData();
 				if (null == metaData) {
 					if (DebugFile.trace)
-						DebugFile.writeln("no metadata found for table" + tableName);
+						DebugFile.writeln("no metadata found for table " + tableName);
 					return new ColumnDef[0];
 				}
 				ColumnDef[] oCols = metaData.getColumns(tableName);
@@ -161,7 +161,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 			} else {
 				oLst = new ColumnDef[0];
 			}
-		} catch (Exception xcpt) {
+		} catch (NullPointerException xcpt) {
 			if (DebugFile.trace)
 				DebugFile.writeln("DBTable.columns() " + xcpt.getClass().getName() + " " + xcpt.getMessage());
 			oLst = null;

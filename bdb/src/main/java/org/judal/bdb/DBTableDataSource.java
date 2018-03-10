@@ -119,7 +119,10 @@ public class DBTableDataSource extends DBBucketDataSource implements TableDataSo
 		}
 
 		DBTable retval;
-		Properties oProps = getTableProperties(oSmd.getTable(recordInstance.getTableName()));
+		TableDef tdef = oSmd.getTable(recordInstance.getTableName());
+		if (null==tdef)
+			throw new JDOException("Table " + recordInstance.getTableName() + " not found in schema metadata");
+		Properties oProps = getTableProperties(tdef);
 		oProps.put("readonly", isReadOnly() ? "true" : "false");
 		retval = (DBTable) openTableOrBucket(oProps, getMetaData().getTable(recordInstance.getTableName()), recordInstance.getClass(), true);
 
