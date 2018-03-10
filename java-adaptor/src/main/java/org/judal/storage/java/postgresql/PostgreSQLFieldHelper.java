@@ -154,7 +154,7 @@ public class PostgreSQLFieldHelper implements FieldHelper {
 		if (iDays<0) return 0;
 		return Integer.parseInt(Str.removeChars(sTI.substring(iMons,iDays), " "));
 	} // getIntervalPart
-	
+
 	public LatLong getLatLong(Record oRec, String sKey) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException {
 		if (oRec.isNull(sKey)) {
 			return null;

@@ -115,7 +115,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 		for (ColumnDef cdef: tableDefinition.getColumns())
 			columnIndexes.put(++i, cdef.getName());
 	}
-	
+
 	/**
 	 * Constructor
 	 * @param dataSource TableDataSource
@@ -124,7 +124,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOUserException if table or view is not found at DataSource metadata
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		this(getViewDefForName(dataSource, tableName));		
+		this(getViewDefForName(dataSource, tableName));	
 	}
 
 	/**
