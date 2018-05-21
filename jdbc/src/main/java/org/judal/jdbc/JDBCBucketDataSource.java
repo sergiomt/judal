@@ -73,6 +73,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 	 * @throws JDOException if this data source is in the middle of a transaction
 	 */
 	public void execute(String sql) throws JDOException {
+		assertNotClosed();
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCBucketDataSource.execute("+sql+")");
 			DebugFile.incIdent();
@@ -114,6 +115,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 	public void createBucket(String bucketName, Map<String,Object> options) throws JDOException {
 		String keyfield;
 		String valfield;
+		assertNotClosed();
 		if (options==null) {
 			keyfield = "key";
 			valfield = "value";
@@ -157,6 +159,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 	 */
 	@Override
 	public Bucket openBucket(String bucketName) throws JDOException {
+		assertNotClosed();
 		JDBCBucket bckt = new JDBCBucket(this, bucketName);
 		if (inTransaction()) {
 			try {
@@ -177,6 +180,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 	 */
 	@Override
 	public void dropBucket(String bucketName) throws JDOException {
+		assertNotClosed();
 		execute("DROP TABLE "+bucketName);
 	}
 
@@ -187,6 +191,7 @@ public class JDBCBucketDataSource extends JDBCDataSource implements BucketDataSo
 	 */
 	@Override
 	public void truncateBucket(String bucketName) throws JDOException {
+		assertNotClosed();
 		execute("TRUNCATE TABLE "+bucketName);
 	}
 

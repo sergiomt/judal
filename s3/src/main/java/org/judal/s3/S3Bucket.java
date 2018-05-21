@@ -84,7 +84,7 @@ public class S3Bucket implements Bucket {
 	 */
 	@Override
 	public boolean exists(Object key) throws NullPointerException, IllegalArgumentException, JDOException {
-		if (null==key) throw new NullPointerException("S3Bucket.load() key value cannot be null");
+		if (null==key) throw new NullPointerException("S3Bucket.exists() key value cannot be null");
 
 		Object value;
 		if (key instanceof Param)

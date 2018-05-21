@@ -19,7 +19,9 @@ import org.judal.storage.Param;
 import org.judal.storage.keyvalue.ReadOnlyBucket;
 
 public interface View extends ReadOnlyBucket {
-	  
+
+	  final String NUM_ROWS = "NUM_ROWS";
+
  	  ColumnDef[] columns();
  
 	  int columnsCount();

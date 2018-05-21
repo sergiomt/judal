@@ -80,7 +80,7 @@ public abstract class AbstractRelationalQuery<R extends Record> implements Clone
 			}
 			viw = dts.openRelationalView(rec);
 			qry = viw.newQuery();
-			prd = qry.newPredicate();			
+			prd = qry.newPredicate();
 		}
 	}
 

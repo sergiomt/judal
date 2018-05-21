@@ -95,6 +95,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	protected final boolean useDatabaseMetadata;
 	protected boolean autocommit;
 
+	private boolean closed;
+
 	private static final String VERSION = "1.0.0";
 
 	/**
@@ -128,6 +130,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		transactMan = transactManager;
 		metaData = new SchemaMetaData();
 		daos = new HashMap<String,JDCDAO>(349);
+		closed = true;
 		initialize(properties);
 	}
 
@@ -152,7 +155,12 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			return result;
 		}
 	}
-	
+
+	protected void assertNotClosed() throws JDOUserException {
+		if (isClosed())
+				throw new JDOUserException("JDBCDataSource has been closed");
+	}
+
 	/**
 	 * <p>Call a stored procedure or PL/pgSQL function in the case of PostgreSQL</p>.
 	 * The procedure will be invoked using JDBC syntax { call procedureName('param1.,.'para2') }
@@ -321,21 +329,35 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	public void close() {
 
 		if (DebugFile.trace)  {
-			DebugFile.writeln("Begin DBDataSource.close()");
+			DebugFile.writeln("Begin JDBCDataSource.close()");
 			DebugFile.incIdent();
 		}
 
 		connectXcpt = null;
 
+		daos.clear();
+
 		metaData.clear();
 
 		super.close();
 
+		closed = true;
+
 		if (DebugFile.trace)  {
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBDataSource.close()");
+			DebugFile.writeln("End JDBCDataSource.close()");
 		}
 	} // close
+
+	// ----------------------------------------------------------
+
+	/**
+	 * Get whether this JDBCDataSource has been closed
+	 * return boolean
+	 */
+	public boolean isClosed() {
+		return closed;
+	}
 
 	// ----------------------------------------------------------
 
@@ -354,6 +376,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 		connectXcpt = null;
 
+		daos.clear();
+
 		metaData.clear();
 
 		try {
@@ -362,6 +386,8 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		catch (Exception e) {
 			if (DebugFile.trace)  DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
 		}
+
+		closed = true;
 
 		initialize (getProperties());
 
@@ -588,17 +614,38 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	// ----------------------------------------------------------
 
 	public void readMetadataFromFile(Map<String,String> properties) throws JDOException {
+
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDBCDataSource.readMetadataFromFile()");
+			DebugFile.incIdent();
+			StringBuilder metaDataInfo = new StringBuilder();
+			metaDataInfo.append("existing tables [");
+			boolean first = true;
+			for (TableDef tdef : metaData.tables()) {
+				if (first)
+					first = false;
+				else
+					metaDataInfo.append(",");
+				metaDataInfo.append(tdef.getName());
+			}
+			metaDataInfo.append("]");
+			DebugFile.writeln(metaDataInfo.toString());
+		}
+
 		SchemaMetaData fileMetadata;
 		try {
-			String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
-			String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
+			final String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
+			final String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
+			
 			if (metadataPackage.length()==0) {
 				FileInputStream fin = new FileInputStream(new File(metadataFilePath));
 				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(this);
 				fileMetadata = xmlMeta.readMetadata(fin);
 				fin.close();
 				metaData.addMetadata(fileMetadata);
+			
 			} else if (metadataPackage.length()>0) {
+
 				JdoPackageMetadata packMeta = new JdoPackageMetadata(this, metadataPackage, metadataFilePath);
 				InputStream instrm = packMeta.openStream();
 				if (instrm!=null) {
@@ -606,17 +653,41 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 					instrm.close();
 					metaData.addMetadata(fileMetadata);
 				} else {
-					throw new JDOUserException("Could not load metadata for package " + metadataPackage + " file " + metadataFilePath);					
+					throw new JDOUserException("Could not load metadata for package " + metadataPackage + " file " + metadataFilePath);
 				}
+
 			} else {
-				throw new JDOUserException("Missing metadata package and no schema file specified");					
+				throw new JDOUserException("Missing metadata package and no schema file specified");
 			}
+
 			for (TableDef tableDef : metaData.tables()) {
-				cacheTableMetadata(tableDef);
+				// cacheTableMetadata(tableDef);
 				cacheDaoForTable(tableDef);
 			}
+
 		} catch (Exception xcpt) {
+			if (DebugFile.trace) {
+				DebugFile.writeln(xcpt.getClass().getName() + " " +xcpt.getMessage());
+				DebugFile.decIdent();
+			}
 			throw new JDOException(xcpt.getMessage(), xcpt);
+		}
+
+		if (DebugFile.trace) {
+			StringBuilder metaDataInfo = new StringBuilder();
+			metaDataInfo.append("SchemaMetaData tables = [");
+			boolean first = true;
+			for (TableDef tdef : metaData.tables()) {
+				if (first)
+					first = false;
+				else
+					metaDataInfo.append(",");
+				metaDataInfo.append(tdef.getName());
+			}
+			metaDataInfo.append("]");
+			DebugFile.writeln(metaDataInfo.toString());
+			DebugFile.decIdent();
+			DebugFile.writeln("End JDBCDataSource.readMetadataFromFile()");
 		}
 	}
 
@@ -666,9 +737,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			if (getProperty(USER)==null && getProperty(PASSWORD)==null)
 				oConn = DriverManager.getConnection(getProperty(URI));
 			else
-				oConn = DriverManager.getConnection(getProperty(URI),
-						getProperty(USER),
-						getProperty(PASSWORD));
+				oConn = DriverManager.getConnection(getProperty(URI), getProperty(USER), getProperty(PASSWORD));
 		}
 		catch (SQLException e) {
 			if (DebugFile.trace) DebugFile.writeln("DriverManager.getConnection("+getProperty(URI)+","+getProperty(USER)+", ...) SQLException [" + e.getSQLState() + "]:" + String.valueOf(e.getErrorCode()) + " " + e.getMessage());
@@ -683,53 +752,100 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 		oMData = oConn.getMetaData();
 
-		if (DebugFile.trace) DebugFile.writeln("Calling DatabaseMetaData.getDatabaseProductName()");
+		try {
+			if (DebugFile.trace) DebugFile.writeln("Calling DatabaseMetaData.getDatabaseProductName()");
 
-		databaseProductName = oMData.getDatabaseProductName();
+			databaseProductName = oMData.getDatabaseProductName();
 
-		if (databaseProductName.equals(RDBMS.POSTGRESQL.toString()))
-			databaseProductId = RDBMS.POSTGRESQL;
-		else if (databaseProductName.equals(RDBMS.MSSQL.toString()))
-			databaseProductId = RDBMS.MSSQL;
-		else if (databaseProductName.equals(RDBMS.ORACLE.toString()))
-			databaseProductId = RDBMS.ORACLE;
-		else if (databaseProductName.equals(RDBMS.MYSQL.toString()))
-			databaseProductId = RDBMS.MYSQL;
-		else if (databaseProductName.equals(RDBMS.ACCESS.toString()))
-			databaseProductId = RDBMS.ACCESS;
-		else if (databaseProductName.equals(RDBMS.SQLITE.toString()))
-			databaseProductId = RDBMS.SQLITE;
-		else if (databaseProductName.equals(RDBMS.HSQLDB.toString()))
-			databaseProductId = RDBMS.HSQLDB;
-		else if (databaseProductName.equals("StelsDBF JDBC driver") ||
-				databaseProductName.equals("HXTT DBF"))
-			databaseProductId = RDBMS.XBASE;
-		else
-			databaseProductId = RDBMS.GENERIC;
+			if (databaseProductName.equals(RDBMS.POSTGRESQL.toString()))
+				databaseProductId = RDBMS.POSTGRESQL;
+			else if (databaseProductName.equals(RDBMS.MSSQL.toString()))
+				databaseProductId = RDBMS.MSSQL;
+			else if (databaseProductName.equals(RDBMS.ORACLE.toString()))
+				databaseProductId = RDBMS.ORACLE;
+			else if (databaseProductName.equals(RDBMS.MYSQL.toString()))
+				databaseProductId = RDBMS.MYSQL;
+			else if (databaseProductName.equals(RDBMS.ACCESS.toString()))
+				databaseProductId = RDBMS.ACCESS;
+			else if (databaseProductName.equals(RDBMS.SQLITE.toString()))
+				databaseProductId = RDBMS.SQLITE;
+			else if (databaseProductName.equals(RDBMS.HSQLDB.toString()))
+				databaseProductId = RDBMS.HSQLDB;
+			else if (databaseProductName.equals("StelsDBF JDBC driver") ||
+					databaseProductName.equals("HXTT DBF"))
+				databaseProductId = RDBMS.XBASE;
+			else
+				databaseProductId = RDBMS.GENERIC;
 
-		if (DebugFile.trace) {
-			DebugFile.writeln("Database is \"" + databaseProductName + "\"");
-			DebugFile.writeln("Product version " + oMData.getDatabaseProductVersion());
-			DebugFile.writeln(oMData.getDriverName() + " " + oMData.getDriverVersion());
-			DebugFile.writeln("Max connections " + String.valueOf(oMData.getMaxConnections()));
-			DebugFile.writeln("Max statements " + String.valueOf(oMData.getMaxStatements()));
+			if (DebugFile.trace) {
+				DebugFile.writeln("Database is \"" + databaseProductName + "\"");
+				DebugFile.writeln("Product version " + oMData.getDatabaseProductVersion());
+				DebugFile.writeln(oMData.getDriverName() + " " + oMData.getDriverVersion());
+				DebugFile.writeln("Max connections " + String.valueOf(oMData.getMaxConnections()));
+				DebugFile.writeln("Max statements " + String.valueOf(oMData.getMaxStatements()));
+			}
+
+			Functions = SQLFunctions.DB.get(databaseProductId);
+
+			if (useDatabaseMetadata)
+				readMetadataFromDatabase(oConn, oMData);
+			else
+				readMetadataFromFile(properties);
+
+		} finally {
+			oConn.close();
+			oConn = null;
 		}
-
-		Functions = SQLFunctions.DB.get(databaseProductId);
-
-		if (useDatabaseMetadata)
-			readMetadataFromDatabase(oConn, oMData);
-		else
-			readMetadataFromFile(properties);
-
-		oConn.close();
-		oConn = null;
 
 		if (DebugFile.trace)
 		{
+			DebugFile.writeln("JDC tables map contains " + getJDCTablesMap().size()+ " entries");
+			DebugFile.writeln("SchemaMetadata contains " + metaData.tables().size()+" tables");
+			DebugFile.writeln("SchemaMetadata contains " + metaData.views().size()+" views");
+			StringBuilder tableList = new StringBuilder();
+			tableList.append("JDC tables list = [");
+			try {
+				boolean first = true;
+				for (Map.Entry<String, TableDef> e : getJDCTablesMap().entrySet()) {
+					if (first)
+						first = false;
+					else
+						tableList.append(",");
+					tableList.append(e.getKey());
+				}
+				tableList.append("]");
+				DebugFile.writeln(tableList.toString());
+				tableList.setLength(0);
+				tableList.append("SchemaMetaData tables = [");
+				first = true;
+				for (TableDef t : metaData.tables()) {
+					if (first)
+						first = false;
+					else
+						tableList.append(",");
+					tableList.append(t.getName());
+				}
+				tableList.append("]");
+				DebugFile.writeln(tableList.toString());
+				tableList.setLength(0);
+				tableList.append("SchemaMetaData views = [");
+				first = true;
+				for (ViewDef t : metaData.views()) {
+					if (first)
+						first = false;
+					else
+						tableList.append(",");
+					tableList.append(t.getName());
+				}
+				tableList.append("]");
+				DebugFile.writeln(tableList.toString());
+			} catch (Exception e) {
+					DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
+			}
 			DebugFile.decIdent();
 			DebugFile.writeln("End JDBCDataSource.initialize()");
 		}
+		closed = false;
 	} // initialize
 
 	// ----------------------------------------------------------
@@ -881,13 +997,18 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	 * @param sTable Table name
 	 * @return SQLViewDef object or <b>null</b> if no view was found with given name.
 	 * @throws NullPointerException if sTable is <b>null</b>
+	 * @throws IllegalStateException if this data source has not been initialised
+	 * @throws JDOUserException if this data source has been closed
 	 */
 	public SQLViewDef getViewDef(String sView) throws JDOException {
 
 		if (null==sView) throw new NullPointerException("JDBCDataSource.getViewDef() view name cannot be null");
 
 		if (null==metaData)
-			throw new JDOException("DBDataSource internal table map not initialized, call DBDataSource constructor first");
+			throw new IllegalStateException("DBDataSource internal table map not initialized, call DBDataSource constructor first");
+
+		if (isClosed())
+			throw new JDOUserException("JDBCDataSource has been closed");
 
 		return (SQLViewDef) metaData.getView(sView.toLowerCase());
 	} 
@@ -899,13 +1020,18 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	 * @param sTable Table name
 	 * @return SQLTableDef object or <b>null</b> if no table was found with given name.
 	 * @throws NullPointerException if sTable is <b>null</b>
+	 * @throws IllegalStateException if this data source has not been initialised
+	 * @throws JDOUserException if this data source has been closed
 	 */
 	public SQLTableDef getTableDef(String sTable) throws JDOException {
 
 		if (null==sTable) throw new NullPointerException("JDBCDataSource.getTableDef() table name cannot be null");
 
 		if (null==metaData)
-			throw new JDOException("JDBCDataSource internal table map not initialized, call DBDataSource constructor first");
+			throw new IllegalStateException("JDBCDataSource internal table map not initialized, call DBDataSource constructor first");
+
+		if (isClosed())
+			throw new JDOUserException("JDBCDataSource has been closed");
 
 		return (SQLTableDef) metaData.getTable(sTable.toLowerCase());
 	} 
@@ -917,16 +1043,21 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	 * @param sObjectName Object name
 	 * @return ViewDef or TableDef object or <b>null</b> if no table nor view was found with given name.
 	 * @throws NullPointerException if sObjectName is <b>null</b>
+	 * @throws IllegalStateException if this data source has not been initialised
+	 * @throws JDOUserException if this data source has been closed
 	 */
 	public ViewDef getTableOrViewDef(String sObjectName) throws JDOException {
 
-		if (null==sObjectName) throw new NullPointerException("JDBCDataSource.getTableOrViewDef() table name cannot be null");
+		if (null==sObjectName) throw new NullPointerException("JDBCDataSource.getTableOrViewDef() table or view name cannot be null");
 
 		if (null==metaData)
-			throw new JDOException("JDBCDataSource internal table map not initialized, call DBDataSource constructor first");
+			throw new IllegalStateException("JDBCDataSource internal table map not initialized, call DBDataSource constructor first");
+
+		if (isClosed())
+			throw new JDOUserException("JDBCDataSource has been closed");
 
 		ViewDef retobj = null;
-		
+
 		if (metaData.containsTable(sObjectName))
 			retobj = metaData.getTable(sObjectName);
 		else if (metaData.containsView(sObjectName))
@@ -945,7 +1076,7 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	 * If getJDCTablesMap() is called before creating any instance of DBBind
 	 * then an IllegalStateException will be thrown.
 	 */
-	public Map<String,TableDef> getJDCTablesMap() throws IllegalStateException {
+	public Map<String,TableDef> getJDCTablesMap() throws IllegalStateException, JDOUserException {
 
 		if (null==metaData)
 			throw new IllegalStateException("JDBCDataSource internal table map not initialized, call JDBCDataSource initialize first");
@@ -959,13 +1090,17 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	 * <p>Get a {@link JDCConnection} instance from connection pool</p>
 	 * @param sCaller Symbolic name identifying the caller program or subroutine,
 	 * this field is used for statistical control of database accesses,
-	 * performance tunning and debugging open/close mismatch.
+	 * performance tuning and debugging open/close mismatch.
 	 * @return An open connection to the database.
 	 * @throws SQLException
+	 * @throws JDOUserException if this data source has been closed
 	 */
 	@Override
-	public synchronized JDCConnection getConnection(String sCaller) throws SQLException {
+	public synchronized JDCConnection getConnection(String sCaller) throws SQLException, JDOUserException {
 		JDCConnection oConn;
+
+		if (isClosed())
+			throw new JDOUserException("JDBCDataSource has been closed");
 
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCDataSource.getConnection(" + sCaller + ")");
@@ -1030,9 +1165,13 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	 * @return An open connection to the database.
 	 * Returned type is actually an unpooled com.knowgate.jdc.JDCConnection instance.
 	 * @throws SQLException
+	 * @throws JDOUserException if this data source has been closed
 	 */
 	public synchronized Connection getConnection(String sUser, String sPasswd) throws SQLException {
 		Connection oConn;
+
+		if (isClosed())
+			throw new JDOUserException("JDBCDataSource has been closed");
 
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCDataSource.getConnection(" + sUser + ", ...)");

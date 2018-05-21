@@ -37,27 +37,31 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 
 	/**
 	 * <p>Constructor.</p>
-	 * Create TableOperation using EngineFactory default table data source.
+	 * Create TableOperation using EngineFactory default table data source or default relational data source if default table data source is null.
 	 */
-	public AbstractTableOperation() {
-		 this(EngineFactory.getDefaultTableDataSource());
+	public AbstractTableOperation() throws NullPointerException {
+		 this(EngineFactory.getDefaultTableDataSource()==null ? EngineFactory.getDefaultRelationalDataSource() : EngineFactory.getDefaultTableDataSource());
 	 }
 
 	/**
 	 * <p>Constructor.</p>
-	 * Create IndexableTableOperation using EngineFactory default table data source.
+	 * Create IndexableTableOperation using EngineFactory default table data source or default relational data source if default table data source is null.
 	 * @param record R Instance of Record subclass to be used by this operation.
+	 * @throws NullPointerException if record is null
 	 */
-	public AbstractTableOperation(R record) {
-		 this(EngineFactory.getDefaultTableDataSource(), record);
+	public AbstractTableOperation(R record) throws NullPointerException {
+		 this(EngineFactory.getDefaultTableDataSource()==null ? EngineFactory.getDefaultRelationalDataSource() : EngineFactory.getDefaultTableDataSource(), record);
 	 }
 	
 	/**
 	 * <p>Constructor.</p>
 	 * Create TableOperation using given table data source.
 	 * @param dataSource TableDataSource
+	 * @throws NullPointerException if dataSource is null
 	 */
-	public AbstractTableOperation(TableDataSource dataSource) {
+	public AbstractTableOperation(TableDataSource dataSource) throws NullPointerException {
+		if (null==dataSource)
+			throw new NullPointerException("AbstractTableOperation constructor. TableDataSource cannot be null");
 		dts = dataSource;
 		rec = null;
 	}
@@ -67,8 +71,13 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 	 * Create TableOperation using given table data source.
 	 * @param dataSource TableDataSource
 	 * @param record R Instance of Record subclass to be used by this operation.
+	 * @throws NullPointerException if dataSource is null or record is null
 	 */
-	public AbstractTableOperation(TableDataSource dataSource, R record) {
+	public AbstractTableOperation(TableDataSource dataSource, R record) throws NullPointerException {
+		if (null==dataSource)
+			throw new NullPointerException("AbstractTableOperation constructor. TableDataSource cannot be null");
+		if (null==record)
+			throw new NullPointerException("AbstractTableOperation constructor. Record cannot be null");
 		dts = dataSource;
 		rec = record;
 		open();
@@ -81,7 +90,7 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 	public TableDataSource dataSource() {
 		return dts;
 	}
-	
+
 	protected void open() {
 		tbl = ((TableDataSource) dts).openTable(rec);
 	}

@@ -22,6 +22,8 @@ import javax.transaction.TransactionManager;
 
 import org.judal.transaction.DataSourceTransactionManager;
 
+import com.knowgate.debug.DebugFile;
+
 /**
  * <p>JDBC Engine to create relational data sources.</p>
  * @author Sergio Montoro Ten
@@ -40,6 +42,8 @@ public class JDBCEngine implements Engine<JDBCRelationalDataSource> {
 		try {
 			return new JDBCRelationalDataSource(properties, getTransactionManager());
 		} catch (Exception xcpt) {
+			if (DebugFile.trace)
+				DebugFile.writeStackTrace(xcpt);
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
 	}
@@ -56,6 +60,8 @@ public class JDBCEngine implements Engine<JDBCRelationalDataSource> {
 		try {
 			return new JDBCRelationalDataSource(properties, transactManager);
 		} catch (Exception xcpt) {
+			if (DebugFile.trace)
+				DebugFile.writeStackTrace(xcpt);
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
 	}

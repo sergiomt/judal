@@ -38,7 +38,6 @@ import com.knowgate.gis.LatLong;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-
 import java.lang.reflect.InvocationTargetException;
 
 import java.text.ParseException;
@@ -190,7 +189,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 
 	/**
 	 * <p>Remove value of a column.</p>
-	 * This method may have different behaviors depending on the implementation.
+	 * This method may have different behaviours depending on the implementation.
 	 * For MapRecord subclass, removing a column will cause that it won't be updated in the database.
 	 * But for ArrayRecord and PojoRecord, removing a column will set it to <b>null</b> or cause an exception.
 	 * @param colname String Column Name
@@ -200,7 +199,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 
 	/**
 	 * <p>Remove values for all columns.</p>
-	 * This method may have different behaviors depending on the implementation.
+	 * This method may have different behaviours depending on the implementation.
 	 */
 	@Override
 	public abstract void clear();
@@ -273,7 +272,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 * @throws NullPointerException If EngineFactory.getDefaultTableDataSource() is not set
 	 */
 	@Override
-	public final boolean load(Object oKey) throws JDOException,NullPointerException {
+	public boolean load(Object oKey) throws JDOException,NullPointerException {
 		return load(EngineFactory.getDefaultTableDataSource(), oKey);
 	}
 
@@ -297,7 +296,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 		try (Table oTbl = ((TableDataSource) oDts).openTable(this)) {
 			oTbl.store(this);
 		} finally {
-			if (DebugFile.trace) DebugFile.decIdent();			
+			if (DebugFile.trace) DebugFile.decIdent();
 		}
 		if (DebugFile.trace)
 			DebugFile.writeln("End AbstractRecord.store(" + oDts.getClass().getName() + ") : " +  getKey());
@@ -311,7 +310,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 * @throws JDOException
 	 */
 	@Override
-	public final void store() throws JDOException {
+	public void store() throws JDOException {
 		store(EngineFactory.getDefaultTableDataSource());
 	}
 
@@ -336,7 +335,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 * @throws JDOException
 	 */
 	@Override
-	public final void delete() throws JDOException {
+	public void delete() throws JDOException {
 		delete(EngineFactory.getDefaultTableDataSource());
 	}
 	
@@ -512,7 +511,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 							throw new JDOUserException("AbstractRecord.setKey("+ value + ") "+e.getClass().getName()+" "+e.getMessage());
 						}
 					}  else {
-						put(col.getName(), vals[c++]);						
+						put(col.getName(), vals[c++]);
 					}
 				}
 			} catch (ClassCastException cce) {
@@ -570,7 +569,10 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	public LatLong getLatLong(String sColName) throws ClassCastException, ClassNotFoundException, NumberFormatException, ArrayIndexOutOfBoundsException {
 		if (null==fhelper)
 			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
-		return fhelper.getLatLong(this, sColName);
+		if (isNull(sColName))
+			return null;
+		else
+			return fhelper.getLatLong(this, sColName);
 	}
 
 	/**
@@ -712,9 +714,9 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	protected Object getBinaryData(String sKey, Object oObj) {
 		Object retObj = null;
 		if (oObj instanceof byte[]) {
-			if (!hasLongVarBinaryData) longVarBinariesLengths = new HashMap<String,Long>();	      		   	      		    
+			if (!hasLongVarBinaryData) longVarBinariesLengths = new HashMap<String,Long>();	
 			longVarBinariesLengths.put(sKey, new Long(((byte[])oObj).length));
-			hasLongVarBinaryData = true;	      			
+			hasLongVarBinaryData = true;
 			retObj = oObj;
 		} else {
 			Class[] aInts = oObj.getClass().getInterfaces();
@@ -731,9 +733,9 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 						oOOut.writeObject(oObj);
 						byte[] aBytes = oBOut.toByteArray();
 						if (aBytes!=null) {
-							if (!hasLongVarBinaryData) longVarBinariesLengths = new HashMap<String,Long>();	      		   	      		    
+							if (!hasLongVarBinaryData) longVarBinariesLengths = new HashMap<String,Long>();	
 							longVarBinariesLengths.put(sKey, new Long(aBytes.length));
-							hasLongVarBinaryData = true;  			        	
+							hasLongVarBinaryData = true;
 							retObj = aBytes;
 						}
 						oOOut.close();
@@ -747,7 +749,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 		return retObj;
 	}
 
-	protected static String getColumnAlias(String columnName) {
+	public static String getColumnAlias(String columnName) {
 		final int len = columnName.length()-5;
 		for (int n=0; n<len; n++)
 			if (columnName.charAt(n)==' ' &&

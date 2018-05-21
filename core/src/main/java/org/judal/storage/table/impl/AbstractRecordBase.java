@@ -1,5 +1,8 @@
 package org.judal.storage.table.impl;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 /**
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -12,7 +15,9 @@ package org.judal.storage.table.impl;
  */
 
 import java.io.IOException;
-
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import java.text.DateFormat;
@@ -32,6 +37,7 @@ import java.util.Map;
 import org.judal.metadata.ColumnDef;
 import org.judal.serialization.BytesConverter;
 import org.judal.serialization.JSONValue;
+import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.table.Record;
 
 import com.knowgate.currency.Money;
@@ -552,6 +558,17 @@ import com.knowgate.stringutils.XML;
 			return ((Boolean) apply(sColName)).booleanValue();
 	}
 
+	public Object getSerializable(String sColName) throws IOException, ClassNotFoundException {
+		if (isNull(sColName)) return null;
+		ByteArrayInputStream oByIn = new ByteArrayInputStream((byte[]) apply(sColName));
+		ObjectInputStream oObjIn = new ObjectInputStream(oByIn);
+		Object retval = oObjIn.readObject();
+		oObjIn.close();
+		oByIn.close();
+		return retval;
+		
+	}
+
 	protected boolean isNullOrNone(Object obj) {
 		return obj==null || obj.getClass().getName().equals("scala.None$");
 	}
@@ -660,6 +677,22 @@ import com.knowgate.stringutils.XML;
 	public BigDecimal put(String sColName, String sDecVal, DecimalFormat oPattern) throws ParseException {
 		Object prev = put(sColName, oPattern.parse(sDecVal));
 		return isNullOrNone(prev) ? null : (BigDecimal) prev;
+	}
+
+	/**
+	 * <p>Serialize and object and write the resulting byte array into the specified column.</p>
+	 * @param colname String Column Name
+	 * @param value Serializable Column value
+	 * @throws IOException 
+	 */
+	public Serializable putSerializable(String colname, Serializable value) throws IOException {
+		ByteArrayOutputStream byOut = new ByteArrayOutputStream();
+		ObjectOutputStream objOut = new ObjectOutputStream(byOut);
+		objOut.writeObject(value);
+		put (colname, byOut.toByteArray());
+		objOut.close();
+		byOut.close();
+		return value;
 	}
 
 	/**

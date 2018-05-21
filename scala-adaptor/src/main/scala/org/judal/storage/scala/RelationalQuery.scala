@@ -37,7 +37,7 @@ class RelationalQuery[R >: Null <: Record](dts: RelationalDataSource , recClass:
   
   private def this() = this(null: RelationalDataSource, null: Class[R], null: String)
 
-	override def clone() = {
+	override def clone() : RelationalQuery[R] = {
 		val theClone = new RelationalQuery[R]()
 		theClone.clone(this)
 		theClone

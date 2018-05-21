@@ -41,6 +41,7 @@ public class StorageObjectFactory extends ObjectFactory {
 
 	static {
 		JavaRecordSet = org.judal.storage.table.impl.ArrayListRecordSet.class;
+		ScalaRecordSet = org.judal.storage.table.impl.ArrayListRecordSet.class;
 		try {
 			JavaRecord = Class.forName("org.judal.storage.java.JavaRecord");
 		} catch (ClassNotFoundException ignore) { }
@@ -82,7 +83,7 @@ public class StorageObjectFactory extends ObjectFactory {
 		R retval = null;
 		final int parameterCount = recordConstructor.getParameterCount();
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newStored("+recordConstructor.getName()+","+constructorParameters+")");
+			DebugFile.writeln("StorageObjectFactory.newRecord("+recordConstructor.getName()+","+constructorParameters+")");
 		try {
 			if (parameterCount==0)
 				retval = recordConstructor.newInstance();
@@ -93,7 +94,7 @@ public class StorageObjectFactory extends ObjectFactory {
 				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" StorageObjectFactory.newRecord(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
 		}
 		if (DebugFile.trace)
-			DebugFile.writeln("StorageObjectFactory.newRecord() : " + retval.getClass().getName());
+			DebugFile.writeln("StorageObjectFactory.newRecord() : " + (null==retval ? "null" : retval.getClass().getName()));
 		return retval;
 	}
 

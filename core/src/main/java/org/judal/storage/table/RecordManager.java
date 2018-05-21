@@ -19,6 +19,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 import javax.cache.Cache;
 import javax.cache.Cache.Entry;
@@ -39,13 +42,13 @@ import com.knowgate.debug.DebugFile;
 public class RecordManager implements AutoCloseable {
 
 	private final Properties properties;
-	private final Cache<Object, Record> cache;
+	private final Future<Cache<Object, Record>> cache;
 	private final TableDataSource dataSource;
 	private final RecordQueueProducer storageQueue;
 	private boolean closed;
-	
+
 	public RecordManager(final TableDataSource dataSource, final RecordQueueProducer storageQueue,
-                         final Cache<Object, Record> cache, final Map<String,String> propsMap) {
+							final Future<Cache<Object, Record>> cache, final Map<String,String> propsMap) {
 		this.dataSource = dataSource;
 		this.storageQueue = storageQueue;
 		this.cache = cache;
@@ -56,8 +59,34 @@ public class RecordManager implements AutoCloseable {
 		closed = false;
 	}
 
+	public RecordManager(final TableDataSource dataSource, final RecordQueueProducer storageQueue,
+			final Cache<Object, Record> cache, final Map<String,String> propsMap) {
+		this.dataSource = dataSource;
+		this.storageQueue = storageQueue;
+		this.cache = new FutureTask<Cache<Object, Record>>(new Runnable() { public void run() {}; },cache);
+		this.properties = new Properties();
+		if (propsMap!=null)
+			for (Map.Entry<String,String> e : propsMap.entrySet())
+				properties.put(e.getKey(), e.getValue());
+		closed = false;
+	}
+
+	private Cache<Object, Record> getCache() {
+		Cache<Object, Record> retval = null;
+		try {
+			retval = cache.get();
+		} catch (InterruptedException | ExecutionException e) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("RecordManager.getCache() " +  e.getClass().getName() + " " + e.getMessage());
+			}
+		}
+		return retval;
+	}
+
+	@Override
 	public void close() {
-		cache.close();
+		if (null!=getCache())
+			getCache().close();
 		storageQueue.close();
 		dataSource.close();
 		closed = true;
@@ -123,14 +152,14 @@ public class RecordManager implements AutoCloseable {
 			throw new IllegalStateException("RecordManager.evict() RecordManager has been closed");
 		Object key = ((Record) rec).getKey();
 		if (key!=null)
-			cache.remove(key);
+			getCache().remove(key);
 	}
 
 
 	public void evictAll() {
 		if (closed)
 			throw new IllegalStateException("RecordManager.evictAll() RecordManager has been closed");
-		cache.clear();
+		getCache().clear();
 	}
 
 
@@ -140,17 +169,16 @@ public class RecordManager implements AutoCloseable {
 	}
 
 
-	public void evictAll(Collection objs) {
+	public void evictAll(@SuppressWarnings("rawtypes") Collection objs) {
 		for (Object obj : objs)
 			evict(obj);
 	}
 
-
-	public void evictAll(boolean subclasses, Class class1) {
+	public void evictAll(boolean subclasses, @SuppressWarnings("rawtypes") Class class1) {
 		ArrayList<Object> evicted = new ArrayList<Object>(100);
-		for (Entry<Object,Record> keyvalue: cache) {
+		for (Entry<Object,Record> keyvalue: getCache()) {
 			Object entry;
-				entry = cache.get(keyvalue.getKey());
+				entry = getCache().get(keyvalue.getKey());
 				if (entry != null) {
 					if (subclasses) {
 						if (class1.isInstance(entry))
@@ -179,7 +207,7 @@ public class RecordManager implements AutoCloseable {
 	public Object getObjectById(Object id) throws JDOUserException {
 		if (closed)
 			throw new IllegalStateException("RecordManager.getObjectById() RecordManager has been closed");
-		Object obj = cache.get(id);
+		Object obj = getCache().get(id);
 		if (null==obj)
 			throw new JDOUserException("Object "+id+" not found in cache");
 		return obj;
@@ -213,7 +241,7 @@ public class RecordManager implements AutoCloseable {
 		return obj; 
 	}
 
-	public <T> T[] makePersistentAll(T... objs) {
+	public <T> T[] makePersistentAll(@SuppressWarnings("unchecked") T... objs) {
 		
 		if (closed)
 			throw new IllegalStateException("RecordManager.makePersistentAll() RecordManager has been closed");
@@ -262,7 +290,6 @@ public class RecordManager implements AutoCloseable {
 		return StorageObjectFactory.newRecord(recordClass, dataSource.getMetaData().getTable(tableName));
 	}
 
-	@SuppressWarnings("unchecked")
 	public void refresh(Object obj) {		
 		Table tbl = null;
 		Record former = (Record) obj;
@@ -271,7 +298,7 @@ public class RecordManager implements AutoCloseable {
 			tbl = dataSource.openTable(former);
 			if (tbl.load(former.getKey(), former))
 				try {
-					cache.put(former.getKey(), former);
+					getCache().put(former.getKey(), former);
 				} catch (IllegalStateException | IllegalArgumentException | JDOException xcpt) {
 					if (DebugFile.trace)
 						DebugFile.writeln("TableManager.retrieve("+former.getKey()+") " + xcpt.getClass().getName() + " " + xcpt.getMessage());
@@ -291,22 +318,36 @@ public class RecordManager implements AutoCloseable {
 				throw new JDOUserException("Another object with the same id "+rec.getKey()+" but on a different table "+cached.getTableName()+" is already cached");
 			rec.setValue((Serializable) cached.getValue()); 
 		} catch (JDOUserException notfound) {
-			Table tbl = null;
-			try {
-				tbl = dataSource.openTable((Record) obj);
+			try (Table tbl = dataSource.openTable((Record) obj)) {
 				if (tbl.load(rec.getKey(), rec))
 					try {
-						cache.put(rec.getKey(), rec);
+						getCache().put(rec.getKey(), rec);
 					} catch (IllegalStateException | IllegalArgumentException | JDOException xcpt) {
 						if (DebugFile.trace)
 							DebugFile.writeln("TableManager.retrieve("+rec.getKey()+") " + xcpt.getClass().getName() + " " + xcpt.getMessage());
 					}
 				else
 					rec.setKey(null);
-			} finally {
-				tbl.close();
-			}			
+			}
 		}
 	}
 
+	public void waitFor(final Record rec, final long maxWait, final long retries) throws IllegalArgumentException, InterruptedException {
+		if (maxWait<0)
+			throw new IllegalArgumentException("RecordManager.waitFor() maxWait must be equal to or greater than zero" );
+		if (retries<0)
+			throw new IllegalArgumentException("RecordManager.waitFor() retries must be equal to or greater than zero" );
+		if (retries>maxWait)
+			throw new IllegalArgumentException("RecordManager.waitFor() retries must less than or equals to maxWait" );
+		long delay = retries==0 ? maxWait : maxWait / (retries+1l);
+		boolean exists = false;
+		for (long waiting = 0l; waiting<=maxWait && !exists; waiting+=delay) {
+			try (View tbl = dataSource.openView(rec)) {
+				exists = tbl.exists(rec.getKey());
+			}
+			Thread.sleep(delay);
+		}
+		if (!exists)
+			throw new InterruptedException(rec.getClass().getName()+" not found " + rec.getKey() + " after " + retries + " in " + maxWait + " milliseconds");
+	}
 }

@@ -54,6 +54,7 @@ import com.knowgate.gis.LatLong;
  * @author Sergio Montoro Ten
  * @version 1.0
  */
+@SuppressWarnings("deprecation")
 public class JDCDAO {
 
 	private SQLStatements sqlStatements;

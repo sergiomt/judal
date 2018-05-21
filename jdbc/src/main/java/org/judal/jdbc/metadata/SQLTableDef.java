@@ -12,7 +12,6 @@ package org.judal.jdbc.metadata;
  * KIND, either express or implied.
  */
 
-import java.io.StringBufferInputStream;
 import java.sql.SQLException;
 import java.sql.DatabaseMetaData;
 import java.sql.Connection;
@@ -467,9 +466,12 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 	 */
 	public String getSource()  {
 		StringBuilder builder = new StringBuilder(2000);
+
 		builder.append("CREATE TABLE ").append(getName()).append(" (\n");
+
 		for (ColumnDef c : getColumns())
 			builder.append(((SQLColumn)c).sqlScriptDef(dbms)).append(",\n");
+
 		if (getPrimaryKeyMetadata()!=null && getPrimaryKeyMetadata().getNumberOfColumns()>0) {
 			String[] pkcols = new String[getPrimaryKeyMetadata().getNumberOfColumns()];
 			int c = 0;
@@ -485,6 +487,7 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 					builder.append("CONSTRAINT ck_").append(String.valueOf(++n)+"_"+getName()).append(" CHECK ("+c.getConstraint()+"),\n");
 			}
 		}
+
 		n = 0;
 		if (getForeignKeys()!=null) {
 			for (ForeignKeyMetadata fk : getForeignKeys()) {
@@ -501,8 +504,10 @@ public class SQLTableDef extends TableDef implements SQLSelectableDef {
 				builder.append(" (").append(String.join(",", fkcols)).append("),\n");
 			}
 		}
+
 		if (builder.length()>1) builder.setLength(builder.length()-2); // remove trailing comma
 		builder.append("\n)");
+
 		return builder.toString();
 	} // getSource
 

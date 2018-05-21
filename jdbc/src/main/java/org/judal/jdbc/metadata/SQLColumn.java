@@ -153,10 +153,21 @@ public final class SQLColumn extends ColumnDef {
 				throw new UnsupportedOperationException("Type "+typeName(getSqlType())+" is undefined for "+eRDBMS);
 			sTypedef += Numeric[eRDBMS.intValue()] + "("+String.valueOf(getLength())+","+String.valueOf(getScale())+")";
 			break;
+		case Types.CHAR:
+			sTypedef += "CHAR("+String.valueOf(getLength())+")";
+			break;
+		case Types.NCHAR:
+			sTypedef += "NCHAR("+String.valueOf(getLength())+")";
+			break;
 		case Types.VARCHAR:
 			if (null==VarChar[eRDBMS.intValue()])
 				throw new UnsupportedOperationException("Type "+typeName(getSqlType())+" is undefined for "+eRDBMS);
 			sTypedef += VarChar[eRDBMS.intValue()]+"("+String.valueOf(getLength())+")";
+			break;
+		case Types.NVARCHAR:
+			if (null==NVarChar[eRDBMS.intValue()])
+				throw new UnsupportedOperationException("Type "+typeName(getSqlType())+" is undefined for "+eRDBMS);
+			sTypedef += NVarChar[eRDBMS.intValue()]+"("+String.valueOf(getLength())+")";
 			break;
 		case Types.LONGVARCHAR:
 			if (null==LongVarChar[eRDBMS.intValue()])
@@ -249,6 +260,7 @@ public final class SQLColumn extends ColumnDef {
 	public static final String LongVarBinary[] = { null, "MEDIUMBLOB", "BYTEA", "IMAGE", null, "LONG RAW", null, null, null, null, null, null, "LONGVARBINARY" };
 	public static final String Serial[] = { null, "AUTO_INCREMENT", "", "IDENTITY", null, "", null, null, null, null, null, null, "LONGVARBINARY" };
 	public static final String VarChar[] = { null, "VARCHAR", "VARCHAR", "NVARCHAR", null, "VARCHAR2", null, null, null, null, null, null, "VARCHAR" };
+	public static final String NVarChar[] = { null, "VARCHAR", "VARCHAR", "NVARCHAR", null, "VARCHAR2", null, null, null, null, null, null, "VARCHAR" };
 	public static final String Blob[] = { null, "MEDIUMBLOB", "BYTEA", "IMAGE", null, "BLOB", null, null, null, null, null, null, "BLOB" };
 	public static final String Clob[] = { null, "MEDIUMTEXT", "TEXT", "NTEXT", null, "CLOB", null, null, null, null, null, null, "CLOB" };
 	public static final String Numeric[] = { null, "DECIMAL", "DECIMAL", "DECIMAL", null, "NUMBER", null, null, null, null, null, null, "NUMERIC" };

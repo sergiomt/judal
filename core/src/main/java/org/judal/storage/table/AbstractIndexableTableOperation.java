@@ -76,7 +76,8 @@ public abstract class AbstractIndexableTableOperation<R extends Record> extends 
 	public AbstractIndexableTableOperation(TableDataSource dataSource, R record) {
 		super(dataSource, record);
 	}
-	
+
+	@Override
 	protected void open() {
 		tbl = ((TableDataSource) dts).openIndexedTable(getRecord());
 	}

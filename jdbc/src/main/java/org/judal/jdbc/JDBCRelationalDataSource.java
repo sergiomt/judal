@@ -71,6 +71,7 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	 */
 	@Override
 	public JDBCRelationalView openRelationalView(Record viewRecord) throws JDOException {
+		assertNotClosed();
 		return new JDBCRelationalView(this, viewRecord);
 	}
 
@@ -107,6 +108,7 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	 */
 	@Override
 	public void createIndex(IndexDef indexDef) throws JDOException {
+		assertNotClosed();
 		try {
 			if (DebugFile.trace) {
 				DebugFile.writeln("Begin JDBCRelationalDataSource.createIndex("+indexDef.getName()+")");
@@ -134,6 +136,7 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	 */
 	@Override
 	public void dropIndex(String indexName, String tableName) throws JDOException {
+		assertNotClosed();
 		execute("DROP INDEX " + indexName);
 	}
 

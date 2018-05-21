@@ -42,6 +42,8 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 
 	private static final long serialVersionUID = 10000L;
 
+	public static int MAX_DEFAULT_CAPACITY = 16384;
+
 	private Class<R> candidateClass;
 
 	/**
@@ -60,10 +62,8 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 	public ArrayListRecordSet(Class<R> candidateClass, int capacity) {
 		this.candidateClass = candidateClass;
 		if (capacity>0)
-			if (capacity==Integer.MAX_VALUE)
-				ensureCapacity(capacity>128 ? 128 : capacity);
-			else
-				ensureCapacity(capacity>16384 ? 16384 : capacity);
+			if (capacity>MAX_DEFAULT_CAPACITY)
+				ensureCapacity(MAX_DEFAULT_CAPACITY);
 	}
 
 	/**
@@ -83,13 +83,15 @@ public class ArrayListRecordSet<R extends Record> extends ArrayList<R> implement
 	@Override
 	public List<R> filter(final Object predicate) {
 		LinkedList<R> filtered = new LinkedList<R> ();
+		if (null==getCandidateClass())
+			throw new NullPointerException("ArrayListRecordSet.filter(9 cannot be invoked if ResuluSet candidate class is null");
 		try {
-			Method m = predicate.getClass().getMethod("test", candidateClass);
+			Method m = predicate.getClass().getMethod("test", getCandidateClass());
 			for (R record : this)
 				if ((boolean) m.invoke(predicate, record))
 					filtered.add(record);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			throw new NullPointerException("Cannot invoke method test() of predicate class "+predicate.getClass().getName());
+			throw new NullPointerException("Cannot invoke method test() of predicate class " + predicate.getClass().getName() + "<" + getCandidateClass().getName() + "> " + e.getClass().getName() + " " +e.getMessage());
 		}
 		return filtered;
 	}

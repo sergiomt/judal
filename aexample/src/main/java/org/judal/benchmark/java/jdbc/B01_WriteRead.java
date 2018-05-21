@@ -15,9 +15,11 @@ import javax.jdo.JDOException;
 import org.junit.Test;
 import org.junit.After;
 import org.junit.Before;
+
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+
 import org.openjdk.jmh.annotations.Benchmark;
 
 import org.judal.benchmark.java.MediumRecordData;
@@ -175,7 +177,6 @@ public class B01_WriteRead {
 		EngineFactory.getDefaultRelationalDataSource().truncateTable(TableName, false);
 	}
 
-	@Benchmark
 	public void insertJDBCOne(JDBCRelationalDataSource dts, MediumRecordData d) throws SQLException {
 
 		final String sql = "INSERT INTO " + MediumRecordData.TABLE_NAME + " VALUES (?" + String.format("%0" + 70 + "d", 0).replace("0", ",?") + ")";
@@ -196,7 +197,6 @@ public class B01_WriteRead {
 		conn.close();
 	}
 
-	@Benchmark
 	public void readJDBC() throws SQLException {
 		JDBCRelationalDataSource dts = (JDBCRelationalDataSource) EngineFactory.getDefaultRelationalDataSource();
 		MediumRecordData[] data = new MediumRecordData[howMany];
@@ -220,7 +220,6 @@ public class B01_WriteRead {
 		conn.close();
 	}
 
-	@Benchmark
 	public void insertJDBCMany(MediumRecordData[] data) throws SQLException {
 		JDBCRelationalDataSource dts = (JDBCRelationalDataSource) EngineFactory.getDefaultRelationalDataSource();
 
@@ -246,7 +245,6 @@ public class B01_WriteRead {
 		conn.close();
 	}
 
-	@Benchmark
 	public void insertJUDALMany(MediumRecordData[] data) throws SQLException {
 		JDBCRelationalDataSource dts = (JDBCRelationalDataSource) EngineFactory.getDefaultRelationalDataSource();
 		Table tbl = dts.openTable(new org.judal.storage.java.MapRecord(dts, MediumRecordData.TABLE_NAME));
@@ -301,23 +299,19 @@ public class B01_WriteRead {
 		tbl.close();
 	}
 
-	@Benchmark
 	public void insertJUDALOneArray(JDBCRelationalDataSource dts, MediumRecordData d) throws SQLException {
 		insertJUDALOne(dts, d, new MediumRecordArray());
 	}
-	
-	@Benchmark
+
 	public void insertJUDALOneMap(JDBCRelationalDataSource dts, MediumRecordData d) throws SQLException {
 		insertJUDALOne(dts, d, new MediumRecordMap());
 	}
 
-	@Benchmark
 	public void insertJUDALOnePojo(JDBCRelationalDataSource dts, MediumRecordData d) throws SQLException {
 		insertJUDALOne(dts, d, new MediumRecordPojo());
 	}
 
 	@SuppressWarnings("unused")
-	@Benchmark
 	public void readJUDALArray(TableDataSource dts) {
 		View viw = dts.openView(new MediumRecordMap());
 		RecordSet<MediumRecordArray> rset = viw.fetch(null, null, null);
@@ -325,7 +319,6 @@ public class B01_WriteRead {
 	}
 
 	@SuppressWarnings("unused")
-	@Benchmark
 	public void readJUDALMap(TableDataSource dts) {
 		View viw = dts.openView(new MediumRecordArray());
 		RecordSet<MediumRecordArray> rset = viw.fetch(null, null, null);
@@ -333,20 +326,17 @@ public class B01_WriteRead {
 	}
 
 	@SuppressWarnings("unused")
-	@Benchmark
 	public void readJUDALPojo(TableDataSource dts) {
 		View viw = dts.openView(new MediumRecordPojo());
 		RecordSet<MediumRecordPojo> rset = viw.fetch(null, null, null);
 		viw.close();
 	}
 
-	@Benchmark
 	public void insertHibernateOne(Session hses, MediumRecordData d) throws SQLException {
 		MediumRecordPojo rec = new MediumRecordPojo(d);
 		hses.save(rec);
 	}
 
-	@Benchmark
 	public void readHibernate(Session hses) throws SQLException {
 		Query qry = hses.createQuery("SELECT r FROM MediumRecordPojo AS r");
 		qry.list();

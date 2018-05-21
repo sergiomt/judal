@@ -20,15 +20,18 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
 
 import com.knowgate.debug.DebugFile;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 import org.judal.storage.Param;
 import org.judal.storage.keyvalue.Stored;
@@ -82,8 +85,57 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			viewDef = (SQLViewDef) tov;
 		else if (tov instanceof SQLTableDef)
 			viewDef = ((SQLTableDef) tov).asView();
-		if (null==viewDef)
+		if (null==viewDef) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("JDOException at JDBCIndexableView constructor. Table or View not found " + recordInstance.getTableName());
+				DebugFile.writeln("JDC tables map contains " + dataSource.getJDCTablesMap().size()+ " entries");
+				DebugFile.writeln("SchemaMetadata contains " + dataSource.getMetaData().tables().size()+" tables");
+				DebugFile.writeln("SchemaMetadata contains " + dataSource.getMetaData().views().size()+" views");
+				StringBuilder tableList = new StringBuilder();
+				tableList.append("JDC tables list = [");
+				try {
+					boolean first = true;
+					for (Map.Entry<String, TableDef> e : dataSource.getJDCTablesMap().entrySet()) {
+						if (first)
+							first = false;
+						else
+							tableList.append(",");
+						tableList.append(e.getKey());
+					}
+					tableList.append("]");
+					DebugFile.writeln(tableList.toString());
+					tableList.setLength(0);
+					tableList.append("SchemaMetaData tables = [");
+					first = true;
+					for (TableDef t : dataSource.getMetaData().tables()) {
+						if (first)
+							first = false;
+						else
+							tableList.append(",");
+						tableList.append(t.getName());
+					}
+					tableList.append("]");
+					DebugFile.writeln(tableList.toString());
+					tableList.setLength(0);
+					tableList.append("SchemaMetaData views = [");
+					first = true;
+					for (ViewDef t : dataSource.getMetaData().views()) {
+						if (first)
+							first = false;
+						else
+							tableList.append(",");
+						tableList.append(t.getName());
+					}
+					tableList.append("]");
+					DebugFile.writeln(tableList.toString());
+				} catch (Exception e) {
+					if (DebugFile.trace) {
+						DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
+					}
+				}
+			}
 			throw new JDOException("JDBCIndexableView Table or View not found "+recordInstance.getTableName());
+		}
 		dao = null;
 	}
 
@@ -215,18 +267,18 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			if (null==indexColumnName || indexColumnName.length()==0) {
 				stmt = getConnection().prepareStatement("SELECT COUNT(*) AS NUM_ROWS FROM "+name());
 			} else {
-				stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"=?");
+				stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+"=?");
 				ColumnDef cdef = getViewDef().getColumnByName(indexColumnName);
 				if (null==valueSearched) {
 					if (null==cdef)
 						throw new JDOException("Type could not be infered for null value");
 					else
-						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+" IS NULL");
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+" IS NULL");
 				} else {
 					if (valueSearched instanceof Expression) {
-						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"="+valueSearched.toString());
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+"="+valueSearched.toString());
 					} else {
-						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS NUM_ROWS FROM "+name()+" WHERE "+indexColumnName+"=?");
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+"=?");
 						if (null==cdef)
 							stmt.setObject(1, valueSearched);
 						else
@@ -354,7 +406,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			qry.setResult("*");
 		else
 			qry.setResult(fetchGroup.getMembers());
-		qry.setRange(offset, offset+maxrows);			
+		qry.setRange(offset, getRangeUpperBound(maxrows, offset));
 		if (null==indexColumnName) {
 			qry.setFilter((String) null);
 		} else {
@@ -379,6 +431,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	 * @param offset int First record to read from [0..n]
 	 * @return RecordSet&lt;? extends Record&gt;
 	 * @throws JDOException
+	 * @throws JDOUserException if valueFrom and valueTo are null or are not of the same type
 	 */
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo, int maxrows, int offset)
@@ -386,13 +439,13 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 		Predicate predicate = new SQLAndPredicate();
 		try {
 			if (valueFrom==null && valueTo==null) {
-				throw new JDOException("Range fetch needs at least value from or value to");
+				throw new JDOUserException("Range fetch needs at least value from or value to");
 			} else if (valueFrom==null) {
 				predicate.add(indexColumnName, LTE, valueTo);
 			} else if (valueTo==null) {
 				predicate.add(indexColumnName, GTE, valueFrom);
 			} else if (!valueFrom.getClass().equals(valueTo.getClass())) {
-				throw new JDOException("Range fetch needs value from and value to of the same type");
+				throw new JDOUserException("Range fetch needs value from and value to of the same type");
 			} else {
 				predicate.add(indexColumnName, BETWEEN, new Object[]{valueFrom, valueTo});
 			}
@@ -412,17 +465,18 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	/**
 	 * <p>Fetch RecordSet filtering by several column values.</p>
 	 * @param fetchGroup FetchGroup Columns to fetch
-	 * @param maxrows int Maximum numbers of records to return
+	 * @param maxrows int Maximum numbers of records to return or -1 for Integer.MAX_VALUE maximum numberof records
 	 * @param offset int First record to read from [0..n]
 	 * @param params Param&hellip; Each Param name must match a column name in the table
 	 * @throws JDOException
+	 * @throws JDOUserException if maxrows is zero or negative number less than minus one
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, int maxrows, int offset, Param... params)
 			throws JDOException {
 		SQLQuery qry = new SQLQuery(this);
-		qry.setRange(offset, offset+maxrows);
+		qry.setRange(offset, getRangeUpperBound(maxrows, offset));
 		if (null==fetchGroup)
 			qry.setResult("*");
 		else
@@ -633,4 +687,23 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 		return null;
 	}
 	
+
+	/**
+	 * <p>Fetch RecordSet filtering by several column values.</p>
+	 * @param maxrows int Maximum numbers of records to return or -1 for Integer.MAX_VALUE maximum numberof records
+	 * @param offset int First record to read from [0..n]
+	 * @throws JDOUserException if maxrows is zero or negative number less than minus one
+	 */
+	private int getRangeUpperBound(final int maxrows, final int offset) throws JDOUserException {
+		int upperBound;
+		if (maxrows==0 || maxrows<-1)
+			throw new JDOUserException("JDBCIndexableTable.fetch() maxrows cannot be zero");
+		else if (maxrows==-1)
+			upperBound = Integer.MAX_VALUE;
+		else if (offset>Integer.MAX_VALUE-maxrows)
+			upperBound = Integer.MAX_VALUE;
+		else
+			upperBound = offset+maxrows;
+		return upperBound;
+	}
 }

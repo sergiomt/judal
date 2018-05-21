@@ -181,5 +181,7 @@ public class EngineFactory {
 	public static final String NAME_HBASE = "HBASE";
 	public static final String NAME_MONGODB = "MONGODB";
 	public static final String NAME_REDIS = "REDIS";
+	public static final String NAME_FILE = "FILE";
+	public static final String NAME_INMEMORY = "INMEMORY";
 	
 }

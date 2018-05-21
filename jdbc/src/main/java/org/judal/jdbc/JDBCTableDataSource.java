@@ -15,7 +15,6 @@ package org.judal.jdbc;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.jdo.JDOException;
@@ -37,7 +36,6 @@ import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
-import org.judal.metadata.IndexDef.Using;
 import org.judal.storage.DataSource;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
@@ -78,6 +76,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 */
 	@Override
 	public JDBCRelationalTable openTable(Record tableRecord) throws JDOException {
+		assertNotClosed();
 		JDBCRelationalTable tbl = new JDBCRelationalTable(this, tableRecord);
 		if (DebugFile.trace)
 			DebugFile.writeln("JDBCTableDataSource.openTable(" + tableRecord.getTableName() + ") in transaction "+String.valueOf(inTransaction()));
@@ -116,6 +115,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 */
 	@Override
 	public JDBCIndexableView openView(Record viewRecord) throws JDOException {
+		assertNotClosed();
 		return new JDBCIndexableView(this, viewRecord);
 	}
 
@@ -128,6 +128,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 */
 	@Override
 	public JDBCIndexableView openIndexedView(Record viewRecord) throws JDOException {
+		assertNotClosed();
 		return new JDBCIndexableView(this, viewRecord);
 	}
 
@@ -137,7 +138,9 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	@SuppressWarnings("unchecked")
 	@Override
 	public RelationalView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, Pair<String,String>... onColumns) throws JDOException {
-		
+
+		assertNotClosed();
+
 		JDBCRelationalView tbl = null;		
 		
 		if (null==joinType)
@@ -156,7 +159,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			throw new JDOUserException("At least one column pair is required");
 		
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDBCTableDataSource.openJoinView("+joinType.name()+","+result.getTableName()+","+baseTable.getName()+" AS "+baseTable.getAlias()+joinedTable.getName()+" AS "+joinedTable.getAlias()+", ...)");
+			DebugFile.writeln("Begin JDBCTableDataSource.openJoinView("+joinType.name()+","+result.getTableName()+","+baseTable.getName()+" AS "+baseTable.getAlias()+","+joinedTable.getName()+" AS "+joinedTable.getAlias()+", ...)");
 			DebugFile.incIdent();
 		}
 		
@@ -332,11 +335,13 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			}
 			String ddl = ((SQLTableDef) tableDef).getSource();
 			execute(ddl);
-			cacheTableMetadata((SQLTableDef) tableDef);
-			conn = getConnection("JDBCTableDataSource");
-			addColumnsToCache((SQLTableDef) tableDef, conn, conn.getMetaData());
-			conn.close("JDBCTableDataSource");
-			conn = null;
+			if (!getMetaData().containsTable(tableDef.getName())) {
+				cacheTableMetadata((SQLTableDef) tableDef);
+				conn = getConnection("JDBCTableDataSource");
+				addColumnsToCache((SQLTableDef) tableDef, conn, conn.getMetaData());
+				conn.close("JDBCTableDataSource");
+				conn = null;
+			}
 			if (DebugFile.trace) {
 				DebugFile.writeln("End JDBCTableDataSource.createTable("+tableDef.getName()+")");
 				DebugFile.decIdent();
@@ -355,7 +360,10 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 */
 	@Override
 	public void dropTable(String tableName, boolean cascade) throws JDOException {
+		assertNotClosed();
 		execute("DROP TABLE "+tableName+(cascade ? " CASCADE" : ""));
+		if (getMetaData().containsTable(tableName))
+			getMetaData().removeTable(tableName, null);
 	}
 
 	/**
@@ -363,6 +371,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 	 */
 	@Override
 	public void truncateTable(String tableName, boolean cascade) throws JDOException {
+		assertNotClosed();
 		execute("TRUNCATE TABLE "+tableName+(cascade ? " CASCADE" : ""));
 	}
 	
