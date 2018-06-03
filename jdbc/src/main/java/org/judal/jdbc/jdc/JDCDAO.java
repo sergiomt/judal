@@ -29,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Map;
@@ -108,13 +107,13 @@ public class JDCDAO {
 	 * @throws NullPointerException If all objects in PKValues array are null (only debug version)
 	 * @throws ArrayIndexOutOfBoundsException if the length of PKValues array does not match the number of primary key columns of the table
 	 * @throws SQLException
+	 * @throws NullPointerException If oConn is null.
 	 */
 	public boolean loadRegister(JDCConnection oConn, Object[] PKValues, Record AllValues)
 			throws SQLException, NullPointerException, IllegalStateException, ArrayIndexOutOfBoundsException {
 		int c;
 		boolean bFound;
 		Object oVal;
-		Iterator<ColumnDef> oColIterator;
 		PreparedStatement oStmt = null;
 		ResultSet oRSet = null;
 		Chronometer oChn = null;
@@ -125,8 +124,9 @@ public class JDCDAO {
 		if (DebugFile.trace) {
 			oChn = new Chronometer();
 
-			DebugFile.writeln("Begin SQLHelper.loadRegister([Connection:"+oConn.pid()+"], Object[], [HashMap])" );
+			DebugFile.writeln("Begin JDCDAO.loadRegister(" + oConn + ", Object[], [HashMap])" );
 			DebugFile.incIdent();
+			DebugFile.writeln("XId=" + (oConn.getId()==null ? "null" : oConn.getId().toString()));
 
 			boolean bAllNull = true;
 			for (int n=0; n<PKValues.length; n++)
@@ -137,7 +137,7 @@ public class JDCDAO {
 		}
 
 		if (sqlStatements.getSelect()==null) {
-			throw new SQLException("SQLHelper.loadRegister() Primary key not found", "42S12");
+			throw new SQLException("JDCDAO.loadRegister() Primary key not found", "42S12");
 		}
 
 		AllValues.clear();
@@ -175,7 +175,7 @@ public class JDCDAO {
 						if (DebugFile.trace) DebugFile.writeln("Value of column " + oDBCol.getName() + " is NULL");
 					} else {
 						AllValues.put(oDBCol.getName(), toJavaObject(oVal, oDBCol.getName(), oDBCol.getType()));
-					}// fi
+					} // fi
 				}
 			}
 
@@ -191,7 +191,7 @@ public class JDCDAO {
 		}
 		catch (SQLException sqle) {
 			if (DebugFile.trace) {
-				DebugFile.writeln("SQLException "+sqle.getMessage());
+				DebugFile.writeln(sqle.getClass().getName() + " "+sqle.getMessage() + ", SQLState=" + sqle.getSQLState() + ", ErrorCode=" + sqle.getErrorCode());
 				DebugFile.decIdent();
 			}
 			try {
@@ -204,8 +204,8 @@ public class JDCDAO {
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("loading register took "+oChn.stop()+" ms");
-			DebugFile.writeln("End SQLHelper.loadRegister() : " + (bFound ? "true" : "false"));
+			DebugFile.writeln("loading register took " + oChn.stop() + " ms");
+			DebugFile.writeln("End JDCDAO.loadRegister() : " + (bFound ? "true" : "false"));
 		}
 
 		return bFound;
@@ -225,14 +225,13 @@ public class JDCDAO {
 	 * @param Record Values to assign to fields.
 	 * @return <b>true</b> if register was inserted for first time, <false> if it was updated.
 	 * @throws SQLException
+	 * @throws NullPointerException If oConn is null.
 	 */
-
 	public boolean storeRegister(JDCConnection oConn, Record AllValues) throws SQLException {
 		int c;
 		boolean bNewRow = false;
 		String sCol;
 		String sSQL = "";
-		ListIterator<String> oKeyIterator;
 		int iAffected = -1;
 		PreparedStatement oStmt = null;
 
@@ -241,8 +240,9 @@ public class JDCDAO {
 
 		if (DebugFile.trace)
 		{
-			DebugFile.writeln("Begin JDCDAO.storeRegister([Connection:"+oConn.getId().toString()+"], {" + AllValues.toString() + "})" );
+			DebugFile.writeln("Begin JDCDAO.storeRegister(" + oConn +", {" + AllValues.toString() + "})" );
 			DebugFile.incIdent();
+			DebugFile.writeln("XId=" + (oConn.getId()==null ? "null" : oConn.getId().toString()));
 		}
 
 		try {
@@ -274,13 +274,9 @@ public class JDCDAO {
 									oCol.getType()==java.sql.Types.NCHAR || oCol.getType()==java.sql.Types.NVARCHAR ) {
 
 								if (AllValues.apply(sCol)!=null) {
-									// DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
-
 									if (AllValues.apply(sCol).toString().length() > oCol.getLength())
 										DebugFile.writeln("ERROR: value for " + oCol.getName() + " exceeds columns precision of " + String.valueOf(oCol.getLength()));
 								} // fi (AllValues.get(sCol)!=null)
-								// else
-								//	DebugFile.writeln("Binding " + sCol + "=NULL");
 							}
 						} // fi (DebugFile.trace)
 
@@ -311,6 +307,7 @@ public class JDCDAO {
 						DebugFile.decIdent();
 					}
 					oStmt.close();
+					oStmt = null;
 					throw new SQLException(sqle.getMessage(), sqle.getSQLState(), sqle.getErrorCode());
 				}
 
@@ -323,9 +320,9 @@ public class JDCDAO {
 			if (iAffected<=0) {
 				bNewRow = true;
 
-				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getInsert() + ")");
-
 				sSQL = sqlStatements.getInsert();
+
+				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getInsert() + ")");
 
 				oStmt = oConn.prepareStatement(sqlStatements.getInsert());
 
@@ -335,7 +332,7 @@ public class JDCDAO {
 					sCol = oCol.getName();
 
 					if (!oCol.getAutoIncrement()) {
-						
+
 						// if (DebugFile.trace) {
 						//	if (null!=AllValues.apply(sCol))
 						//		DebugFile.writeln("Binding " + sCol + "=" + AllValues.apply(sCol).toString());
@@ -343,32 +340,28 @@ public class JDCDAO {
 						//		DebugFile.writeln("Binding " + sCol + "=NULL");
 						// }
 
-						c += oConn.bindParameter (oStmt, c, AllValues.apply(sCol), oCol.getType());            	
+						c += oConn.bindParameter (oStmt, c, AllValues.apply(sCol), oCol.getType());
 					} // fi autoincrement
 				} // wend
 
 				if (DebugFile.trace) DebugFile.writeln("PreparedStatement.executeUpdate()");
 
-				try {
-					iAffected = oStmt.executeUpdate();
-				} catch (SQLException sqle) {
-					if (DebugFile.trace) {
-						DebugFile.writeln("SQLException "+sqle.getMessage());
-						DebugFile.decIdent();
-					}
-					oStmt.close();
-					throw new SQLException(sqle.getMessage(), sqle.getSQLState(), sqle.getErrorCode());
-				}
+				iAffected = oStmt.executeUpdate();
 
 				if (DebugFile.trace) DebugFile.writeln(String.valueOf(iAffected) +  " affected rows");
 
 				oStmt.close();
-				oStmt =null;
+				oStmt = null;
 			}
 			else
 				bNewRow = false;
 		}
 		catch (SQLException sqle) {
+			if (DebugFile.trace) {
+				DebugFile.writeln(sqle.getClass().getName() + " " + sqle.getMessage() + ", SQLState=" + sqle.getSQLState() +", ErrorCode=" + sqle.getErrorCode() + ", Connection Name=" + oConn.getName() + ", XId=" + (oConn==null ? "null" : oConn.getId().toString()) + ", SQL=" + sSQL);
+				DebugFile.decIdent();
+			}
+
 			try { if (null!=oStmt) oStmt.close(); } catch (Exception ignore) { }
 
 			throw new SQLException (sqle.getMessage() + " " + sSQL, sqle.getSQLState(), sqle.getErrorCode());
@@ -395,6 +388,7 @@ public class JDCDAO {
 	 * @param BinaryLengths map of lengths for long fields.
 	 * @return <b>true</b> if register was inserted for first time, <false> if it was updated.
 	 * @throws SQLException
+	 * @throws NullPointerException If oConn is null.
 	 */
 
 	public boolean storeRegisterLong(JDCConnection oConn, Record AllValues, Map<String,Long> BinaryLengths) throws IOException, SQLException {
@@ -412,8 +406,9 @@ public class JDCDAO {
 
 		if (DebugFile.trace)
 		{
-			DebugFile.writeln("Begin JDCDAO.storeRegisterLong([Connection:"+oConn.getId().toString()+"], {" + AllValues.toString() + "})" );
+			DebugFile.writeln("Begin JDCDAO.storeRegisterLong(" + oConn +", {" + AllValues.toString() + "})" );
 			DebugFile.incIdent();
+			DebugFile.writeln("XId=" + (oConn.getId()==null ? "null" : oConn.getId().toString()));
 		}
 
 		oStreams  = new LinkedList<InputStream>();
@@ -643,6 +638,7 @@ public class JDCDAO {
 	 * @param AllValues Record with, at least, the primary key values for the register. Other Record values are ignored.
 	 * @return <b>true</b> if register was delete, <b>false</b> if register to be deleted was not found.
 	 * @throws SQLException
+	 * @throws NullPointerException If oConn is null.
 	 */
 	public boolean deleteRegister(JDCConnection oConn, Map<String,Object> AllValues) throws SQLException {
 		int c;
@@ -651,17 +647,19 @@ public class JDCDAO {
 		ColumnMetadata oPK;
 		ColumnDef oCol;
 
+		if (null==oConn)
+			throw new NullPointerException("JDCDAO.deleteRegister() Connection is null");
+
 		if (DebugFile.trace)
 		{
-			DebugFile.writeln("Begin JDCDAO.deleteRegister([Connection], {" + AllValues.toString() + "})" );
+			DebugFile.writeln("Begin JDCDAO.deleteRegister(" + oConn + ", {" + AllValues.toString() + "})" );
 			DebugFile.incIdent();
+			DebugFile.writeln("XId=" + (oConn.getId()==null ? "null" : oConn.getId().toString()));
 		}
 
 		if (sqlStatements.getDelete()==null) {
 			throw new SQLException("JDCDAO.deleteRegister() Primary key not found", "42S12");
 		}
-
-		// Begin SQLException
 
 		if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement(" + sqlStatements.getDelete() + ")");
 
@@ -679,8 +677,6 @@ public class JDCDAO {
 		if (DebugFile.trace) DebugFile.writeln("PreparedStatement.executeUpdate()");
 
 		bDeleted = (oStmt.executeUpdate()>0);
-
-		// End SQLException
 
 		if (DebugFile.trace)
 		{
@@ -708,7 +704,6 @@ public class JDCDAO {
 			 ResultSet oRSet = oStmt.executeQuery("SELECT NULL FROM " + tdef.getName() + " WHERE " + sQueryString)) {
 			bExists = oRSet.next();
 		}
-		
 		return bExists;
 	}
 
@@ -720,9 +715,14 @@ public class JDCDAO {
 	 * @param sQueryString Register Query String, as a SQL WHERE clause syntax
 	 * @return <b>true</b> if register exists, <b>false</b> otherwise.
 	 * @throws SQLException
+	 * @throws NullPointerException If oConn is null.
 	 */
 	public boolean existsRegister(JDCConnection oConn, String sQueryString, Object[] oQueryParams) throws SQLException {
+		if (null==oConn)
+			throw new NullPointerException("JDCDAO.existsRegister() Connection is null");
+
 		boolean bExists = false;
+		ResultSet oRSet = null;
 		try (PreparedStatement oStmt = oConn.prepareStatement("SELECT NULL FROM " + tdef.getName() + " WHERE " + sQueryString, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
 			if (oQueryParams!=null) {
 				for (int p=0; p<oQueryParams.length; p++) {
@@ -753,9 +753,10 @@ public class JDCDAO {
 				}
 			}
 
-			ResultSet oRSet = oStmt.executeQuery();
+			oRSet = oStmt.executeQuery();
 			bExists = oRSet.next();
-			oRSet.close();
+		} finally {
+			if (oRSet!=null) oRSet.close();
 		}
 		return bExists;
 	}
@@ -768,41 +769,53 @@ public class JDCDAO {
 	 * @param AllValues Map<String,Object>
 	 * @return <b>true</b> if register exists, <b>false</b> otherwise.
 	 * @throws SQLException
+	 * @throws NullPointerException If oConn is null.
 	 */
-
 	public boolean existsRegister(JDCConnection oConn, Map<String,Object> AllValues) throws SQLException {
 		int c;
 		boolean bExists;
-		PreparedStatement oStmt;
-		ResultSet oRSet;
+		PreparedStatement oStmt = null;
+		ResultSet oRSet = null;
 		ColumnMetadata oPK;
 		ColumnDef oCol;
 
+		if (null==oConn)
+			throw new NullPointerException("JDCDAO.existsRegister() Connection is null");
+
 		if (DebugFile.trace)
 		{
-			DebugFile.writeln("Begin DBTable.existsRegister([Connection], {" + AllValues.toString() + "})" );
+			DebugFile.writeln("Begin JDCDAO.existsRegister(" + oConn + ", {" + AllValues.toString() + "})" );
 			DebugFile.incIdent();
+			DebugFile.writeln("XId=" + (oConn.getId()==null ? "null" : oConn.getId().toString()));
 		}
 
-		oStmt = oConn.prepareStatement(sqlStatements.getExists(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		try {
+			oStmt = oConn.prepareStatement(sqlStatements.getExists(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 
-		c = 1;
-		while (c<=tdef.getPrimaryKeyMetadata().getNumberOfColumns()) {
-			oPK = tdef.getPrimaryKeyMetadata().getColumns()[c-1];
-			oCol = tdef.getColumnByName(oPK.getName());
-			oStmt.setObject (c++, AllValues.get(oPK.getName()), oCol.getType());
-		} // wend
+			c = 1;
+			while (c<=tdef.getPrimaryKeyMetadata().getNumberOfColumns()) {
+				oPK = tdef.getPrimaryKeyMetadata().getColumns()[c-1];
+				oCol = tdef.getColumnByName(oPK.getName());
+				oStmt.setObject (c++, AllValues.get(oPK.getName()), oCol.getType());
+			} // wend
 
-		oRSet = oStmt.executeQuery();
-		bExists = oRSet.next();
+			oRSet = oStmt.executeQuery();
+			bExists = oRSet.next();
 
-		oRSet.close();
-		oStmt.close();
+			oRSet.close();
+			oRSet = null;
+			oStmt.close();
+			oStmt = null;
+
+		} finally {
+			if (oRSet!=null) oRSet.close();
+			if (oStmt!=null) oStmt.close();
+		}
 
 		if (DebugFile.trace)
 		{
 			DebugFile.decIdent();
-			DebugFile.writeln("End DBTable.existsRegister() : " + String.valueOf(bExists));
+			DebugFile.writeln("End JDCDAO.existsRegister() : " + String.valueOf(bExists));
 		}
 
 		return bExists;

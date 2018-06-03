@@ -1509,8 +1509,6 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			}
 		}
 
-		if (DebugFile.trace) DebugFile.writeln("JDCConnection.bindParameter("+String.valueOf(iParamIndex)+","+oParamValue+","+String.valueOf(iSQLType)+") : "+String.valueOf(nBinded));
-
 		return nBinded;
 	} // bindParameter
 

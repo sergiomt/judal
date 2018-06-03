@@ -22,6 +22,8 @@ import javax.jdo.datastore.Sequence;
 import org.judal.jdbc.JDBCDataSource;
 import org.judal.jdbc.jdc.JDCConnection;
 
+import com.knowgate.debug.DebugFile;
+
 public class PgSequenceGenerator implements Sequence {
 
 	private JDBCDataSource dataSource;
@@ -32,7 +34,7 @@ public class PgSequenceGenerator implements Sequence {
 		this.dataSource = dataSource;
 		this.sequenceName = sequenceName;
 	}
-	
+
 	@Override
 	public String getName() {
 		return sequenceName;
@@ -41,28 +43,55 @@ public class PgSequenceGenerator implements Sequence {
 	@Override
 	public long nextValue() throws JDOException {
 		JDCConnection conn = null;
-        Statement stmt = null;
-        ResultSet rset = null;
-        try {
+		Statement stmt = null;
+		ResultSet rset = null;
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin PgSequenceGenerator.nextValue()");
+			DebugFile.incIdent();
+		}
+		try {
 			conn = dataSource.getConnection(sequenceName);
 			stmt = conn.createStatement();
-	        rset = stmt.executeQuery("SELECT nextval('" + getName() + "')");
-	        rset.next();
-	        current = rset.getInt(1);
-	        rset.close();
-	        rset = null;
-	        stmt.close();
-	        stmt = null;
-	        conn.close(sequenceName);
-	        conn = null;
-        } catch (SQLException sqle) {
-        	throw new JDOException(sqle.getMessage(), sqle);
-        } finally {
-			try { if (rset!=null) rset.close(); } catch (SQLException ignore) { }
-			try { if (stmt!=null) stmt.close(); } catch (SQLException ignore) { }
-			try { if (conn!=null) if (!conn.isClosed()) conn.close(sequenceName); } catch (SQLException ignore) { }
+			if (DebugFile.trace)
+				DebugFile.writeln("Statement.executeQuery(SELECT nextval('" + getName() + "'))");
+			rset = stmt.executeQuery("SELECT nextval('" + getName() + "')");
+			rset.next();
+			current = rset.getInt(1);
+			rset.close();
+			rset = null;
+			stmt.close();
+			stmt = null;
+			conn.close(sequenceName);
+			conn = null;
+		} catch (SQLException sqle) {
+			if (DebugFile.trace) {
+				DebugFile.writeln(sqle.getClass().getName() + " " + sqle.getMessage());
+				DebugFile.decIdent();
+			}
+			throw new JDOException(sqle.getMessage(), sqle);
+		} finally {
+			try {
+				if (rset != null)
+					rset.close();
+			} catch (SQLException ignore) {
+			}
+			try {
+				if (stmt != null)
+					stmt.close();
+			} catch (SQLException ignore) {
+			}
+			try {
+				if (conn != null)
+					if (!conn.isClosed())
+						conn.close(sequenceName);
+			} catch (SQLException ignore) {
+			}
 		}
-        return current;
+		if (DebugFile.trace) {
+			DebugFile.decIdent();
+			DebugFile.writeln("End PgSequenceGenerator.nextValue() : " + current);
+		}
+		return current;
 	}
 
 	@Override
