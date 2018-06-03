@@ -1067,6 +1067,8 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		return Types.VARCHAR;
 	else if (obj instanceof Byte)
 		return Types.TINYINT;
+	else if (obj instanceof Character)
+		return Types.CHAR;
 	else if (obj instanceof Short)
 		return Types.SMALLINT;
 	else if (obj instanceof Integer)

@@ -472,6 +472,15 @@ public interface Record extends Serializable, Stored {
 	/**
 	 * <p>Set column value.</p>
 	 * @param colname String Case insensitive column name
+	 * @param charvalue char Column value
+	 * @return Character Previous column value
+	 * @throws IllegalArgumentException
+	 */
+	Character put(String colname, char charvalue) throws IllegalArgumentException;
+
+	/**
+	 * <p>Set column value.</p>
+	 * @param colname String Case insensitive column name
 	 * @param shortvalue short Column value
 	 * @return Short Previous column value
 	 * @throws IllegalArgumentException

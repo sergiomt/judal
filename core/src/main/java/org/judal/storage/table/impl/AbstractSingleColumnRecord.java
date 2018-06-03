@@ -288,7 +288,7 @@ public abstract class AbstractSingleColumnRecord implements SingleColumnRecord {
 
 	@Override
 	public Boolean put(String colname, boolean boolval) throws IllegalArgumentException {
-		throw new ClassCastException("Cannot cast from Boolean to Object");
+		throw new ClassCastException("Cannot cast from boolean to Object");
 	}
 
 	@Override
@@ -327,15 +327,18 @@ public abstract class AbstractSingleColumnRecord implements SingleColumnRecord {
 	}
 
 	@Override
-	public Date put(String colname, String strdate, SimpleDateFormat pattern)
-			throws ParseException, IllegalArgumentException {
+	public Date put(String colname, String strdate, SimpleDateFormat pattern) throws ParseException, IllegalArgumentException {
 		throw new ClassCastException("Cannot cast from Date to Object");
 	}
 
 	@Override
-	public BigDecimal put(String colname, String decimalvalue, DecimalFormat pattern)
-			throws ParseException, IllegalArgumentException {
+	public BigDecimal put(String colname, String decimalvalue, DecimalFormat pattern) throws ParseException, IllegalArgumentException {
 		throw new ClassCastException("Cannot cast from decimal to Object");
+	}
+
+	@Override
+	public Character put(String colname, char charvalue) throws IllegalArgumentException {
+		throw new ClassCastException("Cannot cast from char to Object");
 	}
 
 	@Override

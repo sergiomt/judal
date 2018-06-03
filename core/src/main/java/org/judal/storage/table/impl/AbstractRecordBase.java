@@ -35,9 +35,10 @@ import java.util.Locale;
 import java.util.Map;
 
 import org.judal.metadata.ColumnDef;
+
 import org.judal.serialization.BytesConverter;
 import org.judal.serialization.JSONValue;
-import org.judal.storage.query.AbstractQuery;
+
 import org.judal.storage.table.Record;
 
 import com.knowgate.currency.Money;
@@ -512,7 +513,13 @@ import com.knowgate.stringutils.XML;
 	 */
 	@Override
 	public String getString(String sColName) throws ClassCastException {
-		return (String) apply(sColName);
+		Object strval = apply(sColName);
+		if (null==strval)
+			return null;
+		else if (strval instanceof String)
+			return (String) apply(sColName);
+		else
+			return strval.toString();
 	}
 
 	/**
@@ -524,10 +531,7 @@ import com.knowgate.stringutils.XML;
 	 */
 	@Override
 	public String getString(String sColName, String sDefault) throws ClassCastException {
-		if (isNull(sColName))
-			return sDefault;
-		else
-			return (String) apply(sColName);
+		return isNull(sColName) ? sDefault : getString(sColName);
 	}
 
 	/**
@@ -594,6 +598,24 @@ import com.knowgate.stringutils.XML;
 	public Byte put(String sColName, byte byVal) {
 		Object prev = put(sColName,new Byte(byVal));
 		return isNullOrNone(prev) ? null : (Byte) prev;
+	}
+
+	/** <p>Set char value at internal collection</p>
+	 * @param sColName String Column Name
+	 * @param cVal char Field Value
+	 * @return Character Previous column value
+	 */
+	@Override
+	public Character put(String sColName, char cVal) {
+		Object prev = put(sColName, new Character(cVal));
+		if (isNullOrNone(prev))
+			return null;
+		else if (prev instanceof Character)
+			return (Character) prev;
+		else if (prev instanceof String)
+			return ((String) prev).charAt(0);
+		else
+			return prev.toString().charAt(0);
 	}
 
 	/** <p>Set short value at internal collection</p>

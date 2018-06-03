@@ -634,4 +634,10 @@ public class JDOPersistenceCapable implements JDORecord {
 		return null;
 	}
 
+	@Override
+	public Character put(String colname, char charvalue) throws IllegalArgumentException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

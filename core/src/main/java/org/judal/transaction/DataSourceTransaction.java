@@ -306,21 +306,32 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	 * @param res XAResource
 	 * @throws NullPointerException if resource is <b>null</b>
 	 * @throws RollbackException if Transaction Status is STATUS_MARKED_ROLLBACK or STATUS_ROLLING_BACK
-	 * @throws IllegalStateException if getFormatId() is TransactionId.NO_TRANSACTION_ID or Transaction Status is STATUS_PREPARED
+	 * @throws IllegalStateException if getFormatId() is TransactionId.NO_TRANSACTION_ID or Transaction Status is STATUS_PREPARED or XAResource is a closed Connection
 	 * @throws SystemException if there is an exception during resource start
 	 */
 	@Override
 	public boolean enlistResource(XAResource res) throws NullPointerException, RollbackException, IllegalArgumentException, IllegalStateException, SystemException {
-		
+
 		boolean retval;
 
 		if (null==res) {
 			if (DebugFile.trace) DebugFile.writeln("NullPointerException DataSourceTransaction.enlistResource() XAResource cannot be null");
 			throw new NullPointerException("XAResource cannot be null");			
 		}
-		
+
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransaction.enlistResource("+res+")");
+			if (res instanceof Connection) {
+				try {
+					if (((Connection) res).isClosed()) {
+						DebugFile.writeln("Cannot enlist Connection " + res + " into DataSourceTransaction because it is closed");
+						throw new IllegalStateException("Cannot enlist Connection " + res + " into DataSourceTransaction because the Connection is closed");
+					}
+				} catch (SQLException e) {
+					DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
+					throw new SystemException("Cannot enlist Connection " + res + " into DataSourceTransaction " + e.getClass().getName() + " " + e.getMessage());
+				}
+			}
+			DebugFile.writeln("Begin DataSourceTransaction.enlistResource(" + res + ")");
 			DebugFile.incIdent();
 		}
 
@@ -331,7 +342,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			}			
 			throw new RollbackException("Cannot enlist resource because transaction was set to rollback only");
 		}
-		
+
 		if (status==Status.STATUS_PREPARED) {
 			if (DebugFile.trace) {
 				DebugFile.writeln("IllegalStateException Cannot enlist resources in prepared transaction " + tid.toString());
