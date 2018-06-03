@@ -48,6 +48,8 @@ import org.judal.storage.FieldHelper;
 import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.impl.AbstractRecord;
 
+import com.knowgate.debug.DebugFile;
+
 /**
  * Implementation of Record interface using an hash map to hold column values
  * @author Sergio Montoro Ten
@@ -373,11 +375,49 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
-	
+
 	private static ViewDef getViewDefForName(TableDataSource dataSource, String name) {
 		final ViewDef vdef = dataSource.getTableOrViewDef(name);
-		if (null==vdef)
+		if (null==vdef) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("JDOException at MapRecord.getViewDefForName(). Table or View not found " + name);
+				DebugFile.writeln("SchemaMetadata contains " + dataSource.getMetaData().tables().size()+" tables");
+				DebugFile.writeln("SchemaMetadata contains " + dataSource.getMetaData().views().size()+" views");
+				StringBuilder tableList = new StringBuilder();
+				tableList.append("JDC tables list = [");
+				try {
+					boolean first = true;
+					tableList.append("SchemaMetaData tables = [");
+					first = true;
+					for (TableDef t : dataSource.getMetaData().tables()) {
+						if (first)
+							first = false;
+						else
+							tableList.append(",");
+						tableList.append(t.getName());
+					}
+					tableList.append("]");
+					DebugFile.writeln(tableList.toString());
+					tableList.setLength(0);
+					tableList.append("SchemaMetaData views = [");
+					first = true;
+					for (ViewDef t : dataSource.getMetaData().views()) {
+						if (first)
+							first = false;
+						else
+							tableList.append(",");
+						tableList.append(t.getName());
+					}
+					tableList.append("]");
+					DebugFile.writeln(tableList.toString());
+				} catch (Exception e) {
+					if (DebugFile.trace) {
+						DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
+					}
+				}
+			}
 			throw new JDOUserException("MapRecord constructor. Table or view " + name + " not found");
+		}
 		return vdef;
 	}
 }
