@@ -64,7 +64,7 @@ public class RAMQueueConsumer extends ThreadPoolExecutor implements RecordQueueC
 		if (DebugFile.trace) {
 		  DebugFile.writeln("Begin RAMQueueConsumer.stop()");
 		  DebugFile.incIdent();
-	    }		
+	    }
 
 		super.shutdown();
 
