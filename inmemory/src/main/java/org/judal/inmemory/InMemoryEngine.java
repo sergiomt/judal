@@ -45,9 +45,12 @@ public class InMemoryEngine implements Engine<InMemoryDataSource> {
 	public InMemoryDataSource getDataSource(Map<String, String> properties) throws JDOException {
 		SchemaMetaData metadata;
 		try {
-			String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
+			String metadataFilePath = Env.getString(properties, DataSource.METADATA, "");
 			String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
-			if (metadataPackage.length()==0) {
+			if (metadataFilePath.length()==0 && metadataPackage.length()==0) {
+				return new InMemoryDataSource(properties);
+			}
+			else if (metadataPackage.length()==0) {
 				FileInputStream fin = new FileInputStream(new File(metadataFilePath));
 				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(null);
 				metadata = xmlMeta.readMetadata(fin);

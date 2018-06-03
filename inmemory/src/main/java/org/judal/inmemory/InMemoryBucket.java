@@ -13,10 +13,11 @@ package org.judal.inmemory;
  */
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.judal.storage.Param;
 
@@ -43,7 +44,7 @@ public class InMemoryBucket implements Bucket {
 	public InMemoryBucket(InMemoryDataSource oDts, String sBucketName) {
 		bucketName = sBucketName;
 		dts = oDts;
-		bucketData = new HashMap<Object,InMemoryRecord>();
+		bucketData = new ConcurrentHashMap<Object,InMemoryRecord>();
 	}
 
 	/**
@@ -55,9 +56,7 @@ public class InMemoryBucket implements Bucket {
 	}
 
 	@Override
-	public void close() throws JDOException {
-		bucketData.clear();
-	}
+	public void close() throws JDOException { }
 
 	/**
 	 * Check whether an object with the given key is at this Bucket
@@ -70,14 +69,7 @@ public class InMemoryBucket implements Bucket {
 	@Override
 	public boolean exists(Object key) throws NullPointerException, IllegalArgumentException, JDOException {
 		if (null==key) throw new NullPointerException("InMemoryBucket.exists() key value cannot be null");
-
-		Object value;
-		if (key instanceof Param)
-			value = ((Param) key).getValue();
-		else
-			value = key;
-
-		return bucketData.containsKey(value);
+		return bucketData.containsKey(key instanceof Param ? ((Param) key).getValue() : key);
 	}
 
 	/**

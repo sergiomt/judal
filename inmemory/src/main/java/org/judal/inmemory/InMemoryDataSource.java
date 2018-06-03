@@ -20,7 +20,6 @@ import javax.transaction.TransactionManager;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.datastore.JDOConnection;
-import javax.jdo.datastore.Sequence;
 
 import org.judal.metadata.SchemaMetaData;
 import org.judal.storage.Param;
@@ -37,6 +36,7 @@ public class InMemoryDataSource implements BucketDataSource {
 	private SchemaMetaData smd;
 	private Map<String,String> props;
 	private Map<String,InMemoryBucket> dataStore;
+	private Map<String,InMemorySequence> sequences;
 
 	/**
 	 * 
@@ -47,6 +47,7 @@ public class InMemoryDataSource implements BucketDataSource {
 		props = new HashMap<String,String>(17);
 		props.putAll(properties);
 		dataStore = new HashMap<String,InMemoryBucket>();
+		sequences  = new HashMap<String,InMemorySequence>();
 	}
 
 	public InMemoryDataSource(Map<String, String> properties, SchemaMetaData metaData) throws JDOException {
@@ -166,13 +167,26 @@ public class InMemoryDataSource implements BucketDataSource {
 		throw new JDOUnsupportedOptionException("InMemoryDataSource does not use connections");
 	}
 
+	public InMemorySequence createSequence(String name, long initial) throws JDOException {
+		if (sequences.containsKey(name.toLowerCase()))
+			throw new JDOException("Sequence " + name + " already exists");
+		InMemorySequence seq = new InMemorySequence(name, initial);
+		sequences.put(name.toLowerCase(), seq);
+		return seq;
+	}
+
+	public void dropSequence(String name, long initial) throws JDOException {
+		if (!sequences.containsKey(name.toLowerCase()))
+			throw new JDOException("Sequence " + name + "does not exist");
+		sequences.remove(name.toLowerCase());
+	}
+
 	/**
-	 * InMemoryDataSource does not implement sequences. This method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
+	 * @return InMemorySequence
 	 */
 	@Override
-	public Sequence getSequence(String name) throws JDOException {
-		throw new JDOUnsupportedOptionException("InMemoryDataSource does not provide sequences");
+	public InMemorySequence getSequence(String name) throws JDOException {
+		return sequences.get(name.toLowerCase());
 	}
 
 	/**

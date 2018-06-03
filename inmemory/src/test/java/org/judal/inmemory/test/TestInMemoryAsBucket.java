@@ -1,7 +1,6 @@
 package org.judal.inmemory.test;
 
 import org.junit.Test;
-import org.junit.Ignore;
 import org.junit.BeforeClass;
 import org.junit.AfterClass;
 
@@ -11,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.judal.storage.DataSource;
+import org.judal.storage.EngineFactory;
+
 import javax.jdo.JDOException;
 import javax.transaction.SystemException;
 
@@ -31,8 +32,9 @@ public class TestInMemoryAsBucket extends AbstractBucketTest {
 	@BeforeClass
 	public static void init() throws ClassNotFoundException, JDOException, IOException {
 		properties = new TestInMemory().getTestProperties();
-		InMemoryEngine s3 = new InMemoryEngine();
-		dts = s3.getDataSource(properties);
+		InMemoryEngine ime = new InMemoryEngine();
+		EngineFactory.registerEngine(EngineFactory.NAME_INMEMORY, ime.getClass().getName());
+		dts = ime.getDataSource(properties);
 		defaultBucketName = bucketName;
 		bucketName = properties.getOrDefault(DataSource.URI, "judaltest1");
 	}

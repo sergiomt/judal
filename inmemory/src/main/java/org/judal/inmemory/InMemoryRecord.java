@@ -97,8 +97,8 @@ public class InMemoryRecord extends AbstractRecordBase {
 	 */
 	@Override
 	public void setKey(Object value) throws NullPointerException {
-		if (null==value) throw new NullPointerException("S3 object key cannot be null");
-		key = (String) value; 
+		if (null==value) throw new NullPointerException("InMemory object key cannot be null");
+		key = (String) value;
 	}
 
 	/**
