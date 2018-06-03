@@ -10,28 +10,37 @@ import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
 import javax.jdo.PersistenceManager;
 
+import org.judal.storage.Param;
 import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.keyvalue.Stored;
 
 import com.knowgate.io.FileUtils;
+import com.knowgate.io.MimeUtils;
 
 import static org.judal.storage.DataSource.URI;
 
 public class FileBucket implements Bucket {
 
-	private File dir;
-	private String path;
+	final private File dir;
+	final private String path;
 	
 	public FileBucket(Map<String, String> properties, String name, boolean create) throws JDOException {
-		path = properties.get(URI);
-		if (!path.endsWith(File.separator))
-			path += File.separator;
-		dir = new File(path+name);
+		String uri = properties.get(URI);
+		if (!uri.endsWith(File.separator))
+			uri += File.separator;
+		path = uri + name + File.separator;
+		dir = new File(path);
 		if (!dir.exists())
 			if (create)
 				dir.mkdirs();
 			else
-				throw new JDOException("Bucket "+name+" not found");
+				throw new JDOException("FileBucket "+name+" not found");
+		else if (!dir.isDirectory())
+			throw new JDOException("File " + path+name + " already exists but it is not a directory");
+		else if (!dir.canRead())
+			throw new JDOException("FileBucket can't read from " + path);
+		else if (!dir.canWrite())
+			throw new JDOException("FileBucket can't write to " + path);
 	}
 
 	@Override
@@ -39,18 +48,34 @@ public class FileBucket implements Bucket {
 		return dir.getName();
 	}
 
+	private String getFilePath(final Object key) throws NullPointerException {
+		if (null==key)
+			throw new NullPointerException("FileBucket file name cannot be null");
+		if (key instanceof Param)
+			return path + ((Param) key).getValue();
+		else
+			return path + key;
+	}
+
+	private String getFileExtension(final String fileName) throws NullPointerException {
+		final int lastDot = fileName.lastIndexOf('.');
+		return lastDot>=0 ? fileName.substring(lastDot) : "";
+	}
+
 	@Override
 	public boolean exists(Object key) throws JDOException {
-		return new File(path+key).exists();
+		return new File(getFilePath(key)).exists();
 	}
 
 	@Override
 	public boolean load(Object key, Stored target) throws JDOException {
-		File source = new File(path+key);
-		boolean retval = source.exists();
+		final File source = new File(getFilePath(key));
+		final boolean retval = source.exists();
+		if (!source.isFile())
+			throw new JDOException("FileBucket.load() " + source.getAbsolutePath() + " is not a file");
 		try {
 			if (retval)
-				target.setContent(FileUtils.readFileToByteArray(source), null);
+				target.setContent(FileUtils.readFileToByteArray(source), MimeUtils.getFileExtensionForMimeType(getFileExtension(source.getName())));
 			else
 				target.setContent(null, null);
 		} catch (IOException ioe) {

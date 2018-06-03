@@ -1,17 +1,13 @@
 package org.judal.file;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.Serializable;
 
 import javax.jdo.JDOException;
 
+import org.judal.metadata.TableDef;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
-import org.judal.storage.keyvalue.BucketDataSource;
 import org.judal.storage.keyvalue.Stored;
-
-import com.knowgate.io.FileUtils;
 
 public class FileStore implements Stored {
 
@@ -21,11 +17,16 @@ public class FileStore implements Stored {
 	private String fileName;
 	private byte[] content;
 
+	public FileStore(TableDef tdef) {
+		fileName = tdef.getCatalog();
+		bucketName = tdef.getName();
+	}
+
 	public FileStore(FileBucket bucket, String name) {
 		fileName = name;
 		bucketName = bucket.name();
 	}
-	
+
 	@Override
 	public void setKey(Object key) throws JDOException {
 		fileName = (String) key;

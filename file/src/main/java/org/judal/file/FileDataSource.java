@@ -13,6 +13,7 @@ import javax.jdo.datastore.Sequence;
 import javax.transaction.TransactionManager;
 
 import org.judal.storage.keyvalue.BucketDataSource;
+import org.judal.file.InMemorySequence;
 import org.judal.storage.Param;
 
 public class FileDataSource implements BucketDataSource {
@@ -30,10 +31,19 @@ public class FileDataSource implements BucketDataSource {
 
 	@Override
 	public boolean exists(String objectName, String objectType) throws JDOException {
-		if ("U".equals(objectType))
-			return buckets.containsKey(objectName.toLowerCase());
-		else
+		if ("U".equals(objectType)) {
+			if (buckets.containsKey(objectName.toLowerCase())) {
+				return true;
+			} else {
+				String path = properties.get(URI);
+				if (!path.endsWith(File.separator))
+					path += File.separator;
+				File dir = new File(path+objectName);
+				return dir.exists() && dir.isDirectory();
+			}
+		} else {
 			return false;
+		}
 	}
 
 	@Override
@@ -49,6 +59,20 @@ public class FileDataSource implements BucketDataSource {
 	@Override
 	public JDOConnection getJdoConnection() throws JDOException {
 		throw new JDOUnsupportedOptionException("FileDataSource does not support connections");
+	}
+
+	public InMemorySequence createSequence(String name, long initial) throws JDOException {
+		if (sequences.containsKey(name.toLowerCase()))
+			throw new JDOException("Sequence " + name + " already exists");
+		InMemorySequence seq = new InMemorySequence(name, initial);
+		sequences.put(name.toLowerCase(), seq);
+		return seq;
+	}
+
+	public void dropSequence(String name, long initial) throws JDOException {
+		if (!sequences.containsKey(name.toLowerCase()))
+			throw new JDOException("Sequence " + name + "does not exist");
+		sequences.remove(name.toLowerCase());
 	}
 
 	@Override
@@ -102,9 +126,13 @@ public class FileDataSource implements BucketDataSource {
 			path += File.separator;
 		File dir = new File(path+bucketName);
 		if (dir.exists()) {
-			for (File f : dir.listFiles())
-				if (f.isFile())
-					f.delete();
+			if (dir.isDirectory()) {
+				for (File f : dir.listFiles())
+					if (f.isFile())
+						f.delete();
+			} else {
+				throw new JDOException(path + bucketName + " is not a directory");
+			}
 		}
 	}
 }
