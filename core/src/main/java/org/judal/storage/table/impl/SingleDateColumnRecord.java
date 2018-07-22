@@ -2,7 +2,6 @@ package org.judal.storage.table.impl;
 
 import java.sql.Timestamp;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.Types;
 import java.util.Calendar;
 import java.util.Date;
@@ -10,13 +9,20 @@ import java.util.Date;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.ViewDef;
 
 public class SingleDateColumnRecord  extends SingleObjectColumnRecord  {
 
 	private static final long serialVersionUID = 1L;
 
+	public SingleDateColumnRecord(ViewDef tableDef) {
+		super(tableDef);
+		setColumn(new ColumnDef(columnName, Types.DATE, 1));
+	}
+
 	public SingleDateColumnRecord(String tableName) {
 		super(tableName);
+		setColumn(new ColumnDef(columnName, Types.DATE, 1));
 	}
 
 	public SingleDateColumnRecord(String tableName, String columnName) {

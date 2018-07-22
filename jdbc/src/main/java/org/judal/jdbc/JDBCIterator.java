@@ -29,7 +29,6 @@ import org.judal.metadata.SelectableDef;
 
 import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.table.Record;
-import org.judal.storage.StorageObjectFactory;
 
 /**
  * <p>Iterator over an open SQL ResultSet.</p>
@@ -38,7 +37,7 @@ import org.judal.storage.StorageObjectFactory;
  */
 public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 
-	protected Constructor<? extends Stored> recordConstructor;
+	protected Constructor<? extends Object> recordConstructor;
 	protected SelectableDef tableDef;
 	private Class<? extends Stored> resultClass;
 	private Statement stmt;
@@ -51,13 +50,14 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 	 * @param resultClass Class&lt;? extends Record&gt;
 	 * @param tableDef SelectableDef
 	 * @param stmt PreparedStatement
-	 * @param rset ResultSet
+	 * @param rset Constructor&lt;? extends Object&gt;
+	 * @param recordConstructor
 	 * @throws NoSuchMethodException if resultClass has no default constructor nor a constructor compatible with a SelectableDef argument
 	 * @throws SecurityException
 	 * @throws NullPointerException if resultClass or stmt or rset are null
 	 */
 	@SuppressWarnings("unchecked")
-	public JDBCIterator(Class<? extends Stored> resultClass, SelectableDef tableDef, PreparedStatement stmt, ResultSet rset)
+	public JDBCIterator(Class<? extends Stored> resultClass, SelectableDef tableDef, PreparedStatement stmt, ResultSet rset, Constructor<? extends Object> recordConstructor)
 		throws NoSuchMethodException, SecurityException, NullPointerException {
 
 		if (null==resultClass)
@@ -77,8 +77,8 @@ public class JDBCIterator implements AutoCloseable, Iterator<Stored> {
 		this.nextRow = null;
 		this.resultClass = resultClass;
 		this.tableDef = tableDef;
-		this.recordConstructor = (Constructor<? extends Stored>) StorageObjectFactory.getConstructor(resultClass, new Class<?>[]{tableDef.getClass()});
 		this.isNext = null;
+		this.recordConstructor = recordConstructor;
 
 		try {
 			if (null==recordConstructor)

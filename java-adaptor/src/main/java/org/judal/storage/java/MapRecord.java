@@ -126,7 +126,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOUserException if table or view is not found at DataSource metadata
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		this(getViewDefForName(dataSource, tableName));	
+		this(getViewDefForName(dataSource, tableName), dataSource.getFieldHelper());	
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOUserException if table or view is not found at DataSource metadata
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
-		this(dataSource, tableName, null, constraintsChecker);
+		this(dataSource, tableName, dataSource.getFieldHelper(), constraintsChecker);
 	}
 	
 	/**
@@ -171,7 +171,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	 * @throws JDOException 
 	 */
 	public MapRecord(TableDataSource dataSource, String tableName, String... columnNames) throws JDOException {
-		this(dataSource, tableName, null, null, columnNames);
+		this(dataSource, tableName, dataSource.getFieldHelper(), null, columnNames);
 	}
 
 	/**

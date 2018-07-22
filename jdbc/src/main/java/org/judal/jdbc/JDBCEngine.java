@@ -13,6 +13,9 @@ package org.judal.jdbc;
  */
 
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.Enumeration;
 
 import org.judal.storage.Engine;
 import org.judal.storage.EngineFactory;
@@ -30,6 +33,28 @@ import com.knowgate.debug.DebugFile;
  * @version 1.0
  */
 public class JDBCEngine implements Engine<JDBCRelationalDataSource> {
+
+	/**
+	 * Get new JDBCRelationalDataSource
+	 * @param properties Properties Valid property names are listed at DataSource.PropertyNames
+	 * @return JDBCRelationalDataSource
+	 * @throws JDOException
+	 */
+	public JDBCRelationalDataSource getDataSource(Properties properties) throws JDOException {
+		try {
+			HashMap<String,String> mprops = new HashMap<>(properties.size()*2);
+			Enumeration<?> names = properties.propertyNames();
+			while (names.hasMoreElements()) {
+				final String key = (String) names.nextElement();
+				mprops.put(key, properties.getProperty(key));
+			}
+			return new JDBCRelationalDataSource(mprops, getTransactionManager());
+		} catch (Exception xcpt) {
+			if (DebugFile.trace)
+				DebugFile.writeStackTrace(xcpt);
+			throw new JDOException(xcpt.getMessage(), xcpt);
+		}
+	}
 
 	/**
 	 * Get new JDBCRelationalDataSource

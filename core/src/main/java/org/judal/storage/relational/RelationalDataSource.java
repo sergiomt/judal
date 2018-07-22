@@ -53,7 +53,7 @@ public interface RelationalDataSource extends TableDataSource {
 	 * @throws JDOException
 	 */
 	RelationalTable openRelationalTable(Record recordInstance) throws JDOException;
-	
+
 	/**
 	 * Open relational view for read-only.
 	 * @param recordInstance Record
@@ -61,7 +61,16 @@ public interface RelationalDataSource extends TableDataSource {
 	 * @throws JDOException
 	 */
 	RelationalView openRelationalView(Record recordInstance) throws JDOException;
-	
+
+	/**
+	 * Open relational view for read-only.
+	 * @param recordInstance Record
+	 * @param alias String Alias to be given to the view when used in a query
+	 * @return RelationalView
+	 * @throws JDOException
+	 */
+	RelationalView openRelationalView(Record recordInstance, String alias) throws JDOException;
+
 	/**
 	 * Open Relational View for read-only of two joined views.
 	 * @param joinType JoinType enum INNER, OUTER

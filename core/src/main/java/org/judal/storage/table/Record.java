@@ -33,6 +33,7 @@ import javax.jdo.FetchGroup;
 
 import org.judal.metadata.ColumnDef;
 import org.judal.storage.ConstraintsChecker;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.keyvalue.Stored;
 
 import com.knowgate.currency.Money;
@@ -102,6 +103,12 @@ public interface Record extends Serializable, Stored {
 	 * @return ConstraintsChecker
 	 */
 	ConstraintsChecker getConstraintsChecker();
+
+	/**
+	 * <p>Get instance of FieldHelper applicable to this Record  (if any).</p>
+	 * @return FieldHelper
+	 */
+	FieldHelper getFieldHelper();
 
 	/**
 	 * <p>Get value of a column.</p>

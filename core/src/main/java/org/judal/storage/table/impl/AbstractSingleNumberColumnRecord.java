@@ -12,6 +12,8 @@ package org.judal.storage.table.impl;
  * KIND, either express or implied.
  */
 
+import org.judal.metadata.ViewDef;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -27,6 +29,10 @@ import javax.jdo.JDOException;
 public abstract class AbstractSingleNumberColumnRecord extends SingleObjectColumnRecord {
 
 	private static final long serialVersionUID = 1L;
+
+	public AbstractSingleNumberColumnRecord(ViewDef tableDef) {
+		super(tableDef);
+	}
 
 	public AbstractSingleNumberColumnRecord(String tableName) {
 		super(tableName);

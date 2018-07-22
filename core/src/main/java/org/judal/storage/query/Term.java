@@ -14,6 +14,7 @@ package org.judal.storage.query;
 
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 
 import org.judal.metadata.NameAlias;
@@ -152,6 +153,23 @@ public abstract class Term implements Part,Serializable {
 
 	/**
 	 * Create term.
+	 * @param sColumnName String Column Name
+	 * @param sOperator String Operator. Must be Must be Operator.BETWEEN or Operator.IN or Operator.NOTIN
+	 * @param aColumnValues Collection&lt;Object&gt; column values
+	 */
+	public Term(String sColumnName, String sOperator, Collection<Object> aColumnValues) {
+		oAliasedTable = null;
+		sColumn = sColumnName;
+		sOper = sOperator;
+		nValues = aColumnValues.size();
+		aValues = new Object[nValues];
+		int v = 0;
+		for (Object o :aColumnValues)
+			aValues[v++] = o;
+	}
+
+	/**
+	 * Create term.
 	 * @param sColumnName String Name of column at outer table
 	 * @param sOperator String Operator. Must be one of {"IN","NOT IN","EXISTS","NOT EXISTS","LIKE","ILIKE","BETWEEN"}
 	 * @param oAliasedTableName NameAlias Aliased Table Name
@@ -170,7 +188,7 @@ public abstract class Term implements Part,Serializable {
 	/**
 	 * Create term.
 	 * @param sColumnName String Column Name
-	 * @param sOperator String Operator. Must be Must be Operator.BETWEEN or Operator.IN 
+	 * @param sOperator String Operator. Must be Must be Operator.BETWEEN or Operator.IN or Operator.NOTIN
 	 * @param aColumnValues String[] column values
 	 */
 	public Term(String sColumnName, String sOperator, String[] aColumnValues) {
@@ -186,7 +204,7 @@ public abstract class Term implements Part,Serializable {
 	/**
 	 * Create term.
 	 * @param sColumnName String Column Name
-	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
+	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.NOTIN
 	 * @param aColumnValues Integer[] column values
 	 */
 	public Term(String sColumnName, String sOperator, Integer[] aColumnValues) {
@@ -202,7 +220,7 @@ public abstract class Term implements Part,Serializable {
 	/**
 	 * Create term.
 	 * @param sColumnName String Column Name
-	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN 
+	 * @param sOperator String Operator. Must be Operator.BETWEEN or Operator.IN or Operator.NOTIN
 	 * @param aColumnValues int[] column values
 	 */
 	public Term(String sColumnName, String sOperator, int[] aColumnValues) {

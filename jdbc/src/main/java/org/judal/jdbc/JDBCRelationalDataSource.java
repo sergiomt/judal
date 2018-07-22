@@ -53,7 +53,7 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	 * <p>Open JDBC relational table for read/write.</p>
 	 * Each table uses its own java.sql.Connection.
 	 * If this data source is inTransaction() Then the underlying connection will be enlisted in the resources participating in the transaction.
-	 * @param recordInstance Record Instance of the Record subclass that will be used to read/write the table
+	 * @param tableRecord Record Instance of the Record subclass that will be used to read/write the table
 	 * @return JDBCRelationalTable
 	 * @throws JDOException
 	 */
@@ -65,7 +65,7 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	/**
 	 * <p>Open JDBC relational view for read only.</p>
 	 * Each view uses its own java.sql.Connection.
-	 * @param recordInstance Record Instance of the Record subclass that will be used to read the view
+	 * @param viewRecord Record Instance of the Record subclass that will be used to read the view
 	 * @return JDBCRelationalView
 	 * @throws JDOException
 	 */
@@ -73,6 +73,22 @@ public class JDBCRelationalDataSource extends JDBCTableDataSource implements Rel
 	public JDBCRelationalView openRelationalView(Record viewRecord) throws JDOException {
 		assertNotClosed();
 		return new JDBCRelationalView(this, viewRecord);
+	}
+
+	/**
+	 * <p>Open JDBC relational view for read only.</p>
+	 * Each view uses its own java.sql.Connection.
+	 * @param viewRecord Record Instance of the Record subclass that will be used to read the view
+	 * @param alias String Alias to be given to the view when used in a query
+	 * @return JDBCRelationalView
+	 * @throws JDOException
+	 */
+	@Override
+	public JDBCRelationalView openRelationalView(Record viewRecord, String alias) throws JDOException {
+		assertNotClosed();
+		JDBCRelationalView view = new JDBCRelationalView(this, viewRecord);
+		view.setAlias(alias);
+		return view;
 	}
 
 	/**

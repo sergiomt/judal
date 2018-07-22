@@ -32,6 +32,7 @@ import org.judal.serialization.BytesConverter;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.impl.AbstractRecordBase;
@@ -54,9 +55,18 @@ public class InMemoryRecord extends AbstractRecordBase {
 	
 	private TableDef tdef;
 
+	private final FieldHelper fhelper;
+
 	public InMemoryRecord(TableDef tableDef) throws JDOException {
 		tdef = tableDef;
 		recordData = new HashMap<String,Object>();
+		fhelper = null;
+	}
+
+	public InMemoryRecord(TableDef tableDef, FieldHelper fldHelper) throws JDOException {
+		tdef = tableDef;
+		recordData = new HashMap<String,Object>();
+		fhelper = fldHelper;
 	}
 
 	public InMemoryRecord(String bucketName) throws JDOException {
@@ -83,6 +93,24 @@ public class InMemoryRecord extends AbstractRecordBase {
 		this(new InMemoryTableDef(bucketName));
 		for (String columnName : columnNames)
 			tdef.addColumnMetadata("", columnName, Types.VARCHAR, true);
+	}
+
+	/**
+	 * Constructor
+	 * @param bucketName String
+	 * @param fldHelper FieldHelper
+	 * @param columnNames String[] Metadata column names
+	 * @throws JDOException
+	 */
+	public InMemoryRecord(String bucketName, FieldHelper fldHelper, String... columnNames) throws JDOException {
+		this(new InMemoryTableDef(bucketName), fldHelper);
+		for (String columnName : columnNames)
+			tdef.addColumnMetadata("", columnName, Types.VARCHAR, true);
+	}
+
+	@Override
+	public FieldHelper getFieldHelper() {
+		return fhelper;
 	}
 
 	@Override

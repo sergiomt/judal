@@ -37,6 +37,7 @@ import org.judal.serialization.BytesConverter;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.impl.AbstractRecordBase;
@@ -390,6 +391,11 @@ public class S3Record extends AbstractRecordBase {
 	@Override
 	public void clear() {
 		metadataProperties.clear();		
+	}
+
+	@Override
+	public FieldHelper getFieldHelper() {
+		return null;
 	}
 
 	@Override

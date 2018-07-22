@@ -15,6 +15,7 @@ package org.judal.metadata.bind;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileNotFoundException;
+import java.io.OutputStream;
 
 import javax.jdo.JDOException;
 
@@ -101,5 +102,18 @@ public class JdoPackageMetadata implements MetadataScanner {
 		SchemaMetaData metadata = xmlparser.readMetadata(in);
 		return metadata;
 	}
-	
+
+	/**
+	 * <p>Write SchemaMetaData to an OutputStream</p>
+	 * @param metadata SchemaMetaData
+	 * @param out OutputStream
+	 * @throws JDOException
+	 * @throws IOException
+	 */
+	@Override
+	public void writeMetadata(SchemaMetaData metadata, OutputStream out) throws JDOException, IOException {
+		JdoXmlMetadata xmlparser = new JdoXmlMetadata(dataSource);
+		xmlparser.writeMetadata(metadata, out);
+	}
+
 }

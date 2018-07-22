@@ -29,6 +29,7 @@ import org.judal.metadata.ColumnDef;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.SingleColumnRecord;
 import org.judal.storage.table.Table;
@@ -49,20 +50,25 @@ public abstract class AbstractSingleColumnRecord implements SingleColumnRecord {
 	protected Object value;
 	protected String columnName;
 	protected String tableName;
+	private final FieldHelper fhelper;
 
 	public AbstractSingleColumnRecord() {
-		tableName = null;
-		columnName = "value";
+		this(null,"value");
 	}
 
 	public AbstractSingleColumnRecord(String tableName) {
-		this.tableName = tableName;
+		this(tableName, "value");
 		this.columnName = "value";
 	}
 
 	public AbstractSingleColumnRecord(String tableName, String columnName) {
+		this(tableName,columnName,null);
+	}
+
+	public AbstractSingleColumnRecord(String tableName, String columnName, FieldHelper fhelper) {
 		this.tableName = tableName;
 		this.columnName = columnName;
+		this.fhelper = fhelper;
 	}
 
 	@Override
@@ -78,6 +84,11 @@ public abstract class AbstractSingleColumnRecord implements SingleColumnRecord {
 	@Override
 	public void clear() {
 		setValue(null);
+	}
+
+	@Override
+	public FieldHelper getFieldHelper() throws ArrayIndexOutOfBoundsException {
+		return fhelper;
 	}
 
 	@Override

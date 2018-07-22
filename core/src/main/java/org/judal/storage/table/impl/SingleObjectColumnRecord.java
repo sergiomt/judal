@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.AbstractMap.SimpleImmutableEntry;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.ViewDef;
 import org.judal.serialization.JSONValue;
 
 import com.knowgate.stringutils.XML;
@@ -35,6 +36,10 @@ public class SingleObjectColumnRecord extends AbstractSingleColumnRecord  {
 	private static final long serialVersionUID = 1L;
 
 	private ColumnDef columnDef;
+
+	public SingleObjectColumnRecord(ViewDef tableDef) {
+		super(tableDef.getName());
+	}
 
 	public SingleObjectColumnRecord(String tableName) {
 		super(tableName);

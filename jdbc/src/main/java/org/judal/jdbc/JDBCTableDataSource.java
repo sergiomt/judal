@@ -28,15 +28,9 @@ import org.judal.jdbc.metadata.SQLColumn;
 import org.judal.jdbc.metadata.SQLIndex;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.jdbc.metadata.SQLViewDef;
-import org.judal.metadata.ColumnDef;
-import org.judal.metadata.ForeignKeyDef;
-import org.judal.metadata.IndexDef;
-import org.judal.metadata.JoinDef;
-import org.judal.metadata.JoinType;
-import org.judal.metadata.NameAlias;
-import org.judal.metadata.SchemaMetaData;
-import org.judal.metadata.TableDef;
+import org.judal.metadata.*;
 import org.judal.storage.DataSource;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
@@ -50,7 +44,9 @@ import com.knowgate.tuples.Pair;
  * @version 1.0
  */
 public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDataSource {
-	
+
+	private FieldHelper fieldHelper;
+
 	/**
 	 * <p>Constructor</p>
 	 * @param properties Map&lt;String, String&gt; As listed in DataSource.PropertyNames
@@ -240,7 +236,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 				jn.addColumn(column.$2());
 			}
 		}
-		
+
 		tbl = new JDBCRelationalView(this, tdef, result.getClass());
 		
 		if (DebugFile.trace) {
@@ -249,6 +245,18 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			DebugFile.writeln("End JDBCTableDataSource.openJoinView()");
 		}
 		return tbl;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public FieldHelper getFieldHelper() throws JDOException {
+		return fieldHelper;
+	}
+
+	public void setFieldHelper(FieldHelper fhelper) {
+		fieldHelper = fhelper;
 	}
 
 	/**
@@ -374,5 +382,5 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		assertNotClosed();
 		execute("TRUNCATE TABLE "+tableName+(cascade ? " CASCADE" : ""));
 	}
-	
+
 }

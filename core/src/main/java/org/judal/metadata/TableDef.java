@@ -124,6 +124,8 @@ public class TableDef extends ViewDef {
 		builder.append("    <class");
 		if (getRecordClassName()!=null)
 			builder.append(" name=\"").append(getRecordClassName()).append("\" ");
+		else
+			builder.append(" name=\"\" ");
 		builder.append(" table=\"").append(getName()).append("\" />\n");
 		for (ColumnDef cdef : getColumns())
 			builder.append(cdef.toJdoXml()).append("\n");

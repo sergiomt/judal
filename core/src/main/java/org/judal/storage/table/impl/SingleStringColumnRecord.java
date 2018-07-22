@@ -8,13 +8,20 @@ import javax.jdo.JDOException;
 import org.judal.metadata.ColumnDef;
 
 import com.knowgate.stringutils.Html;
+import org.judal.metadata.ViewDef;
 
 public class SingleStringColumnRecord extends SingleObjectColumnRecord  {
 
 	private static final long serialVersionUID = 1L;
 
+	public SingleStringColumnRecord(ViewDef tableDef) {
+		super(tableDef);
+		setColumn(new ColumnDef(columnName, Types.VARCHAR, 1));
+	}
+
 	public SingleStringColumnRecord(String tableName) {
 		super(tableName);
+		setColumn(new ColumnDef(columnName, Types.VARCHAR, 1));
 	}
 
 	public SingleStringColumnRecord(String tableName, String columnName) {

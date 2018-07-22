@@ -14,6 +14,7 @@ package org.judal.metadata;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.jdo.JDOException;
 
@@ -32,5 +33,14 @@ public interface MetadataScanner {
 	 * @throws IOException
 	 */
 	SchemaMetaData readMetadata(InputStream instrm) throws JDOException, IOException;
-	
-}
+
+	/**
+	 * <p>Write SchemaMetaData to an OutputStream</p>
+	 * @param metadata SchemaMetaData
+	 * @param out OutputStream
+	 * @throws JDOException
+	 * @throws IOException
+	 */
+	void writeMetadata(SchemaMetaData metadata, OutputStream out) throws JDOException, IOException;
+
+	}

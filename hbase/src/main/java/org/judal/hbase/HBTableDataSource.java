@@ -32,6 +32,7 @@ import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.View;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.Param;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef;
@@ -257,6 +258,11 @@ public class HBTableDataSource implements TableDataSource {
 			if (oInStrm2!=null) oInStrm2.close();
 		} catch (IOException ignore) { }
 		oCfg = null;
+	}
+
+	@Override
+	public FieldHelper getFieldHelper() throws JDOException {
+		return null;
 	}
 
 	@Override

@@ -29,6 +29,7 @@ import org.judal.storage.DataSource;
 
 import com.knowgate.currency.Money;
 import com.knowgate.gis.LatLong;
+import org.judal.storage.FieldHelper;
 
 public class JDOPersistenceCapable implements JDORecord {
 
@@ -471,6 +472,11 @@ public class JDOPersistenceCapable implements JDORecord {
 	public int size() {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	@Override
+	public FieldHelper getFieldHelper() {
+		return null;
 	}
 
 	@Override

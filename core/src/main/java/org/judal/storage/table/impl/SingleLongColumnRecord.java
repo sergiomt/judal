@@ -6,10 +6,16 @@ import java.sql.Types;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.ViewDef;
 
 public class SingleLongColumnRecord extends AbstractSingleNumberColumnRecord {
 
 	private static final long serialVersionUID = 1L;
+
+	public SingleLongColumnRecord(ViewDef tableDef) {
+		super(tableDef);
+		setColumn(new ColumnDef("value", Types.BIGINT, 1));
+	}
 
 	public SingleLongColumnRecord(String tableName) {
 		super(tableName);

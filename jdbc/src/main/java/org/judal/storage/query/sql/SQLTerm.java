@@ -5,8 +5,7 @@ import java.math.BigInteger;
 
 import java.sql.Timestamp;
 
-import java.util.Calendar;
-import java.util.Date;
+import java.util.*;
 
 import org.judal.metadata.NameAlias;
 import org.judal.storage.query.Expression;
@@ -115,7 +114,19 @@ public class SQLTerm extends Term {
 	public SQLTerm(String columnName, String operator, NameAlias aliasedTableName, String nestedColumnName, Part nestedTerm) {
 		super (columnName, operator, aliasedTableName, nestedColumnName, nestedTerm);
 	}
-	
+
+	public SQLTerm(String columnName, String operator, Collection<Object> columnValues) {
+		super (columnName, operator, columnValues);
+	}
+
+	public SQLTerm(String columnName, String operator, LinkedList<Object> columnValues) {
+		super (columnName, operator, columnValues);
+	}
+
+	public SQLTerm(String columnName, String operator, ArrayList<Object> columnValues) {
+		super (columnName, operator, columnValues);
+	}
+
 	public SQLTerm(String columnName, String operator, String[] columnValues) {
 		super (columnName, operator, columnValues);
 	}

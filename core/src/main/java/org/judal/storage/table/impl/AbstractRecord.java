@@ -66,6 +66,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 
 	private static final long serialVersionUID = 10000l;
 
+	protected String tableName;
 	protected transient SelectableDef tableDef;
 	protected transient ConstraintsChecker checker;
 	protected transient FieldHelper fhelper;
@@ -102,22 +103,6 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	}
 
 	/**
-	 * <p>Construct AbstractRecord reading the metadata from a ViewDef or TableDef and with the given FieldHelper and ConstraintsChecker.</p>
-	 * @param tableDefinition ViewDef or TableDef
-	 * @param fieldHelper FieldHelper
-	 * @param constraintsChecker ConstraintsChecker
-	 * @throws JDOUserException if tableDefinition is <b>null</b>
-	 */
-	public AbstractRecord(ViewDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOUserException {
-		if (null==tableDefinition)
-			throw new JDOUserException("AbstractRecord constructor. ViewDef cannot be null");
-		tableDef = tableDefinition;
-		setFieldHelper(fieldHelper);
-		setConstraintsChecker(constraintsChecker);
-		clearLongData();
-	}
-	
-	/**
 	 * <p>Construct AbstractRecord reading the metadata directly from a DataSource capable of providing it.</p>
 	 * @param dataSource TableDataSource
 	 * @param tableName Name of table or view
@@ -125,7 +110,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 * @throws JDOUserException if dataSource is <b>null</b>
 	 */
 	public AbstractRecord(TableDataSource dataSource, String tableName) throws JDOException {
-		this(dataSource, tableName, null, null);
+		this(dataSource, tableName, dataSource.getFieldHelper(), null);
 	}
 
 	/**
@@ -149,24 +134,42 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 * @throws JDOUserException if dataSource is <b>null</b>
 	 */
 	public AbstractRecord(TableDataSource dataSource, String tableName, ConstraintsChecker constraintsChecker) throws JDOException {
-		this(dataSource, tableName, null, constraintsChecker);
+		this(dataSource, tableName, dataSource.getFieldHelper(), constraintsChecker);
+	}
+
+	/**
+	 * <p>Construct AbstractRecord reading the metadata from a ViewDef or TableDef and with the given FieldHelper and ConstraintsChecker.</p>
+	 * @param tableDefinition ViewDef or TableDef
+	 * @param fieldHelper FieldHelper
+	 * @param constraintsChecker ConstraintsChecker
+	 * @throws JDOUserException if tableDefinition is <b>null</b>
+	 */
+	public AbstractRecord(ViewDef tableDefinition, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOUserException {
+		if (null==tableDefinition)
+			throw new JDOUserException("AbstractRecord constructor. ViewDef cannot be null");
+		tableDef = tableDefinition;
+		tableName = tableDef.getName();
+		setFieldHelper(fieldHelper);
+		setConstraintsChecker(constraintsChecker);
+		clearLongData();
 	}
 
 	/**
 	 * <p>Construct AbstractRecord reading the metadata directly from a DataSource capable of providing it.</p>
 	 * @param dataSource TableDataSource
-	 * @param tableName Name of table or view
+	 * @param tableOrViewName Name of table or view
 	 * @param fieldHelper FieldHelper
 	 * @param constraintsChecker ConstraintsChecker
 	 * @throws JDOException
 	 * @throws JDOUserException if dataSource is <b>null</b>
 	 */
-	public AbstractRecord(TableDataSource dataSource, String tableName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
+	public AbstractRecord(TableDataSource dataSource, String tableOrViewName, FieldHelper fieldHelper, ConstraintsChecker constraintsChecker) throws JDOException {
 		if (null==dataSource)
 			throw new JDOUserException("No DataSource specified and no one provided by EngineFactory neither");
-		tableDef = dataSource.getTableDef(tableName);
+		tableDef = dataSource.getTableDef(tableOrViewName);
 		if (null==tableDef)
-			throw new JDOException("Table "+tableName+" does not exist or could not be read from the data source");
+			throw new JDOException("Table "+tableOrViewName+" does not exist or could not be read from the data source");
+		tableName = tableDef.getName();
 		setFieldHelper(fieldHelper);
 		setConstraintsChecker(constraintsChecker);
 		clearLongData();
@@ -351,6 +354,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 */
 	public void setTableDef(SelectableDef selectableDef) {
 		tableDef = selectableDef;
+		tableName = tableDef.getName();
 	}
 	
 	public void clearLongData() {
@@ -405,7 +409,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 */
 	@Override
 	public String getBucketName() {
-		return tableDef.getName();
+		return tableName;
 	}
 
 	/**
@@ -413,7 +417,7 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 */
 	@Override
 	public String getTableName() {
-		return tableDef.getName();
+		return tableName;
 	}
 
 	/**

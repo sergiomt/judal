@@ -12,6 +12,7 @@ package org.judal.jdbc;
  * KIND, either express or implied.
  */
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import java.sql.PreparedStatement;
@@ -34,6 +35,7 @@ import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 import org.judal.storage.Param;
+import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
@@ -490,7 +492,8 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 					where.add(p.getName(), Operator.EQ, p.getValue());
 			} catch (UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException xcpt) {
 				throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
-			}			
+			}
+			qry.setFilter(where);
 		}
 		return fetchQuery(qry);
 	}
@@ -616,18 +619,47 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	 * Each iterator will open a new java.sql.ResultSet over the underlying table using this view connection.
 	 * The ResultSet will remain open until the iterator is closed.
 	 * @return JDBCIterator
+	 * @throws RuntimeException If no suitable constructor is found for the Record class
 	 */
 	@Override
-	public JDBCIterator iterator() {
+	public JDBCIterator iterator() throws RuntimeException {
 		JDBCIterator retval = null;
+		Object constructorParam;
+		Constructor<? extends Object> recordConstructor = StorageObjectFactory.getConstructor(recordClass, new Class<?>[]{getViewDef().getClass()});
+		if (null==recordConstructor) {
+			recordConstructor = StorageObjectFactory.getConstructor(recordClass, new Class<?>[]{getDataSource().getClass()});
+            constructorParam = getDataSource();
+		} else {
+            constructorParam = getViewDef();
+		}
+
+		if (null==recordConstructor)
+			throw new RuntimeException("No suitable constructor found for class " + recordClass.getName());
+
 		if (null==iterators)
 			iterators = new LinkedList<JDBCIterator>();
+
+		StringBuilder columns = new StringBuilder();
+		try {
+			Record rec = (Record) recordConstructor.newInstance(constructorParam);
+			boolean first = true;
+			for  (ColumnDef cdef : rec.columns()) {
+				if (first)
+					first = false;
+				else
+					columns.append(",");
+				columns.append(cdef.getName());
+			}
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException xcpt) {
+			throw new JDOException(xcpt.getMessage(), xcpt);
+		}
+
 		PreparedStatement stmt = null;
 		ResultSet rset = null;
 		try {
-			stmt = getConnection().prepareStatement("SELECT * FROM "+name(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			stmt = getConnection().prepareStatement("SELECT " + columns.toString() + " FROM " + name(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			rset = stmt.executeQuery();
-			retval = new JDBCIterator(candidateClass, getViewDef(), stmt, rset);
+			retval = new JDBCIterator(candidateClass, getViewDef(), stmt, rset, recordConstructor);
 			iterators.add(retval);
 		} catch (SQLException | NoSuchMethodException | SecurityException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);

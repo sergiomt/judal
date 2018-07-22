@@ -211,7 +211,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 			for (Param v : aParams)
 				oCols.append(",").append(v.getName());
 			try {
-				final String sSQL = "INSERT INTO "+name()+" ("+oCols.substring(1)+") VALUES (?"+String.format(String.format("%%0%dd",aParams.length-1),0).replace("0",",?")+")";
+				final String sSQL = "INSERT INTO " + getTableDef().getName() + " ("+oCols.substring(1)+") VALUES (?"+String.format(String.format("%%0%dd",aParams.length-1),0).replace("0",",?")+")";
 				if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
 				preparedInsert = getConnection().prepareStatement(sSQL);
 				int p = 0;
@@ -266,7 +266,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 					}
 				}
 				PreparedStatement oStmt = null;
-				sSQL = "UPDATE "+name()+" SET "+oVals.substring(1)+" WHERE "+oQry.getFilter();
+				sSQL = "UPDATE " + getTableDef().getName() + " SET "+oVals.substring(1)+" WHERE "+oQry.getFilter();
 				try {
 					if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
 					oStmt = getConnection().prepareStatement(sSQL);
@@ -355,7 +355,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 		}
 
 				PreparedStatement oStmt = null;
-				String sSQL = "DELETE FROM "+name()+" WHERE "+oQry.getFilter();
+				String sSQL = "DELETE FROM " + getTableDef().getName() +" WHERE "+oQry.getFilter();
 				try {
 					if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
 					oStmt = getConnection().prepareStatement(sSQL);

@@ -172,6 +172,7 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	@SuppressWarnings("rawtypes")
 	public ViewDef setRecordClass(Class classRecord) {
 		recordClass = classRecord;
+		recordClassName = classRecord.getName();
 		return this;
 	}
 

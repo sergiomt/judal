@@ -192,7 +192,8 @@ public class JdoXmlMetadata implements MetadataScanner {
 					if (DebugFile.trace)
 						DebugFile.writeln("class="+clss.getAttlistClass().getName()+" table=" + tableName);
 					TableDef tbl = createTableDef(tableName);
-					tbl.setRecordClassName(pack.getAttlistPackage().getName()+"."+clss.getAttlistClass().getName());
+					if (null!=clss.getAttlistClass().getName() && clss.getAttlistClass().getName().length()>0)
+						tbl.setRecordClassName(pack.getAttlistPackage().getName()+"."+clss.getAttlistClass().getName());
 					List<IndexDef> indexes = new LinkedList<>();
 					List<com.sun.java.xml.ns.jdo.jdo._Class.Choice> clssChoices = clss.getChoiceList();
 					if (clssChoices!=null) {

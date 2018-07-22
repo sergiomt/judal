@@ -8,11 +8,17 @@ import java.text.ParseException;
 import javax.jdo.JDOException;
 
 import org.judal.metadata.ColumnDef;
+import org.judal.metadata.ViewDef;
 
 public class SingleBigDecimalColumnRecord extends AbstractSingleNumberColumnRecord {
 
 	private static final long serialVersionUID = 1L;
-	
+
+	public SingleBigDecimalColumnRecord(ViewDef tableDef) {
+		super(tableDef);
+		setColumn(new ColumnDef(columnName, Types.DECIMAL, 1));
+	}
+
 	public SingleBigDecimalColumnRecord(String tableName) {
 		super(tableName);
 		setColumn(new ColumnDef("value", Types.DECIMAL, 1));

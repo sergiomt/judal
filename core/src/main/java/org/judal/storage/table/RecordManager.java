@@ -13,6 +13,8 @@ package org.judal.storage.table;
  */
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,7 +36,9 @@ import javax.jdo.datastore.JDOConnection;
 import javax.jdo.datastore.Sequence;
 
 import org.judal.metadata.PrimaryKeyDef;
+import org.judal.metadata.SelectableDef;
 import org.judal.metadata.TableDef;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.Param;
 import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.queue.RecordQueueProducer;
@@ -276,6 +280,21 @@ public class RecordManager implements AutoCloseable {
 		Object obj = getCache().get(id);
 		if (null==obj)
 			throw new JDOUserException("Object "+id+" not found in cache");
+		else if (obj instanceof Record) {
+			try {
+				Method setTableDef = obj.getClass().getMethod("setTableDef", SelectableDef.class);
+				SelectableDef tdef = dataSource.getTableOrViewDef(((Record) obj).getTableName());
+				if (null!=tdef)
+					setTableDef.invoke(obj, tdef);
+			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | JDOException e) { }			
+			if (dataSource.getFieldHelper()!=null) {
+				try {
+					Method setFieldHelper = obj.getClass().getMethod("getFieldHelper", FieldHelper.class);
+					setFieldHelper.invoke(obj, dataSource.getFieldHelper());
+				} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | JDOException e) { }				
+			}
+		}
+
 		return obj;
 	}
 

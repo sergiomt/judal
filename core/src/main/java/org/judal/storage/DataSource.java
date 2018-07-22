@@ -251,4 +251,5 @@ public interface DataSource extends AutoCloseable {
 
     @Override
     void close() throws JDOException;
+
 }

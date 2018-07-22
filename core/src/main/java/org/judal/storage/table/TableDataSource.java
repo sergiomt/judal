@@ -15,6 +15,7 @@ package org.judal.storage.table;
 import java.util.Map;
 
 import javax.jdo.JDOException;
+import javax.jdo.JDOUserException;
 
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef;
@@ -24,6 +25,7 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 import org.judal.storage.DataSource;
+import org.judal.storage.FieldHelper;
 
 import com.knowgate.tuples.Pair;
 
@@ -41,6 +43,13 @@ public interface TableDataSource extends DataSource {
 	 * @throws JDOException
 	 */
 	TableDef getTableDef(String tableName) throws JDOException;
+
+	/**
+	 * Get instance of field helper (if any) for the data source
+	 * @return FieldHelper or <b>null</b> if there is no FieldHelper defined for this data source
+	 * @throws JDOException
+	 */
+	FieldHelper getFieldHelper() throws JDOException;
 
 	/**
 	 * Get view definition
@@ -128,7 +137,6 @@ public interface TableDataSource extends DataSource {
 	 */
 	void truncateTable(String tableName, boolean cascade) throws JDOException;
 
-	
 	/**
 	 * Open Table for Read/Write.
 	 * Basic tables only support seeking records by primary key.

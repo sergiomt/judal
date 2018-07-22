@@ -1,8 +1,6 @@
 package org.judal.jdbc;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * © Copyright 2016 the original author.
@@ -16,7 +14,6 @@ import java.io.InputStream;
  * KIND, either express or implied.
  */
 
-import java.io.PrintWriter;
 import java.security.AccessControlException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -28,12 +25,8 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.logging.Logger;
 
@@ -477,6 +470,63 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 	
 	// ----------------------------------------------------------
 
+	protected boolean loadCachedMetadataFromDatabase(Connection oConn) {
+		boolean success = false;
+		JDCConnection jConn = new JDCConnection(oConn, null);
+		try {
+			if (exists(jConn, "k_metadata", "U")) {
+				try (Statement stmt = oConn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+					try (ResultSet rset = stmt.executeQuery("SELECT xml_metadata FROM k_metadata")) {
+						if (rset.next()) {
+							readMetadataFromInputStream(rset.getBinaryStream(1));
+							success = true;
+						}
+					}
+				}
+			}
+		} catch (Exception xcpt) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("JDBCDataSource.loadCachedMetadataFromDatabase() " + xcpt.getClass().getName()+" "+xcpt.getMessage());
+			}
+		}
+		return success;
+	}
+
+	// ----------------------------------------------------------
+
+	protected boolean writeCachedMetadataToDatabase(Connection oConn) {
+		boolean success = false;
+		JDCConnection jConn = new JDCConnection(oConn, null);
+		try {
+			if (exists(jConn, "k_metadata", "U")) {
+				try (Statement stmt = oConn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+					stmt.executeUpdate("DELETE FROM k_metadata");
+				}
+				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(this);
+				ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+				xmlMeta.writeMetadata(metaData, bytesOut);
+				byte[] bytea = bytesOut.toByteArray();
+				ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytea);
+				SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+				try (PreparedStatement stmt = oConn.prepareStatement("INSERT INTO k_metadata (ts_snapshot,xml_metadata) VALUES(?,?)")) {
+					stmt.setString(1, fmt.format(new Date()));
+					stmt.setBinaryStream(2, bytesIn, bytea.length);
+					stmt.execute();
+				}
+				bytesIn.close();
+				bytesOut.close();
+				success = true;
+			}
+		} catch (Exception xcpt) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("JDBCDataSource.writeCachedMetadataToDatabase() " + xcpt.getClass().getName()+" "+xcpt.getMessage());
+			}
+		}
+		return success;
+	}
+
+	// ----------------------------------------------------------
+
 	protected void readMetadataFromDatabase(Connection oConn, DatabaseMetaData oMData) throws SQLException {
 
 		if (DebugFile.trace) {
@@ -613,10 +663,10 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 	// ----------------------------------------------------------
 
-	public void readMetadataFromFile(Map<String,String> properties) throws JDOException {
+	public void readMetadataFromInputStream(InputStream fin) throws JDOException {
 
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin JDBCDataSource.readMetadataFromFile()");
+			DebugFile.writeln("Begin JDBCDataSource.readMetadataFromInputStream()");
 			DebugFile.incIdent();
 			StringBuilder metaDataInfo = new StringBuilder();
 			metaDataInfo.append("existing tables [");
@@ -634,31 +684,10 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 		SchemaMetaData fileMetadata;
 		try {
-			final String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
-			final String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
-			
-			if (metadataPackage.length()==0) {
-				FileInputStream fin = new FileInputStream(new File(metadataFilePath));
-				JdoXmlMetadata xmlMeta = new JdoXmlMetadata(this);
-				fileMetadata = xmlMeta.readMetadata(fin);
-				fin.close();
-				metaData.addMetadata(fileMetadata);
-			
-			} else if (metadataPackage.length()>0) {
 
-				JdoPackageMetadata packMeta = new JdoPackageMetadata(this, metadataPackage, metadataFilePath);
-				InputStream instrm = packMeta.openStream();
-				if (instrm!=null) {
-					fileMetadata = packMeta.readMetadata(instrm);
-					instrm.close();
-					metaData.addMetadata(fileMetadata);
-				} else {
-					throw new JDOUserException("Could not load metadata for package " + metadataPackage + " file " + metadataFilePath);
-				}
-
-			} else {
-				throw new JDOUserException("Missing metadata package and no schema file specified");
-			}
+			JdoXmlMetadata xmlMeta = new JdoXmlMetadata(this);
+			fileMetadata = xmlMeta.readMetadata(fin);
+			metaData.addMetadata(fileMetadata);
 
 			for (TableDef tableDef : metaData.tables()) {
 				// cacheTableMetadata(tableDef);
@@ -686,6 +715,54 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 			}
 			metaDataInfo.append("]");
 			DebugFile.writeln(metaDataInfo.toString());
+			DebugFile.decIdent();
+			DebugFile.writeln("End JDBCDataSource.readMetadataFromInputStream()");
+		}
+	}
+
+	// ----------------------------------------------------------
+
+	public void readMetadataFromFile(Map<String,String> properties) throws JDOException {
+
+		if (DebugFile.trace) {
+			DebugFile.writeln("Begin JDBCDataSource.readMetadataFromFile()");
+			DebugFile.incIdent();
+		}
+
+		try {
+			final String metadataFilePath = Env.getString(properties, DataSource.METADATA, DataSource.DEFAULT_METADATA);
+			final String metadataPackage = Env.getString(properties, DataSource.PACKAGE, "");
+			
+			if (metadataPackage.length()==0) {
+				FileInputStream fin = new FileInputStream(new File(metadataFilePath));
+				readMetadataFromInputStream(fin);
+				fin.close();
+
+			} else if (metadataPackage.length()>0) {
+
+				JdoPackageMetadata packMeta = new JdoPackageMetadata(this, metadataPackage, metadataFilePath);
+				InputStream instrm = packMeta.openStream();
+				if (instrm!=null) {
+					readMetadataFromInputStream(instrm);
+					instrm.close();
+				} else {
+					throw new JDOUserException("Could not load metadata for package " + metadataPackage + " file " + metadataFilePath);
+				}
+
+			} else {
+				throw new JDOUserException("Missing metadata package and no schema file specified");
+			}
+
+
+		} catch (Exception xcpt) {
+			if (DebugFile.trace) {
+				DebugFile.writeln(xcpt.getClass().getName() + " " +xcpt.getMessage());
+				DebugFile.decIdent();
+			}
+			throw new JDOException(xcpt.getMessage(), xcpt);
+		}
+
+		if (DebugFile.trace) {
 			DebugFile.decIdent();
 			DebugFile.writeln("End JDBCDataSource.readMetadataFromFile()");
 		}
@@ -787,10 +864,14 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 			Functions = SQLFunctions.DB.get(databaseProductId);
 
-			if (useDatabaseMetadata)
-				readMetadataFromDatabase(oConn, oMData);
-			else
+			if (useDatabaseMetadata) {
+				if (!loadCachedMetadataFromDatabase(oConn)) {
+					readMetadataFromDatabase(oConn, oMData);
+					writeCachedMetadataToDatabase(oConn);
+				}
+			} else {
 				readMetadataFromFile(properties);
+			}
 
 		} finally {
 			oConn.close();
@@ -917,12 +998,17 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 		JDCConnection oConn = null;
 		boolean retval;
 		try {
-			oConn = this.getConnection("exists");
+			oConn = getConnection("exists");
 			retval = oConn.exists(sObjectName, sObjectType);
 		}  catch (SQLException | UnsupportedOperationException sqle) {
 			throw new JDOException(sqle.getMessage(), sqle);
 		} finally {
-			if (oConn!=null) oConn.close();
+			try {
+				if (oConn != null) oConn.close("exists");
+			} catch (SQLException sqle) {
+				if (DebugFile.trace)
+					DebugFile.writeln("JDBCDataSource.exists(" + sObjectName + ","  + sObjectType + ") SQLException " + sqle.getMessage());
+			}
 		}
 		return retval;
 	}
@@ -1141,9 +1227,6 @@ public abstract class JDBCDataSource extends JDCConnectionPool implements DataSo
 
 	/**
 	 * <p>Get a Connection instance from connection pool</p>
-	 * @param sCaller Symbolic name identifying the caller program or subroutine,
-	 * this field is used for statistical control of database accesses,
-	 * performance tunning and debugging open/close mismatch.
 	 * @return An open connection to the database.
 	 * @throws SQLException
 	 */
