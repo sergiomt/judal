@@ -25,7 +25,7 @@ import org.judal.metadata.NameAlias;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
-import org.judal.metadata.IndexDef.Type;
+import org.judal.storage.FieldHelper;
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
@@ -218,6 +218,13 @@ public class DBTableDataSource extends DBBucketDataSource implements TableDataSo
 		} catch (NotSupportedException | SystemException | SecurityException | IllegalStateException | RollbackException | HeuristicMixedException | HeuristicRollbackException | IllegalArgumentException | ClassNotFoundException e) {
 			throw new JDOException(e.getMessage(), e);
 		}
+	}
+
+	// --------------------------------------------------------------------------
+
+	@Override
+	public FieldHelper getFieldHelper() throws JDOException {
+		return null;
 	}
 
 	// --------------------------------------------------------------------------
