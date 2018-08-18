@@ -58,7 +58,7 @@ public class RecordManager implements AutoCloseable {
 	private boolean enableCache;
 
 	public RecordManager(final TableDataSource dataSource, final RecordQueueProducer storageQueue,
-							final Future<Cache<Object, Record>> cache, final Map<String,String> propsMap) {
+						 final Future<Cache<Object, Record>> cache, final Map<String,String> propsMap) {
 		if (null==dataSource)
 			throw new NullPointerException("RecordManager constructor dataSource may not be null");
 		if (null==storageQueue)
@@ -76,7 +76,7 @@ public class RecordManager implements AutoCloseable {
 	}
 
 	public RecordManager(final TableDataSource dataSource, final RecordQueueProducer storageQueue,
-			final Cache<Object, Record> cache, final Map<String,String> propsMap) {
+						 final Cache<Object, Record> cache, final Map<String,String> propsMap) {
 		if (null==dataSource)
 			throw new NullPointerException("RecordManager constructor dataSource may not be null");
 		if (null==storageQueue)

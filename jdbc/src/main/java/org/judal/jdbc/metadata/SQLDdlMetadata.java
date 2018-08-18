@@ -15,6 +15,8 @@ package org.judal.jdbc.metadata;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,9 +25,11 @@ import javax.jdo.JDOUserException;
 
 import org.judal.jdbc.JDBCMetadataObjectFactory;
 import org.judal.jdbc.RDBMS;
+import org.judal.metadata.ExtendableDef;
 import org.judal.metadata.MetadataScanner;
 import org.judal.metadata.ProcedureDef;
 import org.judal.metadata.SchemaMetaData;
+import org.judal.metadata.Scriptable;
 import org.judal.metadata.TriggerDef;
 import org.judal.metadata.ViewDef;
 
@@ -40,9 +44,23 @@ import com.knowgate.io.StreamPipe;
 public class SQLDdlMetadata implements MetadataScanner {
 
 	private RDBMS dbms;
-	
+	private String statementDelimiter;
+
 	public SQLDdlMetadata(RDBMS dbms) {
 		this.dbms = dbms;
+		this.statementDelimiter = ";\n";
+	}
+
+	/**
+	 * Get SQL-DDL statement delimiter. By default it is ; followed by a new line character LF(10)
+	 * @return String
+	 */
+	public String getstatementDelimiter() {
+		return statementDelimiter;
+	}
+
+	public void setstatementDelimiter(final String delim) {
+		statementDelimiter = delim;
 	}
 
 	private String readStream(InputStream instrm) throws IOException {
@@ -147,6 +165,17 @@ public class SQLDdlMetadata implements MetadataScanner {
 			}
 		}
 		return metadata;
+	}
+
+	@Override
+	public void writeMetadata(SchemaMetaData metadata, OutputStream out) throws JDOException, IOException {
+		try (OutputStreamWriter wrtr = new OutputStreamWriter(out)) {
+			for (ExtendableDef objDef : metadata.all()) {
+				Scriptable srcDef = (Scriptable) objDef;
+				wrtr.write(srcDef.getSource());
+				wrtr.write(getstatementDelimiter());
+			}
+		}
 	}
 
 }

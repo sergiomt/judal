@@ -13,6 +13,7 @@ package org.judal.jdbc;
  */
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,6 +31,7 @@ import org.judal.jdbc.metadata.SQLBuilder;
 import org.judal.jdbc.metadata.SQLSelectableDef;
 import org.judal.jdbc.metadata.SQLTableDef;
 import org.judal.storage.Param;
+import org.judal.storage.StorageObjectFactory;
 
 import javax.jdo.FetchPlan;
 import javax.jdo.JDOException;
@@ -400,6 +402,19 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 	@SuppressWarnings("unchecked")
 	public JDBCIterator iterator() {
 		JDBCIterator retval = null;
+
+		Object constructorParam;
+		Constructor<? extends Object> recordConstructor = StorageObjectFactory.getConstructor(candidateClass, new Class<?>[]{getTableDef().getClass()});
+		if (null==recordConstructor) {
+			recordConstructor = StorageObjectFactory.getConstructor(candidateClass, new Class<?>[]{getDataSource().getClass()});
+			constructorParam = getDataSource();
+		} else {
+			constructorParam = getTableDef();
+		}
+
+		if (null==recordConstructor)
+			throw new RuntimeException("No suitable constructor found for class " + candidateClass.getName());
+
 		if (null==iterators)
 			iterators = new LinkedList<JDBCIterator>();
 		PreparedStatement stmt = null;
@@ -407,7 +422,7 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 		try {
 			stmt = getConnection().prepareStatement("SELECT * FROM "+name(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			rset = stmt.executeQuery();
-			retval = new JDBCIterator((Class<? extends Record>) (candidateClass), tableDef, stmt, rset);
+			retval = new JDBCIterator((Class<? extends Stored>) (candidateClass), tableDef, stmt, rset, recordConstructor);
 			iterators.add(retval);
 		} catch (SQLException | NoSuchMethodException | SecurityException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);

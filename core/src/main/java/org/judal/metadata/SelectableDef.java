@@ -1,8 +1,5 @@
 package org.judal.metadata;
 
-import javax.jdo.JDOUnsupportedOptionException;
-import javax.jdo.JDOUserException;
-
 /**
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.

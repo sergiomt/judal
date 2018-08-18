@@ -265,6 +265,8 @@ public class DBDataSource implements DataSource {
 		String sFdb = null;
 		String sDbk = oConnectionProperties.getProperty("name","unnamed");
 		boolean bRo = false;
+		String sCnm = "";
+		String sDbp = "";
 		HashMap<String,DBIndex> oIdxs = new HashMap<String,DBIndex>();
 
 		if (null==oEnv)
@@ -334,11 +336,11 @@ public class DBDataSource implements DataSource {
 					DebugFile.writeln("Environment.openDatabase("+getTransaction()+","+getPath()+sDbk+".db"+","+sDbk+","+String.valueOf(bRo)+")");
 					DebugFile.writeln("without secondary indexes");
 				}
-				
-				oPdb = oEnv.openDatabase(oTrn, getPath()+sDbk+".db", sDbk, bRo ? oDro : oDfg);
+				sDbp = getPath()+sDbk+".db";
+				oPdb = oEnv.openDatabase(oTrn, sDbp, sDbk, bRo ? oDro : oDfg);
 			}
 
-			String sCnm = sDbk + (null==sIdx ? ".PrimaryKey:" : "."+sIdx+":") + String.valueOf(new java.util.Date().getTime()) + "#" + String.valueOf(oRnd.nextInt());
+			sCnm = sDbk + (null==sIdx ? ".PrimaryKey:" : "."+sIdx+":") + String.valueOf(new java.util.Date().getTime()) + "#" + String.valueOf(oRnd.nextInt());
 
 			if (recordClass!=null)
 				oDbc = new DBTable(this, oTblDef, sCnm, sDbk, oPdb, oIdxs, oFdb, oCtg, oKey, recordClass, isTransactional() && useTransaction);
@@ -349,14 +351,14 @@ public class DBDataSource implements DataSource {
 
 		} catch (DatabaseException dbe) {
 			if (DebugFile.trace) {
+				DebugFile.writeln("DBEnvironment.openTable() DatabaseException " + dbe.getMessage() + " "  + sDbp);
 				DebugFile.decIdent();
-				DebugFile.writeln("DBEnvironment.openTable() DatabaseException "+dbe.getMessage());  
 			}
 			throw new JDOException(dbe.getMessage(), dbe);
 		} catch (FileNotFoundException fnf) {
 			if (DebugFile.trace) {
+				DebugFile.writeln("DBEnvironment.openTable() FileNotFoundException " + fnf.getMessage());
 				DebugFile.decIdent();
-				DebugFile.writeln("DBEnvironment.openTable() FileNotFoundException "+fnf.getMessage());  
 			}
 			throw new JDOException(fnf.getMessage(), fnf);
 		}

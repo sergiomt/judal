@@ -30,7 +30,8 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	private Class recordClass;
 	private String recordClassName;
 	private String alias;
-	
+	private String description;
+
 	/**
 	 * <p>Create ViewDef.</p>
 	 * @param aliasedName String View names can be aliased.
@@ -83,6 +84,7 @@ public class ViewDef extends TypeDef implements SelectableDef {
 		recordClassName  = source.recordClassName;		
 		setName(source.getName());
 		setAlias(source.getAlias());
+		setDescription(source.getDescription());
 		setTable(source.getTable());
 	}
 
@@ -110,7 +112,7 @@ public class ViewDef extends TypeDef implements SelectableDef {
 			}
 		} // next
 	}
-	
+
 	/**
 	 * @return ViewDef
 	 */
@@ -118,7 +120,7 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	public ViewDef clone() {
 		return new ViewDef(this);
 	}
-	
+
 	/**
 	 * <p>Set alias.</p>
 	 * @param alias String
@@ -138,6 +140,27 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	 */
 	public String getAlias() {
 		return alias==null || alias.length()==0 ? getName() : alias;
+	}
+
+	/**
+	 * <p>Set description.</p>
+	 * @param description String
+	 * @return ViewDef <b>this</b>
+	 */
+	public ViewDef setDescription(String description) throws JDOUserException {
+		if (getUnmodifiable())
+			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
+		this.description = description;
+		if (DebugFile.trace) DebugFile.writeln("ViewDef.setDescription(" + description + ")");
+		return this;
+	}
+
+	/**
+	 * <p>Get description.</p>
+	 * @return String
+	 */
+	public String getDescription() {
+		return description;
 	}
 
 	/**

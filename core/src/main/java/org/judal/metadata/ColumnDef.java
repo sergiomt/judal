@@ -60,6 +60,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	private String sFamily;
 	private Object oDefault;
 	private SimpleDateFormat oDtFmt;
+	private String sDescription;
 
 	private Pattern oPattern;
 	private static HashMap<String,Pattern> oRegExps = new HashMap<String,Pattern>();
@@ -243,7 +244,7 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		sFamily = null;
 		oDefault = oCol.getDefaultValue();
 		oPattern = null;
-		oDtFmt = null;	
+		oDtFmt = null;
 		if (oCol.getExtensions()!=null)
 			for (ExtensionMetadata ext : oCol.getExtensions())
 				newExtensionMetadata(ext.getKey(), ext.getValue(), ext.getVendorName());
@@ -266,9 +267,25 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		oDefault = oCol.oDefault;
 		oPattern = oCol.oPattern;
 		oDtFmt = oCol.oDtFmt;	
+		sDescription = oCol.getDescription();
 		if (oCol.getExtensions()!=null)
 			for (ExtensionMetadata ext : oCol.getExtensions())
 				newExtensionMetadata(ext.getKey(), ext.getValue(), ext.getVendorName());
+	}
+
+	/**
+	 * @return String Column description.
+	 */
+	public String getDescription() {
+		return sDescription;
+	}
+
+	/**
+	 * Set column description
+	 * @param sFamilyName String
+	 */
+	public void setDescription(String sColumnDescription) {
+		sDescription = sColumnDescription;
 	}
 
 	/**

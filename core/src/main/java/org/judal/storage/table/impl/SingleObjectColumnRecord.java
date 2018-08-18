@@ -31,7 +31,7 @@ import org.judal.serialization.JSONValue;
 
 import com.knowgate.stringutils.XML;
 
-public class SingleObjectColumnRecord extends AbstractSingleColumnRecord  {
+public class SingleObjectColumnRecord extends AbstractSingleColumnRecord {
 
 	private static final long serialVersionUID = 1L;
 

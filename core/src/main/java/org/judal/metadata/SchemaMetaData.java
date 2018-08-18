@@ -1,5 +1,7 @@
 package org.judal.metadata;
 
+import java.util.ArrayList;
+
 /**
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
@@ -276,6 +278,21 @@ public class SchemaMetaData {
 			DebugFile.decIdent();
 			DebugFile.writeln("End SchemaMetaData.addTable()");
 		}
+	}
+
+	/**
+	 * Get a Collection with all the objects contained in all the packages of this SchemaMetaData.
+	 * The objects are returned in groups sequences, tables, views, procedures and last triggers.
+	 * @return Collection&lt;ExtendableDef&gt;
+	 */
+	public Collection<ExtendableDef> all() {
+		ArrayList<ExtendableDef> allObjects = new ArrayList<ExtendableDef>(seqDefs.size()+trigDefs.size()+procDefs.size()+tbleDefs.size()+viewDefs.size());
+		allObjects.addAll(seqDefs.values());
+		allObjects.addAll(tbleDefs.values());
+		allObjects.addAll(viewDefs.values());
+		allObjects.addAll(procDefs.values());
+		allObjects.addAll(trigDefs.values());
+		return Collections.unmodifiableCollection(allObjects);
 	}
 
 	/**

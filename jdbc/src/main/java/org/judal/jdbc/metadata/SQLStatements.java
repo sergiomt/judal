@@ -1,7 +1,5 @@
 package org.judal.jdbc.metadata;
 
-import org.judal.metadata.TypeDef;
-
 public class SQLStatements {
 
 	private String sqlSelect;
