@@ -530,11 +530,17 @@ public class JDCConnection extends TransactionalResource implements Connection, 
 			notifyClose();
 		}
 		else {
-			if (!started) {
-				try { setAutoCommit(true); }
-				catch (SQLException sqle) { DebugFile.writeln("SQLException setAutoCommit(true) "+sqle.getMessage()); } 
-				try { setReadOnly(false); }
-				catch (SQLException sqle) { DebugFile.writeln("SQLException setReadOnly(false) "+sqle.getMessage()); } 
+			if (conn.isClosed()) {
+				if (DebugFile.trace) {
+					DebugFile.writeln("WARN: Called JDCConnection.close(" + sCaller + ") on a connection which is already close");
+				}
+			} else {
+				if (!started) {
+					try { setAutoCommit(true); }
+					catch (SQLException sqle) { DebugFile.writeln("SQLException setAutoCommit(true) " + sqle.getMessage()); } 
+					try { setReadOnly(false); }
+					catch (SQLException sqle) { DebugFile.writeln("SQLException setReadOnly(false) " + sqle.getMessage()); } 
+				}
 			}
 			pool.returnConnection(this, sCaller);
 		}
