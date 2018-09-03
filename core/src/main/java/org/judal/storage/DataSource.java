@@ -97,6 +97,10 @@ public interface DataSource extends AutoCloseable {
      */
 	public static final String ACCESSKEY = "accessKey";
     /**
+     * Lucene Analyser class. Default is org.apache.lucene.analysis.WhitespaceAnalyzer.
+     */
+    public static final String ANALYZER = "analyzer";
+	/**
      * Configuration property used by JDBC. Boolean (true/false). Default true.
      */
     public static final String AUTOCOMMIT = "autocommit";
@@ -230,10 +234,12 @@ public interface DataSource extends AutoCloseable {
     public static final String DEFAULT_MAIL_TRANSPORT_PROTOCOL = "smtp";
     public static final String DEFAULT_MAIL_SMTP_PORT = "25";
 
+    public static final String DEFAULT_ANALYZER = "org.apache.lucene.analysis.WhitespaceAnalyzer";
+
     /**
      * List of supported property names
      */
-    public static final String[] PropertyNames = new String[]{ACCESSKEY,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD,MAIL_STORE_PROTOCOL, MAIL_TRANSPORT_PROTOCOL, MAIL_INCOMING, MAIL_OUTGOING, MAIL_ACCOUNT, MAIL_PASSWORD, MAIL_USER, MAIL_SMTP_HOST, MAIL_SMTP_PORT,LUCENEINDEX};
+    public static final String[] PropertyNames = new String[]{ACCESSKEY,ANALYZER,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD,MAIL_STORE_PROTOCOL, MAIL_TRANSPORT_PROTOCOL, MAIL_INCOMING, MAIL_OUTGOING, MAIL_ACCOUNT, MAIL_PASSWORD, MAIL_USER, MAIL_SMTP_HOST, MAIL_SMTP_PORT,LUCENEINDEX};
 
     /**
      * List of default property values
@@ -246,7 +252,8 @@ public interface DataSource extends AutoCloseable {
     	new String[]{MAXCONNECTIONS,DEFAULT_MAXCONNECTIONS},
     	new String[]{MAXPOOLSIZE,DEFAULT_MAXPOOLSIZE},
     	new String[]{POOLSIZE,DEFAULT_POOLSIZE},
-    	new String[]{REGION,DEFAULT_REGION}
+    	new String[]{REGION,DEFAULT_REGION},
+    	new String[]{ANALYZER,DEFAULT_ANALYZER}
     };
 
     @Override
