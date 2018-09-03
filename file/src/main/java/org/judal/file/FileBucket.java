@@ -29,12 +29,12 @@ public class FileBucket implements Bucket {
 		if (!uri.endsWith(File.separator))
 			uri += File.separator;
 		path = uri + name + File.separator;
-		dir = new File(path);
+		dir = new File(uri + name);
 		if (!dir.exists())
 			if (create)
 				dir.mkdirs();
 			else
-				throw new JDOException("FileBucket "+name+" not found");
+				throw new JDOException("FileBucket "+name+" not found at " + uri);
 		else if (!dir.isDirectory())
 			throw new JDOException("File " + path+name + " already exists but it is not a directory");
 		else if (!dir.canRead())
