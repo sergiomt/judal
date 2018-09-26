@@ -16,6 +16,6 @@ public enum Connective {
 
 	NONE,
 	AND,
-	OR
+	OR;
 
 }

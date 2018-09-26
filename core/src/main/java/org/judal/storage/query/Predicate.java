@@ -237,15 +237,14 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	public int size() {
 		return oParts.size();
 	}
-	
+
 	/**
 	 * Get predicate parts
-	 * @return ArrayList&lt;QueryPart&gt;
+	 * @return ArrayList&lt;Part&gt;
 	 */
 	public ArrayList<Part> parts() {
 		return oParts;
 	}
-
 
 	/**
 	 * Get array of parameter values
@@ -305,10 +304,10 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	}
 
 	/**
-	 * <p>Get text representation of this Predicate according to the query syntax required by the implementation.</p>
-	 * @return String
+	 * <p>Get representation of this Predicate according to the query syntax required by the implementation.</p>
+	 * @return Object
 	 */
-	public abstract String getText();
+	public abstract Object getText();
 
 	/**
 	 * <p>Get parameterized text representation of this Predicate according to the query syntax required by the implementation.</p>

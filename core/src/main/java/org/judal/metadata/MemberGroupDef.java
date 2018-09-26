@@ -41,11 +41,11 @@ public class MemberGroupDef extends ExtendableDef implements FetchGroupMetadata 
 	public MemberGroupDef(String groupName, String... fieldNames) {
 		name = groupName;
 		if (fieldNames==null) {
-			members = new ArrayList<FieldMetadata>();			
+			members = new ArrayList<FieldMetadata>();
 		} else {
 			members = new ArrayList<FieldMetadata>(fieldNames.length);
 			for (String fieldName : fieldNames)
-				newFieldMetadata(fieldName);			
+				newFieldMetadata(fieldName);
 		}
 	}
 

@@ -22,9 +22,9 @@ public interface Part extends Cloneable {
 	Part clone();
 
 	/**
-	 * @return String The part in plain text including all the parameter values
+	 * @return String or other suitable representation of the part in plain text including all the parameter values
 	 */
-	String getText();
+	Object getText();
 
 	/**
 	 * @return String The part with its parameters as question marks "?"

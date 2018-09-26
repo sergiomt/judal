@@ -19,6 +19,7 @@ import java.util.LinkedHashSet;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOUserException;
+import javax.jdo.metadata.ColumnMetadata;
 
 import org.judal.metadata.ColumnDef;
 
@@ -45,7 +46,7 @@ public class ColumnGroup implements FetchGroup, Iterable<String> {
 		postLoad = false;
 		recursion = null;
 		unmodifiable = false;
-		members = new LinkedHashSet<String>();
+		members = new LinkedHashSet<String>(columns.length*2+1);
 		addMembers(columns);
 	}
 
@@ -62,7 +63,21 @@ public class ColumnGroup implements FetchGroup, Iterable<String> {
 		for (String column : columns)
 			members.add(column);
 	}
-	
+
+	/**
+	 * <p>Constructor.</p>
+	 * @param columns ColumnMetadata[]
+	 */
+	public ColumnGroup(ColumnMetadata[] columns) {
+		rec = null;
+		postLoad = false;
+		recursion = null;
+		unmodifiable = false;
+		members = new LinkedHashSet<String>(columns.length*2+1);
+		for (ColumnMetadata column : columns)
+			members.add(column.getName());
+	}
+
 	/**
 	 * <p>Constructor.</p>
 	 * Create new ColumnGroup by cloning another one.
@@ -70,10 +85,10 @@ public class ColumnGroup implements FetchGroup, Iterable<String> {
 	 */
 	public ColumnGroup(Record record) {
 		rec = record;
-		members = new LinkedHashSet<String>();
 		postLoad = false;
 		recursion = null;
 		unmodifiable = false;
+		members = new LinkedHashSet<String>();
 		for (Object column : record.fetchGroup().getMembers())
 			members.add((String) column);
 	}

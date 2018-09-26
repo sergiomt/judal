@@ -501,7 +501,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	public Predicate getFilterPredicate() {
 		return filterPredicate;
 	}
-	
+
 	/**
 	 * <p>Set grouping expression using native query language.</p>
 	 * For JDBC implementations filterExpression must be the expression
@@ -658,7 +658,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	}
 
 	/**
-	 * <p>Set results using a subclass of Record.</p>
+	 * <p>Set results using a subclass of MongoDocument.</p>
 	 * The columns fetched by this query will be defined by the fetchGroup() method of resultClass
 	 * @param resultClass Class&lt;? extends Record&gt;
 	 * @param constructorParameterClasses Class&lt;?&gt;&hellip; List of classes of the parameters taken by the constructor which must be used by this query when adding new results during fetch.

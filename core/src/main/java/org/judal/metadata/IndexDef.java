@@ -43,7 +43,13 @@ public abstract class IndexDef extends ExtendableDef implements IndexMetadata {
 		BTREE,
 		CLUSTERED,
 		GIST,
-		;		
+		HASH,
+		ASCENDING,
+		DESCENDING,
+		GEO2D,
+		GEO2DSPHERE,
+		TEXT
+		;
 	}
 
 	private Type eType;
