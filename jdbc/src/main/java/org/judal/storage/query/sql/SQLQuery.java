@@ -30,7 +30,6 @@ import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Expression;
-import org.judal.storage.query.Predicate;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
 import org.judal.storage.table.SingleColumnRecord;
@@ -61,7 +60,7 @@ public class SQLQuery extends AbstractQuery {
 
 	private Constructor<? extends Record> recordConstructor;
 	private Object[] constructorParameters;
-	
+
 	public SQLQuery(JDBCIndexableView view) throws JDOException {
 		if (view.getResultClass()==null)
 			throw new NullPointerException("SQLQuery() IndexableView.getResultClass() cannot be null");
