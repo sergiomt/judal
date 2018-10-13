@@ -36,6 +36,7 @@ import org.bson.Document;
 
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.DataSource;
 import org.judal.storage.EngineFactory;
@@ -50,7 +51,7 @@ public class MongoDocument extends AbstractRecordBase implements Stored {
 
 	private static final long serialVersionUID = 1L;
 
-	private TableDef tdef;
+	private ViewDef tdef;
 
 	private Document wrapped;
 	
@@ -60,7 +61,7 @@ public class MongoDocument extends AbstractRecordBase implements Stored {
 		this.tdef = new TableDef(collectionName);
 	}
 
-	public MongoDocument(TableDef tdef) {
+	public MongoDocument(ViewDef tdef) {
 		this.tdef = tdef;
 	}
 
@@ -69,7 +70,7 @@ public class MongoDocument extends AbstractRecordBase implements Stored {
 				this.wrapped = bsonDocument;
 	}
 
-	public MongoDocument(TableDef tdef, Document bsonDocument) {
+	public MongoDocument(ViewDef tdef, Document bsonDocument) {
 		this.tdef = tdef;
 		this.wrapped = bsonDocument;
 	}

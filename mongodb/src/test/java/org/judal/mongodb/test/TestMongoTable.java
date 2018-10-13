@@ -77,6 +77,7 @@ public class TestMongoTable extends TestMongoBase {
 				rset = tbl.fetch(record.fetchGroup(), "open", new Float(10), new Float(14), 2, 0);
 				assertEquals(2, rset.size());
 				assertEquals(1, tbl.count("open", new Float(10)));
+				assertEquals(14.5,tbl.avg("open", null));
 			}
 		}
 	}

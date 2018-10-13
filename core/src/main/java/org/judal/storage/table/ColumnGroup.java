@@ -133,7 +133,8 @@ public class ColumnGroup implements FetchGroup, Iterable<String> {
 		if (unmodifiable)
 			throw new JDOUserException("FetchGroup is unmodifiable");
 		for (String memberName : memberNames)
-			members.add(memberName);
+			if (memberName!=null && memberName.length()>0)
+				members.add(memberName);
 		return this;
 	}
 

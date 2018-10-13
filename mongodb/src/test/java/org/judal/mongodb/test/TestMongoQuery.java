@@ -63,22 +63,22 @@ public class TestMongoQuery extends TestMongoBase {
 			MongoDocument record = new MongoDocument(metadata.getTable(collectionName));
 			try (MongoTable tbl = dts.openTable(record)) {
 				
-				BSONQuery qry0 = new BSONQuery(tbl);
+				BSONQuery qry0 = new BSONQuery(tbl,null);
 				qry0.setFilter(qry0.newPredicate(AND).add("exchange", EQ, "NASDAQ").and("open",LT, new Float(0)));
 				RecordSet<? extends MongoDocument> rst0 = (RecordSet<? extends MongoDocument>) qry0.execute();
 				assertEquals(0, rst0.size());
 
-				BSONQuery qry1 = new BSONQuery(tbl);
+				BSONQuery qry1 = new BSONQuery(tbl,null);
 				qry1.setFilter(qry1.newPredicate(AND).add("exchange", EQ, "NASDAQ").and("open",GT, new Float(0)));
 				RecordSet<? extends MongoDocument> rst1 = (RecordSet<? extends MongoDocument>) qry1.execute();
 				assertEquals(doc_count, rst1.size());
 
-				BSONQuery qry2 = new BSONQuery(tbl);
+				BSONQuery qry2 = new BSONQuery(tbl,null);
 				qry2.setFilter(qry2.newPredicate(AND).add("exchange", EQ, "NASDAQ").and("open",GTE, new Float(14)));
 				RecordSet<? extends MongoDocument> rst2 = (RecordSet<? extends MongoDocument>) qry2.execute();
 				assertTrue(rst2.size()<rst1.size());
 
-				BSONQuery qry3 = new BSONQuery(tbl);
+				BSONQuery qry3 = new BSONQuery(tbl,null);
 				qry3.setFilter(qry3.newPredicate(AND).add("exchange", EQ, "NASDAQ").and("open", LT, new Float(14)));
 				RecordSet<? extends MongoDocument> rst3 = (RecordSet<? extends MongoDocument>) qry3.execute();
 				assertTrue(rst3.size()<rst1.size());

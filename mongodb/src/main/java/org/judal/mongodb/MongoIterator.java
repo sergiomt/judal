@@ -17,18 +17,18 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.bson.Document;
-import org.judal.metadata.TableDef;
+import org.judal.metadata.ViewDef;
 
 import com.mongodb.operation.BatchCursor;
 
 public class MongoIterator implements Iterator<MongoDocument>, AutoCloseable {
 
 	private final BatchCursor<Document> cursor;
-	private final TableDef tdef;
+	private final ViewDef tdef;
 	private List<Document> curBatch;
 	private int curPos;
 
-	public MongoIterator(TableDef tdef, final BatchCursor<Document> cursor) {
+	public MongoIterator(ViewDef tdef, final BatchCursor<Document> cursor) {
 		this.tdef = tdef;
 		this.cursor = cursor;
 	}

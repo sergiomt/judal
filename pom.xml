@@ -38,6 +38,7 @@
         <module>bdb</module>
         <module>s3</module>
         <module>hbase</module>
+        <module>mongodb</module>
         <!--
         <module>cassandra</module>
         -->

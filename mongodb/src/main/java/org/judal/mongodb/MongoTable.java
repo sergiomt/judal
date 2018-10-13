@@ -20,7 +20,9 @@ import org.judal.metadata.IndexDef.Using;
 import org.judal.metadata.TableDef;
 import org.judal.storage.Param;
 import org.judal.storage.keyvalue.Stored;
-import org.judal.storage.table.IndexableTable;
+import org.judal.storage.query.AbstractQuery;
+import org.judal.storage.query.bson.BSONQuery;
+import org.judal.storage.relational.RelationalTable;
 import org.judal.storage.table.Record;
 
 import com.mongodb.MongoException;
@@ -33,7 +35,7 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import com.mongodb.connection.Cluster;
 
-public class MongoTable extends MongoView implements IndexableTable {
+public class MongoTable extends MongoView implements RelationalTable {
 
 	private static final UpdateOptions upsert = new UpdateOptions().upsert(true);
 	
@@ -150,6 +152,23 @@ public class MongoTable extends MongoView implements IndexableTable {
 	@Override
 	public void dropIndex(String indexName) throws JDOException {
 		getCollection().dropIndex(indexName);
+	}
+
+	@Override
+	public int update(Param[] values, AbstractQuery filter) throws JDOException {
+		Bson where = ((BSONQuery) filter).source();
+		Document doc =new Document();
+		for (Param p : values)
+			doc.put(p.getName(), p.getValue());
+		UpdateResult result = getCollection().updateMany(where, doc);
+		return (int) result.getModifiedCount();
+	}
+
+	@Override
+	public int delete(AbstractQuery filter) throws JDOException {
+		Bson where = ((BSONQuery) filter).source();
+		DeleteResult result = getCollection().deleteMany(where);
+		return (int) result.getDeletedCount();
 	}
 
 }

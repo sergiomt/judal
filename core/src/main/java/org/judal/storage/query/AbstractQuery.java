@@ -110,7 +110,6 @@ public abstract class AbstractQuery implements Cloneable, Query {
 		this.candidateClass = source.candidateClass;
 		this.results = source.results;
 		this.filter = source.filter;
-		this.filterPredicate = source.filterPredicate;
 		this.grouping = source.grouping;
 		this.ordering = source.ordering;
 		this.ignoreCache = source.ignoreCache;
@@ -120,6 +119,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 		this.unique = source.unique;
 		this.unmodifiable = false;
 		this.candidates = source.candidates;
+		this.setFilter(source.getFilterPredicate().clone());
 		if (source.parameters==null) {
 			this.parameters = null;
 		} else {

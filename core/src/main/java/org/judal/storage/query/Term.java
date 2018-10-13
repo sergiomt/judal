@@ -429,11 +429,11 @@ public abstract class Term implements Part,Serializable {
 	}
 	
 	protected Term() { }
-	
+
 	public abstract String getTableName();
 
 	public abstract Term clone();
-	
+
 	protected void clone(Term source) {
 		oAliasedTable = source.oAliasedTable;
 		sColumn = source.sColumn;
@@ -443,9 +443,9 @@ public abstract class Term implements Part,Serializable {
 		if (source.aValues==null)
 			aValues = null;
 		else
-			aValues = Arrays.copyOf(aValues, aValues.length);
+			aValues = Arrays.copyOf(source.aValues, source.aValues.length);
 	}
-	
+
 	public String getColumnName() {
 		return sColumn;
 	}

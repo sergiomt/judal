@@ -140,7 +140,6 @@ public class MongoBucket implements Bucket {
 		FindOperation<Document> fop = new FindOperation<Document>(ns,codec);
 		ReadWriteBinding readBinding = new ClusterBinding(cluster, readPref, concern);
 		return fop.execute(readBinding);
-		
 	}
 
 	@Override
@@ -169,9 +168,13 @@ public class MongoBucket implements Bucket {
 			throw new JDOException(e.getMessage(), e);
 		}
 	}
-	
+
 	public Cluster getCluster() {
 		return cluster;
+	}
+
+	public String getDatabase() {
+		return database;
 	}
 
 	public MongoCollection<Document> getCollection() {
