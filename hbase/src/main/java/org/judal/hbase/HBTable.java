@@ -12,8 +12,10 @@ package org.judal.hbase;
  */
 
 import java.io.IOException;
-import java.sql.Types;
+
 import java.util.Iterator;
+import java.util.List;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,60 +26,64 @@ import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.PersistenceManager;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.conf.Configuration;
+
+import org.apache.hadoop.hbase.Cell;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.ClusterConnection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.client.Delete;
 import org.apache.hadoop.hbase.client.Get;
-import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 
 import com.knowgate.debug.DebugFile;
+
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.TableDef;
+
 import org.judal.serialization.BytesConverter;
+
 import org.judal.storage.keyvalue.ReadOnlyBucket;
 import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
-import org.judal.storage.table.Table;
 import org.judal.storage.table.TableDataSource;
 import org.judal.storage.Param;
 import org.judal.storage.StorageObjectFactory;
 
-public class HBTable implements Table {
+public class HBTable implements org.judal.storage.table.Table {
 
 	private String sTsc;
-	private HTable oTbl;
-	private HBTableDataSource oCfg;
+	private ClusterConnection oCon;
+	private org.apache.hadoop.hbase.client.Table oTbl;
+	private HBTableDataSource oDts;
 	private Class<? extends Record> oCls;
 	private HashSet<HBIterator> oItr;
 
 	// --------------------------------------------------------------------------
 	
-	public HBTable(HBTableDataSource hCfg, HTable hTbl, Class<? extends Record> cRecordClass) {
-		oCfg = hCfg;
-		oTbl = hTbl;
-		sTsc = null;
-		oItr = null;
-		oCls = cRecordClass;
+	public HBTable(HBTableDataSource oDts, Configuration oCfg, Record oRec) throws IOException {
+		this.oDts = oDts;
+		this.sTsc = null;
+		this.oItr = null;
+		this.oCls = oRec.getClass();
+		this.oCon = (ClusterConnection) ConnectionFactory.createConnection(oCfg);
+		this.oTbl = oCon.getTable(TableName.valueOf(oRec.getTableName()));
 	}
 
 	// --------------------------------------------------------------------------
 	
 	@Override
 	public String name() {
-		try {
-			return (String) BytesConverter.fromBytes(oTbl.getTableName(), Types.VARCHAR);
-		} catch (IOException e) {
-			return null;
-		}
+		return oTbl.getName().getNameAsString();
 	}
 
 	// --------------------------------------------------------------------------
 	
-	public HTable getTable() {
+	public org.apache.hadoop.hbase.client.Table getTable() {
 		return oTbl;
 	}
 
@@ -99,7 +105,7 @@ public class HBTable implements Table {
 	// --------------------------------------------------------------------------
 	
 	public TableDataSource getDataSource() {
-		return oCfg;
+		return oDts;
 	}
 
 	// --------------------------------------------------------------------------
@@ -108,7 +114,8 @@ public class HBTable implements Table {
 	public void close() throws JDOException {
 		try {
 			oTbl.close();
-			oCfg.openedTables().remove(oTbl);
+			oCon.close();
+			oDts.openedTables().remove(this);
 		} catch (IOException ioe) {
 			throw new JDOException(ioe.getMessage(),ioe);
 		}
@@ -127,7 +134,7 @@ public class HBTable implements Table {
 			value = key;
 		if (value==null) throw new NullPointerException("HBTable.exists() Key value cannot be null");		
 		try {
-			return oTbl.exists(new Get(BytesConverter.toBytes(key)));
+			return oTbl.exists(new Get(BytesConverter.toBytes(value)));
 		} catch (IOException ioe) {
 			throw new JDOException(ioe.getMessage(),ioe);
 		}
@@ -139,9 +146,9 @@ public class HBTable implements Table {
 	public boolean exists(Param... keys) throws JDOException {
 		if (keys.length>1)
 			throw new JDOUnsupportedOptionException("HBase can only use a single column as index at a time");
-		if (keys[0].getValue()==null) throw new NullPointerException("HBTable.exists() Key value cannot be null");		
+		if (keys[0].getValue()==null) throw new NullPointerException("HBTable.exists() Key value cannot be null");
 		try {
-			return oTbl.exists(new Get(BytesConverter.toBytes(keys[0])));
+			return oTbl.exists(new Get(BytesConverter.toBytes(keys[0].getValue())));
 		} catch (IOException ioe) {
 			throw new JDOException(ioe.getMessage(),ioe);
 		}
@@ -161,18 +168,19 @@ public class HBTable implements Table {
 		try {
 			Result oRes = oTbl.get(oGet);
 			for (ColumnDef oCol : columns()) {
-				KeyValue oKvl = oRes.getColumnLatest(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
-				if (oKvl!=null)
-					if (oKvl.getValue()!=null)
-						oRow.put(oCol.getName(), BytesConverter.fromBytes(oKvl.getValue(), oCol.getType()));
+				Cell oKvl = oRes.getColumnLatestCell(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
+				if (oKvl!=null) {
+					byte[] colValue = getColumnLatestValue(oKvl);
+					if (colValue!=null)
+						oRow.put(oCol.getName(), BytesConverter.fromBytes(colValue, oCol.getType()));
+				}
 				if (DebugFile.trace) {
-					DebugFile.writeln("KeyValue == "+oKvl);					
 					if (oKvl==null)
 						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+") == null");
-					else if (oKvl.getValue()==null)
-						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() is null");
-					else						
-						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue() == "+BytesConverter.fromBytes(oKvl.getValue(), oCol.getType()));
+					else if (oKvl.getValueArray()==null)
+						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue("+ColumnDef.typeName(oCol.getType())+") is null");
+					else
+						DebugFile.writeln("Result.getColumnLatest("+oCol.getFamily()+","+oCol.getName()+").getValue("+ColumnDef.typeName(oCol.getType())+") == " + BytesConverter.fromBytes(getColumnLatestValue(oKvl), oCol.getType()));
 				}
 			}
 			if (DebugFile.trace) {
@@ -182,7 +190,7 @@ public class HBTable implements Table {
 		} catch (IOException ioe) {
 			if (DebugFile.trace) {
 				DebugFile.decIdent();
-				DebugFile.writeln("IOException "+ioe.getMessage());				
+				DebugFile.writeln("IOException "+ioe.getMessage());
 			}
 			throw new JDOException(ioe.getMessage(),ioe);
 		}
@@ -202,7 +210,7 @@ public class HBTable implements Table {
 		}
 
 		// oRow.checkConstraints(getDataSource());
-		
+
 		final byte[] byPK = BytesConverter.toBytes(oRow.getKey());
 		Put oPut = new Put(byPK);
 		try {
@@ -210,10 +218,30 @@ public class HBTable implements Table {
 				Object oObj = oRow.apply(oCol.getName());
 				if (oObj!=null) {
 					if (DebugFile.trace) {
-						DebugFile.writeln("Put.add("+oCol.getFamily()+","+oCol.getName()+",toBytes("+oRow.getClass().getName()+".apply("+oCol.getName()+"),"+oCol.getType()+"))");
-						DebugFile.writeln(oCol.getName()+"="+oObj.toString());
+						DebugFile.writeln("Put.add("+oCol.getFamily()+","+oCol.getName()+",toBytes("+oRow.getClass().getName()+".apply("+oCol.getName()+"),"+ColumnDef.typeName(oCol.getType())+"))");
+						DebugFile.writeln(oObj.getClass().getName() + " " + oCol.getName()+"="+oObj.toString());
 					}
-					oPut.add(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()), BytesConverter.toBytes(oObj, oCol.getType()));
+					oPut.addColumn(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()), BytesConverter.toBytes(oObj, oCol.getType()));
+
+					/*
+					if (DebugFile.trace) {
+						List<Cell> cells = oPut.get(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
+						assert(cells.size()>=1);
+						DebugFile.writeln("value offset is "+cells.get(cells.size()-1).getValueOffset());
+						if (!Arrays.equals(BytesConverter.toBytes(oObj, oCol.getType()), cells.get(cells.size()-1).getValueArray())) {
+							StringBuilder arraysBytes = new StringBuilder();
+							arraysBytes.append("Inserted array is [");
+							for (byte b : BytesConverter.toBytes(oObj, oCol.getType()))
+								arraysBytes.append(String.valueOf(b)).append(",");
+							arraysBytes.append("]\n");
+							arraysBytes.append("Read array is [");
+							for (byte b : cells.get(cells.size()-1).getValueArray())
+								arraysBytes.append(String.valueOf(b)).append(",");;
+							arraysBytes.append("]\n");
+							DebugFile.writeln(arraysBytes.toString());
+						}
+					}
+					*/
 				} else {
 					if (DebugFile.trace)
 						DebugFile.writeln(oRow.getClass().getName()+".apply("+oCol.getName()+") == null");
@@ -260,7 +288,7 @@ public class HBTable implements Table {
 			for (Param oPar : aParams) {
 				Object oObj = oPar.getValue();
 				if (oObj!=null) {
-					oPut.add(BytesConverter.toBytes(oPar.getFamily()), BytesConverter.toBytes(oPar.getName()), BytesConverter.toBytes(oObj, oPar.getType()));
+					oPut.addColumn(BytesConverter.toBytes(oPar.getFamily()), BytesConverter.toBytes(oPar.getName()), BytesConverter.toBytes(oObj, oPar.getType()));
 				}
 			}
 			oTbl.put(oPut);
@@ -358,16 +386,17 @@ public class HBTable implements Table {
 				if (!oRes.isEmpty()) {
 					for (String sColName : members) {
 						ColumnDef oCol = getColumnByName(sColName);
-						KeyValue oKvl = oRes.getColumnLatest(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
+						Cell oKvl = oRes.getColumnLatestCell(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
 						if (oKvl!=null) {
-							if (oKvl.getValue()!=null) {
-								oRow.put(oCol.getName(), BytesConverter.fromBytes(oKvl.getValue(), oCol.getType()));
+							byte[] colValue = getColumnLatestValue(oKvl);
+							if (colValue!=null) {
+								oRow.put(oCol.getName(), BytesConverter.fromBytes(colValue, oCol.getType()));
 							} else {
-								if (DebugFile.trace) DebugFile.writeln("Value is null");				      	
+								if (DebugFile.trace) DebugFile.writeln("Value is null");
 							}
 						} else {
-							if (DebugFile.trace) DebugFile.writeln("KeyValue is null");				      					    	
-						}  
+							if (DebugFile.trace) DebugFile.writeln("KeyValue is null");
+						}
 					}
 					oRst.add(oRow);
 				} else {
@@ -524,13 +553,12 @@ public class HBTable implements Table {
 						throw new JDOException(nsme.getMessage(), nsme);
 					}
 					for (ColumnDef oCol : fetchCols) {
-						KeyValue oKvl = res.getColumnLatest(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
-						if (oKvl!=null) {
-							if (oKvl.getValue()!=null)
-								row.put(oCol.getName(), BytesConverter.fromBytes(oKvl.getValue(), oCol.getType()));
+						byte[] columnValue = getColumnLatestValue(res, oCol.getFamily(), oCol.getName());
+						if (columnValue!=null) {
+								row.put(oCol.getName(), BytesConverter.fromBytes(columnValue, oCol.getType()));
 						}
 				  } // next
-					rst.add(row);	    	  
+					rst.add(row);
 				} // fi (nRowCount>iOffset)
 			} // next
 		} catch (IOException ioe) {
@@ -548,9 +576,9 @@ public class HBTable implements Table {
 		try {
 			for (Param v : aValues) {
 				if (v.getValue()==null)
-					oPut.add(BytesConverter.toBytes(v.getFamily()), BytesConverter.toBytes(v.getName()), new byte[0]);
+					oPut.addColumn(BytesConverter.toBytes(v.getFamily()), BytesConverter.toBytes(v.getName()), new byte[0]);
 				else
-					oPut.add(BytesConverter.toBytes(v.getFamily()), BytesConverter.toBytes(v.getName()), BytesConverter.toBytes(v.getValue(), v.getType()));
+					oPut.addColumn(BytesConverter.toBytes(v.getFamily()), BytesConverter.toBytes(v.getName()), BytesConverter.toBytes(v.getValue(), v.getType()));
 			}
 			oTbl.put(oPut);
 		} catch (IOException ioe) {
@@ -558,5 +586,15 @@ public class HBTable implements Table {
 		}
 		return 1;
 	}
-	
+
+	private byte[] getColumnLatestValue(Cell oCll) {
+		final byte[] valueArray = oCll.getValueArray();
+		return valueArray==null ? null :Arrays.copyOfRange(valueArray, oCll.getValueOffset(), valueArray.length);
+	}
+
+	private byte[] getColumnLatestValue(Result oRes, String sFamily, String sQualifier) {
+		Cell oCll = oRes.getColumnLatestCell(BytesConverter.toBytes(sFamily), BytesConverter.toBytes(sQualifier));
+		return null==oCll ? null : getColumnLatestValue(oCll);
+	}
+
 }

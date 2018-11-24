@@ -16,10 +16,12 @@ import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.TableNotFoundException;
 import org.apache.hadoop.hbase.ZooKeeperConnectionException;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
-import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Admin;
+import org.apache.hadoop.hbase.client.ClusterConnection;
+import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.util.VersionInfo;
 
@@ -37,7 +39,6 @@ import org.judal.storage.Param;
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef;
 import org.judal.metadata.NameAlias;
-import org.judal.metadata.NonUniqueIndexDef;
 import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
@@ -54,7 +55,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.jdo.JDOException;
@@ -75,6 +75,7 @@ public class HBTableDataSource implements TableDataSource {
 	// A constant to convert a fraction to a percentage
 	private static final int CONVERT_TO_PERCENTAGE = 100;
 
+	@SuppressWarnings("deprecation")
 	private StringBufferInputStream oInStrm1, oInStrm2;
 
 	private Configuration oCfg;
@@ -110,9 +111,7 @@ public class HBTableDataSource implements TableDataSource {
 		if (DebugFile.trace) DebugFile.writeln("this version is "+thisVersion);
 		if (null!=thisVersion)
 			if (!thisVersion.equals(defaultsVersion))
-				throw new IOException(
-						"hbase-default.xml file seems to be for and old version of HBase (" +
-								defaultsVersion + "), this version is " + thisVersion);
+				throw new IOException("hbase-default.xml file seems to be for and old version of HBase (" + defaultsVersion + "), this version is " + thisVersion);
 		if (DebugFile.trace) DebugFile.writeln("finished checkDefaultsVersion");
 	}
 
@@ -187,7 +186,7 @@ public class HBTableDataSource implements TableDataSource {
 			File oFle = new File(sPath+"hbase-default.xml");
 			if (oFle.exists()) {
 				if (DebugFile.trace) DebugFile.writeln("parsing hbase-default.xml");
-				
+
 				String sDefaults = FileUtils.readFileToString(new File(sPath+"hbase-default.xml"), "ISO8859_1");
 				oInStrm1 = new StringBufferInputStream(sDefaults);
 				oCfg.addResource(oInStrm1);
@@ -275,60 +274,63 @@ public class HBTableDataSource implements TableDataSource {
 		this.oSmd = oSmd;
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void createTable(TableDef tableDef, Map<String,Object> options) throws JDOException {
 		HTableDescriptor oTds;
-		HBaseAdmin oAdm = null;
-		String tableName = tableDef.getName();
+		TableName tableName = TableName.valueOf(tableDef.getName());
 		try {
-			oAdm = new HBaseAdmin(getConfig());
-			if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+tableName+")");
-			oAdm.getTableDescriptor(Bytes.toBytes(tableName));
-			throw new JDOException("HBTableDataSource.createTable() Table "+tableName+" already exists");
-		} catch (TableNotFoundException tnfe) {
-			if (DebugFile.trace) DebugFile.writeln("Creating table "+tableName);
-			oTds = new HTableDescriptor(tableName);
-			for (ColumnDef oCol : tableDef.getColumns()) {
-				String sFamily = oCol.getFamily();
-				if (null==sFamily) 
-					throw new JDOUserException("Family for column "+oCol.getName()+" cannot be null");
-				if (null==sFamily) sFamily = "default";
-				if (sFamily.length()==0) 
-					throw new JDOUserException("Family for column "+oCol.getName()+" cannot be empty");
-				if (sFamily.length()==0) sFamily = "default";
-				if (!oTds.hasFamily(Bytes.toBytes(oCol.getFamily()))) {
-					try {
-						// This raises a NoSuchMethodError
-						// oTds.addFamily(new HColumnDescriptor(Bytes.toBytes(oCol.getFamily())));
-						HColumnDescriptor coldesc = new HColumnDescriptor(Bytes.toBytes(oCol.getFamily()));
-						Method addf = oTds.getClass().getMethod("addFamily", new Class[]{HColumnDescriptor.class});
-						addf.invoke(oTds, coldesc);
-					} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-						throw new JDOException(e.getClass().getName()+" "+e.getMessage()+" probably a compile vs runtime HBase version mistmatch");
-					}
+			try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
+				try (Admin oAdm = oCon.getAdmin()) {
+					if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+tableName+")");
+					oAdm.getTableDescriptor(tableName);
+					throw new JDOException("HBTableDataSource.createTable() Table "+tableName+" already exists");
 				}
-			} // next
-			try {
-				oAdm.createTable(oTds);
-				oSmd.addTable(tableDef,null);
+			}
+		} catch (TableNotFoundException tnfe) {
+			try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
+				if (DebugFile.trace) DebugFile.writeln("Creating table "+tableName);
+				oTds = new HTableDescriptor(tableName);
+				for (ColumnDef oCol : tableDef.getColumns()) {
+					String sFamily = oCol.getFamily();
+					if (null==sFamily) 
+						throw new JDOUserException("Family for column "+oCol.getName()+" cannot be null");
+					if (sFamily.length()==0) 
+						throw new JDOUserException("Family for column "+oCol.getName()+" cannot be empty");
+					if (sFamily.length()==0) sFamily = "default";
+					if (!oTds.hasFamily(Bytes.toBytes(oCol.getFamily()))) {
+						try {
+							// This raises a NoSuchMethodError
+							// oTds.addFamily(new HColumnDescriptor(Bytes.toBytes(oCol.getFamily())));
+							HColumnDescriptor coldesc = new HColumnDescriptor(Bytes.toBytes(oCol.getFamily()));
+							Method addf = oTds.getClass().getMethod("addFamily", new Class[]{HColumnDescriptor.class});
+							addf.invoke(oTds, coldesc);
+						} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							throw new JDOException(e.getClass().getName()+" "+e.getMessage()+" probably a compile vs runtime HBase version mistmatch");
+						}
+					}
+				} // next
+				try (Admin oAdm = oCon.getAdmin()) {
+					oAdm.createTable(oTds);
+					oSmd.addTable(tableDef,null);
+				} catch (IOException ioe) {
+					throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
+				}
+				if (DebugFile.trace) DebugFile.writeln("Table "+tableName+" created");
 			} catch (IOException ioe) {
 				throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
 			}
-			if (DebugFile.trace) DebugFile.writeln("Table "+tableName+" created");
 		} catch (IOException ioe) {
 			throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
-	    } finally {
-			try {
-				if (oAdm!=null) oAdm.close();
-			} catch (IOException e) { }
-	    }
+		}
 	}
 
 	@Override
 	public HBTable openTable(Record oRec) throws JDOException {
+		HBTable oTbl = null;
 		try {
 			if (DebugFile.trace) DebugFile.writeln("new HBTable(this, new HTable(getConfig(), "+oRec.getTableName()+"))");
-			HBTable oTbl = new HBTable(this, new HTable(getConfig(), oRec.getTableName()), oRec.getClass());
+			oTbl = new HBTable(this, getConfig(), oRec);
 			oOTbls.add(oTbl);
 			return oTbl;
 		} catch (TableNotFoundException tnf) {
@@ -348,20 +350,18 @@ public class HBTableDataSource implements TableDataSource {
 	public void dropTable(String sName, boolean bCascade) throws JDOException {
 		if (bCascade)
 			throw new JDOUnsupportedOptionException("HBase does not support drop cascade option");
-		HBaseAdmin oAdm = null;
-		try {
-			final byte[] byName = Bytes.toBytes(sName);
-			oAdm = new HBaseAdmin(getConfig());
-			oAdm.disableTable(byName);
-			oAdm.deleteTable(byName);
+		try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
+			TableName tableName = TableName.valueOf(sName);
+			try (Admin oAdm = oCon.getAdmin()) {
+				oAdm.disableTable(tableName);
+				oAdm.deleteTable(tableName);
+			}
 		} catch (MasterNotRunningException mnre) {
 			throw new JDOException("HBTable.truncate() MasterNotRunningException "+mnre.getMessage(), mnre);		  
 		} catch (ZooKeeperConnectionException zkce) {
 			throw new JDOException("HBTable.truncate() ZooKeeperConnectionException "+zkce.getMessage(), zkce);		  		  
 		} catch (IOException ioe) {
 			throw new JDOException("HBTable.truncate() IOException "+ioe.getMessage(), ioe);		  
-		} finally {
-			try { if (oAdm!=null) oAdm.close(); } catch (Exception ignore) { }
 		}
 	}
 
@@ -370,21 +370,16 @@ public class HBTableDataSource implements TableDataSource {
 		boolean objExists;
 		if (!objectType.equals("U"))
 			throw new JDOUnsupportedOptionException("HBase only supports type U (table) exists check");
-		HBaseAdmin oAdm = null;
-		try {
-			oAdm = new HBaseAdmin(getConfig());
-			if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+objectName+")");
-			oAdm.getTableDescriptor(Bytes.toBytes(objectName));
-			objExists = true;
+		try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
+			try (Admin oAdm = oCon.getAdmin()) {
+				if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+objectName+")");
+				oAdm.getTableDescriptor(TableName.valueOf(objectName));
+				objExists = true;
+			}
 		} catch (TableNotFoundException tnfe) {
 			objExists = false;
 		} catch (Exception xcpt) {
 			throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
-		} finally {
-			try {
-			 if (oAdm!=null)
-				 oAdm.close();
-			 } catch (IOException e) { }
 		}
 		return objExists;
 	}
@@ -457,15 +452,13 @@ public class HBTableDataSource implements TableDataSource {
 
 	@Override
 	public void truncateTable(String tableName, boolean cascade) throws JDOException {
-		HBaseAdmin oAdm = null;
 		TableDef tblDef = getTableDef(tableName);
-		try {
-			final byte[] byName = Bytes.toBytes(tableName);
-			oAdm = new HBaseAdmin(getConfig());
-			HTableDescriptor oTds = oAdm.getTableDescriptor(byName);
-			oAdm.disableTable(byName);
-			oAdm.deleteTable(byName);
-			oAdm.createTable(oTds);
+		try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
+			TableName tblName = TableName.valueOf(tableName);
+			try (Admin oAdm = oCon.getAdmin()) {
+				oAdm.disableTable(tblName);
+				oAdm.deleteTable(tblName);
+			}
 			createTable(tblDef, new HashMap<String,Object>());
 		} catch (MasterNotRunningException mnre) {
 			throw new JDOException("HBTable.truncate() MasterNotRunningException "+mnre.getMessage(), mnre);		  
@@ -473,9 +466,7 @@ public class HBTableDataSource implements TableDataSource {
 			throw new JDOException("HBTable.truncate() ZooKeeperConnectionException "+zkce.getMessage(), zkce);		  		  
 		} catch (IOException ioe) {
 			throw new JDOException("HBTable.truncate() IOException "+ioe.getMessage(), ioe);		  
-		} finally {
-			try { if (oAdm!=null) oAdm.close(); } catch (Exception ignore) { }
-		}		
+		}
 	}
 
 	/**

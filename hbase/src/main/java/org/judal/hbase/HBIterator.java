@@ -12,6 +12,7 @@ package org.judal.hbase;
  */
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import javax.jdo.JDOException;
@@ -21,7 +22,7 @@ import org.judal.storage.StorageObjectFactory;
 import org.judal.storage.keyvalue.Stored;
 import org.judal.storage.table.Record;
 import org.judal.serialization.BytesConverter;
-import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
@@ -65,13 +66,15 @@ public class HBIterator implements AutoCloseable, Iterator<Stored> {
 		}
 		try {
 			for (ColumnDef cdef : table.columns()) {
-				KeyValue kv = result.getColumnLatest(BytesConverter.toBytes(cdef.getFamily()), BytesConverter.toBytes(cdef.getName()));
-				if (kv!=null)
-					if (kv.getValue()!=null)
-						rec.put(cdef.getName(), BytesConverter.fromBytes(kv.getValue(), cdef.getType()));
+				Cell kv = result.getColumnLatestCell(BytesConverter.toBytes(cdef.getFamily()), BytesConverter.toBytes(cdef.getName()));
+				if (kv!=null) {
+					byte[] colValue = getColumnLatestValue(kv);
+					if (colValue!=null)
+						rec.put(cdef.getName(), BytesConverter.fromBytes(colValue, cdef.getType()));
+				}
 			}
 		} catch (IOException ioe) {
-			throw new JDOException (ioe.getMessage(), ioe);			
+			throw new JDOException (ioe.getMessage(), ioe);	
 		}
 		return rec;
 	}
@@ -79,6 +82,11 @@ public class HBIterator implements AutoCloseable, Iterator<Stored> {
 	@Override
 	public void close() {
 		scanner.close();
+	}
+
+	private byte[] getColumnLatestValue(Cell oCll) {
+		final byte[] valueArray = oCll.getValueArray();
+		return valueArray==null ? null :Arrays.copyOfRange(valueArray, oCll.getValueOffset(), valueArray.length);
 	}
 
 }
