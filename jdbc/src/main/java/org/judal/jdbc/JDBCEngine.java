@@ -90,7 +90,7 @@ public class JDBCEngine implements Engine<JDBCRelationalDataSource> {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */

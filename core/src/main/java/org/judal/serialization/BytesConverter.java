@@ -54,21 +54,21 @@ public class BytesConverter {
 			if (oObj instanceof Boolean)
 				return Bytes.toBytes(((Boolean) oObj).booleanValue());
 			else
-				return Bytes.toBytes(new Boolean(oObj.toString()).booleanValue());								
+				return Bytes.toBytes(new Boolean(oObj.toString()).booleanValue());
 		case Types.SMALLINT:
 			if (oObj instanceof Short)
 				return Bytes.toBytes(((Short) oObj).shortValue());
 			else if (oObj instanceof String)
-				return Bytes.toBytes(new Short((String) oObj).shortValue());				
+				return Bytes.toBytes(new Short((String) oObj).shortValue());
 			else
-				return Bytes.toBytes(new Short(oObj.toString()).shortValue());				
+				return Bytes.toBytes(new Short(oObj.toString()).shortValue());
 		case Types.INTEGER:
 			if (oObj instanceof Integer)
 				return Bytes.toBytes(((Integer) oObj).intValue());
 			else if (oObj instanceof Short)
 				return Bytes.toBytes(((Short) oObj).intValue());
 			else if (oObj instanceof String)
-				return Bytes.toBytes(new Integer((String) oObj).intValue());				
+				return Bytes.toBytes(new Integer((String) oObj).intValue());
 			else
 				return Bytes.toBytes(new Integer(oObj.toString()).intValue());
 		case Types.BIGINT:
@@ -79,7 +79,7 @@ public class BytesConverter {
 			else if (oObj instanceof Short)
 				return Bytes.toBytes(((Short) oObj).longValue());
 			else if (oObj instanceof String)
-				return Bytes.toBytes(new Long((String) oObj).longValue());				
+				return Bytes.toBytes(new Long((String) oObj).longValue());
 			else
 				return Bytes.toBytes(new Long(oObj.toString()).longValue());
 		case Types.FLOAT:
@@ -94,7 +94,7 @@ public class BytesConverter {
 			else if (oObj instanceof Double)
 				return Bytes.toBytes(((Double) oObj).floatValue());
 			else if (oObj instanceof String)
-				return Bytes.toBytes(new Float((String) oObj).floatValue());				
+				return Bytes.toBytes(new Float((String) oObj).floatValue());
 			else 
 				return Bytes.toBytes(new Float(oObj.toString()).floatValue());
 		case Types.DOUBLE:
@@ -109,7 +109,7 @@ public class BytesConverter {
 			else if (oObj instanceof Float)
 				return Bytes.toBytes((double)((Float) oObj).floatValue());
 			else if (oObj instanceof String)
-				return Bytes.toBytes(new Double((String) oObj).doubleValue());				
+				return Bytes.toBytes(new Double((String) oObj).doubleValue());
 			else 
 				return Bytes.toBytes(new Double(oObj.toString()).doubleValue());
 		case Types.DECIMAL:
@@ -125,11 +125,11 @@ public class BytesConverter {
 			if (oObj instanceof Date)
 				return Bytes.toBytes(((Date) oObj).getTime());
 			else if (oObj instanceof Timestamp)
-				return Bytes.toBytes(((Timestamp) oObj).getTime());		
+				return Bytes.toBytes(((Timestamp) oObj).getTime());
 			else if (oObj instanceof Calendar)
 				return Bytes.toBytes(((Calendar) oObj).getTimeInMillis());
 			else if (oObj instanceof Long)
-				return Bytes.toBytes(((Long) oObj).longValue());		
+				return Bytes.toBytes(((Long) oObj).longValue());
 		case Types.BINARY:
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:
@@ -144,13 +144,13 @@ public class BytesConverter {
 			else if (oObj instanceof Short)
 				return toBytes(oObj, Types.SMALLINT);
 			else if (oObj instanceof Integer)
-				return toBytes(oObj, Types.INTEGER);				
+				return toBytes(oObj, Types.INTEGER);
 			else if (oObj instanceof Long)
 				return toBytes(oObj, Types.BIGINT);
 			else if (oObj instanceof Float)
-				return toBytes(oObj, Types.FLOAT);				
+				return toBytes(oObj, Types.FLOAT);
 			else if (oObj instanceof Double)
-				return toBytes(oObj, Types.DOUBLE);				
+				return toBytes(oObj, Types.DOUBLE);	
 			else if (oObj instanceof BigDecimal)
 				return toBytes(oObj, Types.DECIMAL);
 			else if (oObj instanceof Date)
@@ -177,10 +177,10 @@ public class BytesConverter {
 				} catch (IOException e) { }
 				throw new RuntimeException("BytesConverter.toBytes() IOException serializing "+oObj.getClass().getName()+" "+ioe.getMessage());
 			}
-			return aRetVal;				
+			return aRetVal;
 		default:
 			throw new RuntimeException("BytesConverter.toBytes() unrecognized type "+String.valueOf(iType));
-		}	
+		}
 	}
 
 	/**
@@ -295,7 +295,7 @@ public class BytesConverter {
 					throw new IOException ("BytesConverter.fromBytes() ClassNotFoundException "+cnf.getMessage());
 				} finally {
 					oIn.close();
-					byIn.close();      	
+					byIn.close();
 				}
 				return oRetVal;
 			}

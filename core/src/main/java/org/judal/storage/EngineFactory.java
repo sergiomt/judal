@@ -28,14 +28,14 @@ import org.judal.storage.table.TableDataSource;
  * @version 1.0
  */
 public class EngineFactory {
-	
+
 	/**
 	 * A default data source can be kept per thread so that load and store methods can use it implicitly.
 	 */
 	public static ThreadLocal<DataSource> DefaultThreadDataSource = new ThreadLocal<DataSource>();
 	
 	private static Hashtable<String, Class<Engine<? extends DataSource>>> engines = new Hashtable<String, Class<Engine<? extends DataSource>>>();
-	
+
 	@SuppressWarnings("unchecked")
 	/**
 	 * <p>Register an Engine implementation under a given name</p>
@@ -97,7 +97,7 @@ public class EngineFactory {
 	public static BucketDataSource getDefaultBucketDataSource() throws JDOUserException {
 		
 		BucketDataSource tdts = null; 		
-		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();		
+		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();
 		
 		if (null==ddts)
 			tdts = StorageContext.Default.getKeyValueDataSource();
@@ -125,7 +125,7 @@ public class EngineFactory {
 	public static TableDataSource getDefaultTableDataSource() throws JDOUserException {
 		
 		TableDataSource tdts = null; 		
-		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();		
+		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();
 
 		if (null==ddts)
 			tdts = StorageContext.Default.getTableDataSource();
@@ -156,7 +156,7 @@ public class EngineFactory {
 	public static RelationalDataSource getDefaultRelationalDataSource() throws JDOUserException {
 		
 		RelationalDataSource rdts = null; 
-		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();		
+		DataSource ddts = EngineFactory.DefaultThreadDataSource.get();
 
 		if (null==ddts)
 			rdts = StorageContext.Default.getRelationalDataSource();
@@ -170,6 +170,7 @@ public class EngineFactory {
 		
 		return rdts;
 	}
+
 	
 	/*
 	 * Some standard names for engines

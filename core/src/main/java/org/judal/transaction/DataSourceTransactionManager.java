@@ -37,11 +37,11 @@ public class DataSourceTransactionManager implements TransactionManager {
 	 * <p>Default transaction manager.</p>
 	 */
 	public static DataSourceTransactionManager Transact  = new DataSourceTransactionManager();
-			
+
 	private static ThreadLocal<Transaction> threadTransaction = new ThreadLocal<Transaction>();
 
 	private Class<? extends Transaction> transactionClass;
-	
+
 	/**
 	 * <p>Constructor.</p>
 	 * Create new instance of DataSourceTransactionManager using org.judal.transaction.DataSourceTransaction as transaction interface implementation.
@@ -66,13 +66,19 @@ public class DataSourceTransactionManager implements TransactionManager {
 	public static Transaction currentTransaction() {
 		return threadTransaction.get();
 	}
-	
+
 	private void setNewTransaction() throws SystemException {
 		try {
 			threadTransaction.set(transactionClass.newInstance());
 		} catch (InstantiationException | IllegalAccessException xcpt) {
 			throw new SystemException(xcpt.getMessage());
-		}		
+		}
+	}
+
+	private void removeTransaction() throws SystemException {
+		if (threadTransaction!=null) {
+			threadTransaction.remove();
+		}
 	}
 
 	private void requireTransaction(String action) throws IllegalStateException, SystemException {
@@ -117,11 +123,10 @@ public class DataSourceTransactionManager implements TransactionManager {
 	 */
 	@Override
 	public void begin() throws NotSupportedException, SystemException {
-		if (threadTransaction.get()==null)
-			setNewTransaction();
+		Transaction currentTransaction = getTransaction();
 		try {
-			if (threadTransaction.get() instanceof DataSourceTransaction)
-				((DataSourceTransaction) threadTransaction.get()).begin();
+			if (currentTransaction instanceof DataSourceTransaction)
+				((DataSourceTransaction) currentTransaction).begin();
 		} catch (IllegalStateException | XAException e) {
 			throw new SystemException(e.getMessage());
 		}
@@ -147,7 +152,7 @@ public class DataSourceTransactionManager implements TransactionManager {
 
 		requireTransaction("commit");
 		getTransaction().commit();
-		setNewTransaction();
+		removeTransaction();
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
@@ -220,7 +225,7 @@ public class DataSourceTransactionManager implements TransactionManager {
 			throw new IllegalStateException("Cannot rollback transaction while it's committing");
 		}
 		getTransaction().rollback();
-		setNewTransaction();
+		removeTransaction();
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
@@ -270,6 +275,6 @@ public class DataSourceTransactionManager implements TransactionManager {
 	 * Do not call it while a transaction in ongoing.
 	 */
 	public void reset() {
-		threadTransaction.set(null);		
+		threadTransaction.set(null);
 	}
 }

@@ -333,20 +333,31 @@ public class SchemaMetaData {
 	}
 
 	/**
+	 * <p>Get TableDef for a table with a given name.</p>
+	 * If the provided table name ends with a string date pattern like _YYYY-MM-DD then a corresponding table without that suffix will also be sought
 	 * @param tableName String Table Name
 	 * @return TableDef or <b>null</b> if this SchemaMetadata does not contain a TableDef with the given name.
 	 */
 	public TableDef getTable(String tableName) {
-		return tbleDefs.get(tableName.toLowerCase());
+		if (null==tableName) return null;
+		TableDef tdef = tbleDefs.get(tableName.toLowerCase());
+		if (null==tdef && ymd.matcher(tableName).matches())
+			tdef = tbleDefs.get(tableName.substring(0,tableName.lastIndexOf('_')).toLowerCase());
+		return tdef;
 	}
 
 	/**
-	 * Check whether this SchemaMetaData contains a TableDef with the given name. Table names are case insensitive.
+	 * <p>Check whether this SchemaMetaData contains a TableDef with the given name. Table names are case insensitive.</p>
+	 * If the provided table name ends with a string date pattern like _YYYY-MM-DD then a corresponding table without that suffix will also be sought
 	 * @param tableName String TableDef Name
 	 * @return boolean
 	 */
 	public boolean containsTable(String tableName) {
-		return tbleDefs.containsKey(tableName.toLowerCase());
+		if (null==tableName) return false;
+		boolean bfound = tbleDefs.containsKey(tableName.toLowerCase());
+		if (!bfound && ymd.matcher(tableName).matches())
+			bfound = tbleDefs.containsKey(tableName.substring(0,tableName.lastIndexOf('_')).toLowerCase());
+		return bfound;
 	}
 
 	/**
