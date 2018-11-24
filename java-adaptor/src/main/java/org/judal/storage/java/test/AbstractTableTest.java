@@ -195,7 +195,7 @@ public abstract class AbstractTableTest {
 			created = true;
 			TestRecord1 rec = recordClass1.newInstance();
 			assertEquals(7, rec.getTableDef().getNumberOfColumns());
-			
+
 			assertEquals(7, rec.getTableDef().getColumnsStr().split(",").length);
 			assertNotNull(rec.getTableDef().getColumnByName("id"));
 			rec.put("id", new Integer(1));
@@ -210,7 +210,7 @@ public abstract class AbstractTableTest {
 			Table tb = ds.openTable(rec);
 			tb.store(rec);
 			tb.close();
-			
+
 			TestRecord1 ret = recordClass1.newInstance();
 			tb = ds.openTable(ret);
 			boolean loaded = tb.load(new Integer(1), ret);
@@ -234,9 +234,9 @@ public abstract class AbstractTableTest {
 	public void test02Transaction() throws JDOException, IOException, NotSupportedException, SystemException, SecurityException, IllegalStateException, RollbackException, HeuristicMixedException, HeuristicRollbackException, InstantiationException, IllegalAccessException {
 
 		DebugFile.writeln("AbtractTableTest Begin test02Transaction()");
-		
+
 		TableDataSource ds = getTableDataSource();
-		
+
 		if (ds.getTransactionManager()!=null) {
 
 		ArrayRecord1.dataSource = ds;
