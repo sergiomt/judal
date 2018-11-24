@@ -40,7 +40,7 @@ public class BenchmarkHelper {
 	public static void destroy() {
 		RelationalDataSource dts = EngineFactory.getDefaultRelationalDataSource();
 		dts.close();
-		EngineFactory.DefaultThreadDataSource.set(null);
+		EngineFactory.DefaultThreadDataSource.remove();
 	}
 
 	public static Map<String, String> dataSourceProperties() {

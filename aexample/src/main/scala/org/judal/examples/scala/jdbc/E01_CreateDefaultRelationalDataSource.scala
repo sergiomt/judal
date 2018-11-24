@@ -69,6 +69,7 @@ object E01_CreateDefaultRelationalDataSource {
 
 	def close() = {
 	  EngineFactory.DefaultThreadDataSource.get.close
+	  EngineFactory.DefaultThreadDataSource.remove
 		EngineFactory.deregisterEngine(new JDBCEngine().name)
 	}
 

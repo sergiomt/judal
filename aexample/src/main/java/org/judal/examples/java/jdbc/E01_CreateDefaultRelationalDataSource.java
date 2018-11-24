@@ -52,6 +52,7 @@ public class E01_CreateDefaultRelationalDataSource {
 	public static void close() throws Exception {
 		assertNotNull(EngineFactory.getEngine(jdbc.name()));
 		EngineFactory.DefaultThreadDataSource.get().close();
+		EngineFactory.DefaultThreadDataSource.remove();
 		EngineFactory.deregisterEngine(jdbc.name());
 	}
 
