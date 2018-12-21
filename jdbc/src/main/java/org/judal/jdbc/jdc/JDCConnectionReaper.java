@@ -46,6 +46,7 @@ public class JDCConnectionReaper extends Thread {
 			checkAccess();
 			setDaemon(true);
 			setPriority(MIN_PRIORITY);
+			setName("JDC-Connection-Reaper-" + getId());
 		} catch (SecurityException ignore) { }
 	}
 
@@ -70,7 +71,8 @@ public class JDCConnectionReaper extends Thread {
 	}
 
 	public void halt() {
-		keepruning=false;
+		keepruning = false;
+		interrupt();
 	}
 
 	/**
