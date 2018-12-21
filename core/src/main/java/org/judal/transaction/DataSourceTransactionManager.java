@@ -163,13 +163,10 @@ public class DataSourceTransactionManager implements TransactionManager {
 	/**
 	 * @return int Status of the transaction for current thread
 	 * @throws SystemException
-	 * @throws IllegalStateException if there is no transaction for the current thread
 	 */
 	@Override
-	public int getStatus() throws IllegalStateException, SystemException {
-		if (threadTransaction.get()==null)
-			throw new IllegalStateException("There is no transaction for the current thread");		
-		return threadTransaction.get().getStatus();
+	public int getStatus() throws SystemException {
+		return threadTransaction.get()==null ? Status.STATUS_NO_TRANSACTION: threadTransaction.get().getStatus();
 	}
 
 	/**

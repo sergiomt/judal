@@ -267,7 +267,7 @@ public abstract class AbstractTableTest {
 			rec2.put("name", "John Smith");
 			rec2.put("created", new Timestamp(System.currentTimeMillis()));
 			rec2.put("description", "... ... ...");
-			
+
 			DebugFile.writeln("AbtractTableTest Transaction status before begin (1) = "+ statusString(getTableDataSource().getTransactionManager().getStatus()));
 			getTableDataSource().getTransactionManager().begin();
 			assertEquals(Status.STATUS_ACTIVE, ds.getTransactionManager().getStatus());
@@ -363,7 +363,7 @@ public abstract class AbstractTableTest {
 			DebugFile.writeln("AbtractTableTest Before truncate"+ ArrayRecord1.tableName);
 			ds.truncateTable(ArrayRecord1.tableName, false);
 			DebugFile.writeln("AbtractTableTest After truncate"+ ArrayRecord1.tableName);
-			
+
 			DebugFile.writeln("AbtractTableTest Reopen "+ ArrayRecord2.tableName);
 			tb2 = ds.openTable(rec2);
 			assertFalse(tb2.exists(new Param("code",1,"1234")));
@@ -380,7 +380,6 @@ public abstract class AbstractTableTest {
 			DebugFile.writeStackTrace(e);
 		} finally {
 			if (ds!=null) {
-				DebugFile.writeln("AbtractTableTest Transaction status while finalizing = "+ statusString(ds.getTransactionManager().getStatus()));
 				try {
 					if (ds.getTransactionManager().getStatus()!=Status.STATUS_NO_TRANSACTION &&
 						ds.getTransactionManager().getStatus()!=Status.STATUS_COMMITTED &&

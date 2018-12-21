@@ -54,7 +54,20 @@ public class SQLPredicate extends Predicate {
 			DebugFile.writeln("Begin SQLPredicate.add(" + paramValues.toString() + ")");
 			DebugFile.incIdent();
 		}
-		
+
+		if (constructorParameters[0] instanceof SQLTerm) {
+			if (constructorParameters.length==1) {
+				super.addPart((SQLTerm) constructorParameters[0]);
+			} else {
+				for (int p=1; p<constructorParameters.length; p++)
+					if (!(constructorParameters[0] instanceof SQLTerm))
+						throw new IllegalArgumentException("SQLPredicate.add() if first parameter type is SQLTerm then every parameter must be SQLTerm as well");
+				for (int p=0; p<constructorParameters.length; p++)
+					super.addPart((SQLTerm) constructorParameters[p]);
+			}
+			
+		}
+
 		Class<?>[] parameterClasses = assumeNullsAre(Object.class, constructorParameters);
 
 		Constructor<SQLTerm> constructor = (Constructor<SQLTerm>) ObjectFactory.getConstructor(SQLTerm.class, parameterClasses);

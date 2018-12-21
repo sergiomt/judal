@@ -61,7 +61,8 @@ public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R
 
 	@Override
 	public RecordSet<R> fetch() {
-		qry.setFilter(prd);
+		if (prd!=null & prd.parts().size()>0)
+			qry.setFilter(prd);
 		return viw.fetch(qry);
 	}
 
@@ -69,13 +70,16 @@ public class RelationalQuery<R extends Record> extends AbstractRelationalQuery<R
 	public R fetchFirst() {
 		RecordSet<R> rst;
 		AbstractQuery qry1;
-		qry.setFilter(prd);
+		if (prd!=null & prd.parts().size()>0)
+			qry.setFilter(prd);
 		if (qry.getRangeFromIncl()==0l && qry.getRangeToExcl()==1l) {
 			qry1 = qry;
 		} else {
 			qry1 = qry.clone();
-			qry.setRange(0l, 1l);
-		}			
+			qry1.setRange(0l, 1l);
+			if (prd!=null & prd.parts().size()>0)
+				qry1.setFilter(prd);
+		}
 		rst = viw.fetch(qry1);
 		return rst.isEmpty() ? null : rst.get(0);
 	}

@@ -123,9 +123,9 @@ public class TestJDBCQuery {
 	
     where = new SQLAndPredicate();
     where.add("gu_job", Operator.IN, "k_jobs", subselect);
-	
+
     JDBCRelationalView jobAtomsJoin = (JDBCRelationalView) dts.openJoinView(JoinType.INNER, jobRec, AS(jobRec,"j"), AS("k_jobs_atoms_by_day","a"), P$("gu_job","gu_job"));
-    
+
     assertNotNull(jobAtomsJoin.getViewDef());
     assertEquals(Job.tableName, jobAtomsJoin.getViewDef().getName());
     assertEquals(1, jobAtomsJoin.getViewDef().getNumberOfJoins());
@@ -142,7 +142,8 @@ public class TestJDBCQuery {
 
     // assertEquals("SELECT SUM(h.nu_msgs) AS message_count,h.dt_hour AS hour FROM k_jobs INNER JOIN k_jobs_atoms_by_day ON k_jobs.gu_job=k_jobs_atoms_by_day.gu_job WHERE  ( gu_job IN (SELECT gu_job FROM k_jobs WHERE  ( gu_workarea = ? AND  ( dt_execution BETWEEN ? AND ?  OR dt_finished BETWEEN ? AND ?  )  ) ) )  GROUP BY 2",qry.source());
 
-    jobAtomsJoin.close();    
+    jobAtomsJoin.close();
+
     dts.dropTable(Job.tableName, false);
 
     

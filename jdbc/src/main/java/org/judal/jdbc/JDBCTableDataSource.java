@@ -137,8 +137,8 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 
 		assertNotClosed();
 
-		JDBCRelationalView tbl = null;		
-		
+		JDBCRelationalView tbl = null;
+
 		if (null==joinType)
 			throw new JDOUserException("Join type cannot be null");
 		if (null==result)
@@ -153,7 +153,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			throw new JDOUserException("Joined table must be aliased");
 		if (null==onColumns || onColumns.length==0)
 			throw new JDOUserException("At least one column pair is required");
-		
+
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCTableDataSource.openJoinView("+joinType.name()+","+result.getTableName()+","+baseTable.getName()+" AS "+baseTable.getAlias()+","+joinedTable.getName()+" AS "+joinedTable.getAlias()+", ...)");
 			DebugFile.incIdent();
@@ -165,7 +165,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 			if (DebugFile.trace) DebugFile.decIdent();
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		} finally {
-			if (tbl!=null) tbl.close();			
+			if (tbl!=null) tbl.close();
 		}
 
 		SQLViewDef tdef = tbl.getViewDef().clone();
@@ -238,7 +238,7 @@ public class JDBCTableDataSource extends JDBCBucketDataSource implements TableDa
 		}
 
 		tbl = new JDBCRelationalView(this, tdef, result.getClass());
-		
+
 		if (DebugFile.trace) {
 			DebugFile.writeln("joined tables are " + tdef.getTables());
 			DebugFile.decIdent();

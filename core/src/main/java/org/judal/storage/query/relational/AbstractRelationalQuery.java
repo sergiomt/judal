@@ -25,6 +25,7 @@ import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.Connective;
 import org.judal.storage.query.Part;
 import org.judal.storage.query.Predicate;
+import org.judal.storage.query.Term;
 import org.judal.storage.relational.RelationalDataSource;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
@@ -276,6 +277,13 @@ public abstract class AbstractRelationalQuery<R extends Record> implements Clone
 		return this;
 	}
 
+	public AbstractRelationalQuery<R> and(Term term)
+			throws JDOUserException, UnsupportedOperationException, NoSuchMethodException, SecurityException,
+			InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		prd.andPart(term);
+		return this;
+	}
+
 	public AbstractRelationalQuery<R> addPart(Part term)
 			throws JDOUserException, UnsupportedOperationException, NoSuchMethodException, SecurityException,
 			InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
@@ -351,6 +359,13 @@ public abstract class AbstractRelationalQuery<R extends Record> implements Clone
 		return this;
 	}
 
+	public AbstractRelationalQuery<R> or(Term term)
+			throws JDOUserException, UnsupportedOperationException, NoSuchMethodException, SecurityException,
+			InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		prd.orPart(term);
+		return this;
+	}
+
 	public abstract AbstractRelationalQuery<R> clone();
 
 	public int count() {
@@ -392,6 +407,15 @@ public abstract class AbstractRelationalQuery<R extends Record> implements Clone
 
 	public Predicate newPredicate(Connective logicalConnective, String operator, Param[] filterParameters) {
 		return qry.newPredicate(logicalConnective, operator, filterParameters);
+	}
+
+	/**
+	 * <p>Get query source code as required by the implementation.</p>
+	 * @return Object. For example a SQL statement in case of JDBC.
+	 * @throws JDOException
+	 */
+	public Object source() throws JDOException {
+		return qry.source();
 	}
 
 }

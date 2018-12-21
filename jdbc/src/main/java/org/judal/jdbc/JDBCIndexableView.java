@@ -269,18 +269,18 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			if (null==indexColumnName || indexColumnName.length()==0) {
 				stmt = getConnection().prepareStatement("SELECT COUNT(*) AS NUM_ROWS FROM "+name());
 			} else {
-				stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+"=?");
+				stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM " + getViewDef().getTables() +" WHERE "+indexColumnName+"=?");
 				ColumnDef cdef = getViewDef().getColumnByName(indexColumnName);
 				if (null==valueSearched) {
 					if (null==cdef)
 						throw new JDOException("Type could not be infered for null value");
 					else
-						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+" IS NULL");
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM " + getViewDef().getTables() + " WHERE "+indexColumnName+" IS NULL");
 				} else {
 					if (valueSearched instanceof Expression) {
-						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+"="+valueSearched.toString());
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM " + getViewDef().getTables() + " WHERE "+indexColumnName+"="+valueSearched.toString());
 					} else {
-						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM "+name()+" WHERE "+indexColumnName+"=?");
+						stmt = getConnection().prepareStatement("SELECT COUNT("+indexColumnName+") AS " + NUM_ROWS + " FROM " + getViewDef().getTables() + " WHERE "+indexColumnName+"=?");
 						if (null==cdef)
 							stmt.setObject(1, valueSearched);
 						else
@@ -333,11 +333,12 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 		if (DebugFile.trace) {
 			DebugFile.writeln("Begin JDBCRelationalView.exists()");
 			DebugFile.incIdent();
-			DebugFile.writeln("Connection.prepareStatement(SELECT NULL AS void FROM "+name()+" WHERE "+where+")");
+			DebugFile.writeln("Connection.prepareStatement(SELECT NULL AS void FROM " + getViewDef().getTables() + " WHERE "+where+")");
 		}
 
+
 		try {
-			stmt = getConnection().prepareStatement("SELECT NULL AS void FROM "+name()+" WHERE "+where);
+			stmt = getConnection().prepareStatement("SELECT NULL AS void FROM " + getViewDef().getTables() +" WHERE "+where);
 			int pos = 0;
 			for (Param key : keys)
 				if (key!=null)

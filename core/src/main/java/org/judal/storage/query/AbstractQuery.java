@@ -191,10 +191,10 @@ public abstract class AbstractQuery implements Cloneable, Query {
 			}
 		return filtering;
 	}
-	
+
 	/**
 	 * <p>Get query source code as required by the implementation.</p>
-	 * @return Object For example a SQL statement in case of JDBC.
+	 * @return Object. For example a SQL statement in case of JDBC.
 	 * @throws JDOException
 	 */
 	public abstract Object source() throws JDOException;
@@ -627,7 +627,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	 * @param members Iterable&lt;String&gt;
 	 * @throws JDOUnsupportedOptionException
 	 */
-	public void setResult(Iterable<String> members) {		
+	public void setResult(Iterable<String> members) {
 		this.results = String.join(",", members);
 	}
 	
@@ -658,7 +658,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 	}
 
 	/**
-	 * <p>Set results using a subclass of MongoDocument.</p>
+	 * <p>Set results using a subclass of Record.</p>
 	 * The columns fetched by this query will be defined by the fetchGroup() method of resultClass
 	 * @param resultClass Class&lt;? extends Record&gt;
 	 * @param constructorParameterClasses Class&lt;?&gt;&hellip; List of classes of the parameters taken by the constructor which must be used by this query when adding new results during fetch.

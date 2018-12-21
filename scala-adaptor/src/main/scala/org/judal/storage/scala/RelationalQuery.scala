@@ -44,7 +44,8 @@ class RelationalQuery[R >: Null <: Record](dts: RelationalDataSource , recClass:
 	}
 
 	override def fetch() : Iterable[R] = {
-		qry.setFilter(prd)
+	  if (prd!=null & prd.parts.size>0)
+      qry.setFilter(prd)
 		viw.fetch(qry).asScala
 	}
 
@@ -60,14 +61,17 @@ class RelationalQuery[R >: Null <: Record](dts: RelationalDataSource , recClass:
 
 	def fetchFirst() : R = {
 		var rst : RecordSet[R] = null
-	  qry.setFilter(prd)
+	  if (prd!=null & prd.parts.size>0)
+      qry.setFilter(prd)
 		if (qry.getRangeFromIncl==0l && qry.getRangeToExcl==1l) {
 		  rst = viw.fetch(qry)
 		} else {
 		  val q1 = clone
 		  q1.setRange(0l, 1l)
+	    if (prd!=null & prd.parts.size>0)
+		    q1.setFilter(prd)
 		  rst = viw.fetch(q1.qry)
-		}			
+		}
 		  if (rst.isEmpty()) null else rst.get(0)
 	}
 	
