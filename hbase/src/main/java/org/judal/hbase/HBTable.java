@@ -71,6 +71,8 @@ public class HBTable implements org.judal.storage.table.Table {
 		this.oItr = null;
 		this.oCls = oRec.getClass();
 		this.oCon = (ClusterConnection) ConnectionFactory.createConnection(oCfg);
+		if (null==oCon)
+			throw new IOException("HBase ConnectionFactory.createConnection() failed");
 		this.oTbl = oCon.getTable(TableName.valueOf(oRec.getTableName()));
 	}
 
@@ -209,6 +211,14 @@ public class HBTable implements org.judal.storage.table.Table {
 			DebugFile.incIdent();
 		}
 
+		if (null==oRow.getKey()) {
+			if (DebugFile.trace) {
+				DebugFile.writeln("ERROR: Tried to store an HBase row which primary key is null");
+				DebugFile.decIdent();
+			}
+			throw new JDOException("Can store an HBase row which primary key is null");
+		}
+
 		// oRow.checkConstraints(getDataSource());
 
 		final byte[] byPK = BytesConverter.toBytes(oRow.getKey());
@@ -223,25 +233,6 @@ public class HBTable implements org.judal.storage.table.Table {
 					}
 					oPut.addColumn(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()), BytesConverter.toBytes(oObj, oCol.getType()));
 
-					/*
-					if (DebugFile.trace) {
-						List<Cell> cells = oPut.get(BytesConverter.toBytes(oCol.getFamily()), BytesConverter.toBytes(oCol.getName()));
-						assert(cells.size()>=1);
-						DebugFile.writeln("value offset is "+cells.get(cells.size()-1).getValueOffset());
-						if (!Arrays.equals(BytesConverter.toBytes(oObj, oCol.getType()), cells.get(cells.size()-1).getValueArray())) {
-							StringBuilder arraysBytes = new StringBuilder();
-							arraysBytes.append("Inserted array is [");
-							for (byte b : BytesConverter.toBytes(oObj, oCol.getType()))
-								arraysBytes.append(String.valueOf(b)).append(",");
-							arraysBytes.append("]\n");
-							arraysBytes.append("Read array is [");
-							for (byte b : cells.get(cells.size()-1).getValueArray())
-								arraysBytes.append(String.valueOf(b)).append(",");;
-							arraysBytes.append("]\n");
-							DebugFile.writeln(arraysBytes.toString());
-						}
-					}
-					*/
 				} else {
 					if (DebugFile.trace)
 						DebugFile.writeln(oRow.getClass().getName()+".apply("+oCol.getName()+") == null");
@@ -370,9 +361,9 @@ public class HBTable implements org.judal.storage.table.Table {
 			DebugFile.writeln("Begin HBTable.fetch("+indexColumnName+","+valueSearched+",["+sColList.substring(1)+"])");
 			DebugFile.incIdent();
 		}
-		
+
 		RecordSet<R> oRst = null;
-		
+
 		try {
 			oRst = StorageObjectFactory.newRecordSetOf((Class<R>) oCls, maxrows);
 		} catch (NoSuchMethodException e) {

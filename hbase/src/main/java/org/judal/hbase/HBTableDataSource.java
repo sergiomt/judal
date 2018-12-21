@@ -82,7 +82,7 @@ public class HBTableDataSource implements TableDataSource {
 
 	private SchemaMetaData oSmd;
 
-	private Set<HBTable> oOTbls;
+	private final Set<HBTable> oOTbls;
 
 	public HBTableDataSource(SchemaMetaData oMetaData) {
 		oSmd = oMetaData;
@@ -337,8 +337,8 @@ public class HBTableDataSource implements TableDataSource {
 			throw new JDOException("TableNotFoundException "+tnf.getMessage(), tnf);
 		} catch (IOException ioe) {
 			throw new JDOException("IOException "+ioe.getMessage(), ioe);
-	  } catch (Exception xcpt) {
-		  throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
+		} catch (Exception xcpt) {
+			throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
 		}
 	}
 
