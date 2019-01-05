@@ -236,7 +236,8 @@ public class SQLTerm extends Term {
 					oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(")");
 				else
 					oTxt.append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getText()).append(")");
-			
+			else
+				oTxt.append(sColumn).append(" ").append(sOper).append(" (SELECT ").append(sNestedColumn).append(" FROM ").append(getTableName()).append(" WHERE ").append(oNested.getText()).append(")");
 		} else {
 			if (sOper.equalsIgnoreCase(Operator.WITHIN)) {
 				final Object value2 = (aValues==null || aValues.length<3 ? null : aValues[2]);
