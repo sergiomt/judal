@@ -47,6 +47,7 @@ import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.FieldHelper;
 import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.impl.AbstractRecord;
+import org.judal.storage.java.internal.CaseInsensitiveValuesMap;
 
 import com.knowgate.debug.DebugFile;
 
@@ -59,29 +60,6 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 
 	private static final long serialVersionUID = 10000l;
 
-	/**
-	 * Column names are case insensitive, so specialize a HashMap to implement case insensitive lookups
-	*/	
-	@SuppressWarnings("serial")
-	private class CaseInsensitiveValuesMap extends HashMap<String,Object> {
-		@Override
-		public Object put (String key, Object value) {
-			return super.put(key.toLowerCase(), value);
-		}
-		@Override
-		public Object remove (Object key) {
-			return super.remove(((String) key).toLowerCase());
-		}
-		@Override
-		public Object get (Object key) {
-			return super.get(((String) key).toLowerCase());
-		}
-		@Override
-		public boolean containsKey (Object key) {
-			return super.containsKey(((String) key).toLowerCase());
-		}
-	}
-	
 	private CaseInsensitiveValuesMap values;
 	private HashMap<Integer, String> columnIndexes;
 
@@ -319,7 +297,8 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	public Object get(Object key) {
 		return values.get(key);
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		return (Map<String,String>) super.getMap(sKey);
@@ -344,7 +323,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 	public Collection<Object> values() {
 		return values.values();
 	}
-	
+
 	@SuppressWarnings("rawtypes")
 	@Override
 	public void setValue(Serializable value) throws JDOException {
