@@ -59,6 +59,7 @@ import org.judal.metadata.bind.JdoPackageMetadata;
 import org.judal.metadata.bind.JdoXmlMetadata;
 import org.judal.storage.Env;
 import org.judal.storage.Param;
+import org.judal.transaction.DataSourceTransactionManager;
 import org.judal.transaction.TransactionalResource;
 import org.judal.storage.DataSource;
 
