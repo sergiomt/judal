@@ -36,9 +36,9 @@ public class DataSourceTransactionManager implements TransactionManager {
 	/**
 	 * <p>Default transaction manager.</p>
 	 */
-	public static DataSourceTransactionManager Transact  = new DataSourceTransactionManager();
+	public static final DataSourceTransactionManager Transact  = new DataSourceTransactionManager();
 
-	private static ThreadLocal<Transaction> threadTransaction = new ThreadLocal<Transaction>();
+	private ThreadLocal<Transaction> threadTransaction = new ThreadLocal<Transaction>();
 
 	private Class<? extends Transaction> transactionClass;
 
@@ -63,7 +63,7 @@ public class DataSourceTransactionManager implements TransactionManager {
 	 * <p>Get transaction for the current thread (if any).</p>
 	 * @return Transaction or <b>null</b>
 	 */
-	public static Transaction currentTransaction() {
+	public Transaction currentTransaction() {
 		return threadTransaction.get();
 	}
 
@@ -272,6 +272,7 @@ public class DataSourceTransactionManager implements TransactionManager {
 	 * Do not call it while a transaction in ongoing.
 	 */
 	public void reset() {
-		threadTransaction.set(null);
+		if (null!=threadTransaction)
+			threadTransaction.remove();
 	}
 }
