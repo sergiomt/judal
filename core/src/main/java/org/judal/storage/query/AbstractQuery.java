@@ -44,8 +44,8 @@ import com.knowgate.typeutils.ObjectFactory;
 public abstract class AbstractQuery implements Cloneable, Query {
 
 	private static final long serialVersionUID = 1L;
-	private static final Long ZERO = new Long(0L);
-	
+	private static final Long ZERO = 0L;
+
 	private HashMap<String,Object> extensions;
 	@SuppressWarnings("rawtypes")
 	private Class resultClass;
@@ -119,7 +119,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 		this.unique = source.unique;
 		this.unmodifiable = false;
 		this.candidates = source.candidates;
-		this.setFilter(source.getFilterPredicate().clone());
+		this.setFilter(source.getFilterPredicate()==null ? null : source.getFilterPredicate().clone());
 		if (source.parameters==null) {
 			this.parameters = null;
 		} else {
@@ -140,7 +140,7 @@ public abstract class AbstractQuery implements Cloneable, Query {
 		}
 		this.endOfFetch = source.endOfFetch;
 	}
-	
+
 	/**
 	 * <p>Create a new instance of Record subclass used to iterate through this query results.</p>
 	 * @return Record
