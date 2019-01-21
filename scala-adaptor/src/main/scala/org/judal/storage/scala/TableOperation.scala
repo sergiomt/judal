@@ -36,7 +36,6 @@ class TableOperation[R >: Null <: Record](dataSource: TableDataSource , record: 
 	}
 
 	override def fetchFirst(fetchGroup: FetchGroup , columnName: String , valueSearched: Any, sortBy: String*) : R = {
-		var retval: R = null
 		var rst: RecordSet[R] = getTable.fetch(fetchGroup, columnName, valueSearched)
 		if (rst.size()>0) {
 		  if (sortBy!=null && sortBy.length==1)
@@ -49,9 +48,11 @@ class TableOperation[R >: Null <: Record](dataSource: TableDataSource , record: 
 			  else
 				  throw new JDOUserException("Unrecognized sort direction " + sortBy(1))
 		  }
-		  retval = rst.get(0)
+		  val retval : R = rst.get(0)
+		  setRecord(retval)
+		} else {
+		  setRecord(null)
 		}
-		retval
-	}	
-	
+		getRecord()
+	}
 }

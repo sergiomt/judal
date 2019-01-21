@@ -48,8 +48,7 @@ public class TableOperation<R extends Record> extends AbstractTableOperation<R> 
 
 	@Override
 	public R fetchFirst(FetchGroup fetchGroup, String columnName, Object valueSearched, String... sortBy)
-			throws JDOException {
-		R retval = null;
+		throws JDOException {
 		RecordSet<R> rst;
 		if (sortBy==null || sortBy.length==0)
 			rst = fetch(fetchGroup, columnName, valueSearched);
@@ -62,9 +61,8 @@ public class TableOperation<R extends Record> extends AbstractTableOperation<R> 
 				rst = fetchDesc(fetchGroup, columnName, valueSearched, sortBy[0]);
 			else
 				throw new JDOUserException("Unrecognized sort direction " + sortBy[1]);
-		if (rst.size()>0)
-			retval = rst.get(0);
-		return retval;
+		setRecord(rst.size()>0 ? rst.get(0) : null);
+		return getRecord();
 	}
 
 }
