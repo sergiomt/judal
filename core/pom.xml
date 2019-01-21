@@ -153,7 +153,7 @@
 		<dependency>
 			<groupId>com.knowgate</groupId>
 			<artifactId>knowgate-base</artifactId>
-			<version>9.0.1</version>
+			<version>9.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>dom4j</groupId>
@@ -201,7 +201,7 @@
 		<dependency>
 			<groupId>org.apache.ignite</groupId>
 			<artifactId>ignite-core</artifactId>
-			<version>2.6.0</version>
+			<version>2.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>xml-apis</groupId>
