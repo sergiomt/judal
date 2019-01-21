@@ -1,5 +1,7 @@
 package org.judal.transaction;
 
+import java.nio.Buffer;
+
 /**
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
@@ -93,12 +95,12 @@ public class TransactionId implements Xid {
 		str.append(",");
 		ByteBuffer buffer = ByteBuffer.allocate(Long.BYTES);
 		buffer.put(gtrid);
-		buffer.flip();
+		((Buffer) buffer).flip();
 		str.append(String.valueOf(buffer.getLong()));
 		str.append(",");
 		buffer = ByteBuffer.allocate(Long.BYTES);
 	    buffer.put(bqual);
-		buffer.flip();
+	    ((Buffer) buffer).flip();
 		str.append(String.valueOf(buffer.getLong()));
 		str.append(")");
 		return str.toString();
