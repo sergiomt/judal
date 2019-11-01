@@ -35,17 +35,20 @@ public interface FieldHelper {
 	 * @throws NullPointerException
 	 * @throws NumberFormatException
 	 * @throws IllegalArgumentException
+	 * @throws UnsupportedOperationException
 	 */
-	int getIntervalPart(Record rec, String colname, String part) throws ClassCastException, NullPointerException, NumberFormatException, IllegalArgumentException;
-	
+	int getIntervalPart(Record rec, String colname, String part)
+			throws ClassCastException, NullPointerException, NumberFormatException, IllegalArgumentException, UnsupportedOperationException;
+
 	/**
 	 * <p>Get Integer array.</p>
 	 * @param rec Record
 	 * @param colname String Column name
 	 * @return Integer[]
 	 * @throws ClassCastException
+	 * @throws UnsupportedOperationException
 	 */
-	Integer[] getIntegerArray(Record rec, String colname) throws ClassCastException;
+	Integer[] getIntegerArray(Record rec, String colname) throws ClassCastException, UnsupportedOperationException;
 
 	/**
 	 * <p>Get Long array.</p>
@@ -53,8 +56,9 @@ public interface FieldHelper {
 	 * @param colname String Column name
 	 * @return Long[]
 	 * @throws ClassCastException
+	 * @throws UnsupportedOperationException
 	 */
-	Long[] getLongArray(Record rec, String colname) throws ClassCastException;
+	Long[] getLongArray(Record rec, String colname) throws ClassCastException, UnsupportedOperationException;
 
 	/**
 	 * <p>Get Float array.</p>
@@ -62,8 +66,9 @@ public interface FieldHelper {
 	 * @param colname String Column name
 	 * @return Float[]
 	 * @throws ClassCastException
+	 * @throws UnsupportedOperationException
 	 */
-	Float[] getFloatArray(Record rec, String colname) throws ClassCastException;
+	Float[] getFloatArray(Record rec, String colname) throws ClassCastException, UnsupportedOperationException;
 
 	/**
 	 * <p>Get Double array.</p>
@@ -72,7 +77,7 @@ public interface FieldHelper {
 	 * @return Double[]
 	 * @throws ClassCastException
 	 */
-	Double[] getDoubleArray(Record rec, String colname) throws ClassCastException;
+	Double[] getDoubleArray(Record rec, String colname) throws ClassCastException, UnsupportedOperationException;
 
 	/**
 	 * <p>Get Date array.</p>
@@ -80,8 +85,9 @@ public interface FieldHelper {
 	 * @param colname String Column name
 	 * @return Date[]
 	 * @throws ClassCastException
+	 * @throws UnsupportedOperationException
 	 */
-	Date[] getDateArray(Record rec, String colname) throws ClassCastException;
+	Date[] getDateArray(Record rec, String colname) throws ClassCastException, UnsupportedOperationException;
 	
 	/**
 	 * <p>Get String array.</p>
@@ -90,6 +96,7 @@ public interface FieldHelper {
 	 * @return String[]
 	 * @throws ClassCastException
 	 * @throws ClassNotFoundException
+	 * @throws UnsupportedOperationException
 	 */
 	String[] getStringArray(Record rec, String colname) throws ClassCastException, ClassNotFoundException;
 	
@@ -99,9 +106,10 @@ public interface FieldHelper {
 	 * @param columName String Column name
 	 * @return LatLong
 	 * @throws ClassCastException
+	 * @throws UnsupportedOperationException
 	 */
-	LatLong getLatLong(Record rec, String columName) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException;
-	
+	LatLong getLatLong(Record rec, String columName) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, UnsupportedOperationException;
+
 	/**
 	 * <p>Get name-&gt;value Map.</p>
 	 * @param rec Record
@@ -115,7 +123,29 @@ public interface FieldHelper {
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 * @throws ClassNotFoundException
+	 * @throws UnsupportedOperationException
 	 */
 	Object getMap(Record rec, String columName) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException;
+
 	
+	/**
+	 * <p>Get the family to which a given column belongs.</p>
+	 * @param rec Record
+	 * @param columName String
+	 * @return String Family name or null if the family could not be determined or the column does not belong to any known family
+	 * @throws IllegalArgumentException
+	 * @throws UnsupportedOperationException
+	 */
+	String getFamilyName(Record rec, String columName) throws IllegalArgumentException, UnsupportedOperationException;
+
+	
+	/**
+	 * <p>Get the type of a column</p>
+	 * @param rec Record
+	 * @param columName String
+	 * @return int One of java.sql.Types
+	 * @throws IllegalArgumentException
+	 * @throws UnsupportedOperationException
+	 */
+	 int getType(Record rec, String columName) throws IllegalArgumentException, UnsupportedOperationException);
 }

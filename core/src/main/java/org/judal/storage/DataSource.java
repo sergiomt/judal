@@ -113,7 +113,7 @@ public interface DataSource extends AutoCloseable {
      */
     public static final String REGION = "region";
     /**
-     * Configuration property used by Amazon S3
+     * Configuration property used by Amazon S3 and Google Firebase
      */
     public static final String SECRETKEY = "secretKey";
     /**
@@ -142,51 +142,55 @@ public interface DataSource extends AutoCloseable {
     public static final String USE_DATABASE_METADATA = "useDatabaseMetadata";
     /**
      * Configuration property used by JDBC. Schema name.
-     */    
+     */
     public static final String SCHEMA = "schema";
     /**
      * Configuration property. Name of file describing schema metadata. Default "metadata.xml"
-     */    
+     */
     public static final String METADATA = "metadata";
     /**
      * Configuration property. Path of package containing metadata like "com/acme/app/model"
-     */    
+     */
     public static final String PACKAGE = "package";
     /**
      * Configuration property. Username.
-     */    
+     */
     public static final String USER = "user";
     /**
      * Configuration property. Clear Password.
-     */    
+     */
     public static final String PASSWORD = "password";
     /**
+     * Configuration property used by Google Firebase.
+     */
+    public static final String PROJECTID = "projectid";
+    /**
      * Configuration property
-     */    
+     */
     public static final String STORED = "stored";
     /**
      * Configuration property
-     */    
+     */
     public static final String EXTURL = "exturl";
     /**
      * Configuration property. int [-1..n] Seconds.
-     */    
+     */
     public static final String LOGINTIMEOUT = "logintimeout";
     /**
      * Configuration property. int [-1..n] Seconds.
-     */    
+     */
     public static final String CONNECTIONTIMEOUT = "connectiontimeout";
     /**
      * Configuration property. int [0..n] Size of JDBC connection pool.
-     */    
+     */
     public static final String POOLSIZE = "poolsize";
     /**
      * Configuration property. int [POOLSIZE..n] Maximum size of JDBC connection pool.
-     */    
+     */
     public static final String MAXPOOLSIZE = "maxpoolsize";
     /**
      * Configuration property. int [MAXPOOLSIZE..n] Maximum number of allowed JDBC connections.
-     */    
+     */
     public static final String MAXCONNECTIONS = "maxconnections";
     /**
      * Configuration property. Boolean (true/false) Default true
@@ -247,7 +251,7 @@ public interface DataSource extends AutoCloseable {
     /**
      * List of supported property names
      */
-    public static final String[] PropertyNames = new String[]{ACCESSKEY,ANALYZER,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,REGION,HASHALGORITHM,SALT,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD,MAIL_STORE_PROTOCOL, MAIL_TRANSPORT_PROTOCOL, MAIL_INCOMING, MAIL_OUTGOING, MAIL_ACCOUNT, MAIL_PASSWORD, MAIL_USER, MAIL_SMTP_HOST, MAIL_SMTP_PORT,LUCENEINDEX};
+    public static final String[] PropertyNames = new String[]{ACCESSKEY,ANALYZER,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,PROJECTID,REGION,HASHALGORITHM,SALT,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD,MAIL_STORE_PROTOCOL, MAIL_TRANSPORT_PROTOCOL, MAIL_INCOMING, MAIL_OUTGOING, MAIL_ACCOUNT, MAIL_PASSWORD, MAIL_USER, MAIL_SMTP_HOST, MAIL_SMTP_PORT,LUCENEINDEX};
 
     /**
      * List of default property values

@@ -57,5 +57,5 @@ public interface IndexableTable extends Table, IndexableView {
 	 * @throws JDOException
 	 */
 	void dropIndex(String indexName) throws JDOException;
-	
+
 }

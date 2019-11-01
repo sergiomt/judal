@@ -11,42 +11,26 @@ package org.judal.storage.table;
  * KIND, either express or implied.
  */
 
-import javax.jdo.FetchGroup;
-import javax.jdo.JDOException;
-
 import org.judal.metadata.ColumnDef;
-import org.judal.storage.Param;
-import org.judal.storage.keyvalue.ReadOnlyBucket;
 
-public interface View extends ReadOnlyBucket {
+/**
+ * <p>Interface for read only views with schema.</p>
+ * @author Sergio Montoro Ten
+ * @version 1.0
+ */
+public interface View extends SchemalessView {
 
-	  final String NUM_ROWS = "NUM_ROWS";
+	ColumnDef[] columns();
 
- 	  ColumnDef[] columns();
- 
-	  int columnsCount();
+	int columnsCount();
 
-	  ColumnDef getColumnByName (String columnName);
+	ColumnDef getColumnByName (String columnName);
 
-	  /**
-		* <p>Get Column index given its name</p>
-		* @param columnName String
-		* @return Column Index[1..columnsCount()] or -1 if no column with such name was found.
-	   */
-	  int getColumnIndex (String columnName);
-	  
- 	  boolean exists(Param... keys) throws JDOException;
-
- 	  long count(String indexColumnName, Object valueSearched) throws JDOException;
-
- 	  <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched) throws JDOException;
-
- 	  <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched, int maxrows, int offset) throws JDOException;
- 	  
- 	  <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo) throws JDOException, IllegalArgumentException;
-
- 	  <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo, int maxrows, int offset) throws JDOException, IllegalArgumentException;
-
- 	  Class<? extends Record> getResultClass();
+	/**
+	 * <p>Get Column index given its name</p>
+	 * @param columnName String
+	 * @return Column Index[1..columnsCount()] or -1 if no column with such name was found.
+	 */
+	int getColumnIndex (String columnName);
 
 }

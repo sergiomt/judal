@@ -15,7 +15,6 @@ package org.judal.storage.table;
 import java.util.Map;
 
 import javax.jdo.JDOException;
-import javax.jdo.JDOUserException;
 
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef;
@@ -25,12 +24,11 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 import org.judal.storage.DataSource;
-import org.judal.storage.FieldHelper;
 
 import com.knowgate.tuples.Pair;
 
 /**
- * Interface for DataSource implementations that support tables
+ * Interface for DataSource implementations that support tables with schema
  * @author Sergio Montoro Ten
  * @version 1.0
  */
@@ -43,13 +41,6 @@ public interface TableDataSource extends DataSource {
 	 * @throws JDOException
 	 */
 	TableDef getTableDef(String tableName) throws JDOException;
-
-	/**
-	 * Get instance of field helper (if any) for the data source
-	 * @return FieldHelper or <b>null</b> if there is no FieldHelper defined for this data source
-	 * @throws JDOException
-	 */
-	FieldHelper getFieldHelper() throws JDOException;
 
 	/**
 	 * Get view definition
