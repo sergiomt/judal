@@ -112,7 +112,7 @@ public class PostgreSQLFieldHelper implements FieldHelper {
 		}
 		throw new ClassCastException("PostgreSQLFieldHelper.getDateArray() cannot cast from "+oObj.getClass().getName()+" to Date[]");
 	}
-	
+
 	public String[] getStringArray(Record oRec, String sKey) throws ClassCastException {
 		Object oObj = oRec.apply(sKey);
 		if (null!=oObj) {
@@ -199,5 +199,25 @@ public class PostgreSQLFieldHelper implements FieldHelper {
 			return (Map<String, String>) oObj;
 		}
 	} // getMap
+
+	/**
+	 * PostgreSQL does not use column family names, therefore this method always returns null
+	 * @return null
+	 */
+	public String getFamilyName(Record rec, String columName) {
+		return null;
+	}
+
+	/**
+	 * Get column SQL type
+	 * @param rec Record
+	 * @param columnName String
+	 * @return int One of java.sql.Type
+	 * @throws ArrayIndexOutOfBoundsException if no column with given name is found in Record
+	 */
+	public int getType(Record rec, String columName)
+		throws IllegalArgumentException, ArrayIndexOutOfBoundsException, UnsupportedOperationException {
+		return rec.getColumn(columName).getType();
+	}
 
 }

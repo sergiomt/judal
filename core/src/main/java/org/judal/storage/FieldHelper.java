@@ -134,9 +134,10 @@ public interface FieldHelper {
 	 * @param columName String
 	 * @return String Family name or null if the family could not be determined or the column does not belong to any known family
 	 * @throws IllegalArgumentException
+	 * @throws ArrayIndexOutOfBoundsException
 	 * @throws UnsupportedOperationException
 	 */
-	String getFamilyName(Record rec, String columName) throws IllegalArgumentException, UnsupportedOperationException;
+	String getFamilyName(Record rec, String columName) throws IllegalArgumentException, ArrayIndexOutOfBoundsException, UnsupportedOperationException;
 
 	
 	/**
@@ -145,7 +146,8 @@ public interface FieldHelper {
 	 * @param columName String
 	 * @return int One of java.sql.Types
 	 * @throws IllegalArgumentException
+	 * @throws ArrayIndexOutOfBoundsException
 	 * @throws UnsupportedOperationException
 	 */
-	 int getType(Record rec, String columName) throws IllegalArgumentException, UnsupportedOperationException);
+	 int getType(Record rec, String columName) throws IllegalArgumentException, ArrayIndexOutOfBoundsException, UnsupportedOperationException;
 }

@@ -24,6 +24,7 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 import org.judal.storage.DataSource;
+import org.judal.storage.FieldHelper;
 
 import com.knowgate.tuples.Pair;
 
@@ -176,4 +177,10 @@ public interface TableDataSource extends DataSource {
 	 */
 	IndexableView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable, @SuppressWarnings("unchecked") Pair<String,String>... onColumns) throws JDOException;
 
+	/**
+	 * Get instance of field helper (if any) for the data source
+	 * @return FieldHelper or <b>null</b> if there is no FieldHelper defined for this data source
+	 * @throws JDOException
+	 */
+	FieldHelper getFieldHelper() throws JDOException;
 }

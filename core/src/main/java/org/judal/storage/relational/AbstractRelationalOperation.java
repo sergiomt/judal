@@ -106,12 +106,12 @@ public abstract class AbstractRelationalOperation<R extends Record> extends Abst
 	/**
 	 * <p>Get count of records with a given value within a range in the specified column.</p>
 	 * @param columnName String Column Name
-	 * @param lowerBound Object Lower bound inclusive
-	 * @param upperBound Object Upper bound inclusive
+	 * @param lowerBound Comparable&ldquo;?&rdquo; Lower bound inclusive
+	 * @param upperBound Comparable&ldquo;?&rdquo; Upper bound inclusive
 	 * @return long Count of rows which value for the given column is within the specified range
 	 * @throws JDOException
 	 */
-	public long count(String columnName, Object lowerBound, Object upperBound) throws JDOException {
+	public long count(String columnName, Comparable<?> lowerBound, Comparable<?> upperBound) throws JDOException {
 		RecordSet<Record> oRst = getTable().fetch(new ColumnGroup("COUNT(*) AS " + View.NUM_ROWS), columnName, lowerBound, upperBound, 1, 0);
 		return oRst.get(0).getLong(View.NUM_ROWS);
 	}

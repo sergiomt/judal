@@ -171,5 +171,11 @@ class PostgreSQLFieldHelper extends FieldHelper {
 	    vmp
 	  }
 	}
-  
+
+	def getFamilyName(rec: Record, columName: String ) : String = { null }
+
+	def getType(rec: Record, columName: String) : Int = {
+		rec.getColumn(columName).getType
+	}
+
 }
