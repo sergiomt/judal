@@ -10,10 +10,7 @@ package org.judal.hbase;
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.
  */
-
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
-import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
@@ -23,10 +20,8 @@ import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.ClusterConnection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.hadoop.hbase.util.VersionInfo;
 
 import com.knowgate.debug.DebugFile;
-import com.knowgate.io.FileUtils;
 import com.knowgate.tuples.Pair;
 
 import org.judal.storage.table.IndexableTable;
@@ -34,8 +29,7 @@ import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.View;
-import org.judal.storage.FieldHelper;
-import org.judal.storage.Param;
+
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef;
 import org.judal.metadata.NameAlias;
@@ -44,98 +38,33 @@ import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 import org.judal.metadata.JoinType;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringBufferInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
-import javax.jdo.datastore.JDOConnection;
-import javax.jdo.datastore.Sequence;
-
-import javax.transaction.TransactionManager;
 
 /**
  * Partial Implementation of TableDataSource interface for HBase
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public class HBTableDataSource implements TableDataSource {
-
-	// A constant to convert a fraction to a percentage
-	private static final int CONVERT_TO_PERCENTAGE = 100;
-
-	@SuppressWarnings("deprecation")
-	private StringBufferInputStream oInStrm1, oInStrm2;
-
-	private Configuration oCfg;
+public class HBTableDataSource extends HBBaseDataSource implements TableDataSource {
 
 	private SchemaMetaData oSmd;
 
-	private final Set<HBTable> oOTbls;
-
 	public HBTableDataSource(SchemaMetaData oMetaData) {
 		oSmd = oMetaData;
-		oOTbls = Collections.synchronizedSet(new HashSet<HBTable>());
-		oInStrm1 = oInStrm2 = null;
 	}
 
 	public HBTableDataSource(String sPath, SchemaMetaData oMetaData) throws JDOException {
+		super(sPath);
 		oSmd = oMetaData;
-		oOTbls = Collections.synchronizedSet(new HashSet<HBTable>());
-		open(sPath,null,null,false);
-	}
-
-	public Configuration getConfig() {
-		if (oInStrm1!=null) oInStrm1.reset();
-		if (oInStrm2!=null) oInStrm2.reset();
-		return oCfg;  
-	}
-
-	private void checkDefaultsVersion() throws IOException {
-		if (DebugFile.trace) DebugFile.writeln("getting hbase.defaults.for.version.skip");
-		if (getConfig().getBoolean("hbase.defaults.for.version.skip", Boolean.FALSE)) return;
-		if (DebugFile.trace) DebugFile.writeln("getting hbase.defaults.for.version");
-		String defaultsVersion = getConfig().get("hbase.defaults.for.version");
-		String thisVersion = VersionInfo.getVersion();
-		if (DebugFile.trace) DebugFile.writeln("this version is "+thisVersion);
-		if (null!=thisVersion)
-			if (!thisVersion.equals(defaultsVersion))
-				throw new IOException("hbase-default.xml file seems to be for and old version of HBase (" + defaultsVersion + "), this version is " + thisVersion);
-		if (DebugFile.trace) DebugFile.writeln("finished checkDefaultsVersion");
-	}
-
-	private void checkForClusterFreeMemoryLimit() throws IOException {
-		if (DebugFile.trace) DebugFile.writeln("getting hbase.regionserver.global.memstore.upperLimit");
-		float globalMemstoreLimit = getConfig().getFloat("hbase.regionserver.global.memstore.upperLimit", 0.4f);
-		int gml = (int)(globalMemstoreLimit * CONVERT_TO_PERCENTAGE);
-		if (DebugFile.trace) DebugFile.writeln("getting "+HConstants.HFILE_BLOCK_CACHE_SIZE_KEY);
-		float blockCacheUpperLimit = getConfig().getFloat(HConstants.HFILE_BLOCK_CACHE_SIZE_KEY,HConstants.HFILE_BLOCK_CACHE_SIZE_DEFAULT);
-		int bcul = (int)(blockCacheUpperLimit * CONVERT_TO_PERCENTAGE);
-		if (CONVERT_TO_PERCENTAGE - (gml + bcul)
-				< (int)(CONVERT_TO_PERCENTAGE * 
-						HConstants.HBASE_CLUSTER_MINIMUM_MEMORY_THRESHOLD)) {
-			throw new IOException(
-					"Current heap configuration for MemStore and BlockCache exceeds " +
-							"the threshold required for successful cluster operation. " +
-							"The combined value cannot exceed 0.8. Please check " +
-							"the settings for hbase.regionserver.global.memstore.upperLimit and " +
-							"hfile.block.cache.size in your configuration. " +
-							"hbase.regionserver.global.memstore.upperLimit is " + 
-							globalMemstoreLimit +
-							" hfile.block.cache.size is " + blockCacheUpperLimit);
-		}
-		if (DebugFile.trace) DebugFile.writeln("finished checkForClusterFreeMemoryLimit");
 	}
 
 	@Override
@@ -149,119 +78,6 @@ public class HBTableDataSource implements TableDataSource {
 		boolean isPk = options.containsKey(ColumnDef.OPTION_PRIMARYKEY) ? Boolean.parseBoolean(options.get(ColumnDef.OPTION_PRIMARYKEY).toString()) : false;
 		return new ColumnDef(position, (String) options.get(ColumnDef.OPTION_FAMILY_NAME), columnName, colType, colLen,
 				nullable, null, null, null, options.get(ColumnDef.OPTION_DEFAULT_VALUE), isPk);
-	}
-
-	/**
-	 * 
-	 * @return whether to show HBase Configuration in servlet
-	 */
-	public static boolean isShowConfInServlet() {
-		boolean isShowConf = false;
-		try {
-			if (Class.forName("org.apache.hadoop.conf.ConfServlet") != null) {
-				isShowConf = true;  
-			}
-		} catch (Exception e) {
-
-		}
-		return isShowConf;
-	}
-
-	public void open(String sPath, String sUser, String sPassw, boolean bReadOnly)
-			throws JDOException, NullPointerException {
-
-		if (null==sPath) throw new NullPointerException("HBConfig.open() path cannot be null");
-		if (sPath.length()==0) throw new NullPointerException("HBConfig.open() path cannot be empty");
-
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin HBConfig.open("+sPath+")");
-			DebugFile.incIdent();
-		}
-
-		try {
-			oCfg = new Configuration();
-
-			if (!sPath.endsWith(File.separator)) sPath += File.separator;
-
-			File oFle = new File(sPath+"hbase-default.xml");
-			if (oFle.exists()) {
-				if (DebugFile.trace) DebugFile.writeln("parsing hbase-default.xml");
-
-				String sDefaults = FileUtils.readFileToString(new File(sPath+"hbase-default.xml"), "ISO8859_1");
-				oInStrm1 = new StringBufferInputStream(sDefaults);
-				oCfg.addResource(oInStrm1);
-				if (DebugFile.trace) DebugFile.writeln("checkDefaultsVersion");
-				checkDefaultsVersion();
-				oInStrm1.reset();
-			} else {
-				oInStrm1 = null;
-			}
-			if (DebugFile.trace) DebugFile.writeln("opening "+sPath+"hbase-site.xml");
-			oFle = new File(sPath+"hbase-site.xml");
-			if (oFle.exists()) {
-				if (DebugFile.trace) DebugFile.writeln("parsing hbase-site.xml");
-				String sConfig = FileUtils.readFileToString(new File(sPath+"hbase-site.xml"), "ISO8859_1");
-				oInStrm2 = new StringBufferInputStream(new String(sConfig));
-				oCfg.addResource(oInStrm2);
-				if (DebugFile.trace) DebugFile.writeln("checkForClusterFreeMemoryLimit");
-				checkForClusterFreeMemoryLimit();
-				if (DebugFile.trace) {
-					DebugFile.writeln("quorum="+oCfg.get("hbase.zookeeper.quorum"));
-					DebugFile.writeln("rootdir="+oCfg.get("hbase.rootdir"));
-				}
-			} else {
-				oInStrm2 = null;
-				throw new JDOException("File not found "+sPath+"hbase-site.xml");
-			} 
-		} catch (FileNotFoundException fnfe) {
-			if (DebugFile.trace) {
-			  DebugFile.decIdent();
-			  DebugFile.writeln("HBConfig.open() FileNotFoundException "+fnfe.getMessage());
-		  }
-			throw new JDOException(fnfe.getMessage(), fnfe);
-		} catch (IOException ioe) {
-			if (DebugFile.trace) {
-			  DebugFile.decIdent();
-			  DebugFile.writeln("HBConfig.open() IOException "+ioe.getMessage());
-		  }
-			throw new JDOException(ioe.getMessage(), ioe);
-		} catch (Exception xcpt) {
-			if (DebugFile.trace) {
-			  DebugFile.decIdent();
-			  DebugFile.writeln("HBConfig.open() "+xcpt.getClass().getName()+" "+xcpt.getMessage());
-		  }
-			throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
-		}
-
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End HBConfig.open()");
-		}
-	}
-
-	public void closeTables() throws JDOException {
-		Iterator<HBTable> oIter = oOTbls.iterator();
-		try {
-			while (oIter.hasNext()) oIter.next().getTable().close();
-		} catch (IOException ioe) {
-			throw new JDOException(ioe.getMessage(), ioe);  
-		}
-		oOTbls.clear();	
-	}
-
-	@Override
-	public void close() throws JDOException {
-		closeTables();
-		try {
-			if (oInStrm1!=null) oInStrm1.close();
-			if (oInStrm2!=null) oInStrm2.close();
-		} catch (IOException ignore) { }
-		oCfg = null;
-	}
-
-	@Override
-	public FieldHelper getFieldHelper() throws JDOException {
-		return null;
 	}
 
 	@Override
@@ -331,7 +147,7 @@ public class HBTableDataSource implements TableDataSource {
 		try {
 			if (DebugFile.trace) DebugFile.writeln("new HBTable(this, new HTable(getConfig(), "+oRec.getTableName()+"))");
 			oTbl = new HBTable(this, getConfig(), oRec);
-			oOTbls.add(oTbl);
+			addTable(oTbl);
 			return oTbl;
 		} catch (TableNotFoundException tnf) {
 			throw new JDOException("TableNotFoundException "+tnf.getMessage(), tnf);
@@ -342,86 +158,23 @@ public class HBTableDataSource implements TableDataSource {
 		}
 	}
 
-	public Set<HBTable> openedTables()  {
-		return oOTbls;
-	}
-
 	@Override
-	public void dropTable(String sName, boolean bCascade) throws JDOException {
-		if (bCascade)
-			throw new JDOUnsupportedOptionException("HBase does not support drop cascade option");
+	public void truncateTable(String tableName, boolean cascade) throws JDOException {
+		TableDef tblDef = getTableDef(tableName);
 		try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
-			TableName tableName = TableName.valueOf(sName);
+			TableName tblName = TableName.valueOf(tableName);
 			try (Admin oAdm = oCon.getAdmin()) {
-				oAdm.disableTable(tableName);
-				oAdm.deleteTable(tableName);
+				oAdm.disableTable(tblName);
+				oAdm.deleteTable(tblName);
 			}
+			createTable(tblDef, new HashMap<String,Object>());
 		} catch (MasterNotRunningException mnre) {
-			throw new JDOException("HBTable.truncate() MasterNotRunningException "+mnre.getMessage(), mnre);		  
+			throw new JDOException("HBTable.truncate() MasterNotRunningException "+mnre.getMessage(), mnre);
 		} catch (ZooKeeperConnectionException zkce) {
-			throw new JDOException("HBTable.truncate() ZooKeeperConnectionException "+zkce.getMessage(), zkce);		  		  
+			throw new JDOException("HBTable.truncate() ZooKeeperConnectionException "+zkce.getMessage(), zkce);
 		} catch (IOException ioe) {
-			throw new JDOException("HBTable.truncate() IOException "+ioe.getMessage(), ioe);		  
+			throw new JDOException("HBTable.truncate() IOException "+ioe.getMessage(), ioe);
 		}
-	}
-
-	@Override
-	public boolean exists(String objectName, String objectType) throws JDOException {
-		boolean objExists;
-		if (!objectType.equals("U"))
-			throw new JDOUnsupportedOptionException("HBase only supports type U (table) exists check");
-		try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
-			try (Admin oAdm = oCon.getAdmin()) {
-				if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+objectName+")");
-				oAdm.getTableDescriptor(TableName.valueOf(objectName));
-				objExists = true;
-			}
-		} catch (TableNotFoundException tnfe) {
-			objExists = false;
-		} catch (Exception xcpt) {
-			throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
-		}
-		return objExists;
-	}
-
-	@Override
-	public Map<String, String> getProperties() {
-		return null;
-	}
-
-	/**
-	 * Transactions are not supported by HBase. Therefore this method will always return <b>null</b>.
-	 * @return <b>null</b>
-	 */
-	@Override
-	public TransactionManager getTransactionManager() {
-		return null;
-	}
-
-	/**
-	 * @return <b>null</b>
-	 */
-	@Override
-	public JDOConnection getJdoConnection() throws JDOException {
-		return null;
-	}
-
-	/**
-	 * Sequences are not supported by HBase. Therefore this method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public Sequence getSequence(String name) throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("HBase does not support sequences");
-	}
-
-	/**
-	 * Transactions are not supported by HBase. Therefore this method will always return <b>false</b>.
-	 * @return boolean <b>false</b>
-	 */
-	@Override
-	public boolean inTransaction() throws JDOException {
-		return false;
 	}
 
 	@Override
@@ -451,30 +204,7 @@ public class HBTableDataSource implements TableDataSource {
 	}
 
 	@Override
-	public void truncateTable(String tableName, boolean cascade) throws JDOException {
-		TableDef tblDef = getTableDef(tableName);
-		try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
-			TableName tblName = TableName.valueOf(tableName);
-			try (Admin oAdm = oCon.getAdmin()) {
-				oAdm.disableTable(tblName);
-				oAdm.deleteTable(tblName);
-			}
-			createTable(tblDef, new HashMap<String,Object>());
-		} catch (MasterNotRunningException mnre) {
-			throw new JDOException("HBTable.truncate() MasterNotRunningException "+mnre.getMessage(), mnre);		  
-		} catch (ZooKeeperConnectionException zkce) {
-			throw new JDOException("HBTable.truncate() ZooKeeperConnectionException "+zkce.getMessage(), zkce);		  		  
-		} catch (IOException ioe) {
-			throw new JDOException("HBTable.truncate() IOException "+ioe.getMessage(), ioe);		  
-		}
-	}
-
-	/**
-	 * Secondary indexes are not supported by HBase. Therefore this method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public IndexableTable openIndexedTable(Record recordInstance) throws JDOUnsupportedOptionException {
+	public IndexableTable openIndexedTable(Record recordInstance) throws JDOException {
 		throw new JDOUnsupportedOptionException("HBase does not support tables with secondary indexes");
 	}
 
@@ -489,16 +219,7 @@ public class HBTableDataSource implements TableDataSource {
 	 */
 	@Override
 	public IndexableView openIndexedView(Record recordInstance) throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("HBase does not support tables with secondary indexes");
-	}
-
-	/**
-	 * Callable statements are not supported by HBase. Therefore this method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public Object call(String statement, Param... parameters) throws JDOException {
-		throw new JDOUnsupportedOptionException("HBase does not support callable statements");
+		throw new JDOUnsupportedOptionException("HBase does not support views with secondary indexes");
 	}
 
 	/**
@@ -511,5 +232,5 @@ public class HBTableDataSource implements TableDataSource {
 			throws JDOException {
 		throw new JDOUnsupportedOptionException("HBase does not support inner join views");
 	}
-	
+
 }
