@@ -12,13 +12,14 @@ package org.judal.cassandra;
  */
 
 import java.io.IOException;
-
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 
 import java.sql.Types;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import javax.jdo.FetchGroup;
@@ -27,6 +28,7 @@ import javax.jdo.JDOException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.JDOUserException;
 import javax.jdo.PersistenceManager;
+
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
 import me.prettyprint.cassandra.service.template.ColumnFamilyResult;
@@ -40,16 +42,23 @@ import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSlicesQuery;
 
 import static org.judal.cassandra.ColumnConverter.*;
 
+import static com.knowgate.typeutils.ObjectFactory.filterParameters;
+import static com.knowgate.typeutils.ObjectFactory.getConstructor;
+
 import org.judal.metadata.ColumnDef;
 import org.judal.metadata.IndexDef.Using;
+import org.judal.metadata.TableDef;
 import org.judal.serialization.BytesConverter;
+
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
@@ -57,7 +66,12 @@ import org.judal.storage.table.TableDataSource;
 import org.judal.storage.Param;
 import org.judal.storage.keyvalue.Stored;
 
+import static org.judal.storage.StorageObjectFactory.newRecord;
+import static org.judal.storage.StorageObjectFactory.newRecordSetOf;
+
 public class ColumnFamily implements IndexableTable {
+
+	private static final int DEFAULT_INITIAL_RECORDSET_SIZE = 100;
 
 	private static final byte[] aNull = new byte[0];
 	private static final String DefaultTimestampColumnName = "dt_created";
@@ -66,9 +80,10 @@ public class ColumnFamily implements IndexableTable {
 	private KeySpace oKeySpace;
 	private String sName;
 	private String sTimestampColumname;
-	Class<? extends Record> oResultClass;
-	Class<? extends Stored> oCandidateClass;
-	
+	private Constructor<? extends Record> oRecConstructor;
+	private Class<? extends Record> oResultClass;
+	private Class<? extends Stored> oCandidateClass;
+
 	public ColumnFamily(KeySpace oKsp, String sColumnFamily) {
 		sName = sColumnFamily;
 		oKeySpace = oKsp;
@@ -76,6 +91,7 @@ public class ColumnFamily implements IndexableTable {
 		sTimestampColumname = DefaultTimestampColumnName;
 		oCandidateClass = null;
 		oResultClass =  null;
+		oRecConstructor = null;
 	}
 
 	@Override
@@ -171,11 +187,11 @@ public class ColumnFamily implements IndexableTable {
 							break;
 						case Types.DECIMAL:
 						case Types.NUMERIC:
-	            try {
-	              oRow.put(sCol, (BigDecimal) BytesConverter.fromBytes(byCol, Types.DECIMAL));
-              } catch (IOException ioe) {
-                throw new JDOException(ioe.getMessage(), ioe);
-              }
+							try {
+								oRow.put(sCol, (BigDecimal) BytesConverter.fromBytes(byCol, Types.DECIMAL));
+							} catch (IOException ioe) {
+								throw new JDOException(ioe.getMessage(), ioe);
+							}
 							break;
 						case Types.BLOB:
 						case Types.BINARY:
@@ -197,7 +213,7 @@ public class ColumnFamily implements IndexableTable {
 	} // load
 
 	private void binParameter(String sCol, Object oObj, ColumnFamilyUpdater<String, String> oUpdt)
-		throws JDOException {
+			throws JDOException {
 		if (oObj instanceof String)
 			oUpdt.setString(sCol, (String) oObj);
 		else if (oObj instanceof Date)
@@ -239,36 +255,36 @@ public class ColumnFamily implements IndexableTable {
 			throw new JDOException(hcpt.getMessage(), hcpt);
 		}
 	}
-	
-	@Override
-  public void insert(Param... aParams) throws JDOException {
-	  String sPkValue = null;
-	  for (Param oPar : aParams) {
-	  	if (oPar.isPrimaryKey()) {
-	  		sPkValue = (String) oPar.getValue();
-	  		break;
-	  	}
-	  }
-	  ColumnFamilyUpdater<String, String> oUpdt = oTemplate.createUpdater(sPkValue);
-	  if (null==sPkValue)
-	  	throw new JDOException("ColumnFamily.insert() cannoºt find primary key among parameters");
 
-	  for (Param oCol : aParams) {
+	@Override
+	public void insert(Param... aParams) throws JDOException {
+		String sPkValue = null;
+		for (Param oPar : aParams) {
+			if (oPar.isPrimaryKey()) {
+				sPkValue = (String) oPar.getValue();
+				break;
+			}
+		}
+		ColumnFamilyUpdater<String, String> oUpdt = oTemplate.createUpdater(sPkValue);
+		if (null==sPkValue)
+			throw new JDOException("ColumnFamily.insert() cannoºt find primary key among parameters");
+
+		for (Param oCol : aParams) {
 			String sCol = oCol.getName();
 			Object oObj = oCol.getValue();
 			if (oObj==null)
 				oUpdt.setValue(sCol, aNull, BytesArraySerializer.get());
 			else
 				binParameter(sCol, oObj, oUpdt);
-	   } // next
+		} // next
 		try {
 			oUpdt.addKey(sPkValue);
 			oTemplate.update(oUpdt);
 		} catch (NumberFormatException hcpt) {
 			throw new JDOException(hcpt.getMessage(), hcpt);
 		}
-  }
-	
+	}
+
 
 	@Override
 	public void delete(Object oKey) throws JDOException {
@@ -285,19 +301,19 @@ public class ColumnFamily implements IndexableTable {
 
 		if (oParam.length!=1)
 			throw new JDOUserException("Cassandra only supports filtering by a single index value");
-			
+
 		StringSerializer s = StringSerializer.get();	  
 		ArrayList<String> aKeys = new   ArrayList<String>();
 
 		String sIndexColumn = oParam[0].getName();
 		String sIndexValue = oParam[0].getValue().toString();
-		
+
 		switch (getColumnByName(sIndexColumn).getType()) {
 
 		case Types.BIGINT:
 			RangeSlicesQuery<String, String, Long> oLQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, LongSerializer.get())
 			.setColumnFamily(sName)
-			.setRange("", "", false, columns().length)
+			.setRange("", "", false, columnsCount())
 			.setReturnKeysOnly()
 			.addEqualsExpression(sIndexColumn, new Long(sIndexValue));
 			for (Row<String, String, Long> oRow : oLQry.execute().get())
@@ -307,7 +323,7 @@ public class ColumnFamily implements IndexableTable {
 		case Types.INTEGER:
 			RangeSlicesQuery<String, String, Integer> oIQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, IntegerSerializer.get())
 			.setColumnFamily(sName)
-			.setRange("", "", false, columns().length)
+			.setRange("", "", false, columnsCount())
 			.setReturnKeysOnly()
 			.addEqualsExpression(sIndexColumn, new Integer(sIndexValue));
 			for (Row<String, String, Integer> oRow : oIQry.execute().get())
@@ -317,7 +333,7 @@ public class ColumnFamily implements IndexableTable {
 		case Types.DOUBLE:
 			RangeSlicesQuery<String, String, Double> oDQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, DoubleSerializer.get())
 			.setColumnFamily(sName)
-			.setRange("", "", false, columns().length)
+			.setRange("", "", false, columnsCount())
 			.setReturnKeysOnly()
 			.addEqualsExpression(sIndexColumn, new Double(sIndexValue));
 			for (Row<String, String, Double> oRow : oDQry.execute().get())
@@ -327,7 +343,7 @@ public class ColumnFamily implements IndexableTable {
 		case Types.FLOAT:
 			RangeSlicesQuery<String, String, Float> oFQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, FloatSerializer.get())
 			.setColumnFamily(sName)
-			.setRange("", "", false, columns().length)
+			.setRange("", "", false, columnsCount())
 			.setReturnKeysOnly()
 			.addEqualsExpression(sIndexColumn, new Float(sIndexValue));
 			for (Row<String, String, Float> oRow : oFQry.execute().get())
@@ -338,7 +354,7 @@ public class ColumnFamily implements IndexableTable {
 		case Types.NUMERIC:
 			RangeSlicesQuery<String, String, BigDecimal> oBQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, BigDecimalSerializer.get())
 			.setColumnFamily(sName)
-			.setRange("", "", false, columns().length)
+			.setRange("", "", false, columnsCount())
 			.setReturnKeysOnly()
 			.addEqualsExpression(sIndexColumn, new BigDecimal(sIndexValue));
 			for (Row<String, String, BigDecimal> oRow : oBQry.execute().get())
@@ -348,7 +364,7 @@ public class ColumnFamily implements IndexableTable {
 		default:
 			RangeSlicesQuery<String, String, String> oSQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, s)
 			.setColumnFamily(sName)
-			.setRange("", "", false, columns().length)
+			.setRange("", "", false, columnsCount())
 			.setReturnKeysOnly()
 			.addEqualsExpression(sIndexColumn, sIndexValue);
 			for (Row<String, String, String> oRow : oSQry.execute().get())
@@ -396,13 +412,13 @@ public class ColumnFamily implements IndexableTable {
 	@Override
 	public void close(Iterator<Stored> arg0) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void closeAll() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -437,14 +453,57 @@ public class ColumnFamily implements IndexableTable {
 		return oKeySpace.getTableDef(name()).getColumnIndex(columnName);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean exists(Param... keys) throws JDOException {
-		// TODO Auto-generated method stub
-		return false;
+		if (keys.length!=1)
+			throw new JDOUserException("Cassandra only supports filtering by a single index value");
+
+		String lastKeyForMissing = "";
+		StringSerializer s = StringSerializer.get();
+		QueryResult<?> oRes;
+		OrderedRows<String, String, ?> oRows;
+		Row<String, String, String> oLast;
+		RangeSlicesQuery<String, String, ?> oQry;
+		switch (keys[0].getType()) {
+
+		case Types.BIGINT:
+			oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, LongSerializer.get());
+			break;
+
+		case Types.INTEGER:
+			oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, IntegerSerializer.get());
+			break;
+
+		case Types.DOUBLE:
+			oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, DoubleSerializer.get());
+			break;
+
+		case Types.FLOAT:
+			oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, FloatSerializer.get());
+			break;
+
+		case Types.DECIMAL:
+		case Types.NUMERIC:
+			oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, BigDecimalSerializer.get());
+			break;
+
+		default:
+			oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, s);
+		}
+
+		oQry.setColumnFamily(sName);
+		oQry.setColumnNames(new String[] {keys[0].getName()});
+		oQry.setRowCount(1);
+
+		oQry.setKeys(lastKeyForMissing, "");
+		oRes = oQry.execute();
+		oRows = (OrderedRows<String, String, ?>) oRes.get();
+		return oRows.getCount()>0;
 	}
 
 	@Override
-	public int count(String indexColumnName, Object valueSearched) throws JDOException {
+	public long count(String indexColumnName, Object valueSearched) throws JDOException {
 		// TODO Auto-generated method stub
 		return 0;
 	}
@@ -452,29 +511,82 @@ public class ColumnFamily implements IndexableTable {
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched)
 			throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+		return fetch (fetchGroup, indexColumnName, valueSearched, Integer.MAX_VALUE, 0);
 	}
 
 	@Override
 	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueSearched,
-			int maxrows, int offset) throws JDOException {
-		// TODO Auto-generated method stub
-		return null;
+												 int maxrows, int offset) throws JDOException {
+		return fetch(fetchGroup, indexColumnName, (Comparable<?>) valueSearched, (Comparable<?>) valueSearched, maxrows, offset);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName,
+												Comparable<?> valueFrom, Comparable<?> valueTo,
+												int maxrows, int offset)
+		throws JDOException, IllegalArgumentException {
+
+		int skip = 0;
+		RecordSet<R> oRetVal;
+		try {
+			oRetVal = (RecordSet<R>) newRecordSetOf(getResultClass(), DEFAULT_INITIAL_RECORDSET_SIZE);
+		} catch (NoSuchMethodException e) {
+			throw new JDOException(e.getMessage(), e);
+		}
+
+		switch (getColumnByName(indexColumnName).getType()) {
+
+		case Types.BIGINT:
+			RangeSlicesQuery<String, String, Long> oLQry = createQueryForLongRange(fetchGroup, indexColumnName, valueFrom, valueTo, maxrows, offset);
+			for (Row<String, String, Long> oRow : oLQry.execute().get())
+				if (skip++<offset)
+					oRetVal.add((R) convertHectorRowToRecordLng(newStandardRow(), oRow));
+			break;
+
+		case Types.INTEGER:
+			RangeSlicesQuery<String, String, Integer> oIQry = createQueryForIntegerRange(fetchGroup, indexColumnName, valueFrom, valueTo, maxrows, offset);
+			for (Row<String, String, Integer> oRow : oIQry.execute().get())
+				if (skip++<offset)
+					oRetVal.add((R) convertHectorRowToRecordInt(newStandardRow(), oRow));
+			break;
+
+		case Types.DOUBLE:
+			RangeSlicesQuery<String, String, Double> oDQry = createQueryForDoubleRange(fetchGroup, indexColumnName, valueFrom, valueTo, maxrows, offset);
+			for (Row<String, String, Double> oRow : oDQry.execute().get())
+				if (skip++<offset)
+					oRetVal.add((R) convertHectorRowToRecordDbl(newStandardRow(), oRow));
+			break;
+
+		case Types.FLOAT:
+			RangeSlicesQuery<String, String, Float> oFQry = createQueryForFloatRange(fetchGroup, indexColumnName, valueFrom, valueTo, maxrows, offset);
+			for (Row<String, String, Float> oRow : oFQry.execute().get())
+				if (skip++<offset)
+					oRetVal.add((R) convertHectorRowToRecordFlt(newStandardRow(), oRow));
+			break;
+
+		case Types.DECIMAL:
+		case Types.NUMERIC:
+			RangeSlicesQuery<String, String, BigDecimal> oBQry = createQueryForBigDecimalRange(fetchGroup, indexColumnName, valueFrom, valueTo, maxrows, offset);
+			for (Row<String, String, BigDecimal> oRow : oBQry.execute().get())
+				if (skip++<offset)
+					oRetVal.add((R) convertHectorRowToRecordDec(newStandardRow(), oRow));
+			break;
+
+		default:
+			RangeSlicesQuery<String, String, String> oSQry = createQueryForStringRange(fetchGroup, indexColumnName, valueFrom, valueTo, maxrows, offset);
+			for (Row<String, String, String> oRow : oSQry.execute().get())
+				if (skip++<offset)
+					oRetVal.add((R) convertHectorRowToRecordStr(newStandardRow(), oRow));
+		}
+		return oRetVal;
+
 	}
 
 	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom,
-			Object valueTo) throws JDOException, IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom,
-			Object valueTo, int maxrows, int offset) throws JDOException, IllegalArgumentException {
-		// TODO Auto-generated method stub
-		return null;
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Comparable<?> valueFrom,
+			Comparable<?> valueTo) throws JDOException, IllegalArgumentException {
+		return fetch(fetchGroup, indexColumnName, valueFrom, valueTo, Integer.MAX_VALUE, 0);
 	}
 
 	@Override
@@ -500,293 +612,146 @@ public class ColumnFamily implements IndexableTable {
 		throw new JDOUnsupportedOptionException("Create Index is not supported by Cassandra Hector interface");
 	}
 
-	/*
-	public RecordSet fetch(int iMaxRows, int iOffset) throws JDOException {
-		HashMap<String, Integer> resultMap = new HashMap<String, Integer>();
-		RowSlice oRetVal = new RowSlice();
-		String lastKeyForMissing = "";
-		StringSerializer s = StringSerializer.get();
-		QueryResult<OrderedRows<String, String, String>> oRes;
-		OrderedRows<String, String, String> oRows;
-		Row<String, String, String> oLast;
-		RangeSlicesQuery<String, String, String> oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, s);
-		oQry.setColumnFamily(sName);
-		oQry.setRange("", "", false, columns().length);
-
-		if (iOffset>0) {
-			oQry.setRowCount(iOffset);
-			oQry.setKeys("", "");
-			oRes = oQry.execute();
-			oRows = oRes.get();
-			oLast = oRows.peekLast();
-			if (oLast!=null)
-				lastKeyForMissing = oLast.getKey();
+	@SuppressWarnings("unchecked")
+	private Record newStandardRow() {
+		Object[] constructorParameters;
+		if (null==oRecConstructor) {
+			oRecConstructor = (Constructor<? extends Record>) getConstructor(getResultClass(), new Class<?>[]{TableDef.class});
 		}
-
-		if (iMaxRows>0)
-			oQry.setRowCount(iMaxRows);
-		else
-			oQry.setRowCount(2147483647);
-
-		int rowCnt = 0;
-
-		while (true) {
-			
-			oQry.setKeys(lastKeyForMissing, "");
-			oRes = oQry.execute();
-			oRows = oRes.get();
-
-			oLast = oRows.peekLast();
-			if (oLast!=null) {
-				lastKeyForMissing = oLast.getKey();
-				
-			  for (Row<String, String, String> oRow : oRows) {
-				  if (!resultMap.containsKey(oRow.getKey())) {
-					  resultMap.put(oRow.getKey(), ++rowCnt);
-					  oRetVal.add(convertHectorRowToStandardRowStr(new StandardRow (sName, columns()), oRow));
-				  }
-			  } // next
-			}  else {
-				lastKeyForMissing = "";			
-			}
-
-			if ((oRows.getCount()!=oQry.getRowCount()) || (oRows.getCount()==0)) break;
-
-		} // wend
-
-		return oRetVal;
-	}
-
-	public RecordSet fetch(String sIndexColumn, String sIndexValue)
-			throws JDOException {
-		return fetch (sIndexColumn, sIndexValue, -1);
-	}
-
-	public RecordSet fetch(String sIndexColumn, String sIndexValueMin, String sIndexValueMax) throws JDOException {
-		RecordSet oRetVal = new RowSlice();
-		StringSerializer s = StringSerializer.get();
-
-		switch (column(sIndexColumn).getType()) {
-
-		case Types.BIGINT:
-			RangeSlicesQuery<String, String, Long> oLQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, LongSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size());
-			if (sIndexValueMin!=null)
-				oLQry.addGteExpression(sIndexColumn, new Long(sIndexValueMin));
-			if (sIndexValueMax!=null)
-				oLQry.addLteExpression(sIndexColumn, new Long(sIndexValueMax));
-			for (Row<String, String, Long> oRow : oLQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowLng(new StandardRow (sName, columns()), oRow));
-			break;
-
-		case Types.INTEGER:
-			RangeSlicesQuery<String, String, Integer> oIQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, IntegerSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size());
-			if (sIndexValueMin!=null)
-				oIQry.addGteExpression(sIndexColumn, new Integer(sIndexValueMin));
-			if (sIndexValueMax!=null)
-				oIQry.addLteExpression(sIndexColumn, new Integer(sIndexValueMax));
-			for (Row<String, String, Integer> oRow : oIQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowInt(new StandardRow (sName, columns()), oRow));
-			break;
-
-		case Types.DOUBLE:
-			RangeSlicesQuery<String, String, Double> oDQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, DoubleSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size());
-			if (sIndexValueMin!=null)
-				oDQry.addGteExpression(sIndexColumn, new Double(sIndexValueMin));
-			if (sIndexValueMax!=null)
-				oDQry.addLteExpression(sIndexColumn, new Double(sIndexValueMax));
-			for (Row<String, String, Double> oRow : oDQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowDbl(new StandardRow (sName, columns()), oRow));
-			break;
-
-		case Types.FLOAT:
-			RangeSlicesQuery<String, String, Float> oFQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, FloatSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size());
-			if (sIndexValueMin!=null)
-				oFQry.addGteExpression(sIndexColumn, new Float(sIndexValueMin));
-			if (sIndexValueMax!=null)
-				oFQry.addLteExpression(sIndexColumn, new Float(sIndexValueMax));
-			for (Row<String, String, Float> oRow : oFQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowFlt(new StandardRow (sName, columns()), oRow));
-			break;
-
-		case Types.DECIMAL:
-		case Types.NUMERIC:
-			RangeSlicesQuery<String, String, BigDecimal> oBQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, BigDecimalSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size());
-			if (sIndexValueMin!=null)
-				oBQry.addGteExpression(sIndexColumn, new BigDecimal(sIndexValueMin));
-			if (sIndexValueMax!=null)
-				oBQry.addLteExpression(sIndexColumn, new BigDecimal(sIndexValueMax));
-			for (Row<String, String, BigDecimal> oRow : oBQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowDec(new StandardRow (sName, columns()), oRow));
-			break;
-			
-		default:
-			RangeSlicesQuery<String, String, String> oSQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, s)
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size());
-			if (sIndexValueMin!=null)
-				oSQry.addGteExpression(sIndexColumn, sIndexValueMin);
-			if (sIndexValueMax!=null)
-				oSQry.addLteExpression(sIndexColumn, sIndexValueMax);
-			for (Row<String, String, String> oRow : oSQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowStr(new StandardRow (sName, columns()), oRow));
+		try {
+			constructorParameters = filterParameters(oRecConstructor.getParameters(), new Object[]{oKeySpace.getMetaData().getTable(name())});
+		} catch (InstantiationException e) {
+			throw new JDOException(e.getMessage() + " getting constructor for MongoDocument subclass");
 		}
-		return oRetVal;
+		return newRecord(oRecConstructor, constructorParameters);
 	}
 
-	public RecordSet fetch(String sIndexColumn, Date dtIndexValueMin, Date dtIndexValueMax) throws JDOException {
-		RowSlice oRetVal = new RowSlice();
+	private RangeSlicesQuery<String, String, Long> createQueryForLongRange(FetchGroup fetchGroup,
+			String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) {
 		StringSerializer s = StringSerializer.get();
-		RangeSlicesQuery<String, String, Date> oDtQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, DateSerializer.get())
-				.setColumnFamily(sName)
-				.setRange("", "", false, columns().size());
-		if (dtIndexValueMin!=null)	
-			oDtQry.addGteExpression(sIndexColumn, dtIndexValueMin);
-		if (dtIndexValueMax!=null)	
-			oDtQry.addLteExpression(sIndexColumn, dtIndexValueMax);
-		for (Row<String, String, Date> oRow : oDtQry.execute().get())
-			oRetVal.add(convertHectorRowToStandardRowDate(new StandardRow (sName, columns()), oRow));
-		return oRetVal;
-	}
-
-	public RecordSet fetch(String sIndexColumn, String sIndexValue, Collection<Column> oCols, int iMaxRows)
-			throws JDOException {
-
-		RecordSet oRetVal = new RowSlice();
-		StringSerializer s = StringSerializer.get();
-
-		if (oCols==null) oCols = columns();
-
-		switch (column(sIndexColumn).getType()) {
-
-		case Types.BIGINT:
-			RangeSlicesQuery<String, String, Long> oLQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, LongSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size())
-			.addEqualsExpression(sIndexColumn, new Long(sIndexValue));
-			if (iMaxRows>0) oLQry.setRowCount(iMaxRows);
-			for (Row<String, String, Long> oRow : oLQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowLng(new StandardRow (sName, oCols), oRow));
-			break;
-
-		case Types.INTEGER:
-			RangeSlicesQuery<String, String, Integer> oIQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, IntegerSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size())
-			.addEqualsExpression(sIndexColumn, new Integer(sIndexValue));
-			if (iMaxRows>0) oIQry.setRowCount(iMaxRows);
-			for (Row<String, String, Integer> oRow : oIQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowInt(new StandardRow (sName, oCols), oRow));
-			break;
-
-		case Types.DOUBLE:
-			RangeSlicesQuery<String, String, Double> oDQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, DoubleSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size())
-			.addEqualsExpression(sIndexColumn, new Double(sIndexValue));
-			if (iMaxRows>0) oDQry.setRowCount(iMaxRows);
-			for (Row<String, String, Double> oRow : oDQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowDbl(new StandardRow (sName, oCols), oRow));
-			break;
-
-		case Types.FLOAT:
-			RangeSlicesQuery<String, String, Float> oFQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, FloatSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size())
-			.addEqualsExpression(sIndexColumn, new Float(sIndexValue));
-			if (iMaxRows>0) oFQry.setRowCount(iMaxRows);
-			for (Row<String, String, Float> oRow : oFQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowFlt(new StandardRow (sName, oCols), oRow));
-			break;
-
-		case Types.DECIMAL:
-		case Types.NUMERIC:			
-			RangeSlicesQuery<String, String, BigDecimal> oBQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, BigDecimalSerializer.get())
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size())
-			.addEqualsExpression(sIndexColumn, new BigDecimal(sIndexValue));
-			if (iMaxRows>0) oBQry.setRowCount(iMaxRows);
-			for (Row<String, String, BigDecimal> oRow : oBQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowDec(new StandardRow (sName, oCols), oRow));
-			break;
-			
-		default:
-			RangeSlicesQuery<String, String, String> oSQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, s)
-			.setColumnFamily(sName)
-			.setRange("", "", false, columns().size())
-			.addEqualsExpression(sIndexColumn, sIndexValue);
-			if (iMaxRows>0) oSQry.setRowCount(iMaxRows);
-			for (Row<String, String, String> oRow : oSQry.execute().get())
-				oRetVal.add(convertHectorRowToStandardRowStr(new StandardRow (sName, oCols), oRow));
+		RangeSlicesQuery<String, String, Long> oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, LongSerializer.get())
+		.setColumnFamily(sName)
+		.setColumnNames(getColumNamesArray(fetchGroup));
+		setMaxRows(oQry, maxrows, offset);
+		if (valueFrom!=null && valueFrom.equals(valueTo)) {
+			oQry.addEqualsExpression(indexColumnName, (Long) (valueFrom instanceof Long ? valueFrom : new Long(valueFrom.toString())));
+		} else {
+			if (valueFrom!=null)
+				oQry.addGteExpression(indexColumnName, (Long) (valueFrom instanceof Long ? valueFrom : new Long(valueFrom.toString())));
+			if (valueTo!=null)
+				oQry.addLteExpression(indexColumnName, (Long) (valueTo instanceof Long ? valueTo : new Long(valueTo.toString())));
 		}
-		return oRetVal;
+		return oQry;
 	}
 
-	public RecordSet fetch(String sIndexColumn, String sIndexValue, int iMaxRows)
-			throws JDOException {
-		return fetch(sIndexColumn, sIndexValue, null, iMaxRows);
-	}
-
-	public RecordSet fetch(String sIndexColumn, String sIndexValue, Collection<Column> oCols)
-			throws JDOException {
-		return fetch(sIndexColumn, sIndexValue, oCols, -1);
-	}
-
-	public RecordSet fetch(NameValuePair[] aPairs, int iMaxRows)
-			throws JDOException {
-
-		RecordSet oRetVal = new RowSlice();
+	private RangeSlicesQuery<String, String, Integer> createQueryForIntegerRange(FetchGroup fetchGroup,
+			String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) {
 		StringSerializer s = StringSerializer.get();
+		RangeSlicesQuery<String, String, Integer> oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, IntegerSerializer.get())
+		.setColumnFamily(sName)
+		.setColumnNames(getColumNamesArray(fetchGroup));
+		setMaxRows(oQry, maxrows, offset);
+		if (valueFrom!=null && valueFrom.equals(valueTo)) {
+			oQry.addEqualsExpression(indexColumnName, (Integer) (valueFrom instanceof Long ? valueFrom : new Integer(valueFrom.toString())));
+		} else {
+			if (valueFrom!=null)
+				oQry.addGteExpression(indexColumnName, (Integer) (valueFrom instanceof Long ? valueFrom : new Integer(valueFrom.toString())));
+			if (valueTo!=null)
+				oQry.addLteExpression(indexColumnName, (Integer) (valueTo instanceof Long ? valueTo : new Integer(valueTo.toString())));
+		}
+		return oQry;
+	}
 
+	private RangeSlicesQuery<String, String, Double> createQueryForDoubleRange(FetchGroup fetchGroup,
+			String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) {
+		StringSerializer s = StringSerializer.get();
+		RangeSlicesQuery<String, String, Double> oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, DoubleSerializer.get())
+		.setColumnFamily(sName)
+		.setColumnNames(getColumNamesArray(fetchGroup));
+		setMaxRows(oQry, maxrows, offset);
+		if (valueFrom!=null && valueFrom.equals(valueTo)) {
+			oQry.addEqualsExpression(indexColumnName, (Double) (valueFrom instanceof Long ? valueFrom : new Double(valueFrom.toString())));
+		} else {
+			if (valueFrom!=null)
+				oQry.addGteExpression(indexColumnName, (Double) (valueFrom instanceof Long ? valueFrom : new Double(valueFrom.toString())));
+			if (valueTo!=null)
+				oQry.addLteExpression(indexColumnName, (Double) (valueTo instanceof Long ? valueTo : new Double(valueTo.toString())));
+		}
+		return oQry;
+	}
+
+	private RangeSlicesQuery<String, String, Float> createQueryForFloatRange(FetchGroup fetchGroup,
+			String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) {
+		StringSerializer s = StringSerializer.get();
+		RangeSlicesQuery<String, String, Float> oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, FloatSerializer.get())
+		.setColumnFamily(sName)
+		.setColumnNames(getColumNamesArray(fetchGroup));
+		setMaxRows(oQry, maxrows, offset);
+		if (valueFrom!=null && valueFrom.equals(valueTo)) {
+			oQry.addEqualsExpression(indexColumnName, (Float) (valueFrom instanceof Long ? valueFrom : new Float(valueFrom.toString())));
+		} else {
+			if (valueFrom!=null)
+				oQry.addGteExpression(indexColumnName, (Float) (valueFrom instanceof Long ? valueFrom : new Float(valueFrom.toString())));
+			if (valueTo!=null)
+				oQry.addLteExpression(indexColumnName, (Float) (valueTo instanceof Long ? valueTo : new Float(valueTo.toString())));
+		}
+		return oQry;
+	}
+
+	private RangeSlicesQuery<String, String, BigDecimal> createQueryForBigDecimalRange(FetchGroup fetchGroup,
+			String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) {
+		StringSerializer s = StringSerializer.get();
+		RangeSlicesQuery<String, String, BigDecimal> oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, BigDecimalSerializer.get())
+		.setColumnFamily(sName)
+		.setColumnNames(getColumNamesArray(fetchGroup));
+		setMaxRows(oQry, maxrows, offset);
+		if (valueFrom!=null && valueFrom.equals(valueTo)) {
+			oQry.addEqualsExpression(indexColumnName, (BigDecimal) (valueFrom instanceof Long ? valueFrom : new BigDecimal(valueFrom.toString())));
+		} else {
+			if (valueFrom!=null)
+				oQry.addGteExpression(indexColumnName, (BigDecimal) (valueFrom instanceof Long ? valueFrom : new BigDecimal(valueFrom.toString())));
+			if (valueTo!=null)
+				oQry.addLteExpression(indexColumnName, (BigDecimal) (valueTo instanceof Long ? valueTo : new BigDecimal(valueTo.toString())));
+		}
+		return oQry;
+	}
+
+	private RangeSlicesQuery<String, String, String> createQueryForStringRange(FetchGroup fetchGroup,
+			String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) {
+		StringSerializer s = StringSerializer.get();
 		RangeSlicesQuery<String, String, String> oQry = createRangeSlicesQuery(oKeySpace.keySpace(), s, s, s)
-				.setColumnFamily(sName)
-				.setRange("", "", false, columns().size());
-		for (NameValuePair oNvp : aPairs)
-			oQry.addEqualsExpression(oNvp.getName(), oNvp.getValue());
-		if (iMaxRows>0) oQry.setRowCount(iMaxRows);
-		for (Row<String, String, String> oRow : oQry.execute().get())
-			oRetVal.add(convertHectorRowToStandardRowStr(new StandardRow (sName, columns()), oRow));
-		return oRetVal;
+		.setColumnFamily(sName)
+		.setColumnNames(getColumNamesArray(fetchGroup));
+		setMaxRows(oQry, maxrows, offset);
+		if (valueFrom!=null && valueFrom.equals(valueTo)) {
+			oQry.addEqualsExpression(indexColumnName, valueFrom.toString());
+		} else {
+			if (valueFrom!=null)
+				oQry.addGteExpression(indexColumnName, valueFrom.toString());
+			if (valueTo!=null)
+				oQry.addLteExpression(indexColumnName, valueTo.toString());
+		}
+		return oQry;
 	}
 
-	@Override
-	public RecordSet last(String sOrderByColumn, int iMaxRows, int iOffset)
-			throws JDOException {
-		throw new UnsupportedOperationException("Table.last() is not supported by Cassandra");
+	private void setMaxRows(RangeSlicesQuery<String, String, ?> oQry, int maxrows, int offset) {
+		if (maxrows>0) {
+			try {
+				oQry.setRowCount(maxrows>=0 ? Math.addExact(maxrows, offset) : Integer.MAX_VALUE);
+			} catch (ArithmeticException e) {
+				oQry.setRowCount(Integer.MAX_VALUE);
+			}
+		}
 	}
 
-	@Override
-	public RecordSet last(String sOrderByColumn, Collection<Column> oCols, int iMaxRows, int iOffset)
-			throws JDOException {
-		throw new UnsupportedOperationException("Table.last() is not supported by Cassandra");
+	@SuppressWarnings("unchecked")
+	private String[] getColumNamesArray(FetchGroup fetchGroup) {
+		String[] oColNames = new String[fetchGroup.getMembers().size()];
+		int c = 0;
+		Iterator<String> oColIter = fetchGroup.getMembers().iterator();
+		while (oColIter.hasNext())
+			oColNames[c++] = oColIter.next();
+		return oColNames;
 	}
 
-	@Override
-	public void truncate() throws JDOException {
-		oKeySpace.getCluster().truncate(oKeySpace.getName(), sName);
-	}
-
-	@Override
-  public int update(Param[] aValues, Param[] aWhere) throws JDOException,
-      NullPointerException {
-		throw new UnsupportedOperationException("Table.update() is not supported by CASSANDRA engine");
-
-  }
-
-	@Override
-  public boolean exists(Param key) throws NullPointerException,
-      IllegalArgumentException, JDOException {
-	  // TODO Auto-generated method stub
-	  return false;
-  }
-	*/
 }
