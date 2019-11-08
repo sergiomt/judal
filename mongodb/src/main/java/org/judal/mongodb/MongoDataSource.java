@@ -35,7 +35,7 @@ import com.mongodb.connection.Cluster;
 import org.bson.Document;
 
 import org.judal.mongodb.MongoSequence;
-
+import org.judal.storage.FieldHelper;
 import org.judal.storage.Param;
 import org.judal.storage.keyvalue.BucketDataSource;
 
@@ -45,7 +45,7 @@ public class MongoDataSource implements BucketDataSource {
 	private MongoDatabase database;
 	private String databaseName;
 	private TransactionManager trnMngr;
-
+	private FieldHelper fieldHelper;
 	private Map<String, String> properties;
 
 	public MongoDataSource(Map<String, String> properties) {
@@ -54,6 +54,7 @@ public class MongoDataSource implements BucketDataSource {
 		this.databaseName = properties.getOrDefault(URI, "localhost");
 		this.database = mongoClient.getDatabase(databaseName);
 		this.trnMngr = null;
+		this.fieldHelper = null;
 	}
 
 	public MongoDataSource(Map<String, String> properties, TransactionManager transactManager) {
@@ -62,6 +63,7 @@ public class MongoDataSource implements BucketDataSource {
 		this.databaseName = properties.getOrDefault(URI, "localhost");
 		this.database = mongoClient.getDatabase(databaseName);
 		this.trnMngr = transactManager;
+		this.fieldHelper = null;
 	}
 
 	@Override
@@ -203,6 +205,14 @@ public class MongoDataSource implements BucketDataSource {
 			throw new JDOException(e.getMessage(), e);
 		}
 		return mongoCluster;
+	}
+
+	public FieldHelper getFieldHelper() throws JDOException {
+		return fieldHelper;
+	}
+
+	public void setFieldHelper(FieldHelper fieldHelper) throws JDOException {
+		this.fieldHelper = fieldHelper;
 	}
 
 }

@@ -24,6 +24,7 @@ import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.bson.BSONQuery;
 import org.judal.storage.relational.RelationalTable;
 import org.judal.storage.table.Record;
+import org.judal.storage.table.SchemalessIndexableTable;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
@@ -35,11 +36,15 @@ import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import com.mongodb.connection.Cluster;
 
-public class MongoTable extends MongoView implements RelationalTable {
+public class MongoTable extends MongoView implements RelationalTable, SchemalessIndexableTable  {
 
 	private static final UpdateOptions upsert = new UpdateOptions().upsert(true);
 	
 	private String timestampColumnName;
+
+	public MongoTable(Cluster cluster, String databaseName, String tableName, MongoCollection<Document> collection, Class<? extends Record> recClass) throws JDOException {
+		super(cluster, databaseName, tableName, collection, recClass);
+	}
 
 	public MongoTable(Cluster cluster, String databaseName, TableDef tableDef, MongoCollection<Document> collection, Class<? extends Record> recClass) throws JDOException {
 		super(cluster, databaseName, tableDef, collection, recClass);

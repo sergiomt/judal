@@ -13,7 +13,6 @@ package org.judal.mongodb;
  */
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +44,7 @@ import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.RecordSet;
+import org.judal.storage.table.SchemalessIndexableView;
 
 import com.mongodb.Block;
 import com.mongodb.MongoClient;
@@ -56,8 +56,6 @@ import com.mongodb.binding.ClusterBinding;
 import com.mongodb.binding.ReadWriteBinding;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Aggregates;
-import com.mongodb.client.model.BsonField;
 import com.mongodb.client.model.Filters;
 import com.mongodb.connection.Cluster;
 import com.mongodb.operation.AggregateOperation;
@@ -65,7 +63,7 @@ import com.mongodb.operation.BatchCursor;
 import com.mongodb.operation.FindOperation;
 import com.mongodb.operation.ReadOperation;
 
-public class MongoView extends MongoBucket implements RelationalView {
+public class MongoView extends MongoBucket implements RelationalView, SchemalessIndexableView {
 
 	private static final int DEFAULT_INITIAL_RECORDSET_SIZE = 100;
 
@@ -78,6 +76,14 @@ public class MongoView extends MongoBucket implements RelationalView {
 	public MongoView(Cluster cluster, String databaseName, TableDef tableDef, MongoCollection<Document> collection, Class<? extends Record> recClass) throws JDOException {
 		super(cluster, databaseName, tableDef.getName(), collection);
 		this.tableDef = tableDef;
+		this.candidateClass = this.recordClass = recClass;
+		this.recordConstructor = null;
+		this.pipeline = null;
+	}
+
+	public MongoView(Cluster cluster, String databaseName, String tableName, MongoCollection<Document> collection, Class<? extends Record> recClass) throws JDOException {
+		super(cluster, databaseName, tableName, collection);
+		this.tableDef = null;
 		this.candidateClass = this.recordClass = recClass;
 		this.recordConstructor = null;
 		this.pipeline = null;
@@ -212,7 +218,7 @@ public class MongoView extends MongoBucket implements RelationalView {
 		return Arrays.asList(match, pipeline.get(0), pipeline.get(1), skip, limit, project);
 	}
 
-	private List<BsonDocument> projectPipeline(FetchGroup fetchGroup, String fieldName, Object valueFrom, Object valueTo) {
+	private List<BsonDocument> projectPipeline(FetchGroup fetchGroup, String fieldName, Comparable<?> valueFrom, Comparable<?> valueTo) {
 		BsonDocument range = new BsonDocument();
 		range.append("$gte", BSONConverter.convert(valueFrom));
 		range.append("$lte", BSONConverter.convert(valueTo));
@@ -222,7 +228,7 @@ public class MongoView extends MongoBucket implements RelationalView {
 		return Arrays.asList(match, pipeline.get(0), pipeline.get(1), project);
 	}
 
-	private List<BsonDocument> projectPipeline(FetchGroup fetchGroup, String fieldName, Object valueFrom, Object valueTo, int maxrows, int offset) {
+	private List<BsonDocument> projectPipeline(FetchGroup fetchGroup, String fieldName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) {
 		BsonDocument range = new BsonDocument();
 		range.append("$gte", BSONConverter.convert(valueFrom));
 		range.append("$lte", BSONConverter.convert(valueTo));
@@ -365,7 +371,7 @@ public class MongoView extends MongoBucket implements RelationalView {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo) throws JDOException, IllegalArgumentException {
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo) throws JDOException, IllegalArgumentException {
 		Bson from = Filters.gte(indexColumnName, valueFrom);
 		Bson to = Filters.lte(indexColumnName, valueTo);
 		Bson range = Filters.and(from,to);
@@ -388,7 +394,7 @@ public class MongoView extends MongoBucket implements RelationalView {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo, int maxrows, int offset) throws JDOException, IllegalArgumentException {
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) throws JDOException, IllegalArgumentException {
 		Bson from = Filters.gte(indexColumnName, valueFrom);
 		Bson to = Filters.lte(indexColumnName, valueTo);
 		Bson range = Filters.and(from,to);
@@ -453,7 +459,7 @@ public class MongoView extends MongoBucket implements RelationalView {
 	public Record newRecord(Document bsonDoc) {
 		Object[] constructorParameters;
 		if (null==recordConstructor) {
-			recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(getResultClass(), new Class<?>[]{TableDef.class, Document.class});			
+			recordConstructor = (Constructor<? extends Record>) StorageObjectFactory.getConstructor(getResultClass(), new Class<?>[]{TableDef.class, Document.class});
 		}
 		try {
 			constructorParameters = StorageObjectFactory.filterParameters(recordConstructor.getParameters(), new Object[]{tableDef, bsonDoc});

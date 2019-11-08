@@ -32,14 +32,13 @@ import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 
 import org.judal.storage.FieldHelper;
-import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 
 import com.knowgate.tuples.Pair;
 import com.mongodb.MongoException;
 
-public class MongoTableDataSource extends MongoDataSource implements TableDataSource {
+public class MongoTableDataSource extends MongoSchemalessTableDataSource implements TableDataSource {
 
 	private SchemaMetaData metadata;
 
@@ -145,7 +144,7 @@ public class MongoTableDataSource extends MongoDataSource implements TableDataSo
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public IndexableView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable,
+	public MongoView openJoinView(JoinType joinType, Record result, NameAlias baseTable, NameAlias joinedTable,
 			Pair<String, String>... onColumns) throws JDOException {
 		throw new UnsupportedOperationException("MongoDB does not support JOIN operations");
 	}
