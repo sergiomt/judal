@@ -78,15 +78,17 @@ public class Env {
 	/**
 	 * <p>Read DataSource properties from a properties input stream into a Map
 	 * If namespace is not empty then property names will be read as namespace.parameterName</p>
+	 * <p>If a property name is like ${name} then the property will take the value of the System property
+	 * as read with Java System.getProperty() method.</p>
 	 * @param inStrm InputStream
 	 * @param namespace String
-	 * @return
+	 * @return Map of String keys to String values
 	 * @throws IOException
 	 */
 	public static Map<String,String> getDataSourceProperties(InputStream inStrm, String namespace) throws IOException {
 		Hashtable<String,String> props = new Hashtable<String,String>();
 		if (DebugFile.trace) {
-			DebugFile.writeln("Begin Env.getDataSourceProperties(InputStream, namespace=\""+namespace+"\")");
+			DebugFile.writeln("Begin Env.getDataSourceProperties(InputStream, namespace=\"" + namespace + "\")");
 			DebugFile.incIdent();
 		}
 		if (namespace==null) namespace = "";
@@ -97,8 +99,14 @@ public class Env {
 			String prop = reader.getProperty(prefix + propName);
 			if (DebugFile.trace)
 				DebugFile.writeln(prop==null ? "property "+propName+" not found" : "read "+propName+"="+prop);
-			if (prop!=null)
-				setProperty(props, propName, prop);
+			if (prop!=null) {
+				if (prop.startsWith("${") && prop.endsWith("}")) {
+					String sysPropName = propName.substring(2, prop.length()-1);
+					setProperty(props, sysPropName, System.getProperty(sysPropName));
+				} else {
+					setProperty(props, propName, prop);
+				}
+			}
 		}
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
@@ -112,7 +120,7 @@ public class Env {
 	 * If namespace is not empty then property names will be read as namespace.parameterName</p>
 	 * @param inPath Path
 	 * @param namespace String
-	 * @return
+	 * @return Map of String keys to String values
 	 * @throws IOException
 	 */
 	public static Map<String,String> getDataSourceProperties(Path inPath, String namespace) throws IOException {
@@ -137,15 +145,11 @@ public class Env {
 	    String sBool = oProperties.get(sVarName);
 	    if (null==sBool)
 	      sBool = bDefault ? "true" : "false";
-	    if (null!=sBool) {
-	      sBool = sBool.trim();
-	      if (sBool.equalsIgnoreCase("true") || sBool.equalsIgnoreCase("yes") || sBool.equalsIgnoreCase("on") || sBool.equals("1"))
+	    sBool = sBool.trim();
+	    if (sBool.equalsIgnoreCase("true") || sBool.equalsIgnoreCase("yes") || sBool.equalsIgnoreCase("on") || sBool.equals("1"))
 	        bRetVal = true;
-	      else if (sBool.equalsIgnoreCase("false") || sBool.equalsIgnoreCase("no") || sBool.equalsIgnoreCase("off") || sBool.equals("0"))
+	    else if (sBool.equalsIgnoreCase("false") || sBool.equalsIgnoreCase("no") || sBool.equalsIgnoreCase("off") || sBool.equals("0"))
 	        bRetVal = false;
-	      else
-	        bRetVal = bDefault;      	
-	    } // fi
 	    return bRetVal;
 	  } // getProfileBool
 
