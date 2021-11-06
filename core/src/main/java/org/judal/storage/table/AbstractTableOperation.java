@@ -39,7 +39,7 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 	 * <p>Constructor.</p>
 	 * Create TableOperation using EngineFactory default table data source or default relational data source if default table data source is null.
 	 */
-	public AbstractTableOperation() throws NullPointerException {
+	protected AbstractTableOperation() throws NullPointerException {
 		 this(EngineFactory.getDefaultTableDataSource()==null ? EngineFactory.getDefaultRelationalDataSource() : EngineFactory.getDefaultTableDataSource());
 	 }
 
@@ -49,7 +49,7 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 	 * @param record R Instance of Record subclass to be used by this operation.
 	 * @throws NullPointerException if record is null
 	 */
-	public AbstractTableOperation(R record) throws NullPointerException {
+	protected AbstractTableOperation(R record) throws NullPointerException {
 		 this(EngineFactory.getDefaultTableDataSource()==null ? EngineFactory.getDefaultRelationalDataSource() : EngineFactory.getDefaultTableDataSource(), record);
 	 }
 	
@@ -59,7 +59,7 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 	 * @param dataSource TableDataSource
 	 * @throws NullPointerException if dataSource is null
 	 */
-	public AbstractTableOperation(TableDataSource dataSource) throws NullPointerException {
+	protected AbstractTableOperation(TableDataSource dataSource) throws NullPointerException {
 		if (null==dataSource)
 			throw new NullPointerException("AbstractTableOperation constructor. TableDataSource cannot be null");
 		dts = dataSource;
@@ -73,7 +73,7 @@ public abstract class AbstractTableOperation<R extends Record> implements Operat
 	 * @param record R Instance of Record subclass to be used by this operation.
 	 * @throws NullPointerException if dataSource is null or record is null
 	 */
-	public AbstractTableOperation(TableDataSource dataSource, R record) throws NullPointerException {
+	protected AbstractTableOperation(TableDataSource dataSource, R record) throws NullPointerException {
 		if (null==dataSource)
 			throw new NullPointerException("AbstractTableOperation constructor. TableDataSource cannot be null");
 		if (null==record)
