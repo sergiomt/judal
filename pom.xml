@@ -45,6 +45,7 @@
         <module>cassandra</module>
         <module>firebase</module>
         -->
+        <module>manager</module>
         <module>aexample</module>
     </modules>
 

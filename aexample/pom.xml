@@ -185,6 +185,11 @@
       <artifactId>scala-adaptor</artifactId>
       <version>1.0</version>
     </dependency>
+    <dependency>
+        <groupId>org.judal</groupId>
+        <artifactId>judal-manager</artifactId>
+        <version>1.0</version>
+    </dependency>
   </dependencies>
 
 </project>

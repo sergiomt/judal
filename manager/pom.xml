@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.judal</groupId>
-	<artifactId>core</artifactId>
+	<artifactId>judal-manager</artifactId>
 	<version>1.0</version>
 	<packaging>jar</packaging>
-	<name>judal-core</name>
+	<name>judal-manager</name>
 	<description>Java Universal Data Access Core</description>
 	<url>http://maven.apache.org</url>
 	<licenses>
@@ -38,27 +38,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.16</version>
 			</plugin>
-			<!-- JiBX won't compile with Java 8 because it needs BCEL 6.0 which is 
-				not available at Maven Central Repository. Even replacing it manually, JiBX 
-				bind phase still raises errors. So generate classes from XSD with Java 7 
-				and then put the .jar in a local repository. <plugin> <groupId>org.jibx</groupId> 
-				<artifactId>maven-jibx-plugin</artifactId> <version>1.2.6</version> <executions> 
-				<execution> <id>generate-java-code-from-schema</id> <phase>generate-sources</phase> 
-				<goals> <goal>schema-codegen</goal> </goals> <configuration> <schemaLocation>src/main/resources</schemaLocation> 
-				<includeSchemas> <includeSchema>jdo_3_0.xsd</includeSchema> </includeSchemas> 
-				<verbose>true</verbose> <targetDirectory>target/generated-jibx-sources</targetDirectory> 
-				</configuration> </execution> <execution> <id>compile-binding</id> <phase>process-classes</phase> 
-				<goals> <goal>bind</goal> </goals> <configuration> <load>true</load> <validate>false</validate> 
-				<verify>false</verify> <verbose>true</verbose> <schemaBindingDirectory>src/main/resources</schemaBindingDirectory> 
-				<includeSchemaBindings> <includeSchemaBinding>jdo-binding.xml</includeSchemaBinding> 
-				</includeSchemaBindings> <load>true</load> <validate>true</validate> <verify>true</verify> 
-				</configuration> </execution> </executions> <dependencies> <dependency> <groupId>org.jibx</groupId> 
-				<artifactId>jibx-bind</artifactId> <version>1.2.6</version> <exclusions> 
-				<exclusion> <artifactId>bcel</artifactId> <groupId>bcel</groupId> </exclusion> 
-				</exclusions> </dependency> <dependency> <groupId>org.apache.bcel</groupId> 
-				<artifactId>bcel</artifactId> <version>6.0-SNAPSHOT</version> <scope>system</scope> 
-				<systemPath>${basedir}/lib/org/apache/bcel/bcel/6.0-SNAPSHOT/bcel-6.0-20150726.222224-123.jar</systemPath> 
-				</dependency> </dependencies> </plugin> -->
 		</plugins>
 	</build>
 	<properties>
@@ -151,67 +130,30 @@
 	</repositories>
 	<dependencies>
 		<dependency>
-			<groupId>com.knowgate</groupId>
-			<artifactId>knowgate-base</artifactId>
-			<version>9.1.0</version>
+			<groupId>org.judal</groupId>
+			<artifactId>core</artifactId>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>dom4j</groupId>
-			<artifactId>dom4j</artifactId>
-			<version>1.6.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.judal</groupId>
+			<artifactId>queues</artifactId>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>jibx</groupId>
-			<artifactId>jdo</artifactId>
-			<version>3.0</version>
+			<groupId>org.judal</groupId>
+			<artifactId>java-adaptor</artifactId>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jibx</groupId>
-			<artifactId>jibx-extras</artifactId>
-			<version>1.2.6</version>
-			<exclusions>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-			</exclusions>
+			<groupId>org.judal</groupId>
+			<artifactId>jdbc</artifactId>
+			<version>1.0</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>javax.ejb</groupId>
-			<artifactId>javax.ejb-api</artifactId>
-			<version>3.2</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.jdo</groupId>
-			<artifactId>jdo-api</artifactId>
-			<version>3.1</version>
-			<exclusions>
-				<exclusion>
-					<groupId>javax.transaction</groupId>
-					<artifactId>transaction-api</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>xml-apis</groupId>
-			<artifactId>xmlParserAPIs</artifactId>
-			<version>2.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>xerces</groupId>
-			<artifactId>xercesImpl</artifactId>
-			<version>2.12.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.9.4</version>
+			<groupId>org.apache.ignite</groupId>
+			<artifactId>ignite-core</artifactId>
+			<version>2.7.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

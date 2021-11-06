@@ -1,4 +1,4 @@
-package org.judal.jdbc.test;
+package org.judal.manager.jdbc.test;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
