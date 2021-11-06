@@ -11,6 +11,8 @@ package org.judal.serialization;
  * KIND, either express or implied.
  */
 
+import org.judal.storage.Param;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,6 +20,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
@@ -33,25 +36,28 @@ import java.util.Date;
 public class BytesConverter {
 
 	/**
-	 * Convert a Java object to a bytes representation
+	 * Convert a Java object to a bytes representation.
+	 * If oObj is instance of type byte[] then itself will be returned.
+	 * If oObj is instance of type String then String.getBytes(StandardCharsets.UTF_8) will be returned.
+	 *
 	 * @param oObj Object
 	 * @param iType java.sql.Type
 	 * @return byte[]
 	 */
 	public static byte[] toBytes(Object oObj, int iType) {
 		if (oObj==null) return new byte[0];
+		if (oObj instanceof byte[]) return (byte[]) oObj;
+		if (oObj instanceof Param) return toBytes(((Param) oObj).getValue(), iType);
 		switch (iType) {
 		case Types.TINYINT:
-			return new byte[]{((Byte)oObj).byteValue()};
+			return new byte[]{(Byte) oObj};
 		case Types.CHAR:
 		case Types.NCHAR:
 		case Types.VARCHAR:
 		case Types.NVARCHAR:
 		case Types.LONGVARCHAR:
 		case Types.LONGNVARCHAR:
-			try {
-				return oObj.toString().getBytes("UTF-8");
-			} catch (UnsupportedEncodingException neverthrown) { }
+			return oObj instanceof String ? ((String) oObj).getBytes(StandardCharsets.UTF_8) : oObj.toString().getBytes(StandardCharsets.UTF_8);
 		case Types.BOOLEAN:
 			if (oObj instanceof Boolean)
 				return Bytes.toBytes(((Boolean) oObj).booleanValue());
@@ -174,20 +180,16 @@ public class BytesConverter {
 			else
 				return toBytes(oObj, Types.JAVA_OBJECT);
 		case Types.JAVA_OBJECT:
-			ByteArrayOutputStream byOut = new ByteArrayOutputStream();
-			ObjectOutputStream oOut;
 			byte[] aRetVal = null;
-			try {
-				oOut = new ObjectOutputStream (byOut);
-				oOut.writeObject(oObj);
-				aRetVal = byOut.toByteArray();
-				oOut.close();
-				byOut.close();
+			try (ByteArrayOutputStream byOut = new ByteArrayOutputStream()) {
+				try (ObjectOutputStream oOut = new ObjectOutputStream (byOut)) {
+					oOut.writeObject(oObj);
+					aRetVal = byOut.toByteArray();
+				}
 			} catch (IOException ioe) {
-
-				System.out.println("IOException serializing "+oObj.getClass().getName()+" "+ioe.getMessage());
+				System.err.println("IOException serializing "+oObj.getClass().getName()+" "+ioe.getMessage());
 				try {
-					System.out.println(com.knowgate.debug.StackTraceUtil.getStackTrace(ioe));
+					System.err.println(com.knowgate.debug.StackTraceUtil.getStackTrace(ioe));
 				} catch (IOException e) { }
 				throw new RuntimeException("BytesConverter.toBytes() IOException serializing "+oObj.getClass().getName()+" "+ioe.getMessage());
 			}
@@ -204,6 +206,7 @@ public class BytesConverter {
 	 */
 	public static byte[] toBytes(Object oObj) {
 		if (oObj==null) return new byte[0];
+		if (oObj instanceof byte[]) return (byte[]) oObj;
 		if (oObj instanceof String)
 			return toBytes(oObj, Types.VARCHAR);
 		else if (oObj instanceof Boolean)
@@ -228,8 +231,6 @@ public class BytesConverter {
 			return toBytes(oObj, Types.TIMESTAMP);
 		else if (oObj instanceof Date)
 			return toBytes(oObj, Types.TIMESTAMP);
-		else if (oObj instanceof byte[])
-			return toBytes(oObj, Types.VARBINARY);
 		else
 			return toBytes(oObj, Types.JAVA_OBJECT);
 	}
