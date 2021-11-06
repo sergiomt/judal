@@ -60,7 +60,7 @@ public class HBIterator implements AutoCloseable, Iterator<Stored> {
 	public Record next() throws JDOException {
 		Record rec;
 		try {
-			rec = StorageObjectFactory.newRecord(table.getResultClass(), table.getDataSource().getTableDef(table.name()));
+			rec = StorageObjectFactory.newRecord(table.getResultClass(), ((HBTableDataSource) table.getDataSource()).getTableDef(table.name()));
 		} catch (NoSuchMethodException e) {
 			throw new JDOException("StorageObjectFactory.newRecord() cannot find a suitable constructor for HBase Record");
 		}
