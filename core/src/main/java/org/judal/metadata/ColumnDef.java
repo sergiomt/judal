@@ -12,6 +12,7 @@ package org.judal.metadata;
  * KIND, either express or implied.
  */
 
+import java.math.BigInteger;
 import java.sql.Types;
 import java.sql.Timestamp;
 
@@ -1100,7 +1101,11 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 		return Types.DECIMAL;
 	else if (obj instanceof java.sql.Date)
 		return Types.DATE;
-	else if (obj instanceof Date || obj instanceof Calendar || obj instanceof Timestamp)
+	else if (obj.getClass().getName().equals("java.time.LocalDate"))
+		return Types.DATE;
+	else if (obj instanceof Timestamp || obj instanceof Date || obj instanceof Calendar)
+		return Types.TIMESTAMP;
+	else if (obj.getClass().getName().equals("java.time.LocalDateTime"))
 		return Types.TIMESTAMP;
 	else if (obj instanceof byte[])
 		return Types.BINARY;
@@ -1111,7 +1116,56 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	else
 		return Types.JAVA_OBJECT;
 	}
-	
+
+	/**
+	 * Infer SQL type for a Java class
+	 * @param clazz Class
+	 * @return int
+	 * @see java.sql.Types
+	 */
+	public static int typeForClass(Class<?> clazz) {
+		if (clazz==null)
+			return Types.NULL;
+		else if (clazz.getName().equals(String.class.getName()))
+			return Types.VARCHAR;
+		else if (clazz.getName().equals(Byte.class.getName()) || clazz.getName().equals(byte.class.getName()))
+			return Types.TINYINT;
+		else if (clazz.getName().equals(Character.class.getName()) || clazz.getName().equals(char.class.getName()))
+			return Types.CHAR;
+		else if (clazz.getName().equals(Short.class.getName())  || clazz.getName().equals(short.class.getName()))
+			return Types.SMALLINT;
+		else if (clazz.getName().equals(Integer.class.getName())  || clazz.getName().equals(int.class.getName()))
+			return Types.INTEGER;
+		else if (clazz.getName().equals(Long.class.getName())  || clazz.getName().equals(long.class.getName()))
+			return Types.BIGINT;
+		else if (clazz.getName().equals(Float.class.getName())  || clazz.getName().equals(float.class.getName()))
+			return Types.FLOAT;
+		else if (clazz.getName().equals(Double.class.getName())  || clazz.getName().equals(double.class.getName()))
+			return Types.DOUBLE;
+		else if (clazz.getName().equals(BigDecimal.class.getName())  || clazz.getName().equals(BigInteger.class.getName()))
+			return Types.DECIMAL;
+		else if (clazz.getName().equals(java.sql.Date.class.getName()))
+			return Types.DATE;
+		else if (clazz.getName().equals("java.time.LocalDate"))
+			return Types.DATE;
+		else if (clazz.getName().equals(java.util.Date.class.getName()))
+			return Types.TIMESTAMP;
+		else if (clazz.getName().equals(Calendar.class.getName()))
+			return Types.TIMESTAMP;
+		else if (clazz.getName().equals(Timestamp.class.getName()))
+			return Types.TIMESTAMP;
+		else if (clazz.getName().equals("java.time.LocalDateTime"))
+			return Types.TIMESTAMP;
+		else if (clazz.getName().equals(byte[].class.getName()))
+			return Types.BINARY;
+		else if (clazz.getName().equals(Boolean.class.getName()))
+			return Types.BOOLEAN;
+		else if (clazz.isArray())
+			return Types.ARRAY;
+		else
+			return Types.JAVA_OBJECT;
+	}
+
 	public static final String OPTION_FAMILY_NAME = "family";
 	public static final String OPTION_NULLABLE = "nullable";
 	public static final String OPTION_LENGTH = "nullable";

@@ -23,6 +23,8 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -256,7 +258,7 @@ public interface Record extends Serializable, Stored {
 	Calendar getCalendar(String colname) throws ClassCastException;
 
 	/**
-	 * <p>Get value of a Timestamp or Date column.</p>
+	 * <p>Get value of a timestamp or date column.</p>
 	 * @param colname String
 	 * @return Date or <b>null</b>
 	 * @throws ClassCastException
@@ -273,7 +275,23 @@ public interface Record extends Serializable, Stored {
 	Date getDate(String colname, Date defValue) throws ClassCastException;
 
 	/**
-	 * <p>Get value of a Timestamp or Date column formatted with a given pattern.</p>
+	 * <p>Get value of date column.</p>
+	 * @param colname String
+	 * @return LocalDate or <b>null</b>
+	 * @throws ClassCastException
+	 */
+	LocalDate getLocalDate(String colname);
+
+	/**
+	 * <p>Get value of timestamp column.</p>
+	 * @param colname String
+	 * @return LocalDateTime or <b>null</b>
+	 * @throws ClassCastException
+	 */
+	LocalDateTime getLocalDateTime(String colname);
+
+	/**
+	 * <p>Get value of a timestamp or date column formatted with a given pattern.</p>
 	 * @param colname String
 	 * @param format String
 	 * @return String

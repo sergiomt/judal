@@ -18,7 +18,6 @@ import org.junit.Test;
 
 import com.knowgate.io.FileUtils;
 
-import org.junit.Ignore;
 import org.judal.storage.DataSource;
 import org.judal.storage.java.test.AbstractTableTest;
 import org.judal.storage.java.test.MapRecord1;

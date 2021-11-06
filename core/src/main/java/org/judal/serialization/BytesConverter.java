@@ -20,6 +20,8 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -130,6 +132,18 @@ public class BytesConverter {
 				return Bytes.toBytes(((Calendar) oObj).getTimeInMillis());
 			else if (oObj instanceof Long)
 				return Bytes.toBytes(((Long) oObj).longValue());
+			else if (oObj instanceof LocalDate || oObj instanceof LocalDateTime) {
+				try (ByteArrayOutputStream bout = new ByteArrayOutputStream()) {
+					try (ObjectOutputStream oout = new ObjectOutputStream(bout)) {
+						oout.writeObject(oObj);
+						return bout.toByteArray();
+					} catch (IOException e) {
+						return null;
+					}
+				} catch (IOException e) {
+					return null;
+				}
+			}
 		case Types.BINARY:
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:
@@ -206,6 +220,12 @@ public class BytesConverter {
 			return toBytes(oObj, Types.DOUBLE);
 		else if (oObj instanceof BigDecimal)
 			return toBytes(oObj, Types.DECIMAL);
+		else if (oObj instanceof LocalDate)
+			return toBytes(oObj, Types.DATE);
+		else if (oObj instanceof LocalDateTime)
+			return toBytes(oObj, Types.TIMESTAMP);
+		else if (oObj instanceof Calendar)
+			return toBytes(oObj, Types.TIMESTAMP);
 		else if (oObj instanceof Date)
 			return toBytes(oObj, Types.TIMESTAMP);
 		else if (oObj instanceof byte[])
@@ -219,7 +239,6 @@ public class BytesConverter {
 	 * @param aBytes byte[]
 	 * @return Object
 	 * @throws IOException 
-	 * @throws ClassNotFoundException 
 	 */
 	public static Object fromBytes(byte[] aBytes, int iType) throws IOException {
 		if (aBytes==null) return null;
@@ -273,10 +292,19 @@ public class BytesConverter {
 				return Bytes.toBigDecimal(aBytes);
 		case Types.TIMESTAMP:
 		case Types.DATE:
-			if (aBytes.length==0)
+			if (aBytes.length==0) {
 				return null;
-			else
+			} else if (aBytes.length==8) {
 				return new Date(Bytes.toLong(aBytes));
+			} else {
+				try (ByteArrayInputStream bin = new ByteArrayInputStream(aBytes)) {
+					try (ObjectInputStream oin = new ObjectInputStream(bin)) {
+						return oin.readObject();
+					} catch (ClassNotFoundException e) {
+						throw new IOException(e.getMessage(), e);
+					}
+				}
+			}
 		case Types.BINARY:
 		case Types.VARBINARY:
 		case Types.LONGVARBINARY:

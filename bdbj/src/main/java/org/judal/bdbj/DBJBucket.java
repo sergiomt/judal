@@ -1,6 +1,6 @@
-package org.judal.bdb;
+package org.judal.bdbj;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -24,13 +24,13 @@ import javax.jdo.metadata.PrimaryKeyMetadata;
 
 import com.sleepycat.bind.EntryBinding;
 import com.sleepycat.bind.serial.StoredClassCatalog;
-import com.sleepycat.db.Database;
-import com.sleepycat.db.DatabaseEntry;
-import com.sleepycat.db.DatabaseException;
-import com.sleepycat.db.DeadlockException;
-import com.sleepycat.db.LockMode;
-import com.sleepycat.db.OperationStatus;
-import com.sleepycat.db.Transaction;
+import com.sleepycat.je.Database;
+import com.sleepycat.je.DatabaseEntry;
+import com.sleepycat.je.DatabaseException;
+import com.sleepycat.je.DeadlockException;
+import com.sleepycat.je.LockMode;
+import com.sleepycat.je.OperationStatus;
+import com.sleepycat.je.Transaction;
 import com.knowgate.debug.DebugFile;
 import com.knowgate.debug.StackTraceUtil;
 
@@ -41,30 +41,30 @@ import org.judal.storage.Param;
 import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.keyvalue.Stored;
 
-public class DBBucket implements Bucket {
+public class DBJBucket implements Bucket {
 
 	private String sCnm;
 	private String sDbk;
-	private DBDataSource oRep;
+	private DBJDataSource oRep;
 	private Database oPdb;
 	private Database oFdb;
 	private StoredClassCatalog oCtg;
 	private EntryBinding oKey;
 	private Class<? extends Stored> oClass;
-	private HashSet<DBIterator> oItr;
+	private HashSet<DBJIterator> oItr;
 	
 	@SuppressWarnings("unused")
-	private DBBucket() { }
+	private DBJBucket() { }
 
 	// --------------------------------------------------------------------------
 
-	protected DBBucket(DBDataSource oDatabaseEnvironment,
-			String sConnectionName,
-			String sDatabaseName,
-			Database oPrimaryDatabase,
-			Database oForeignDatabase,
-			StoredClassCatalog oClassCatalog,
-			EntryBinding oEntryBind) throws JDOException {
+	protected DBJBucket(DBJDataSource oDatabaseEnvironment,
+						String sConnectionName,
+						String sDatabaseName,
+						Database oPrimaryDatabase,
+						Database oForeignDatabase,
+						StoredClassCatalog oClassCatalog,
+						EntryBinding oEntryBind) throws JDOException {
 
 		sCnm = sConnectionName;
 		oRep = oDatabaseEnvironment;
@@ -74,7 +74,7 @@ public class DBBucket implements Bucket {
 		oCtg = oClassCatalog;
 		oKey = oEntryBind;
 		oItr = null;
-		oClass = DBStored.class;
+		oClass = DBJStored.class;
 	}
 
 	protected void finalize() {
@@ -89,7 +89,7 @@ public class DBBucket implements Bucket {
 		return oPdb;
 	}
 
-	public DBDataSource getDataSource() {
+	public DBJDataSource getDataSource() {
 		return oRep;
 	}
 
@@ -194,7 +194,7 @@ public class DBBucket implements Bucket {
 			DatabaseEntry oDbKey = new DatabaseEntry(byKey);
 			DatabaseEntry oDbDat = new DatabaseEntry();
 			if (OperationStatus.SUCCESS==oPdb.get(getTransaction(), oDbKey, oDbDat, LockMode.DEFAULT)) {
-				DBEntityBinding oDbeb = new DBEntityBinding(oCtg);
+				DBJEntityBinding oDbeb = new DBJEntityBinding(oCtg);
 				oDbEnt = oDbeb.entryToObject(oDbKey,oDbDat);
 				oTarget.setKey(oDbEnt.getKey());
 				oTarget.setValue(oDbEnt.getWrapped());
@@ -265,13 +265,13 @@ public class DBBucket implements Bucket {
 			oItr.remove(oIter);
 		else
 			throw new IllegalArgumentException("The Iterator does not belong to this table or it has been already closed");
-		((DBIterator) oIter).close();
+		((DBJIterator) oIter).close();
 	}
 
 	@Override
 	public void closeAll() {
 		if (oItr!=null) {
-			for (DBIterator oIter : oItr)
+			for (DBJIterator oIter : oItr)
 				oIter.close();
 			oItr.clear();
 		}
@@ -313,9 +313,9 @@ public class DBBucket implements Bucket {
 
 	@Override
 	public Iterator<Stored> iterator() {
-		DBIterator oIter = new DBIterator(name(), oPdb, oCtg);
+		DBJIterator oIter = new DBJIterator(name(), oPdb, oCtg);
 		if (oItr==null)
-			oItr = new HashSet<DBIterator>();
+			oItr = new HashSet<DBJIterator>();
 		oItr.add(oIter);
 		return oIter;
 	}
@@ -339,7 +339,7 @@ public class DBBucket implements Bucket {
 		try {
 		
 			DBEntityWrapper oEwrp = new DBEntityWrapper(byKey, (Serializable) oRec.getValue());
-			DBEntityBinding oDbeb = new DBEntityBinding(oCtg);
+			DBJEntityBinding oDbeb = new DBJEntityBinding(oCtg);
 
 			if (DebugFile.trace) {
 				StringBuffer oStrKey = new StringBuffer(byKey.length*3);
@@ -399,18 +399,5 @@ public class DBBucket implements Bucket {
 
 		delete (oPkv, getTransaction());
 	} // delete
-
-	public void truncate(boolean useTransaction) throws JDOException {
-
-		if (isReadOnly()) throw new JDOException("DBBucket.truncate() database "+name()+" is in read-only mode");
-
-		try {
-			oPdb.truncate(useTransaction ? getTransaction() : null, false);
-		} catch (DeadlockException dlxc) {
-			throw new JDOException(dlxc.getMessage(), dlxc);
-		} catch (Exception xcpt) {
-			throw new JDOException(xcpt.getMessage(), xcpt);
-		} 
-	} // truncate
 	
 }

@@ -18,6 +18,8 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -184,6 +186,16 @@ public abstract class AbstractSingleColumnRecord implements SingleColumnRecord {
 	@Override
 	public Date getDate(String colname) {
 		throw new ClassCastException("Cannot cast from Object to Date");
+	}
+
+	@Override
+	public LocalDate getLocalDate(String colname) {
+		throw new ClassCastException("Cannot cast from Object to LocalDate");
+	}
+
+	@Override
+	public LocalDateTime getLocalDateTime(String colname) {
+		throw new ClassCastException("Cannot cast from Object to LocalDateTime");
 	}
 
 	@Override

@@ -1,6 +1,6 @@
-package org.judal.bdb.test;
+package org.judal.bdbj.test;
 
-import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.BeforeClass;
 import org.junit.AfterClass;
 
@@ -12,23 +12,23 @@ import java.util.Map;
 import javax.jdo.JDOException;
 import javax.transaction.SystemException;
 
-import org.judal.bdb.DBBucketDataSource;
-import org.judal.bdb.DBDataSource;
-import org.judal.bdb.DBEngine;
+import org.judal.bdbj.DBJBucketDataSource;
+import org.judal.bdbj.DBJDataSource;
+import org.judal.bdbj.DBJEngine;
 import org.judal.storage.java.test.AbstractBucketTest;
 import org.judal.storage.keyvalue.Stored;
 import org.judal.serialization.BytesConverter;
 
-public class TestBDBAsBucket extends AbstractBucketTest {
+public class TestBDBJAsBucket extends AbstractBucketTest {
 
 	private static Map<String,String> properties;
-	private static DBDataSource dts;
+	private static DBJDataSource dts;
 
 	@BeforeClass
 	public static void init() throws ClassNotFoundException, JDOException, IOException {
-		properties = new TestBDB().getTestProperties();
+		properties = new TestBDBJ().getTestProperties();
 		System.out.println(System.getProperty("java.library.path"));
-		DBEngine dbe = new DBEngine();
+		DBJEngine dbe = new DBJEngine();
 		dts = dbe.getDataSource(properties);
 	}
 
@@ -37,14 +37,14 @@ public class TestBDBAsBucket extends AbstractBucketTest {
 		if (dts!=null) dts.close();
 	}
 
-	@Ignore
+	@Test
 	public void test01Bucket() throws JDOException, IOException, SystemException {
 		super.test01Bucket();
 	}
 	
 	@Override
-	public DBBucketDataSource getBucketDataSource() throws JDOException {
-		return (DBBucketDataSource) dts;
+	public DBJBucketDataSource getBucketDataSource() throws JDOException {
+		return (DBJBucketDataSource) dts;
 	}
 
 	@Override

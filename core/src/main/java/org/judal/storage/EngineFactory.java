@@ -177,6 +177,7 @@ public class EngineFactory {
 	 */
 	public static final String NAME_JDBC = "JDBC";
 	public static final String NAME_BERKELEYDB = "BDB";
+	public static final String NAME_BERKELEYDB_JAVA = "BDBJ";
 	public static final String NAME_AMAZONS3 = "S3";
 	public static final String NAME_CASSANDRA = "CASSANDRA";
 	public static final String NAME_HBASE = "HBASE";

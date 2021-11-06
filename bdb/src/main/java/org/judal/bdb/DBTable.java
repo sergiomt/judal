@@ -1581,7 +1581,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 	// --------------------------------------------------------------------------
 	
 	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo) throws JDOException {
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo) throws JDOException {
 		if (valueFrom==null)
 			throw new JDOUserException("Lower bound for range query is required");
 		if (valueTo==null)
@@ -1590,8 +1590,6 @@ public class DBTable extends DBBucket implements IndexableTable {
 			throw new IllegalArgumentException("Lower and upper bound type mismatch");
 		if (valueFrom instanceof Date)
 			return fetch(indexColumnName, (Date) valueFrom, (Date) valueTo);
-		else if (valueFrom instanceof byte[])
-			return fetch(indexColumnName, (byte[]) valueFrom, (byte[]) valueTo);
 		else {
 			int ctype = getColumnByName(indexColumnName).getType();
 			return fetch(indexColumnName, BytesConverter.toBytes(valueFrom, ctype), BytesConverter.toBytes(valueTo, ctype));
@@ -1601,7 +1599,7 @@ public class DBTable extends DBBucket implements IndexableTable {
 	// --------------------------------------------------------------------------
 	
 	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo, int maxrows, int offset) throws JDOException {
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset) throws JDOException {
 		throw new JDOUnsupportedOptionException("Range query with offset and limit not implemented");
 	}
 

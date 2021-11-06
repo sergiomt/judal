@@ -10,7 +10,8 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
@@ -336,6 +337,18 @@ public class JDOPersistenceCapable implements JDORecord {
 
 	@Override
 	public Date getDate(String colname, Date defvalue) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LocalDate getLocalDate(String colname) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public LocalDateTime getLocalDateTime(String colname) {
 		// TODO Auto-generated method stub
 		return null;
 	}

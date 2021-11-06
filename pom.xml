@@ -36,11 +36,13 @@
         <module>scala-adaptor</module>
         <module>jdbc</module>
         <module>bdb</module>
+        <module>bdbj</module>
         <module>s3</module>
         <module>hbase</module>
         <module>mongodb</module>
         <!--
         <module>cassandra</module>
+        <module>firebase</module>
         -->
         <module>aexample</module>
     </modules>

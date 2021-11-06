@@ -26,7 +26,9 @@ import java.text.Format;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -85,6 +87,28 @@ import com.knowgate.stringutils.XML;
 	public Date getDate(String sKey) throws ClassCastException {
 		return DateHelper.toDate(apply(sKey));
 	} // getDate
+
+	/**
+	 * <p>Get value for a DATE field<p>
+	 * @param sKey Field Name
+	 * @return LocalDate value or <b>null</b>.
+	 * @throws ClassCastException if sKey field is not of type DATE
+	 */
+	@Override
+	public LocalDate getLocalDate(String sKey) throws ClassCastException {
+		return DateHelper.toDate(apply(sKey)).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	} // getLocalDate
+
+	/**
+	 * <p>Get value for a DATETIME field<p>
+	 * @param sKey Field Name
+	 * @return LocalDateTime value or <b>null</b>.
+	 * @throws ClassCastException if sKey field is not of type DATETIME
+	 */
+	@Override
+	public LocalDateTime getLocalDateTime(String sKey) throws ClassCastException {
+		return DateHelper.toDate(apply(sKey)).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	} // getLocalDateTime
 
 	/**
 	 * <p>Get value for a DATETIME field<p>

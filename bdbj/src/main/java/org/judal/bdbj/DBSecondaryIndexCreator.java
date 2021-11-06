@@ -1,4 +1,4 @@
-package org.judal.bdb;
+package org.judal.bdbj;
 
 /**
  * © Copyright 2016 the original author.
@@ -19,19 +19,19 @@ import org.judal.storage.StorageObjectFactory;
         import org.judal.storage.table.Record;
 
 import com.knowgate.debug.DebugFile;
-import com.sleepycat.db.DatabaseEntry;
-import com.sleepycat.db.SecondaryDatabase;
-import com.sleepycat.db.SecondaryKeyCreator;
+import com.sleepycat.je.DatabaseEntry;
+import com.sleepycat.je.SecondaryDatabase;
+import com.sleepycat.je.SecondaryKeyCreator;
 
 public class DBSecondaryIndexCreator implements SecondaryKeyCreator {
 
-	private DBEntityBinding oDbeb;
+	private DBJEntityBinding oDbeb;
 	private TableDef oTbl;
 	private Class<? extends Record> oRecCls;
 	private String sIndx;
 	private int iType;
 
-	public DBSecondaryIndexCreator(DBEntityBinding oBind, Class<? extends Record> oRecClass, TableDef oTblDef, String sIndex, int iColumnType) {
+	public DBSecondaryIndexCreator(DBJEntityBinding oBind, Class<? extends Record> oRecClass, TableDef oTblDef, String sIndex, int iColumnType) {
 		oDbeb = oBind;
 		sIndx = sIndex;
 		oTbl = oTblDef;
