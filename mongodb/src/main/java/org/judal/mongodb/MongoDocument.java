@@ -86,20 +86,32 @@ public class MongoDocument extends AbstractRecordBase implements Stored {
 	}
 
 	@Override
-	public void setValue(Serializable value) throws JDOException,ClassCastException {
-		if (value instanceof Document) {
+	public void setValue(Serializable value) throws JDOException, ClassCastException {
+		if (null==value)
+			wrapped = new Document();
+		else if (value instanceof Document) {
 			wrapped = (Document) value;
 		} else if (value instanceof byte[]) {
 			try (ByteArrayInputStream bin = new ByteArrayInputStream((byte[]) value)) {
 				try (ObjectInputStream oin = new ObjectInputStream(bin)) {
-					wrapped = (Document) oin.readObject();
+					Object readed = oin.readObject();
+					if (readed instanceof Document) {
+						wrapped = (Document) oin.readObject();
+					} else if (readed instanceof Map) {
+						wrapped = new Document();
+						wrapped.putAll((Map) value);
+					} else {
+						throw new ClassCastException("Unparseable class " + readed!=null ? readed.getClass().getName() : " null");
+					}
 				}
 			} catch (ClassNotFoundException | IOException e) {
 				throw new JDOException(e.getMessage(), e);
 			}
+		} else if (value instanceof Map) {
+			wrapped = new Document();
+			wrapped.putAll((Map) value);
 		} else if (value instanceof String) {
 			wrapped = Document.parse((String) value);
-
 		} else {
 			throw new ClassCastException("Value must be of type org.bson.Document");
 		}
@@ -110,8 +122,7 @@ public class MongoDocument extends AbstractRecordBase implements Stored {
 		if ("application/json".equalsIgnoreCase(contentType)) {
 			try {
 				wrapped = Document.parse(new String(bytes, "UTF-8"));
-			} catch (UnsupportedEncodingException neverthrown) {
-			}
+			} catch (UnsupportedEncodingException neverthrown) { }
 		} else if ("application/octet-stream".equalsIgnoreCase(contentType)) {
 			setValue(bytes);
 		} else {
@@ -378,7 +389,9 @@ public class MongoDocument extends AbstractRecordBase implements Stored {
 
 	@Override
 	public Object put(int colpos, Object obj) throws IllegalArgumentException, ArrayIndexOutOfBoundsException, UnsupportedOperationException {
-		throw new UnsupportedOperationException("MongoDocument does not support putting values by column position");
+		if (columns().length==0)
+			throw new UnsupportedOperationException("MongoDocument does not support putting values by column position");
+		return put(columns()[colpos-1].getName(), obj);
 	}
 
 	@Override

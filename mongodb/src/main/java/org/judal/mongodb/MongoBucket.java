@@ -1,5 +1,7 @@
 package org.judal.mongodb;
 
+import java.io.Serializable;
+
 /**
  * © Copyright 2018 the original author.
  * This file is licensed under the Apache License version 2.0.
@@ -14,6 +16,7 @@ package org.judal.mongodb;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import javax.jdo.FetchPlan;
@@ -28,6 +31,7 @@ import org.bson.conversions.Bson;
 import org.judal.metadata.TableDef;
 import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.keyvalue.Stored;
+import org.judal.storage.table.Record;
 
 import com.mongodb.MongoException;
 import com.mongodb.MongoNamespace;
@@ -85,7 +89,21 @@ public class MongoBucket implements Bucket {
 		else
 			filter = Filters.eq("_id", key.toString());
 		Document doc = collection.find(filter).limit(1).first();
-		((MongoDocument) target).setDocument(doc);
+		if (target instanceof MongoDocument) {
+			((MongoDocument) target).setDocument(doc);
+		} else if (target instanceof Record) {
+			Record rec = (Record) target;
+			rec.clear();
+			if (doc!=null) {
+				for (Map.Entry<String, Object> e : doc.entrySet()) {
+					rec.put(e.getKey(), e.getValue());
+				}
+			}
+		} else {
+			target.setKey(key);
+			target.setValue(doc!=null ? (Serializable) doc.get("value") : null);
+		}
+
 		return doc!=null;
 	}
 
@@ -151,9 +169,21 @@ public class MongoBucket implements Bucket {
 	@Override
 	public void store(Stored source) throws JDOException {
 		Bson filter = Filters.eq("_id", source.getKey());
-		Bson update =  new Document("$set", ((MongoDocument) source).getDocument());
+		Document update = null;
+		if (source instanceof MongoDocument) {
+			update = new Document("$set", ((MongoDocument) source).getDocument());
+		} else {
+			update = new Document();
+			if (source instanceof Record)  {
+				for (Map.Entry<String,Object> e : ((Record) source).asEntries()) {
+					update.put(e.getKey(), e.getValue());
+				}
+			} else {
+			update.put("value", source.getValue());
+			}
+		}
 		try {
-			collection.updateOne(filter, update, upsert);
+			getCollection().updateOne(filter, update, upsert);
 		} catch (MongoException e) {
 			throw new JDOException(e.getMessage(), e);
 		}

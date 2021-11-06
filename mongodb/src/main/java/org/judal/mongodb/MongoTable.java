@@ -11,6 +11,8 @@ package org.judal.mongodb;
  * KIND, either express or implied.
  */
 
+import java.util.Map;
+
 import javax.jdo.JDOException;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
@@ -65,17 +67,6 @@ public class MongoTable extends MongoView implements RelationalTable, Schemaless
 		return tableDef.getPrimaryKeyMetadata();
 	}
 
-	@Override
-	public void store(Stored source) throws JDOException {
-		Bson filter = Filters.eq("_id", source.getKey());
-		Bson update =  new Document("$set", ((MongoDocument) source).getDocument());
-		try {
-			getCollection().updateOne(filter, update, upsert);
-		} catch (MongoException e) {
-			throw new JDOException(e.getMessage(), e);
-		}
-	}
-	
 	@Override
 	public void insert(Param... params) throws JDOException {
 		Document doc = new Document();
