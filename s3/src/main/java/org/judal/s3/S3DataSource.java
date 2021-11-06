@@ -44,7 +44,7 @@ import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.keyvalue.BucketDataSource;
 
 /**
- * Implementation of BucketDataSource forAmazon S3
+ * Implementation of BucketDataSource for Amazon S3
  * @author Sergio Montoro Ten
  * @version 1.0
  */
