@@ -225,7 +225,7 @@ public class HaloDBDataSource implements BucketDataSource {
 	 * @throws JDOException Never actually thrown
 	 */
 	@Override
-	public Bucket openBucket(String bucketName) throws JDOException {
+	public HaloDBBucket openBucket(String bucketName) throws JDOException {
 		return new HaloDBBucket(this, bucketName);
 	}
 
@@ -284,7 +284,7 @@ public class HaloDBDataSource implements BucketDataSource {
 	 */
 	@Override
 	public Object call(String statement, Param... parameters) throws JDOException {
-		throw new JDOUnsupportedOptionException("InMemoryDataSource does not support callable statements");
+		throw new JDOUnsupportedOptionException("HaloDBDataSource does not support callable statements");
 	}
 
 	/**
