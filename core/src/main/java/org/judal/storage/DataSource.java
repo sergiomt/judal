@@ -189,6 +189,10 @@ public interface DataSource extends AutoCloseable {
 	 */
 	public static final String MAXPOOLSIZE = "maxpoolsize";
 	/**
+	 * Use pool (boolean true/false)
+	 */
+	public static final String USEPOOL = "usepool";
+	/**
 	 * Configuration property. int [MAXPOOLSIZE..n] Maximum number of allowed JDBC connections.
 	 */
 	public static final String MAXCONNECTIONS = "maxconnections";
@@ -220,6 +224,50 @@ public interface DataSource extends AutoCloseable {
 	 * SHA salt
 	 */
 	public static final String SALT = "salt";
+	/**
+	 * Directory
+	 */
+	public static final String DIRECTORY = "directory";
+	/**
+	 * Max File Size (for HaloDB)
+	 */
+	public static final String MAX_FILE_SIZE = "maxfilesize";
+	/**
+	 * Max Tombstone File Size (for HaloDB)
+	 */
+	public static final String MAX_TOMBSTONE_FILE_SIZE = "maxtombstonefilesize";
+	/**
+	 * Build Index Threads (for HaloDB)
+	 */
+	public static final String INDEX_THREADS = "indexthreads";
+	/**
+	 * Flush Data Size Bytes (for HaloDB)
+	 */
+	public static final String FLUSH_SIZE_BYTES = "flushsizebytes";
+	/**
+	 * Compaction Threshold Per File (for HaloDB)
+	 */
+	public static final String COMPACTION_THRESHOLD = "compactionthreshold";
+	/**
+	 * Compaction Job Rate (for HaloDB)
+	 */
+	public static final String COMPACTION_JOB_RATE = "compactionjobrate";
+	/**
+	 * Number of Records (for HaloDB)
+	 */
+	public static final String NUMBER_OF_RECORDS = "numberofrecords";
+	/**
+	 * Clean up Tombstones During Open (for HaloDB)
+	 */
+	public static final String CLEANUP_TOMBSTONE = "cleanuptombstone";
+	/**
+	 * Clean up Memory During Close (for HaloDB)
+	 */
+	public static final String CLEANUP_MEMORY = "cleanupmemory";
+	/**
+	 * Key Size (for HaloDB)
+	 */
+	public static final String KEY_SIZE = "keysize";
 
 	public static final String MAIL_STORE_PROTOCOL = "mail.store.protocol";
 	public static final String MAIL_TRANSPORT_PROTOCOL = "mail.transport.protocol";
@@ -251,7 +299,14 @@ public interface DataSource extends AutoCloseable {
 	/**
 	 * List of supported property names
 	 */
-	public static final String[] PropertyNames = new String[]{ACCESSKEY,ANALYZER,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,USER,PASSWORD,PROJECTID,REGION,HASHALGORITHM,SALT,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD,MAIL_STORE_PROTOCOL, MAIL_TRANSPORT_PROTOCOL, MAIL_INCOMING, MAIL_OUTGOING, MAIL_ACCOUNT, MAIL_PASSWORD, MAIL_USER, MAIL_SMTP_HOST, MAIL_SMTP_PORT,LUCENEINDEX};
+	public static final String[] PropertyNames = new String[]{
+		ACCESSKEY,ANALYZER,SECRETKEY,AUTOCOMMIT,CATALOG,CONFIG,DRIVER,DBENV,BUCKET,URI,SCHEMA,METADATA,PACKAGE,
+		USER,PASSWORD,PROJECTID,REGION,HASHALGORITHM,SALT,STORED,EXTURL,LOGINTIMEOUT,CONNECTIONTIMEOUT,POOLSIZE,
+		USEPOOL,MAXPOOLSIZE,MAXCONNECTIONS,TRANSACTIONAL,USE_DATABASE_METADATA,LDAPCONNECT,LDAPUSER,LDAPPASSWORD,
+		DIRECTORY,LUCENEINDEX,MAX_FILE_SIZE,MAX_TOMBSTONE_FILE_SIZE,INDEX_THREADS,FLUSH_SIZE_BYTES,COMPACTION_THRESHOLD,
+		NUMBER_OF_RECORDS,CLEANUP_TOMBSTONE,CLEANUP_MEMORY,
+		MAIL_STORE_PROTOCOL,MAIL_TRANSPORT_PROTOCOL,MAIL_INCOMING,MAIL_OUTGOING,MAIL_ACCOUNT,MAIL_PASSWORD,MAIL_USER,
+		MAIL_SMTP_HOST,MAIL_SMTP_PORT};
 
 	/**
 	 * List of default property values

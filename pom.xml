@@ -39,6 +39,7 @@
         <module>bdbj</module>
         <module>s3</module>
         <module>hbase</module>
+        <module>halodb</module>
         <module>mongodb</module>
         <!--
         <module>cassandra</module>
