@@ -380,13 +380,13 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	 * <p>Fetch RecordSet filtering by a column value range.</p>
 	 * @param fetchGroup FetchGroup Columns to fetch
 	 * @param indexColumnName String Index column Name
-	 * @param valueFrom Object value from (inclusive)
-	 * @param valueTo Object value to (inclusive)
+	 * @param valueFrom Comparable value from (inclusive)
+	 * @param valueTo Comparable value to (inclusive)
 	 * @return RecordSet&lt;? extends Record&gt;
 	 * @throws JDOException
 	 */
 	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo) throws JDOException {
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo) throws JDOException {
 		return fetch(fetchGroup, indexColumnName, valueFrom, valueTo, Integer.MAX_VALUE, 0);
 	}
 
@@ -428,8 +428,8 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	 * <p>Fetch RecordSet filtering by a column value range.</p>
 	 * @param fetchGroup FetchGroup Columns to fetch
 	 * @param indexColumnName String Index column Name
-	 * @param valueFrom Object value from (inclusive)
-	 * @param valueTo Object value to (inclusive)
+	 * @param valueFrom Comparable value from (inclusive)
+	 * @param valueTo Comparable value to (inclusive)
 	 * @param maxrows int Maximum numbers of records to return
 	 * @param offset int First record to read from [0..n]
 	 * @return RecordSet&lt;? extends Record&gt;
@@ -437,7 +437,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	 * @throws JDOUserException if valueFrom and valueTo are null or are not of the same type
 	 */
 	@Override
-	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Object valueFrom, Object valueTo, int maxrows, int offset)
+	public <R extends Record> RecordSet<R> fetch(FetchGroup fetchGroup, String indexColumnName, Comparable<?> valueFrom, Comparable<?> valueTo, int maxrows, int offset)
 		throws JDOException {
 		Predicate predicate = new SQLAndPredicate();
 		try {
@@ -468,7 +468,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 	/**
 	 * <p>Fetch RecordSet filtering by several column values.</p>
 	 * @param fetchGroup FetchGroup Columns to fetch
-	 * @param maxrows int Maximum numbers of records to return or -1 for Integer.MAX_VALUE maximum numberof records
+	 * @param maxrows int Maximum numbers of records to return or -1 for Integer.MAX_VALUE maximum number of records
 	 * @param offset int First record to read from [0..n]
 	 * @param params Param&hellip; Each Param name must match a column name in the table
 	 * @throws JDOException

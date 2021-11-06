@@ -167,7 +167,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	/**
-	 * This method is not supported by PojoRecordand will always raise an exception
+	 * This method is not supported by PojoRecord and will always raise an exception
 	 * @throws JDOUnsupportedOptionException
 	 */
 	@Override

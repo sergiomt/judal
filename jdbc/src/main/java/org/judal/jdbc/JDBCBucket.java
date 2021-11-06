@@ -245,7 +245,7 @@ public class JDBCBucket extends JDBCBase implements Bucket {
 	public void store(Stored target) throws JDOException {
 		boolean bHasLongVarBinaryData = false;
 		AbstractRecord mapRecord = (AbstractRecord) target;
-		
+
 		if (null==target)
 			throw new NullPointerException("JDBCBucket.store() Target instance may not be null");
 

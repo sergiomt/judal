@@ -168,11 +168,16 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 		if (null==baseTDef)
 			throw new JDOUserException("Could not find any table with name "+tableName);
 		ColumnDef[] columns = baseTDef.filterColumns(columnAliases(columnNames));
-		if (columns==null || columns.length==0)
-			throw new JDOUserException("Could not find any matching columns for {" + String.join(",", columnNames) + "} at table "+tableName+" with columns {" + baseTDef.getColumnsStr() + "}");
+		if (columns==null || columns.length==0) {
+			StringBuilder colNames = new StringBuilder();
+			for (String colName : columnNames) {
+				colNames.append(colNames.length()==0 ? "" : ",").append(colName);
+			}
+			throw new JDOUserException("Could not find any matching columns for {" + colNames.toString() + "} at table "+tableName+" with columns {" + baseTDef.getColumnsStr() + "}");
+		}
 		return new TableDef(tableName, columns);
 	}
-	
+
 	/**
 	 * Constructor
 	 * @throws JDOException 
@@ -198,8 +203,13 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 		if (columnNames==null || columnNames.length==0)
 			columnNames = getTableDef().getColumnsStr().split(",");
 		for (String columnName : columnNames) {
-			if (columnName==null || columnName.trim().length()==0)
-				throw new JDOUserException("Expected Column name but got "+(columnName==null ? "null" : "empty string")+" from columns list {" + String.join(",", columnNames) + "}");
+			if (columnName==null || columnName.trim().length()==0) {
+				StringBuilder colNames = new StringBuilder();
+				for (String colName : columnNames) {
+					colNames.append(colNames.length()==0 ? "" : ",").append(colName);
+				}
+				throw new JDOUserException("Expected Column name but got " + (columnName == null ? "null" : "empty string") + " from columns list {" + colNames.toString() + "}");
+			}
 			String columnAlias = getColumnAlias(columnName);
 			ColumnDef cdef = getTableDef().getColumnByName(columnAlias);
 			if (cdef==null) throw new JDOUserException("Column "+columnAlias+" not found at "+getTableName());
@@ -213,7 +223,7 @@ public class ArrayRecord extends AbstractRecord implements JavaRecord {
 		final int vcount = values.length;
 		SimpleImmutableEntry<String,Object>[] entries = new SimpleImmutableEntry[vcount];
 		for (Entry<String,Integer> e : getColumnsMap().entrySet())
-			entries[e.getValue()] = new SimpleImmutableEntry<String,Object>(e.getKey(), values[e.getValue()]);
+			entries[e.getValue()] = new SimpleImmutableEntry<>(e.getKey(), values[e.getValue()]);
 		return entries;
 	}
 
