@@ -26,7 +26,6 @@ import com.oath.halodb.HaloDBOptions;
 
 import org.judal.serialization.BytesConverter;
 import org.judal.storage.Param;
-import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.keyvalue.BucketDataSource;
 import org.judal.storage.keyvalue.Stored;
 
