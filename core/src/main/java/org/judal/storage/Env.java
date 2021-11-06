@@ -21,6 +21,8 @@ import static java.nio.file.StandardOpenOption.READ;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
 
@@ -38,7 +40,7 @@ import static org.judal.storage.DataSource.DefaultValues;
  * @version 1.0
  */
 public class Env {
-	
+
 	/**
 	 * <p>Get default value for a property (if present).</p>
 	 * @param propertyName String
@@ -100,12 +102,7 @@ public class Env {
 			if (DebugFile.trace)
 				DebugFile.writeln(prop==null ? "property "+propName+" not found" : "read "+propName+"="+prop);
 			if (prop!=null) {
-				if (prop.startsWith("${") && prop.endsWith("}")) {
-					String sysPropName = propName.substring(2, prop.length()-1);
-					setProperty(props, sysPropName, System.getProperty(sysPropName));
-				} else {
-					setProperty(props, propName, prop);
-				}
+				setProperty(props, propName, prop);
 			}
 		}
 		if (DebugFile.trace) {
@@ -201,15 +198,27 @@ public class Env {
 	  }
 
 	  private static void setProperty(Hashtable<String,String> props, String propName, String propValue) {
-			if (null==propValue) {
-				if (getDataSourceDefault(propName)!=null)
-					props.put(propName, getDataSourceDefault(propName));
-			} else if (propValue.length()==0) {
-				if (getDataSourceDefault(propName)!=null)
-					props.put(propName, getDataSourceDefault(propName));
-			} else {
-				props.put(propName, propValue);
-			}		
+	  	if ((null==propValue || propValue.isEmpty()) && getDataSourceDefault(propName)!=null) {
+	  		props.put(propName, replaceEnvironmentVariables(getDataSourceDefault(propName)));
+	  	} else {
+	  		props.put(propName, replaceEnvironmentVariables(propValue));
+	  	}
 	  }
-	  
+
+	  private static String replaceEnvironmentVariables(final String prop) {
+	  	final Pattern environmentVariable = Pattern.compile("\\x24\\x7B([^}]+)\\x7D");
+	  	String replacedProp = prop;
+	  	Matcher matcher = environmentVariable.matcher(replacedProp);
+	  	while (matcher.find()) {
+			String envVarValue = System.getProperty(matcher.group(1));
+			if (null!=envVarValue) {
+				envVarValue = envVarValue.replace("\\", "\\\\");
+				replacedProp = matcher.replaceFirst(envVarValue);
+			} else {
+				replacedProp = matcher.replaceFirst("");
+			}
+			matcher = environmentVariable.matcher(replacedProp);
+	  	}
+	  	return replacedProp;
+	  }
 }
