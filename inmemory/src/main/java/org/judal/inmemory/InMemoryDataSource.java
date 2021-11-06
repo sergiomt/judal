@@ -27,7 +27,7 @@ import org.judal.storage.keyvalue.Bucket;
 import org.judal.storage.keyvalue.BucketDataSource;
 
 /**
- * In-memory implementation of BucketDataSource forAmazon S3
+ * In-memory implementation of BucketDataSource
  * @author Sergio Montoro Ten
  * @version 1.0
  */
@@ -83,7 +83,7 @@ public class InMemoryDataSource implements BucketDataSource {
 	}
 
 	/**
-	 * S3 does not support transactions. This method will always raise JDOUnsupportedOptionException
+	 * In Memory does not support transactions. This method will always raise JDOUnsupportedOptionException
 	 * @throws JDOUnsupportedOptionException
 	 */
 	@Override
@@ -92,7 +92,7 @@ public class InMemoryDataSource implements BucketDataSource {
 	}
 
 	/**
-	 * S3 does not support transactions. This method will always raise JDOUnsupportedOptionException
+	 * In Memory does not support transactions. This method will always raise JDOUnsupportedOptionException
 	 * @throws JDOUnsupportedOptionException
 	 */
 	@Override
@@ -146,7 +146,7 @@ public class InMemoryDataSource implements BucketDataSource {
 	}
 
 	/**
-	 * Delete all objects at this Bucket including all their versions.
+	 * Delete all objects at this Bucket.
 	 * @param bucketName String
 	 * @throws JDOException
 	 */

@@ -91,16 +91,16 @@ public class InMemoryEngine implements Engine<InMemoryDataSource> {
 	}
 
 	/**
-	 * S3 does not support transactions. This method will always raise JDOUnsupportedOptionException
-	 * @throws JDOUnsupportedOptionException
+	 * This method will always raise JDOUnsupportedOptionException
+	 * @throws JDOUnsupportedOptionException InMemoryDataSource does not support transactions
 	 */
 	@Override
 	public TransactionManager getTransactionManager() throws JDOException {
-		throw new JDOUnsupportedOptionException("Amazon S3 does not support transactions");
+		throw new JDOUnsupportedOptionException("InMemoryDataSource does not support transactions");
 	}
 
 	/**
-	 * @return String Engine.NAME_AMAZONS3
+	 * @return String Engine.NAME_INMEMORY
 	 */
 	@Override
 	public String name() {

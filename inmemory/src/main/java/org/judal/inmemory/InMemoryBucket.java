@@ -97,12 +97,11 @@ public class InMemoryBucket implements Bucket {
 	}
 
 	/**
-	 * @param record S3Record
+	 * @param record Stored
 	 */
 	@Override
 	public void store(Stored record) throws JDOException {
-		if (bucketData.containsKey(record.getKey()))
-			bucketData.remove(record.getKey());
+		bucketData.remove(record.getKey());
 		bucketData.put(record.getKey(), (InMemoryRecord) record);
 	}
 
@@ -118,8 +117,7 @@ public class InMemoryBucket implements Bucket {
 			keyval = (String) key;
 		else 
 			keyval = key.toString();
-		if (bucketData.containsKey(keyval))
-			bucketData.remove(keyval);
+		bucketData.remove(keyval);
 	}
 
 	/**
@@ -166,7 +164,7 @@ public class InMemoryBucket implements Bucket {
 	}
 
 	/**
-	 * @return S3Iterator Over all the values stored at this Bucket
+	 * @return InMemoryIterator Over all the values stored at this Bucket
 	 */
 	@Override
 	public Iterator<Stored> iterator() {
