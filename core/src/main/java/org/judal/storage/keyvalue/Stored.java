@@ -19,11 +19,11 @@ import javax.jdo.JDOException;
 import org.judal.storage.DataSource;
 
 /**
- * <p>Interface for key-value pairs.</p>
+ * <p>Interface for stored key-value pairs.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public interface Stored extends Serializable {
+public interface Stored extends KeyValuePair, Serializable {
 
 	/**
 	 * <p>Set key.</p>
@@ -31,13 +31,6 @@ public interface Stored extends Serializable {
 	 * @throws JDOException
 	 */
 	void setKey(Object key) throws JDOException;
-
-	/**
-	 * <p>Get key.</p>
-	 * @return Object
-	 * @throws JDOException
-	 */
-	Object getKey() throws JDOException;
 
 	/**
 	 * <p>Set value.</p>
@@ -54,18 +47,6 @@ public interface Stored extends Serializable {
 	 */
 	void setContent(byte[] bytes, String contentType) throws JDOException;
 
-	/**
-	 * <p>Get value.</p>
-	 * @return Object
-	 * @throws JDOException
-	 */
-	Object getValue() throws JDOException;
-
-	/**
-	 * <p>Get name of the bucket where this key-value is stored.</p>
-	 * @return String
-	 */
-	String getBucketName();
 
 	/**
 	 * <p>Load value into <b>this</b> Stored using the default key-value data source set at EngineFactory for the thread local or the StorageContext.</p>
