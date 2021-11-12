@@ -15,7 +15,6 @@ package org.judal.storage.java;
 import java.io.Serializable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 
 import java.util.Map;
@@ -36,7 +35,6 @@ import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.impl.AbstractRecord;
 
 import com.knowgate.dateutils.DateHelper;
-import com.knowgate.debug.DebugFile;
 
 public class PojoRecord extends AbstractRecord implements JavaRecord {
 
@@ -101,13 +99,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	private ArrayList<Field> getPersistentFields() {
 		if (null==persistentFields) {
 			Field[] declaredFields = getClass().getDeclaredFields();
-			if (null==declaredFields) {
-				if (DebugFile.trace)
-					DebugFile.writeln("PojoRecord.getPersistentFields() NullPointerException getClass().getDeclaredFields()  returned null for " + getClass());
-			} else {
-				DebugFile.writeln("found " + String.valueOf(declaredFields.length) + " declared fields");
-			}
-			persistentFields = new ArrayList<Field>(declaredFields.length);
+			persistentFields = new ArrayList<>(declaredFields.length);
 			for (Field fld : declaredFields) {
 				final int mods = fld.getModifiers();
 				if (!Modifier.isFinal(mods) && !Modifier.isTransient(mods) && !Modifier.isStatic(mods)) {
@@ -217,8 +209,6 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 			Class<?> ctype = col.getType();
 			try {				
 				if (ctype==null) {
-					if (DebugFile.trace)
-						DebugFile.writeln("PojoRecord.get() Cannot determine type of column " + columnName);
 					throw new JDOUserException("PojoRecord.get() cannot determine type of column "+ columnName);
 				}
 				if (ctype.equals(String.class))
@@ -242,21 +232,17 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 				else
 					retval = col.get(this);
 			} catch (IllegalArgumentException | IllegalAccessException e) {
-				if (DebugFile.trace)
-					DebugFile.writeln("PojoRecord.get() " + e.getClass().getName() + " " + e.getMessage());
 				try { col.setAccessible(accesible); } catch (Exception ignore) { }
 				throw new JDOUserException("PojoRecord.get("+colname+")");
 			}
 		} else {
-			if (DebugFile.trace)
-				DebugFile.writeln("PojoRecord.get() Column not found " + columnName);
 		}
 		return retval;
 	}
 
 	@Override
 	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-		return getMap(sKey);
+		return (Map<String,String>) super.getMap(sKey);
 	} // getMap
 	
 	@Override

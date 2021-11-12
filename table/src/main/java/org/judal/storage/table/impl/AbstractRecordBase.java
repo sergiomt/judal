@@ -1,8 +1,5 @@
 package org.judal.storage.table.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
 /*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
@@ -19,6 +16,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
 import java.math.BigDecimal;
 
 import java.text.DateFormat;
@@ -773,7 +773,7 @@ import com.knowgate.stringutils.XML;
 		String sEndElement = ">" + LF;
 
 		DateFormat oXMLDate = dateFormat==null ? new SimpleDateFormat("yyyy-MM-DD HH:mm:ss") : dateFormat;
-		NumberFormat oXMLDecimal = decimalFormat==null ? DecimalFormat.getNumberInstance() : decimalFormat;
+		NumberFormat oXMLDecimal = decimalFormat==null ? NumberFormat.getNumberInstance() : decimalFormat;
 		
 		String nodeName = getClass().getName();
 		int dot = nodeName.lastIndexOf('.');
@@ -804,13 +804,13 @@ import com.knowgate.stringutils.XML;
 					if (textFormat==null)
 						oBF.append(XML.toCData((String) oColValue));
 					else
-						oBF.append(XML.toCData(textFormat.format((String) oColValue)));
+						oBF.append(XML.toCData(textFormat.format(oColValue)));
 				} else if (oColValue instanceof java.util.Date) {
 					oBF.append(oXMLDate.format((java.util.Date) oColValue));
 				} else if (oColValue instanceof Calendar) {
-					oBF.append(oXMLDate.format((java.util.Calendar) oColValue));
+					oBF.append(oXMLDate.format(oColValue));
 				} else if (oColValue instanceof BigDecimal) {
-					oBF.append(oXMLDecimal.format((BigDecimal) oColValue));
+					oBF.append(oXMLDecimal.format(oColValue));
 				} else {
 					oBF.append(oColValue);
 				}

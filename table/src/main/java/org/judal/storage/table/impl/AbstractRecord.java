@@ -33,9 +33,6 @@ import org.judal.storage.table.ColumnGroup;
 import org.judal.storage.table.Table;
 import org.judal.storage.table.TableDataSource;
 
-import com.knowgate.debug.DebugFile;
-import com.knowgate.gis.LatLong;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -291,19 +288,11 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 */
 	@Override
 	public void store(DataSource oDts) throws JDOException,ClassCastException {
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin AbstractRecord.store(" + oDts.getClass().getName() + ") " + getClass().getName());
-			DebugFile.incIdent();
-		}
 		if (getConstraintsChecker()!=null)
 			getConstraintsChecker().check(oDts, this);
 		try (Table oTbl = ((TableDataSource) oDts).openTable(this)) {
 			oTbl.store(this);
-		} finally {
-			if (DebugFile.trace) DebugFile.decIdent();
 		}
-		if (DebugFile.trace)
-			DebugFile.writeln("End AbstractRecord.store(" + oDts.getClass().getName() + ") : " +  getKey());
 	}
 
 	/**
@@ -432,19 +421,10 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 		PrimaryKeyDef pk = tableDef.getPrimaryKeyMetadata();
 		if (null==pk)
 			throw new JDOUserException("Table or view "+getTableName()+"  has no primary key");
-		/*
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin AbstractRecord.getKey()");
-			DebugFile.incIdent();
-			DebugFile.writeln("primary key has " +  String.valueOf(pk.getNumberOfColumns()) + " columns");
-		}
-		*/
-
 		if (pk.getNumberOfColumns()==0) {
 			retval = null;
 		} else if (pk.getNumberOfColumns()==1) {
 			retval = apply(pk.getColumn());
-			// if (DebugFile.trace) DebugFile.writeln(pk.getColumn() + "=" + retval);
 			if (retval instanceof String) {
 				try {
 					retval = pk.getColumns()[0].convert((String) retval);
@@ -466,17 +446,10 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 				}
 				c++;
 			}
-			retval = (Object) retvals;
+			retval = retvals;
 		}
 
-		/*
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End AbstractRecord.getKey() : " + retval + (retval!=null ? " of class " + retval.getClass().getName() : ""));
-		}
-		*/
-
-		return (Object) retval;
+		return retval;
 	}
 
 	/**
@@ -489,7 +462,6 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 		PrimaryKeyDef pk = tableDef.getPrimaryKeyMetadata();
 		if (pk.getNumberOfColumns()==0) throw new JDOException("Table "+tableDef.getName()+" has no primary key");
 		if (pk.getNumberOfColumns()==1) {
-			if (DebugFile.trace) DebugFile.writeln("set "+pk.getColumn()+"="+value);
 			if (pk.getColumn()==null)
 				throw new JDOUserException("Primary key column name for table "+tableDef.getName()+" is null");
 			else if (pk.getColumn().trim().length()==0)
@@ -571,13 +543,13 @@ public abstract class AbstractRecord extends AbstractRecordBase {
 	 * @throws ArrayIndexOutOfBoundsException
 	 */
 	@Override
-	public LatLong getLatLong(String sColName) throws ClassCastException, ClassNotFoundException, NumberFormatException, ArrayIndexOutOfBoundsException {
+	public Object getLatLong(String sColName) throws ClassCastException, ClassNotFoundException, NumberFormatException, ArrayIndexOutOfBoundsException {
 		if (null==fhelper)
 			throw new ClassNotFoundException("No FieldHelper class has been specified for " + getTableName());
 		if (isNull(sColName))
 			return null;
 		else
-			return (LatLong) fhelper.getLatLong(this, sColName);
+			return fhelper.getLatLong(this, sColName);
 	}
 
 	/**
