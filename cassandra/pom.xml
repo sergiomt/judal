@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.judal</groupId>
-	<artifactId>cassandra</artifactId>
+	<artifactId>judal-cassandra</artifactId>
 	<version>1.0</version>
 	<packaging>jar</packaging>
 	<name>judal-cassandra</name>
@@ -15,8 +15,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.5.1</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -48,7 +48,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.judal</groupId>
-			<artifactId>core</artifactId>
+			<artifactId>judal-core</artifactId>
 			<version>1.0</version>
 		</dependency>
 		<dependency>

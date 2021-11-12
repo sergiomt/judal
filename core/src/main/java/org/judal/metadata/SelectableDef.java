@@ -1,6 +1,6 @@
 package org.judal.metadata;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -12,20 +12,17 @@ package org.judal.metadata;
  * KIND, either express or implied.
  */
 
-import javax.jdo.metadata.TypeMetadata;
-
-public interface SelectableDef extends TypeMetadata {
+public interface SelectableDef {
 
 	/**
 	 * @return ColumnDef[]
 	 */
-	@Override
-	public ColumnDef[] getColumns();
+	ColumnDef[] getColumns();
 
 	/**
 	 * @return String Comma separated list of column names
 	 */
-	public String getColumnsStr();
+	String getColumnsStr();
 
 	/**
 	 * <p>Get column by name.</p>
@@ -45,4 +42,7 @@ public interface SelectableDef extends TypeMetadata {
 
 	PrimaryKeyDef getPrimaryKeyMetadata();
 
+	String getName();
+
+	int getNumberOfColumns();
 }

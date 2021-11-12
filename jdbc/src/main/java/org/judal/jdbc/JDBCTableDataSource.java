@@ -1,6 +1,6 @@
 package org.judal.jdbc;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -34,9 +34,9 @@ import org.judal.storage.FieldHelper;
 import org.judal.storage.relational.RelationalView;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
+import org.judal.storage.Pair;
 
 import com.knowgate.debug.DebugFile;
-import com.knowgate.tuples.Pair;
 
 /**
  * <p>Implementation of JDBC table data source</p>

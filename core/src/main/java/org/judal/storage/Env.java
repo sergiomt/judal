@@ -1,6 +1,7 @@
 package org.judal.storage;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -25,9 +26,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletConfig;
-
-import com.knowgate.stringutils.Str;
-import com.knowgate.debug.DebugFile;
 
 import static org.judal.storage.DataSource.PropertyNames;
 import static org.judal.storage.DataSource.DefaultValues;
@@ -69,8 +67,6 @@ public class Env {
 		String prefix = namespace.length()==0 ? "" : namespace + ".";
 		for (String propName : PropertyNames) {
 			String prop = cfg.getInitParameter(prefix + propName);
-			if (DebugFile.trace)
-				DebugFile.writeln(prop==null ? "init parameter "+propName+" not found" : "read init parameter "+propName+"="+prop);
 			if (prop!=null)
 				setProperty(props, propName, prop);
 		}
@@ -89,25 +85,15 @@ public class Env {
 	 */
 	public static Map<String,String> getDataSourceProperties(InputStream inStrm, String namespace) throws IOException {
 		Hashtable<String,String> props = new Hashtable<String,String>();
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin Env.getDataSourceProperties(InputStream, namespace=\"" + namespace + "\")");
-			DebugFile.incIdent();
-		}
 		if (namespace==null) namespace = "";
 		String prefix = namespace.length()==0 ? "" : namespace + ".";
 		Properties reader = new Properties();
 		reader.load(inStrm);
 		for (String propName : PropertyNames) {
 			String prop = reader.getProperty(prefix + propName);
-			if (DebugFile.trace)
-				DebugFile.writeln(prop==null ? "property "+propName+" not found" : "read "+propName+"="+prop);
 			if (prop!=null) {
 				setProperty(props, propName, prop);
 			}
-		}
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End Env.getDataSourceProperties()");
 		}
 		return props;
 	}
@@ -159,7 +145,7 @@ public class Env {
 	   */
 	  public static String getPath(Map<String,String> oProperties, String sVarName) {
 	    String sPath = oProperties.get(sVarName);
-	    return Str.chomp(sPath, System.getProperty("file.separator"));
+	    return chomp(sPath, System.getProperty("file.separator"));
 	  }
 
 	  public static String getString(Map<String,String> oProperties, String sVarName, String sDefault) {
@@ -187,10 +173,6 @@ public class Env {
 			  if (iRetVal<0) throw new NumberFormatException();
 		  }
 		  catch (NumberFormatException nfe) {
-			if (DebugFile.trace) {
-			  DebugFile.writeln(sVarName + " property must be a positive integer value");
-			  DebugFile.decIdent();
-			}
 			throw new NumberFormatException(sVarName + " property must be a positive integer value");
 		  }			
 		} // fi
@@ -221,4 +203,24 @@ public class Env {
 	  	}
 	  	return replacedProp;
 	  }
+
+	/**
+	 * Ensure that a String ends with a given substring
+	 * @param sSource Input String
+	 * @param sEndsWith Substring that the String must end with.
+	 * @return If sSource ends with sEndsWith then sSource is returned,
+	 * else sSource+sEndsWith is returned.
+	 */
+	private static String chomp(String sSource, String sEndsWith) {
+
+		if (null==sSource)
+			return null;
+		else if (sSource.length()==0)
+			return "";
+		else if (sSource.endsWith(sEndsWith))
+			return sSource;
+		else
+			return sSource + sEndsWith;
+	} // chomp
+
 }

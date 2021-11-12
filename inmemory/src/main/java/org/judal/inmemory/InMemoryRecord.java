@@ -1,6 +1,6 @@
 package org.judal.inmemory;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -14,7 +14,7 @@ package org.judal.inmemory;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -448,7 +448,7 @@ public class InMemoryRecord extends AbstractRecordBase {
 	@Override
 	public Object getMap(String colname)
 			throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+			NoSuchMethodException, SecurityException, ClassNotFoundException {
 		return recordData.get(colname);
 	}
 

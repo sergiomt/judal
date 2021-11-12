@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.judal</groupId>
-	<artifactId>core</artifactId>
+	<artifactId>judal-core</artifactId>
 	<version>1.0</version>
 	<packaging>jar</packaging>
 	<name>judal-core</name>
@@ -150,11 +150,13 @@
 		</repository>
 	</repositories>
 	<dependencies>
+		<!--
 		<dependency>
 			<groupId>com.knowgate</groupId>
 			<artifactId>knowgate-base</artifactId>
-			<version>9.1.0</version>
+			<version>9.1.1</version>
 		</dependency>
+		-->
 		<dependency>
 			<groupId>jibx</groupId>
 			<artifactId>jdo</artifactId>

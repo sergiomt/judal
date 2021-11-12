@@ -167,12 +167,12 @@
     </dependency>
     <dependency>
       <groupId>org.judal</groupId>
-      <artifactId>jdbc</artifactId>
+      <artifactId>judal-jdbc</artifactId>
       <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.judal</groupId>
-      <artifactId>queues</artifactId>
+      <artifactId>judal-queues</artifactId>
       <version>1.0</version>
     </dependency>
     <dependency>

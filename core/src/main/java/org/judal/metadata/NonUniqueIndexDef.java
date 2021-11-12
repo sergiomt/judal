@@ -1,6 +1,6 @@
 package org.judal.metadata;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -12,22 +12,12 @@ package org.judal.metadata;
  * KIND, either express or implied.
  */
 
+import java.util.List;
 import java.util.LinkedList;
 
-/**
- * This file is licensed under the Apache License version 2.0.
- * You may not use this file except in compliance with the license.
- * You may obtain a copy of the License at:
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.
- */
-
-import java.util.List;
-
 import javax.jdo.metadata.ColumnMetadata;
+
+import org.judal.metadata.IndexDef;
 
 /**
  * Metadata of a non-unique index
@@ -36,7 +26,7 @@ import javax.jdo.metadata.ColumnMetadata;
  */
 public class NonUniqueIndexDef extends IndexDef {
 
-	private static final long serialVersionUID = 10000l;
+	private static final long serialVersionUID = 10000L;
 
 	public NonUniqueIndexDef () {
 		super(null, null, new LinkedList<ColumnMetadata>(), IndexDef.Type.ONE_TO_MANY);

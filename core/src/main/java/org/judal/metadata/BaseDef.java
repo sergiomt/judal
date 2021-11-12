@@ -1,6 +1,6 @@
 package org.judal.metadata;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -19,8 +19,6 @@ import java.util.List;
 
 import javax.jdo.JDOUserException;
 
-import com.knowgate.debug.DebugFile;
-
 /**
  * <p>Base class for several types of metadata objects.</p>
  * @author Sergio Montoro Ten
@@ -28,7 +26,7 @@ import com.knowgate.debug.DebugFile;
  */
 public abstract class BaseDef extends ExtendableDef implements Cloneable {
 
-	private static final long serialVersionUID = 10000l;
+	private static final long serialVersionUID = 10000L;
 
 	protected String name;
 	protected String table;
@@ -190,7 +188,6 @@ public abstract class BaseDef extends ExtendableDef implements Cloneable {
 		if (unmodifiable)
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		ColumnDef cdef = createColumn();
-		if (DebugFile.trace) DebugFile.writeln("newColumnMetadata() at position "+String.valueOf(getNumberOfColumns()+1));
 		cdef.setPosition(getNumberOfColumns()+1);
 		columns.add(cdef);
 		return cdef;

@@ -28,8 +28,6 @@ import java.util.regex.Pattern;
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.ExtensionMetadata;
 
-import com.knowgate.debug.DebugFile;
-
 import java.util.regex.Matcher;
 
 import java.io.Serializable;
@@ -663,10 +661,6 @@ public class ColumnDef extends ExtendableDef implements Serializable, ColumnMeta
 	 */
 	public Object convert(String sIn) throws NumberFormatException,ParseException,NullPointerException {
 		Object retval = unloggedConvert(sIn);
-		if (sIn!=null && retval!=null && !retval.getClass().equals(String.class)) {
-			if (DebugFile.trace)
-				DebugFile.writeln("ColumnDef.convert(" + sIn + ") into " + retval.getClass().getName());
-		}
 		return retval;
 	}
 

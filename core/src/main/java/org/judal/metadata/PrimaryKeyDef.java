@@ -1,6 +1,7 @@
 package org.judal.metadata;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -17,6 +18,9 @@ import javax.jdo.JDOException;
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
+import org.judal.metadata.ColumnDef;
+import org.judal.metadata.ExtendableDef;
+
 /**
  * JDO PrimaryKeyMetadata interface implementation
  * @author Sergio Montoro Ten
@@ -24,7 +28,7 @@ import javax.jdo.metadata.PrimaryKeyMetadata;
  */
 public class PrimaryKeyDef extends ExtendableDef implements PrimaryKeyMetadata {
 
-	private static final long serialVersionUID = 10000l;
+	private static final long serialVersionUID = 10000L;
 
 	private String name;
 	private ColumnDef[] columns;

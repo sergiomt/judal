@@ -1,5 +1,17 @@
 package org.judal.storage.query.sql;
 
+/*
+ * © Copyright 2016 the original author.
+ * This file is licensed under the Apache License version 2.0.
+ * You may not use this file except in compliance with the license.
+ * You may obtain a copy of the License at:
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.
+ */
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -43,7 +55,7 @@ public class SQLPredicate extends Predicate {
 	@Override
 	@SuppressWarnings("unchecked")
 	public SQLPredicate add(Object... constructorParameters)
-		throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException  {
 
 		if (DebugFile.trace) {
 			StringBuilder paramValues = new StringBuilder();
@@ -81,7 +93,12 @@ public class SQLPredicate extends Predicate {
 			}
 		}
 
-		SQLTerm term = constructor.newInstance(constructorParameters);
+		SQLTerm term = null;
+		try {
+			term = constructor.newInstance(constructorParameters);
+		} catch (InvocationTargetException e) {
+			throw new InstantiationException(e.getMessage());
+		}
 		term.setSQLFunctions(getSQLFunctions());
 
 		super.addPart(term);

@@ -1,6 +1,6 @@
 package org.judal.storage.table;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -22,7 +22,7 @@ import org.judal.metadata.NameAlias;
 import org.judal.storage.DataSource;
 import org.judal.storage.FieldHelper;
 
-import com.knowgate.tuples.Pair;
+import org.judal.storage.Pair;
 
 /**
  * Interface for DataSource implementations that support tables without schema
@@ -38,7 +38,7 @@ public interface SchemalessTableDataSource extends DataSource {
 	 * @param columns Iterable&ldquo;String&rdquo;
 	 * @param indexType IndexDef.Type
 	 * @param using IndexDef.Using
-	 * @return IndefDef
+	 * @return IndexDef
 	 * @throws JDOException
 	 */
 	IndexDef createIndexDef(String indexName, String tableName, Iterable<String> columns, IndexDef.Type indexType, IndexDef.Using using) throws JDOException;

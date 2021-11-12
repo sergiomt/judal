@@ -33,7 +33,7 @@ import org.judal.storage.table.TableDataSource;
 import org.judal.storage.table.View;
 
 import com.knowgate.debug.DebugFile;
-import com.knowgate.tuples.Pair;
+import org.judal.storage.Pair;
 
 import com.sleepycat.db.DatabaseException;
 

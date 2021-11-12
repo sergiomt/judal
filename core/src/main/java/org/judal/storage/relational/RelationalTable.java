@@ -1,6 +1,6 @@
 package org.judal.storage.relational;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -13,9 +13,9 @@ package org.judal.storage.relational;
  */
 
 import javax.jdo.JDOException;
+import javax.jdo.Query;
 
 import org.judal.storage.Param;
-import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.table.IndexableTable;
 
 /**
@@ -32,7 +32,7 @@ public interface RelationalTable extends IndexableTable,RelationalView {
 	 * @return int Count of updated records
 	 * @throws JDOException
 	 */
-	int update(Param[] values, AbstractQuery filter) throws JDOException;
+	int update(Param[] values, Query filter) throws JDOException;
 
 	/**
 	 * <p>Delete records filtered by a Query.</p>
@@ -40,6 +40,6 @@ public interface RelationalTable extends IndexableTable,RelationalView {
 	 * @return int Count of deleted records
 	 * @throws JDOException
 	 */
-	int delete(AbstractQuery filter) throws JDOException;
+	int delete(Query filter) throws JDOException;
 
 }

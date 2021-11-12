@@ -1,6 +1,6 @@
 package org.judal.jdbc;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -14,19 +14,6 @@ package org.judal.jdbc;
 
 import java.io.IOException;
 
-/**
- * © Copyright 2016 the original author.
- * This file is licensed under the Apache License version 2.0.
- * You may not use this file except in compliance with the license.
- * You may obtain a copy of the License at:
- * http://www.apache.org/licenses/LICENSE-2.0
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.
- */
-
-import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -50,6 +37,7 @@ import org.judal.storage.table.Record;
 import org.judal.storage.table.impl.AbstractRecord;
 
 import javax.jdo.JDOException;
+import javax.jdo.Query;
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
@@ -241,7 +229,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 	 * @throws JDOException
 	 */
 	@Override
-	public int update(Param[] aValues, AbstractQuery oQry) throws JDOException {
+	public int update(Param[] aValues, Query oQry) throws JDOException {
 		int iAffected = 0;
 		String sSQL = null;
 		if (oQry==null) throw new NullPointerException("JDBCIndexableTable.update() filter query cannot be null");
@@ -253,12 +241,13 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 
 		if (aValues!=null) {
 			if (aValues.length>0) {
-				StringBuffer oVals = new StringBuffer();
+				StringBuilder oVals = new StringBuilder();
 				for (Param v : aValues) {
 					Object oVal = v.getValue();
 					if (oVal instanceof LatLong) {
 						LatLong oLl = (LatLong) oVal; 
-						oVals.append(",").append(v.getName()).append("=ST_GeographyFromText('SRID=4326;POINT("+String.valueOf(oLl.getLattitude())+" "+String.valueOf(oLl.getLongitude())+")')");
+						oVals.append(",").append(v.getName()).append("=ST_GeographyFromText('SRID=4326;POINT(" +
+								oLl.getLattitude() + " " + oLl.getLongitude() + ")')");
 					} else if (oVal instanceof Expression) {
 						oVals.append(",").append(v.getName()).append("=").append(oVal.toString());
 					} else {
@@ -266,7 +255,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 					}
 				}
 				PreparedStatement oStmt = null;
-				sSQL = "UPDATE " + getTableDef().getName() + " SET "+oVals.substring(1)+" WHERE "+oQry.getFilter();
+				sSQL = "UPDATE " + getTableDef().getName() + " SET "+oVals.substring(1)+" WHERE " + ((AbstractQuery) oQry).getFilter();
 				try {
 					if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
 					oStmt = getConnection().prepareStatement(sSQL);
@@ -300,7 +289,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDBCIndexableTable.update() : "+String.valueOf(iAffected));
+			DebugFile.writeln("End JDBCIndexableTable.update() : " + iAffected);
 		}
 
 		return iAffected;
@@ -325,7 +314,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 			for (Param p : params)
 				where.add(p.getName(), Operator.EQ, p.getValue());
 			qry.setFilter(where);
-		} catch (UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException xcpt) {
+		} catch (UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException xcpt) {
 			throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
 		}
 		
@@ -333,7 +322,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDBCRelationalTable.update() : " + String.valueOf(retval));
+			DebugFile.writeln("End JDBCRelationalTable.update() : " + retval);
 		}
 		
 		return retval;
@@ -345,7 +334,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 	 * @throws JDOException
 	 */
 	@Override
-	public int delete(AbstractQuery oQry) throws JDOException {
+	public int delete(Query oQry) throws JDOException {
 		int iAffected = 0;
 		if (oQry==null) throw new NullPointerException("JDBCRelationalTable.delete() filter query cannot be null");
 
@@ -355,7 +344,7 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 		}
 
 				PreparedStatement oStmt = null;
-				String sSQL = "DELETE FROM " + getTableDef().getName() +" WHERE "+oQry.getFilter();
+				String sSQL = "DELETE FROM " + getTableDef().getName() +" WHERE " + ((AbstractQuery) oQry).getFilter();
 				try {
 					if (DebugFile.trace) DebugFile.writeln("Connection.prepareStatement("+sSQL+")");
 					oStmt = getConnection().prepareStatement(sSQL);
@@ -374,14 +363,14 @@ public class JDBCRelationalTable extends JDBCRelationalView implements Relationa
 
 		if (DebugFile.trace) {
 			DebugFile.decIdent();
-			DebugFile.writeln("End JDBCRelationalTable.delete() : "+String.valueOf(iAffected));
+			DebugFile.writeln("End JDBCRelationalTable.delete() : " + iAffected);
 		}
 		return iAffected;
 	}
 	
 	/**
 	 * <p>Delete one or more rows.</p>
-	 * @param oQry AbstractQuery Query defining the rows to be deleted.
+	 * @param where Param[] Parameters to be evaluated with equals comparator and AND operator
 	 * @throws JDOException
 	 */
 	@Override

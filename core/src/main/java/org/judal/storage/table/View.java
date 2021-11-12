@@ -1,6 +1,7 @@
 package org.judal.storage.table;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -11,7 +12,7 @@ package org.judal.storage.table;
  * KIND, either express or implied.
  */
 
-import org.judal.metadata.ColumnDef;
+import javax.jdo.metadata.ColumnMetadata;
 
 /**
  * <p>Interface for read only views with schema.</p>
@@ -20,11 +21,11 @@ import org.judal.metadata.ColumnDef;
  */
 public interface View extends SchemalessView {
 
-	ColumnDef[] columns();
+	ColumnMetadata[] columns();
 
 	int columnsCount();
 
-	ColumnDef getColumnByName (String columnName);
+	ColumnMetadata getColumnByName (String columnName);
 
 	/**
 	 * <p>Get Column index given its name</p>

@@ -1,6 +1,7 @@
 package org.judal.storage;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -11,12 +12,9 @@ package org.judal.storage;
  * KIND, either express or implied.
  */
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
 import org.judal.storage.table.Record;
-
-import com.knowgate.gis.LatLong;
 
 /**
  * <p>Interface for adaptors of non-standard field types.</p>
@@ -104,11 +102,11 @@ public interface FieldHelper {
 	 * <p>Get LatLong.</p>
 	 * @param rec Record
 	 * @param columName String Column name
-	 * @return LatLong
+	 * @return com.knowgate.gis.LatLong
 	 * @throws ClassCastException
 	 * @throws UnsupportedOperationException
 	 */
-	LatLong getLatLong(Record rec, String columName) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, UnsupportedOperationException;
+	Object getLatLong(Record rec, String columName) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, UnsupportedOperationException;
 
 	/**
 	 * <p>Get name-&gt;value Map.</p>
@@ -119,15 +117,13 @@ public interface FieldHelper {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 * @throws ClassNotFoundException
 	 * @throws UnsupportedOperationException
 	 */
-	Object getMap(Record rec, String columName) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException;
+	Object getMap(Record rec, String columName) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException, ClassNotFoundException;
 
-	
 	/**
 	 * <p>Get the family to which a given column belongs.</p>
 	 * @param rec Record

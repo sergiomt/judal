@@ -1,6 +1,6 @@
 package org.judal.jdbc.jdc;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.

@@ -1,6 +1,6 @@
 package org.judal.metadata;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -14,7 +14,8 @@ package org.judal.metadata;
 
 import java.util.LinkedList;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:

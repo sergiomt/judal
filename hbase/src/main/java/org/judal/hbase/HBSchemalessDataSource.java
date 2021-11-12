@@ -1,6 +1,7 @@
 package org.judal.hbase;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -11,7 +12,7 @@ package org.judal.hbase;
  * KIND, either express or implied.
  */
 
-import org.apache.hadoop.hbase.HColumnDescriptor;
+
 import org.apache.hadoop.hbase.HTableDescriptor;
 import org.apache.hadoop.hbase.MasterNotRunningException;
 import org.apache.hadoop.hbase.TableName;
@@ -21,8 +22,7 @@ import org.apache.hadoop.hbase.client.Admin;
 import org.apache.hadoop.hbase.client.ClusterConnection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 
-import com.knowgate.debug.DebugFile;
-import com.knowgate.tuples.Pair;
+import org.judal.storage.Pair;
 
 import org.judal.storage.table.SchemalessIndexableTable;
 import org.judal.storage.table.SchemalessIndexableView;
@@ -34,7 +34,7 @@ import org.judal.metadata.NameAlias;
 import org.judal.metadata.JoinType;
 
 import java.io.IOException;
-import java.io.StringBufferInputStream;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,21 +71,18 @@ public class HBSchemalessDataSource extends HBBaseDataSource implements Schemale
 		try {
 			try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
 				try (Admin oAdm = oCon.getAdmin()) {
-					if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+tableName+")");
 					oAdm.getTableDescriptor(tableName);
 					throw new JDOException("HBTableDataSource.createTable() Table "+tableName+" already exists");
 				}
 			}
 		} catch (TableNotFoundException tnfe) {
 			try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
-				if (DebugFile.trace) DebugFile.writeln("Creating table "+tableName);
 				oTds = new HTableDescriptor(tableName);
 				try (Admin oAdm = oCon.getAdmin()) {
 					oAdm.createTable(oTds);
 				} catch (IOException ioe) {
 					throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
 				}
-				if (DebugFile.trace) DebugFile.writeln("Table "+tableName+" created");
 			} catch (IOException ioe) {
 				throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
 			}
@@ -98,7 +95,6 @@ public class HBSchemalessDataSource extends HBBaseDataSource implements Schemale
 	public HBSchemalessTable openTable(Record oRec) throws JDOException {
 		HBSchemalessTable oTbl = null;
 		try {
-			if (DebugFile.trace) DebugFile.writeln("new HBTable(this, new HTable(getConfig(), "+oRec.getTableName()+"))");
 			oTbl = new HBSchemalessTable(this, getConfig(), oRec);
 			addTable(oTbl);
 			return oTbl;

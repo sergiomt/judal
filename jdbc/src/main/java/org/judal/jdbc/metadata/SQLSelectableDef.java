@@ -1,6 +1,6 @@
 package org.judal.jdbc.metadata;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -25,5 +25,17 @@ public interface SQLSelectableDef extends SelectableDef, Scriptable {
 	 * @return String
 	 */
 	String getTables() throws JDOUserException,JDOUnsupportedOptionException;
+
+	/**
+	 *
+	 * @return String
+	 */
+	String getCatalog();
+
+	/**
+	 *
+	 * @return String
+	 */
+	String getSchema();
 
 }

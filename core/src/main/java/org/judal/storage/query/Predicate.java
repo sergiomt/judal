@@ -1,6 +1,6 @@
 package org.judal.storage.query;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -13,13 +13,12 @@ package org.judal.storage.query;
  */
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.jdo.JDOUserException;
-
-import com.knowgate.debug.DebugFile;
 
 import static org.judal.storage.query.Connective.*;
 
@@ -37,7 +36,7 @@ import static org.judal.storage.query.Connective.*;
 * s.load(JDCConnection, p.getParameters());
 * Example of Usage #2: Get all contacts whose status is in a given list of values and do not have any opportunity
 * Term t1 = new Term("id_status","IN",new String[]{"Active","JobChange","AnotherStatus"});
-* Term t2 = new Term("SELECT gu_oportunity FROM k_oportunities o WHERE o.gu_contact=c.gu_contact","NOT EXISTS",null);
+* Term t2 = new Term("SELECT gu_opportunity FROM k_opportunities o WHERE o.gu_contact=c.gu_contact","NOT EXISTS",null);
 * AndPredicate p = new AndPredicate();
 * p.add(t1);
 * p.add(t2);
@@ -168,13 +167,12 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
 	 * @return this QueryPredicate
 	 */
 	public abstract Predicate add (Object... constructorParameters)
 		throws	UnsupportedOperationException, NoSuchMethodException,
 				SecurityException, InstantiationException, IllegalAccessException,
-				IllegalArgumentException, InvocationTargetException;
+				IllegalArgumentException;
 
 	/**
 	 * Set connective to AND and create a query part and add it to predicate
@@ -185,14 +183,13 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
 	 * @throws UnsupportedOperationException
 	 * @return this QueryPredicate
 	 */
 	public Predicate and (Object... constructorParameters)
 		throws	UnsupportedOperationException, NoSuchMethodException,
 				SecurityException, InstantiationException, IllegalAccessException,
-				IllegalArgumentException, InvocationTargetException, JDOUserException {
+				IllegalArgumentException, JDOUserException {
 		if (oConnective.equals(NONE) || oConnective.equals(AND)) {
 			oConnective = AND;
 			return add(constructorParameters);
@@ -210,14 +207,13 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
 	 * @throws UnsupportedOperationException
 	 * @return this QueryPredicate
 	 */
 	public Predicate or (Object... constructorParameters)
 		throws	UnsupportedOperationException, NoSuchMethodException,
 				SecurityException, InstantiationException, IllegalAccessException,
-				IllegalArgumentException, InvocationTargetException {
+				IllegalArgumentException {
 		if (oConnective.equals(NONE) || oConnective.equals(OR)) {
 			oConnective = OR;
 			return add(constructorParameters);
@@ -242,7 +238,7 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	 * Get predicate parts
 	 * @return ArrayList&lt;Part&gt;
 	 */
-	public ArrayList<Part> parts() {
+	public List<Part> parts() {
 		return oParts;
 	}
 
@@ -253,17 +249,10 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 	@Override
 	public Object[] getParameters() {
 		
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin Predicate.getParameters()");
-			DebugFile.incIdent();
-		}
-		
-		ArrayList<Object> oParams = new ArrayList<Object>();
+		ArrayList<Object> oParams = new ArrayList<>();
 		
 		for (Part oPart : oParts) {
 			if (oPart instanceof Term) {
-				if (DebugFile.trace)
-					DebugFile.writeln("getting parameters of nested Term");
 				Term oTerm = (Term) oPart;
 				if (!oTerm.getOperator().equals(Operator.IS) && !oTerm.getOperator().equals(Operator.ISNOT))
 				  for (int v=0; v<oTerm.getValueCount(); v++)
@@ -275,8 +264,6 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 						  oParams.add(oTerm.getValue(v));
 			} else {
 				Object[] aParams = oPart.getParameters();
-				if (DebugFile.trace)
-					DebugFile.writeln("adding "+String.valueOf(aParams.length)+" parameters");
 				for (int p=0; p<aParams.length; p++)
 					if (aParams[p]==null)
 						oParams.add(aParams[p]);
@@ -286,33 +273,8 @@ public abstract class Predicate implements Cloneable, Part, Serializable {
 						oParams.add(aParams[p]);
 			}
 		} // next
-		
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			if (oParams!=null && oParams.size()>0) {
-				StringBuilder b = new StringBuilder();
-				for (Object param : oParams)
-					b.append(param==null ? null : param.getClass().getName()).append(",");
-				if (b.length()>0) b.setLength(b.length()-1);
-				DebugFile.writeln("End Predicate.getParameters() : { "+b.toString()+"}");
-			} else {
-				DebugFile.writeln("End Predicate.getParameters() : { }");
-			}
-		}
-		
+
 		return oParams.toArray();
 	}
-
-	/**
-	 * <p>Get representation of this Predicate according to the query syntax required by the implementation.</p>
-	 * @return Object
-	 */
-	public abstract Object getText();
-
-	/**
-	 * <p>Get parameterized text representation of this Predicate according to the query syntax required by the implementation.</p>
-	 * @return String
-	 */
-	public abstract String getTextParametrized();
 	
 }

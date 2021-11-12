@@ -1,6 +1,6 @@
 package org.judal.transaction;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -22,8 +22,6 @@ import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.xa.XAException;
-
-import com.knowgate.debug.DebugFile;
 
 /**
  * <p>Implementation of javax.transaction.TransactionManager</p>
@@ -84,31 +82,15 @@ public class DataSourceTransactionManager implements TransactionManager {
 	private void requireTransaction(String action) throws IllegalStateException, SystemException {
 		final Transaction trn = threadTransaction.get();
 		if (trn==null) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("There is no active transaction to " + action);
-				DebugFile.decIdent();
-			}
 			throw new IllegalStateException("There is no active transaction to " + action);
 		}
 		else {
 			switch (trn.getStatus()) {
 				case Status.STATUS_NO_TRANSACTION:
-					if (DebugFile.trace) {
-						DebugFile.writeln("Can't " + action + "transaction with status no transaction");
-						DebugFile.decIdent();
-					}
 					throw new IllegalStateException("Can't " + action + "transaction with status no transaction");
 				case Status.STATUS_COMMITTED:
-					if (DebugFile.trace) {
-						DebugFile.writeln("Can't " + action + "transaction with status comitted");
-						DebugFile.decIdent();
-					}
 					throw new IllegalStateException("Can't " + action + "transaction with status comitted");
 				case Status.STATUS_ROLLEDBACK:
-					if (DebugFile.trace) {
-						DebugFile.writeln("Can't " + action + "transaction with status rolled back");
-						DebugFile.decIdent();
-					}
 					throw new IllegalStateException("Can't " + action + "transaction with status comitted");
 			}
 		}
@@ -143,21 +125,12 @@ public class DataSourceTransactionManager implements TransactionManager {
 	 */
 	@Override
 	public void commit() throws RollbackException, HeuristicMixedException, HeuristicRollbackException,
-			SecurityException, IllegalStateException, SystemException {	
-		
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransactionManager.commit()");
-			DebugFile.incIdent();
-		}
+			SecurityException, IllegalStateException, SystemException {
 
 		requireTransaction("commit");
 		getTransaction().commit();
 		removeTransaction();
 
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransactionManager.commit()");
-		}
 	}
 
 	/**
@@ -208,26 +181,14 @@ public class DataSourceTransactionManager implements TransactionManager {
 	 */
 	@Override
 	public void rollback() throws IllegalStateException, SecurityException, SystemException {
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransactionManager.rollback()");
-			DebugFile.incIdent();
-		}
 
 		requireTransaction("rollback");
 		if (getStatus()==Status.STATUS_COMMITTING) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("Cannot rollback transaction while it's committing");
-				DebugFile.decIdent();
-			}			
 			throw new IllegalStateException("Cannot rollback transaction while it's committing");
 		}
 		getTransaction().rollback();
 		removeTransaction();
 
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransactionManager.rollback()");
-		}
 	}
 
 	/**

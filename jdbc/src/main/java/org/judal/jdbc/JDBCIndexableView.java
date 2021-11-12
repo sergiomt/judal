@@ -1,6 +1,6 @@
 package org.judal.jdbc;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -13,8 +13,8 @@ package org.judal.jdbc;
  */
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -416,7 +416,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			Predicate predicate = new SQLAndPredicate();
 			try {
 				predicate.add(indexColumnName, EQ, valueSearched);
-			} catch (IllegalArgumentException | IllegalAccessException | UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | InvocationTargetException xcpt) { 
+			} catch (IllegalArgumentException | IllegalAccessException | UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException xcpt) {
 				throw new JDOException(xcpt.getMessage(), xcpt);
 			}
 			qry.setFilter(predicate);
@@ -452,7 +452,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			} else {
 				predicate.add(indexColumnName, BETWEEN, new Object[]{valueFrom, valueTo});
 			}
-		} catch (IllegalArgumentException | IllegalAccessException | UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | InvocationTargetException xcpt) { 
+		} catch (IllegalArgumentException | IllegalAccessException | UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException xcpt) {
 			throw new JDOException(xcpt.getMessage(), xcpt);
 		}
 		SQLQuery qry = new SQLQuery(this);
@@ -491,7 +491,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			try {
 				for (Param p : params)
 					where.add(p.getName(), Operator.EQ, p.getValue());
-			} catch (UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException xcpt) {
+			} catch (UnsupportedOperationException | NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException xcpt) {
 				throw new JDOException(xcpt.getClass().getName()+" "+xcpt.getMessage(), xcpt);
 			}
 			qry.setFilter(where);
@@ -638,7 +638,7 @@ public class JDBCIndexableView extends JDBCBase implements IndexableView {
 			throw new RuntimeException("No suitable constructor found for class " + recordClass.getName());
 
 		if (null==iterators)
-			iterators = new LinkedList<JDBCIterator>();
+			iterators = new LinkedList<>();
 
 		StringBuilder columns = new StringBuilder();
 		try {

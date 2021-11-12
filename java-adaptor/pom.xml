@@ -117,7 +117,12 @@
   <dependencies>
     <dependency>
       <groupId>org.judal</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>judal-core</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.judal</groupId>
+      <artifactId>judal-table</artifactId>
       <version>1.0</version>
     </dependency>
     <dependency>

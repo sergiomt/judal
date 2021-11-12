@@ -1,6 +1,6 @@
 package org.judal.storage.table;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -26,7 +26,7 @@ import org.judal.metadata.ViewDef;
 import org.judal.storage.DataSource;
 import org.judal.storage.FieldHelper;
 
-import com.knowgate.tuples.Pair;
+import org.judal.storage.Pair;
 
 /**
  * Interface for DataSource implementations that support tables with schema

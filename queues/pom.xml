@@ -2,7 +2,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.judal</groupId>
-  <artifactId>queues</artifactId>
+  <artifactId>judal-queues</artifactId>
   <version>1.0</version>
   <packaging>jar</packaging>
   <name>judal-queues</name>
@@ -117,25 +117,30 @@
   <dependencies>
     <dependency>
       <groupId>org.judal</groupId>
-      <artifactId>core</artifactId>
+      <artifactId>judal-core</artifactId>
+      <version>1.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.judal</groupId>
+      <artifactId>judal-table</artifactId>
       <version>1.0</version>
       <exclusions>
-      	<exclusion>
-      		<artifactId>poi</artifactId>
-      		<groupId>org.apache.poi</groupId>
-      	</exclusion>
-      	<exclusion>
-      		<artifactId>jibx-run</artifactId>
-      		<groupId>org.jibx</groupId>
-      	</exclusion>
-      	<exclusion>
-      		<artifactId>xercesImpl</artifactId>
-      		<groupId>xerces</groupId>
-      	</exclusion>
-      	<exclusion>
-      		<artifactId>xmlParserAPIs</artifactId>
-      		<groupId>xml-apis</groupId>
-      	</exclusion>
+        <exclusion>
+          <artifactId>poi</artifactId>
+          <groupId>org.apache.poi</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>jibx-run</artifactId>
+          <groupId>org.jibx</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xercesImpl</artifactId>
+          <groupId>xerces</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xmlParserAPIs</artifactId>
+          <groupId>xml-apis</groupId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>

@@ -1,6 +1,6 @@
 package org.judal.metadata;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -12,18 +12,9 @@ package org.judal.metadata;
  * KIND, either express or implied.
  */
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.Stack;
 
 import javax.jdo.JDOUserException;
-
-import com.knowgate.debug.DebugFile;
-import org.judal.storage.table.Record;
 
 /**
  * View metadata
@@ -137,7 +128,6 @@ public class ViewDef extends TypeDef implements SelectableDef {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.alias = alias;
-		if (DebugFile.trace) DebugFile.writeln("ViewDef.setAlias(" + alias + ")");
 		return this;
 	}
 
@@ -158,7 +148,6 @@ public class ViewDef extends TypeDef implements SelectableDef {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.description = description;
-		if (DebugFile.trace) DebugFile.writeln("ViewDef.setDescription(" + description + ")");
 		return this;
 	}
 
@@ -232,8 +221,6 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int maxLength, boolean isNullable, NonUniqueIndexDef.Type indexType) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
-		if (DebugFile.trace)
-			DebugFile.writeln("ViewDef.addColumnMetadata("+columnFamilyName+","+columnName+","+ColumnDef.typeName(columnType)+","+String.valueOf(maxLength)+","+String.valueOf(isNullable)+","+indexType+")");
 		addColumnMetadata(columnFamilyName, columnName, columnType, maxLength, 0, isNullable, indexType, null, null);
 	}
 
@@ -249,8 +236,6 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int maxLength, boolean isNullable) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
-		if (DebugFile.trace)
-			DebugFile.writeln("ViewDef.addColumnMetadata("+columnFamilyName+","+columnName+","+ColumnDef.typeName(columnType)+","+String.valueOf(maxLength)+","+String.valueOf(isNullable)+")");
 		addColumnMetadata(columnFamilyName, columnName, columnType, maxLength, 0, isNullable, null, null, null);
 	}
 
@@ -267,8 +252,6 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, int precision, int decimalDigits, boolean isNullable) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
-		if (DebugFile.trace)
-			DebugFile.writeln("ViewDef.addColumnMetadata("+columnFamilyName+","+columnName+","+ColumnDef.typeName(columnType)+","+String.valueOf(precision)+","+String.valueOf(decimalDigits)+","+String.valueOf(isNullable)+")");
 		addColumnMetadata(columnFamilyName, columnName, columnType, precision, decimalDigits, isNullable, null, null, null);
 	}
 	
@@ -284,8 +267,6 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, boolean isNullable, NonUniqueIndexDef.Type indexType) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
-		if (DebugFile.trace)
-			DebugFile.writeln("ViewDef.addColumnMetadata("+columnFamilyName+","+columnName+","+ColumnDef.typeName(columnType)+String.valueOf(isNullable)+","+indexType+")");
 		addColumnMetadata(columnFamilyName, columnName, columnType, ColumnDef.getDefaultPrecision(columnType), 0, isNullable, indexType, null, null);
 	}
 	
@@ -300,33 +281,7 @@ public class ViewDef extends TypeDef implements SelectableDef {
 	public void addColumnMetadata(String columnFamilyName, String columnName, int columnType, boolean isNullable) throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.') + 1) + " is set to unmodifiable");
-		if (DebugFile.trace)
-			DebugFile.writeln("ViewDef.addColumnMetadata(" + columnFamilyName + "," + columnName + "," + ColumnDef.typeName(columnType) + "," + String.valueOf(isNullable) + ")");
 		addColumnMetadata(columnFamilyName, columnName, columnType, ColumnDef.getDefaultPrecision(columnType), 0, isNullable, null, null, null);
 	}
 
-	/**
-	 * <p>Create a ViewDef for a class which implements Record interface</p>
-	 * @param recClass Class&ldquo;? extends Record&rdquo; Class implementing Record interface
-	 * @param tableName String
-	 */
-	public static ViewDef of(Class<? extends Record> recClass, String tableName) {
-		final Stack<Class<?>> superClasses = new Stack<>();
-		final List<ColumnDef> columns = new ArrayList<>();
-		superClasses.add(recClass);
-		for (Class<?> superClass = recClass.getSuperclass(); superClass!=null; superClass = superClass.getSuperclass()) {
-			superClasses.add(superClass);
-		}
-		superClasses.forEach(clazz ->  addColumns(clazz, columns));
-		return new ViewDef(tableName, columns.toArray(new ColumnDef[columns.size()]));
-	}
-
-	private static void addColumns(Class<?> clazz, List<ColumnDef> columns) {
-		for (Field f : clazz.getDeclaredFields()) {
-			f.setAccessible(true);
-			if ((f.getModifiers() & Modifier.TRANSIENT) != 0) {
-				columns.add(new ColumnDef(f.getName(),ColumnDef.typeForClass(f.getClass()), columns.size() + 1));
-			}
-		}
- 	}
 }

@@ -1,6 +1,6 @@
 package org.judal.storage.java;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -40,7 +40,7 @@ import com.knowgate.debug.DebugFile;
 
 public class PojoRecord extends AbstractRecord implements JavaRecord {
 
-	private static final long serialVersionUID = 10000l;
+	private static final long serialVersionUID = 10000L;
 
 	private ArrayList<Field> persistentFields;
 	
@@ -255,8 +255,8 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 	}
 
 	@Override
-	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
-		return (Map<String,String>) getMap(sKey);
+	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+		return getMap(sKey);
 	} // getMap
 	
 	@Override
@@ -266,7 +266,7 @@ public class PojoRecord extends AbstractRecord implements JavaRecord {
 
 	@Override
 	public Set<String> keySet() {
-		TreeSet<String> keys = new TreeSet<String>();
+		TreeSet<String> keys = new TreeSet<>();
 		for (Field fld : getPersistentFields())
 			keys.add(fld.getName());
 		return keys;

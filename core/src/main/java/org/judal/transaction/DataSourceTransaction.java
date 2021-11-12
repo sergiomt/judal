@@ -1,6 +1,6 @@
 package org.judal.transaction;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -28,8 +28,6 @@ import javax.transaction.SystemException;
 
 import javax.transaction.xa.Xid;
 
-import com.knowgate.debug.DebugFile;
-
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 
@@ -56,8 +54,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 		thid = Thread.currentThread().getId();
 		sync = null;
 		status = Status.STATUS_NO_TRANSACTION;
-		resources = new LinkedList<XAResource>();
-		if (DebugFile.trace) DebugFile.writeln("new DataSourceTransaction with Xid = "+tid.toString() + " for thread " + thid);
+		resources = new LinkedList<>();
 	}
 
 	/**
@@ -74,24 +71,11 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	 * @throws XAException
 	 */
 	public void begin() throws IllegalStateException, XAException {
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransaction.begin()");
-			DebugFile.incIdent();
-			DebugFile.writeln("Xid = " + tid.toString());
-		}
 
 		if (status==Status.STATUS_UNKNOWN) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("IllegalStateException Transaction "+tid.toString()+" status is unknown");
-				DebugFile.decIdent();
-			}
 			throw new IllegalStateException("Transaction "+tid.toString()+" status is unknown");
 		}
 		if (isActive()) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("Transaction "+tid.toString()+" has been already activated");
-				DebugFile.decIdent();
-			}
 			throw new IllegalStateException("IllegalStateException Transaction "+tid.toString()+" has been already activated");
 		}
 		
@@ -100,11 +84,6 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 		}
 
 		status = Status.STATUS_ACTIVE;
-
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.begin() : " + tid.toString());
-		}
 	}
 
 	/**
@@ -114,20 +93,11 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	 */
 	@Override
 	public void close() throws XAException {
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransaction.close()");
-			DebugFile.incIdent();
-			DebugFile.writeln("Xid = " + tid.toString());
-		}
 
 		while (!resources.isEmpty())
 			resources.pollFirst().end(tid, XAResource.TMJOIN);
 		status = Status.STATUS_NO_TRANSACTION;
 
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.close() : " + tid.toString());
-		}
 	}
 
 	/**
@@ -159,17 +129,8 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	 */
 	@Override
 	public void commit() throws IllegalStateException,JDOException {
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransaction.commit()");
-			DebugFile.incIdent();
-			DebugFile.writeln("Xid = " + tid.toString());
-		}
 
 		if (status!=Status.STATUS_ACTIVE && status!=Status.STATUS_PREPARED) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("IllegalStateException Invalid status for commit "+ getStatusAsString() + " at transaction " + tid.toString());
-				DebugFile.decIdent();
-			}
 			throw new IllegalStateException("Invalid status for commit " + getStatusAsString() + " at transaction " + tid.toString());
 		}
 
@@ -179,13 +140,11 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			status = Status.STATUS_COMMITTING;
 			while (!resources.isEmpty()) {
 				XAResource res = resources.pollFirst();
-				if (DebugFile.trace) DebugFile.writeln("XAResource.commit("+tid.toString()+")");
 				res.commit(tid, true);
 				res.end(tid, XAResource.TMJOIN);
 			}
 			status = Status.STATUS_COMMITTED;
 		} catch (XAException xcpt) {
-			if (DebugFile.trace) DebugFile.decIdent();
 			switch (xcpt.errorCode) {
 			case XAException.XA_HEURCOM:
 			case XAException.XA_HEURHAZ:
@@ -205,10 +164,6 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 		if (sync!=null)
 			sync.afterCompletion(status);
 
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.commit() " + tid.toString());
-		}
 	}
 
 	/**
@@ -231,31 +186,18 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	@Override
 	public boolean delistResource(XAResource res, int flag) throws NullPointerException, IllegalStateException, SystemException {
 		if (status==Status.STATUS_NO_TRANSACTION) {
-			if (DebugFile.trace) DebugFile.writeln("IllegalStateException DataSourceTransaction.delistResource() Current thread has no active transaction");
 			throw new IllegalStateException("Current thread has no active transaction");
 		}
 
 		if (null==res) {
-			if (DebugFile.trace) DebugFile.writeln("NullPointerException DataSourceTransaction.delistResource() XAResource cannot be null");
-			throw new NullPointerException("XAResource cannot be null");			
+			throw new NullPointerException("XAResource cannot be null");
 		}
 
 		boolean retval;
 
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransaction.delistResource("+res+","+flag+")");
-			DebugFile.incIdent();
-		}
-
 		if (contains(res)) {
 			if (tid.getFormatId()==TransactionId.NO_TRANSACTION_ID) {
-				if (DebugFile.trace) {
-					DebugFile.writeln("IllegalStateException Invalid transaction id format");
-					DebugFile.decIdent();
-				}
 				throw new IllegalStateException("Invalid transaction id format");
-			} else if (DebugFile.trace) {
-				DebugFile.writeln("Xid = " + tid.toString());
 			}
 
 			try {
@@ -269,11 +211,6 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			retval = false;
 		}
 
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.delistResource()");
-		}
-		
 		return retval;
 	}
 
@@ -314,56 +251,21 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 
 		boolean retval;
 
-		if (null==res) {
-			if (DebugFile.trace) DebugFile.writeln("NullPointerException DataSourceTransaction.enlistResource() XAResource cannot be null");
-			throw new NullPointerException("XAResource cannot be null");			
-		}
-
-		if (DebugFile.trace) {
-			if (res instanceof Connection) {
-				try {
-					if (((Connection) res).isClosed()) {
-						DebugFile.writeln("Cannot enlist Connection " + res + " into DataSourceTransaction because it is closed");
-						throw new IllegalStateException("Cannot enlist Connection " + res + " into DataSourceTransaction because the Connection is closed");
-					}
-				} catch (SQLException e) {
-					DebugFile.writeln(e.getClass().getName() + " " + e.getMessage());
-					throw new SystemException("Cannot enlist Connection " + res + " into DataSourceTransaction " + e.getClass().getName() + " " + e.getMessage());
-				}
-			}
-			DebugFile.writeln("Begin DataSourceTransaction.enlistResource(" + res + ")");
-			DebugFile.incIdent();
-		}
-
 		if (status==Status.STATUS_MARKED_ROLLBACK || status==Status.STATUS_ROLLING_BACK) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("RollbackException Cannot enlist resource because transaction was set to rollback only");
-				DebugFile.decIdent();
-			}			
 			throw new RollbackException("Cannot enlist resource because transaction was set to rollback only");
 		}
 
 		if (status==Status.STATUS_PREPARED) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("IllegalStateException Cannot enlist resources in prepared transaction " + tid.toString());
-				DebugFile.decIdent();
-			}
 			throw new IllegalStateException("Cannot enlist resources in a prepared transaction " + tid.toString());
 		}
 
 		if (!contains(res)) {
 			
 			if (tid.getFormatId()==TransactionId.NO_TRANSACTION_ID) {
-				if (DebugFile.trace) {
-					DebugFile.writeln("IllegalStateException Invalid transaction id format");
-					DebugFile.decIdent();
-				}
 				throw new IllegalStateException("Invalid transaction id format");
 			}
 			
 			try {
-				if (DebugFile.trace)
-					DebugFile.writeln("XAResource.start("+tid.toString()+","+XAResource.TMJOIN+")");
 				res.start(tid, XAResource.TMJOIN);
 			} catch (XAException xcpt) {
 				throw new SystemException(xcpt.getMessage());
@@ -371,16 +273,9 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 			resources.add(res);
 			retval = true;
 		} else {
-			if (DebugFile.trace)
-				DebugFile.writeln("DataSourceTransaction " + tid.toString() + " resources already contains resource " + res);
 			retval = false;
 		}
 
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.enlistResource() : " + retval);
-		}
-		
 		return retval;
 	}
 
@@ -443,33 +338,19 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	public void rollback() throws JDOException {
 		if (status!=Status.STATUS_ACTIVE && status!=Status.STATUS_PREPARED && status!=Status.STATUS_MARKED_ROLLBACK)
 			throw new IllegalStateException("Invalid transaction status for rollback " + getStatusAsString());
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin DataSourceTransaction.rollback()");
-			DebugFile.incIdent();
-			DebugFile.writeln("Xid = "+tid.toString());
-		}
 		try {
 			status = Status.STATUS_ROLLING_BACK;
 			while (!resources.isEmpty()) {
 				XAResource res = resources.pollFirst();
-				if (DebugFile.trace) DebugFile.writeln("XAResource.rollback("+tid.toString()+")");
 				res.rollback(tid);
 				res.end(tid, XAResource.TMJOIN);
 			}
 			status = Status.STATUS_ROLLEDBACK;
 		} catch (XAException xcpt) {
-			if (DebugFile.trace) {
-				DebugFile.writeln("XAException " + xcpt.getMessage());
-				DebugFile.decIdent();
-			}
 			throw new JDOException(xcpt.getMessage());
 		}		
 		if (sync!=null)
 			sync.afterCompletion(status);
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End DataSourceTransaction.rollback()");
-		}
 	}
 
 	/**
@@ -489,7 +370,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	
 	private boolean supportsIsolationLevel() {
 		boolean supportIsolationLevel = true;
-		if (resources.size()>0) {
+		if (!resources.isEmpty()) {
 			for (XAResource res : resources) {
 				supportIsolationLevel = res instanceof Connection;
 				if (!supportIsolationLevel)
@@ -540,14 +421,20 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 				for (XAResource res : resources) {
 					@SuppressWarnings("resource")
 					Connection conn = (Connection) res;
-					if (level.equals(Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_READ_UNCOMMITTED))
-						conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
-					else if (level.equals(Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_READ_COMMITTED))
-						conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-					else if (level.equals(Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_REPEATABLE_READ))
-						conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
-					else if (level.equals(Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_SERIALIZABLE))
-						conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+					switch (level) {
+						case Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_READ_UNCOMMITTED:
+							conn.setTransactionIsolation(Connection.TRANSACTION_READ_UNCOMMITTED);
+							break;
+						case Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_READ_COMMITTED:
+							conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+							break;
+						case Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_REPEATABLE_READ:
+							conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
+							break;
+						case Constants.PROPERTY_TRANSACTION_ISOLATION_LEVEL_SERIALIZABLE:
+							conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+							break;
+					}
 				}
 			} catch (SQLException sqle) {
 				throw new JDOUnsupportedOptionException(sqle.getMessage(), sqle);				

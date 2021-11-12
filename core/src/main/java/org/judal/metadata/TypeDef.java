@@ -1,6 +1,6 @@
 package org.judal.metadata;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -12,7 +12,6 @@ package org.judal.metadata;
  * KIND, either express or implied.
  */
 
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,20 +20,14 @@ import java.util.Map;
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
 import javax.jdo.JDOUnsupportedOptionException;
-
 import javax.jdo.metadata.ColumnMetadata;
 import javax.jdo.metadata.DatastoreIdentityMetadata;
 import javax.jdo.metadata.ForeignKeyMetadata;
 import javax.jdo.metadata.IndexMetadata;
 import javax.jdo.metadata.InheritanceMetadata;
-import javax.jdo.metadata.PropertyMetadata;
 import javax.jdo.metadata.QueryMetadata;
-import javax.jdo.metadata.TypeMetadata;
 import javax.jdo.metadata.UniqueMetadata;
 import javax.jdo.metadata.VersionMetadata;
-
-import com.knowgate.debug.DebugFile;
-
 import javax.jdo.annotations.IdentityType;
 
 /**
@@ -42,9 +35,9 @@ import javax.jdo.annotations.IdentityType;
  * @author Sergio Montoro Ten
  * @version 1.0
  */
-public class TypeDef extends BaseDef implements TypeMetadata {
+public class TypeDef extends BaseDef {
 
-	private static final long serialVersionUID = 10000l;
+	private static final long serialVersionUID = 10000L;
 
 	@SuppressWarnings("serial")
 	private class CaseInsensitiveColumnMap extends HashMap<String,Integer> {
@@ -82,9 +75,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>Constructor.</p>
 	 */
 	public TypeDef() {
-		queries = new HashMap<String,QueryDef>();
+		queries = new HashMap<>();
 		positions = new CaseInsensitiveColumnMap();
-		fetchGroups = new LinkedList<MemberGroupDef>();
+		fetchGroups = new LinkedList<>();
 		identityMeta = null;
 		identityType = IdentityType.DATASTORE;
 		serializeRead = false;
@@ -100,7 +93,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		super(source);
 		schema = source.schema;
 		catalog = source.catalog;
-		queries = new HashMap<String,QueryDef>();
+		queries = new HashMap<>();
 		for (Map.Entry<String,QueryDef> query : source.queries.entrySet())
 			queries.put(query.getKey(), query.getValue());
 		positions = new CaseInsensitiveColumnMap();
@@ -110,6 +103,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		identityType = source.identityType;
 		serializeRead = source.serializeRead;
 		requiresExtent = source.requiresExtent;
+		objectIdClass = source.objectIdClass;
+		detachable = source.detachable;
+		fetchGroups = source.fetchGroups;
 	}
 
 	/**
@@ -127,11 +123,9 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return String Catalog name or empty String or <b>null</b>
 	 */
-	@Override
 	public String getCatalog() {
 		return catalog;
 	}
-
 
 	/**
 	 * @return Column names separated by commas. If column count is zero then empty String is returned.
@@ -189,7 +183,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return DatastoreIdentityMetadata
 	 */
-	@Override
 	public DatastoreIdentityMetadata getDatastoreIdentityMetadata() {
 		return identityMeta;
 	}
@@ -197,7 +190,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return boolean
 	 */
-	@Override
 	public boolean getDetachable() {
 		return detachable;
 	}
@@ -205,7 +197,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return boolean
 	 */
-	@Override
 	public Boolean getEmbeddedOnly() {
 		return embeddedOnly;
 	}
@@ -214,7 +205,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>Get array of known fetch groups applicable to this TypeDef.</p>
 	 * @return MemberGroupDef[]
 	 */
-	@Override
 	public MemberGroupDef[] getFetchGroups() {
 		return fetchGroups.toArray(new MemberGroupDef[fetchGroups.size()]);
 	}
@@ -237,7 +227,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return ForeignKeyDef[] or <b>null</b> if this TypeDef has no foreign keys.
 	 */
-	@Override
 	public ForeignKeyDef[] getForeignKeys() {
 		if (fks.size()>0)
 			return fks.toArray(new ForeignKeyDef[fks.size()]);
@@ -248,7 +237,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return IdentityType
 	 */
-	@Override
 	public IdentityType getIdentityType() {
 		return identityType;
 	}
@@ -256,7 +244,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return NonUniqueIndexDef[] or TypeDef.NoIndices if there aren't any non unique indexes.
 	 */
-	@Override
 	public NonUniqueIndexDef[] getIndices() {
 		if (nonUniqueIndexes.size()>0)
 			return nonUniqueIndexes.toArray(new NonUniqueIndexDef[nonUniqueIndexes.size()]);
@@ -268,7 +255,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
 	 * @throws JDOUnsupportedOptionException
 	 */
-	@Override
 	public InheritanceMetadata getInheritanceMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support getInheritanceMetadata()");
 	}
@@ -276,7 +262,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return JoinDef[] or TypeDef.NoJoins there aren't any joins.
 	 */
-	@Override
 	public JoinDef[] getJoins() {
 		if (getNumberOfJoins()>0)
 			return joins.toArray(new JoinDef[joins.size()]);
@@ -288,7 +273,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>Get array of member fields of this TypeDef.</p>
 	 * @return FieldDef[]
 	 */
-	@Override
 	public FieldDef[] getMembers() {
 		final int count = getNumberOfColumns();
 		FieldDef[] members = new FieldDef[count];
@@ -317,7 +301,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @param name String
 	 * @return TypeMetadata <b>this</b>
 	 */
-	public TypeMetadata setName(String name) {
+	public TypeDef setName(String name) {
 		this.name = name;
 		return this;
 	}
@@ -325,7 +309,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return int
 	 */
-	@Override
 	public int getNumberOfFetchGroups() {		
 		return fetchGroups==null ? 0 : fetchGroups.size();
 	}
@@ -333,7 +316,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return int
 	 */
-	@Override
 	public int getNumberOfForeignKeys() {
 		return fks==null ? 0 : fks.size();
 	}
@@ -341,7 +323,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return int
 	 */
-	@Override
 	public int getNumberOfIndices() {
 		return nonUniqueIndexes==null ? 0 : nonUniqueIndexes.size();
 	}
@@ -349,7 +330,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return int
 	 */
-	@Override
 	public int getNumberOfJoins() {
 		return joins==null ? 0 : joins.size();
 	}
@@ -357,7 +337,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return int
 	 */
-	@Override
 	public int getNumberOfMembers() {
 		return getNumberOfColumns();
 	}
@@ -366,7 +345,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>This method always returns zero.</p>
 	 * @return int 0
 	 */
-	@Override
 	public int getNumberOfQueries() {
 		return 0;
 	}
@@ -374,7 +352,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return int
 	 */
-	@Override
 	public int getNumberOfUniques() {
 		return uniqueIndexes==null ? 0 : uniqueIndexes.size();
 	}
@@ -382,7 +359,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return String
 	 */
-	@Override
 	public String getObjectIdClass() {
 		return objectIdClass;
 	}
@@ -391,7 +367,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>This method always returns <b>null</b>.</p>
 	 * @return <b>null</b>
 	 */
-	@Override
 	public QueryMetadata[] getQueries() {
 		return null;
 	}
@@ -399,7 +374,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return boolean
 	 */
-	@Override
 	public boolean getRequiresExtent() {
 		return requiresExtent;
 	}
@@ -407,7 +381,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return String Schema name or empty String or <b>null</b>
 	 */
-	@Override
 	public String getSchema() {
 		return schema;
 	}
@@ -415,7 +388,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return boolean
 	 */
-	@Override
 	public boolean getSerializeRead() {
 		return serializeRead;
 	}
@@ -431,7 +403,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	/**
 	 * @return UniqueIndexDef[] or TypeDef.NoUniques if there aren't any unique indexes.
 	 */
-	@Override
 	public UniqueIndexDef[] getUniques() {		
 		if (getNumberOfUniques()>0)
 			return uniqueIndexes.toArray(new UniqueIndexDef[getNumberOfUniques()]);
@@ -443,7 +414,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
 	 * @throws JDOUnsupportedOptionException
 	 */
-	@Override
 	public VersionMetadata getVersionMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support getVersionMetadata()");
 	}
@@ -460,8 +430,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		if (cdef==null)
 			throw new NullPointerException("TypeDef.addColumnMetadata(ColumnDef) ColumnDef must not be null");
-		if (DebugFile.trace)
-			DebugFile.writeln("TypeDef.addColumnMetadata(ColumnDef {"+cdef.getName()+","+String.valueOf(cdef.getPosition())+"}) at position "+String.valueOf(getNumberOfColumns()+1));
 		if (positions.containsKey(cdef.getName()))
 			throw new JDOUserException("Column "+cdef.getName()+" is already present at "+getName());
 		if (cdef.getPosition()!=getNumberOfColumns()+1)
@@ -496,8 +464,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		if (positions.containsKey(columnName))
 			throw new JDOUserException("Column "+columnName+" is already present at "+getName());
 		ColumnDef colDef = newColumnMetadata();		
-		if (DebugFile.trace)
-			DebugFile.writeln("TypeDef.addColumnMetadata("+colDef.getName()+","+ColumnDef.typeName(columnType)+","+String.valueOf(maxLength)+","+String.valueOf(decimalDigits)+","+indexType+","+foreignKeyTableName+","+defaultValue+","+(isPrimaryKey ? "true" : "false")+","+String.valueOf(colDef.getPosition())+") at position "+String.valueOf(getNumberOfColumns()+1));
 		colDef.setFamily(columnFamilyName);
 		colDef.setName(columnName);
 		colDef.setType(columnType);
@@ -537,8 +503,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		if (positions.containsKey(columnName))
 			throw new JDOUserException("Column "+columnName+" is already present at "+getName());
 		ColumnDef colDef = newColumnMetadata();
-		if (DebugFile.trace)
-			DebugFile.writeln("TypeDef.addColumnMetadata("+colDef.getName()+","+ColumnDef.typeName(columnType)+","+String.valueOf(maxLength)+","+String.valueOf(decimalDigits)+","+indexType+","+foreignKeyTableName+","+defaultValue+","+String.valueOf(colDef.getPosition())+") no primary key at position "+String.valueOf(getNumberOfColumns()+1));
 		colDef.setFamily(columnFamilyName);
 		colDef.setName(columnName);
 		colDef.setType(columnType);
@@ -564,7 +528,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
 	 * @throws JDOUnsupportedOptionException
 	 */
-	@Override
 	public DatastoreIdentityMetadata newDatastoreIdentityMetadata() throws JDOUnsupportedOptionException {
 		throw new JDOUnsupportedOptionException("TypeDef does not support newDatastoreIdentityMetadata()");
 	}
@@ -574,7 +537,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @param groupName String
 	 * @return MemberGroupDef
 	 */
-	@Override
 	public MemberGroupDef newFetchGroupMetadata(String groupName) {
 		MemberGroupDef group = new MemberGroupDef(groupName);
 		fetchGroups.add(group);
@@ -612,15 +574,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 		}
 		nonUniqueIndexes.add(index);
 	}
-	
-	/**
-	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public InheritanceMetadata newInheritanceMetadata() throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("TypeDef doe snot support newInheritanceMetadata()");
-	}
 
 	/**
 	 * <p>Create a new PrimaryKeyDef.</p>
@@ -628,7 +581,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return PrimaryKeyDef
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public PrimaryKeyDef newPrimaryKeyMetadata() throws JDOUserException {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -649,33 +601,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 			for (ColumnMetadata cdef : pk.getColumns())
 				getColumnByName(cdef.getName()).setPrimaryKey(true);
 	}
-	
-	/**
-	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public PropertyMetadata newPropertyMetadata(String arg0) throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("TypeDef does not support newPropertyMetadata()");
-	}
-
-	/**
-	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public PropertyMetadata newPropertyMetadata(Method arg0) throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("TypeDef does not support newPropertyMetadata()");
-	}
-
-	/**
-	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public QueryMetadata newQueryMetadata(String queryName) throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("TypeDef does not support newQueryMetadata()");
-	}
 
 	/**
 	 * <p>Add unique index.</p>
@@ -695,20 +620,10 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	}
 
 	/**
-	 * <p>This method is not implemented and always throws JDOUnsupportedOptionException.</p>
-	 * @throws JDOUnsupportedOptionException
-	 */
-	@Override
-	public VersionMetadata newVersionMetadata() throws JDOUnsupportedOptionException {
-		throw new JDOUnsupportedOptionException("TypeDef doe snot support newVersionMetadata()");
-	}
-
-	/**
 	 * @param cacheable boolean
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public TypeDef setCacheable(boolean cacheable) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -721,7 +636,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public TypeDef setCatalog(String catalog) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -734,7 +648,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public TypeDef setDetachable(boolean detachable) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -747,8 +660,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
-	public TypeMetadata setEmbeddedOnly(boolean embeddedOnly) {
+	public TypeDef setEmbeddedOnly(boolean embeddedOnly) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.embeddedOnly = embeddedOnly;
@@ -760,8 +672,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
-	public TypeMetadata setIdentityType(IdentityType identityType) {
+	public TypeDef setIdentityType(IdentityType identityType) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.identityType = identityType;
@@ -773,7 +684,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public TypeDef setObjectIdClass(String objectClass) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -786,7 +696,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public TypeDef setRequiresExtent(boolean requiresExtent) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -799,7 +708,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public TypeDef setSchema(String schema) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -812,7 +720,6 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
 	public TypeDef setSerializeRead(boolean serializeRead) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
@@ -825,8 +732,7 @@ public class TypeDef extends BaseDef implements TypeMetadata {
 	 * @return TypeDef <b>this</b>
 	 * @throws JDOUserException if <b>this</b> is unmodifiable.
 	 */
-	@Override
-	public TypeMetadata setTable(String table) {
+	public TypeDef setTable(String table) {
 		if (getUnmodifiable())
 			throw new JDOUserException(getClass().getName().substring(getClass().getName().lastIndexOf('.')+1)+" is set to unmodifiable");
 		this.table = table;

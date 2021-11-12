@@ -531,7 +531,7 @@ public abstract class AbstractTableTest {
 			if (ds instanceof RelationalDataSource) {
 				
 				RelationalView tb1 = ((RelationalDataSource)ds).openRelationalView(recordClass1.newInstance());
-				AbstractQuery qry1 = tb1.newQuery();
+				AbstractQuery qry1 = (AbstractQuery) tb1.newQuery();
 				Predicate amount0 = qry1.newPredicate(Connective.AND).add("amount", Operator.LT, new BigDecimal("0"));
 				qry1.setFilter(amount0);
 			

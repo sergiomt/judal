@@ -1,6 +1,6 @@
 package org.judal.jdbc;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import org.judal.jdbc.metadata.SQLViewDef;
 
 import javax.jdo.JDOException;
+import javax.jdo.Query;
 
 import org.judal.storage.query.sql.SQLQuery;
 import org.judal.storage.query.sql.SQLPredicate;
@@ -50,7 +51,7 @@ import org.judal.storage.query.Predicate;
 	 /**
 	  * <p>Constructor.</p>
 	  * @param dataSource JDBCTableDataSource
-	  * @param tableDef SQLTableDef
+	  * @param viewDef SQLViewDef
 	  * @param recClass Class&lt;? extends Record&gt; Class of the Record implementation that will be used to fetch, load, store and delete records from the RDBMS table.
 	  * @throws JDOException
 	  */
@@ -206,14 +207,14 @@ import org.judal.storage.query.Predicate;
 
 	  /**
 	   * <p>Fetch records which match a given query.</p>
-	   * @param query SQLQuery
+	   * @param qry SQLQuery
 	   * @return RecordSet&lt;&lt;? extends Record&gt;&gt;
 	   * @throws JDOException
 	   */
 	  @Override
-	  public <R extends Record> RecordSet<R> fetch(AbstractQuery qry)
+	  public <R extends Record> RecordSet<R> fetch(Query qry)
 			  throws JDOException {
-		  return super.fetchQuery(qry);	
+		  return super.fetchQuery((AbstractQuery) qry);
 	  } // fetch
 
 	  /**
@@ -223,16 +224,17 @@ import org.judal.storage.query.Predicate;
 	   * @throws JDOException
 	   */
 	@Override
-	public <R extends Record> R fetchFirst(AbstractQuery query) throws JDOException {
+	public <R extends Record> R fetchFirst(Query query) throws JDOException {
+		AbstractQuery querya = (AbstractQuery) query;
 		AbstractQuery query1;
-		if (query.getRangeFromIncl()!=0l || query.getRangeToExcl()!=1l) {
-			query1 = query.clone();
+		if (querya.getRangeFromIncl()!=0l || querya.getRangeToExcl()!=1l) {
+			query1 = querya.clone();
 			query.setRange(0,1);			
 		} else {
-			query1 = query;
+			query1 = querya;
 		}
 		RecordSet<R> rst = super.fetchQuery(query1);
-		if (rst.size()>0)
+		if (!rst.isEmpty())
 			return rst.get(0);
 		else
 			return null;

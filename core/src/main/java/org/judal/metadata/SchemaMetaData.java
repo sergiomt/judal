@@ -1,8 +1,6 @@
 package org.judal.metadata;
 
-import java.util.ArrayList;
-
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -14,6 +12,7 @@ import java.util.ArrayList;
  * KIND, either express or implied.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -24,8 +23,6 @@ import java.util.regex.Pattern;
 import javax.jdo.JDOUserException;
 import javax.jdo.JDOUnsupportedOptionException;
 import javax.jdo.metadata.ColumnMetadata;
-
-import com.knowgate.debug.DebugFile;
 
 /**
  * In-memory structure for holding a data model
@@ -47,12 +44,12 @@ public class SchemaMetaData {
 	public SchemaMetaData() {
 		schemaName = "";
 		catalogName = "";
-		viewDefs = new LinkedHashMap<String, ViewDef>(499);
-		tbleDefs = new LinkedHashMap<String, TableDef>(499);
-		procDefs = new LinkedHashMap<String, ProcedureDef>(499);
-		trigDefs = new LinkedHashMap<String, TriggerDef>(499);
-		seqDefs  = new LinkedHashMap<String,SequenceDef>();
-		packages = new LinkedList<ClassPackage>();
+		viewDefs = new LinkedHashMap<>(499);
+		tbleDefs = new LinkedHashMap<>(499);
+		procDefs = new LinkedHashMap<>(499);
+		trigDefs = new LinkedHashMap<>(499);
+		seqDefs  = new LinkedHashMap<>();
+		packages = new LinkedList<>();
 		ymd = Pattern.compile("(_\\d{4}-\\d{1,2}-\\d{1,2})$");
 	}
 
@@ -84,9 +81,6 @@ public class SchemaMetaData {
 	 * @throws JDOUserException If this SchemaMetaData already contains any object contained at given SchemaMetaData
 	 */
 	public void addMetadata(SchemaMetaData metadata) throws JDOUserException {
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin SchemaMetaData.addMetadata()");
-		}
 
 		for (ClassPackage pkg : metadata.packages)
 			if (containsPackage(pkg.getName()))
@@ -130,23 +124,6 @@ public class SchemaMetaData {
 		for (String seqName : metadata.seqDefs.keySet())
 			addSequence(metadata.getSequence(seqName));
 
-		if (DebugFile.trace) {
-			StringBuilder metaDataInfo = new StringBuilder();
-			metaDataInfo.append("SchemaMetaData tables = [");
-			boolean first = true;
-			for (TableDef tdef : tables()) {
-				if (first)
-					first = false;
-				else
-					metaDataInfo.append(",");
-				metaDataInfo.append(tdef.getName());
-			}
-			metaDataInfo.append("]");
-			DebugFile.incIdent();
-			DebugFile.writeln(metaDataInfo.toString());
-			DebugFile.decIdent();
-			DebugFile.writeln("End SchemaMetaData.addMetadata()");
-		}
 	}
 
 	/**
@@ -218,20 +195,6 @@ public class SchemaMetaData {
 	 */
 	public void addTable(TableDef tableDef, String packageName) {
 
-		if (DebugFile.trace) {
-			DebugFile.writeln("Begin SchemaMetaData.addTable("+tableDef.getName()+","+packageName+")");
-			DebugFile.incIdent();
-			for (ClassPackage pckg : packages())
-				if (pckg.getName().equalsIgnoreCase(packageName==null ? "default" : packageName)) {
-					StringBuilder b = new StringBuilder();
-					b.append("package "+pckg.getName()+" contains tables: ");
-					for (TableDef t : pckg.getClasses())
-						b.append(t.getName()).append(",");
-					if (b.length()>0) b.setLength(b.length()-1);
-					DebugFile.writeln(b.toString());
-				}
-		}
-
 		final String key = tableDef.getName().toLowerCase();
 
 		if (tbleDefs.containsKey(key))
@@ -250,8 +213,7 @@ public class SchemaMetaData {
 			if (existsDefault) {
 				for (TableDef tdef : defaultPackage.getClasses()) {
 					if (tdef.getName().toLowerCase().equals(key)) {
-						if (DebugFile.trace) DebugFile.decIdent();
-						throw new IllegalArgumentException("Package "+defaultPackage.getName()+" already contains a definition for table "+tableDef.getName());					
+						throw new IllegalArgumentException("Package "+defaultPackage.getName()+" already contains a definition for table "+tableDef.getName());
 					}
 				}
 				defaultPackage.addClass(tableDef);
@@ -265,7 +227,6 @@ public class SchemaMetaData {
 				if (pckg.getName().equalsIgnoreCase(packageName)) {
 					for (TableDef tdef : pckg.getClasses()) {
 						if (tdef.getName().toLowerCase().equals(key)) {
-							if (DebugFile.trace) DebugFile.decIdent();
 							throw new IllegalArgumentException("Package "+packageName+" already contains a definition for table "+tableDef.getName());
 						}
 					}
@@ -274,10 +235,6 @@ public class SchemaMetaData {
 				}			
 		}
 
-		if (DebugFile.trace) {
-			DebugFile.decIdent();
-			DebugFile.writeln("End SchemaMetaData.addTable()");
-		}
 	}
 
 	/**
@@ -666,8 +623,6 @@ public class SchemaMetaData {
 			throws ArrayIndexOutOfBoundsException {
 		final String key = tableName.toLowerCase();
 		boolean matches = ymd.matcher(tableName).find();
-		if (DebugFile.trace)
-			DebugFile.writeln(tableName+" matches "+ymd.toString()+" "+String.valueOf(matches));
 		if (tbleDefs.containsKey(tableName))
 			return tbleDefs.get(key).getColumns();
 		else {

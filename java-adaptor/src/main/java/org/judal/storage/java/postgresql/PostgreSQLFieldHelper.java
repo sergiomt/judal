@@ -1,8 +1,7 @@
 package org.judal.storage.java.postgresql;
 
-import java.util.Date;
-
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -13,9 +12,12 @@ import java.util.Date;
  * KIND, either express or implied.
  */
 
+import java.util.Date;
 import java.util.Map;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+
 import java.sql.Array;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -26,7 +28,8 @@ import com.knowgate.stringutils.Str;
 
 import org.judal.storage.FieldHelper;
 import org.judal.storage.table.Record;
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -183,7 +186,7 @@ public class PostgreSQLFieldHelper implements FieldHelper {
 	 */
 	public Map<String, String> getMap(Record oRec, String sKey)
 			throws NoSuchMethodException, SecurityException, ClassNotFoundException, InstantiationException,
-			IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			IllegalAccessException, IllegalArgumentException {
 		if (oRec.isNull(sKey)) {
 			return null;
 		} else {
@@ -193,8 +196,18 @@ public class PostgreSQLFieldHelper implements FieldHelper {
 			} else {
 				if (null==oCnr)
 					oCnr = Class.forName("org.judal.jdbc.HStore").getConstructor(String.class);
-				Object oItr = oCnr.newInstance(oObj.toString());
-				oObj = oItr.getClass().getMethod("asMap").invoke(oItr);
+				Object oItr = null;
+				try {
+					oItr = oCnr.newInstance(oObj.toString());
+					oObj = oItr.getClass().getMethod("asMap").invoke(oItr);
+				} catch (InvocationTargetException e) {
+					throw new InstantiationException(e.getMessage());
+				}
+				try {
+					oObj = oItr.getClass().getMethod("asMap").invoke(oItr);
+				} catch (InvocationTargetException e) {
+					throw new NoSuchMethodException(e.getMessage());
+				}
 			}
 			return (Map<String, String>) oObj;
 		}
@@ -215,9 +228,9 @@ public class PostgreSQLFieldHelper implements FieldHelper {
 	 * @return int One of java.sql.Type
 	 * @throws ArrayIndexOutOfBoundsException if no column with given name is found in Record
 	 */
-	public int getType(Record rec, String columName)
+	public int getType(Record rec, String columnName)
 		throws IllegalArgumentException, ArrayIndexOutOfBoundsException, UnsupportedOperationException {
-		return rec.getColumn(columName).getType();
+		return rec.getColumn(columnName).getType();
 	}
 
 }

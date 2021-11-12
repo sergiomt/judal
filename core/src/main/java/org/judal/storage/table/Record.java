@@ -1,6 +1,6 @@
 package org.judal.storage.table;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -15,7 +15,6 @@ package org.judal.storage.table;
 import java.io.IOException;
 import java.io.Serializable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -37,9 +36,6 @@ import org.judal.metadata.ColumnDef;
 import org.judal.storage.ConstraintsChecker;
 import org.judal.storage.FieldHelper;
 import org.judal.storage.keyvalue.Stored;
-
-import com.knowgate.currency.Money;
-import com.knowgate.gis.LatLong;
 
 /**
  * <p>Record interface.</p>
@@ -206,7 +202,7 @@ public interface Record extends Serializable, Stored {
 	 * @return Money
 	 * @throws NumberFormatException
 	 */
-	Money getMoney(String colname) throws NumberFormatException;
+	Object getMoney(String colname) throws NumberFormatException;
 	
 	/**
 	 * <p>Get value of a short column.</p>
@@ -380,7 +376,7 @@ public interface Record extends Serializable, Stored {
 	 * @throws ClassCastException
 	 * @throws ClassNotFoundException
 	 */
-	LatLong getLatLong(String colname) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, ClassNotFoundException;
+	Object getLatLong(String colname) throws ClassCastException, NumberFormatException, ArrayIndexOutOfBoundsException, ClassNotFoundException;
 	
 	/**
 	 * <p>Get value of string column.</p>
@@ -433,12 +429,11 @@ public interface Record extends Serializable, Stored {
 	 * @throws InstantiationException
 	 * @throws IllegalAccessException
 	 * @throws IllegalArgumentException
-	 * @throws InvocationTargetException
 	 * @throws NoSuchMethodException
 	 * @throws SecurityException
 	 * @throws ClassNotFoundException
 	 */
-	Object getMap(String colname) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException;
+	Object getMap(String colname) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException, ClassNotFoundException;
 	
 	/**
 	 * <p>Set column value.</p>

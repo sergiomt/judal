@@ -1,6 +1,6 @@
 package org.judal.storage.java;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -13,9 +13,9 @@ package org.judal.storage.java;
  */
 
 import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -300,7 +300,7 @@ public class MapRecord extends AbstractRecord implements JavaRecord {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+	public Map<String,String> getMap(String sKey) throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException, NoSuchMethodException, SecurityException, ClassNotFoundException {
 		return (Map<String,String>) super.getMap(sKey);
 	} // getMap
 

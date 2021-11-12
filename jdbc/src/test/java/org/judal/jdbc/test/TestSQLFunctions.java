@@ -91,7 +91,7 @@ public class TestSQLFunctions extends TestJDBC {
 		
 		SingleLongColumnRecord sir = new SingleLongColumnRecord("test_sql_funcs", "RecCount");
 		try (RelationalTable tbl = dts.openRelationalTable(sir)) {
-			AbstractQuery qry = tbl.newQuery();
+			AbstractQuery qry = (AbstractQuery) tbl.newQuery();
 			qry.setResult("COUNT(*) AS RecCount");
 			qry.setResultClass(SingleLongColumnRecord.class);
 			qry.setFilter(qry.newPredicate(Connective.AND).add("desc", Operator.ISNULL));

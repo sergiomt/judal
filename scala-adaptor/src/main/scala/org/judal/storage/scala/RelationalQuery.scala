@@ -25,7 +25,7 @@ class RelationalQuery[R >: Null <: Record](dts: RelationalDataSource , recClass:
 	  viw = dts.openRelationalView(rec)
 	  if (alias!=null && alias.length()>0)
 		  viw.getClass().getMethod("setAlias", classOf[String]).invoke(viw, alias)
-		qry = viw.newQuery
+		qry = viw.newQuery.asInstanceOf[AbstractQuery]
 		prd = qry.newPredicate
 	}
 	

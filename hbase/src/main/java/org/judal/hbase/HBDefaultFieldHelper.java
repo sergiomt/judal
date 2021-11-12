@@ -1,6 +1,7 @@
 package org.judal.hbase;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -11,8 +12,6 @@ package org.judal.hbase;
  * KIND, either express or implied.
  */
 
-import java.lang.reflect.InvocationTargetException;
-
 import java.sql.Types;
 
 import java.util.Date;
@@ -20,7 +19,6 @@ import java.util.Date;
 import org.judal.storage.FieldHelper;
 import org.judal.storage.table.Record;
 
-import com.knowgate.gis.LatLong;
 
 public class HBDefaultFieldHelper implements FieldHelper {
 
@@ -65,7 +63,7 @@ public class HBDefaultFieldHelper implements FieldHelper {
 	}
 
 	@Override
-	public LatLong getLatLong(Record rec, String columName) throws ClassCastException, NumberFormatException,
+	public Object getLatLong(Record rec, String columName) throws ClassCastException, NumberFormatException,
 			ArrayIndexOutOfBoundsException, UnsupportedOperationException {
 		throw new UnsupportedOperationException("HBDefaultFieldHelper does not support method getLatLong()");
 	}
@@ -73,14 +71,13 @@ public class HBDefaultFieldHelper implements FieldHelper {
 	@Override
 	public Object getMap(Record rec, String columName)
 			throws ClassCastException, InstantiationException, IllegalAccessException, IllegalArgumentException,
-			InvocationTargetException, NoSuchMethodException, SecurityException, ClassNotFoundException {
+			NoSuchMethodException, SecurityException, ClassNotFoundException {
 		throw new UnsupportedOperationException("HBDefaultFieldHelper does not support method getMap()");
 	}
 
 	@Override
 	public String getFamilyName(Record rec, String columName)
 			throws IllegalArgumentException, UnsupportedOperationException {
-		// TODO Auto-generated method stub
 		return DEFAULT_COLUMN_FAMILY;
 	}
 

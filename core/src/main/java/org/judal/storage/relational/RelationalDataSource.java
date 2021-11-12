@@ -1,6 +1,6 @@
 package org.judal.storage.relational;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -20,7 +20,7 @@ import org.judal.metadata.NameAlias;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 
-import com.knowgate.tuples.Pair;
+import org.judal.storage.Pair;
 
 /**
  * Basic interface for relational DataSource implementations

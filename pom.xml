@@ -29,11 +29,11 @@
 
     <modules>
         <module>core</module>
+        <module>table</module>
         <module>inmemory</module>
         <module>file</module>
         <module>queues</module>
         <module>java-adaptor</module>
-        <module>scala-adaptor</module>
         <module>jdbc</module>
         <module>bdb</module>
         <module>bdbj</module>
@@ -46,6 +46,7 @@
         <module>firebase</module>
         -->
         <module>manager</module>
+        <module>scala-adaptor</module>
         <module>aexample</module>
     </modules>
 
@@ -56,6 +57,12 @@
 	</properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.judal</groupId>
+            <artifactId>judal-core</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

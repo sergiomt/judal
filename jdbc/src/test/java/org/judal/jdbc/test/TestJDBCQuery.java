@@ -36,7 +36,7 @@ import org.judal.storage.java.test.AdhocMailing;
 import org.junit.Test;
 
 import com.knowgate.stringutils.Uid;
-import static com.knowgate.tuples.Pair.P$;
+import static org.judal.storage.Pair.P$;
 
 import org.junit.Ignore;
 import org.junit.AfterClass;

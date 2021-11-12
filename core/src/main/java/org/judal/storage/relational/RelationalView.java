@@ -1,6 +1,6 @@
 package org.judal.storage.relational;
 
-/**
+/*
  * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -14,7 +14,7 @@ package org.judal.storage.relational;
 
 import javax.jdo.JDOException;
 
-import org.judal.storage.query.AbstractQuery;
+import javax.jdo.Query;
 import org.judal.storage.query.Predicate;
 import org.judal.storage.table.IndexableView;
 import org.judal.storage.table.Record;
@@ -32,7 +32,7 @@ public interface RelationalView extends IndexableView {
 	   * @return AbstractQuery
 	   * @throws JDOException
 	   */
-	  AbstractQuery newQuery() throws JDOException;
+	  Query newQuery() throws JDOException;
 	  
 	  /**
 	   * <p>Create new Predicate.</p>
@@ -46,7 +46,7 @@ public interface RelationalView extends IndexableView {
 	   * @return RecordSet&lt;&lt;? extends Record&gt;&gt;
 	   * @throws JDOException
 	   */
-	  <R extends Record> RecordSet<R> fetch(AbstractQuery query) throws JDOException;
+	  <R extends Record> RecordSet<R> fetch(Query query) throws JDOException;
 	
 	  /**
 	   * <p>Fetch first record which matches a given query.</p>
@@ -54,7 +54,7 @@ public interface RelationalView extends IndexableView {
 	   * @return R extends Record or null if no record was returned by the query
 	   * @throws JDOException
 	   */
-	  <R extends Record> R fetchFirst(AbstractQuery query) throws JDOException;
+	  <R extends Record> R fetchFirst(Query query) throws JDOException;
 
 	  /**
 	   * <p>Count records matching a Predicate.</p>

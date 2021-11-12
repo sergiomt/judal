@@ -1,6 +1,7 @@
 package org.judal.hbase;
 
-/**
+/*
+ * © Copyright 2016 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
  * You may obtain a copy of the License at:
@@ -21,8 +22,7 @@ import org.apache.hadoop.hbase.client.ClusterConnection;
 import org.apache.hadoop.hbase.client.ConnectionFactory;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import com.knowgate.debug.DebugFile;
-import com.knowgate.tuples.Pair;
+import org.judal.storage.Pair;
 
 import org.judal.storage.table.IndexableTable;
 import org.judal.storage.table.IndexableView;
@@ -98,14 +98,12 @@ public class HBTableDataSource extends HBBaseDataSource implements TableDataSour
 		try {
 			try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
 				try (Admin oAdm = oCon.getAdmin()) {
-					if (DebugFile.trace) DebugFile.writeln("HBaseAdmin.getTableDescriptor("+tableName+")");
 					oAdm.getTableDescriptor(tableName);
 					throw new JDOException("HBTableDataSource.createTable() Table "+tableName+" already exists");
 				}
 			}
 		} catch (TableNotFoundException tnfe) {
 			try (ClusterConnection oCon = (ClusterConnection) ConnectionFactory.createConnection(getConfig())) {
-				if (DebugFile.trace) DebugFile.writeln("Creating table "+tableName);
 				oTds = new HTableDescriptor(tableName);
 				for (ColumnDef oCol : tableDef.getColumns()) {
 					String sFamily = oCol.getFamily();
@@ -132,7 +130,6 @@ public class HBTableDataSource extends HBBaseDataSource implements TableDataSour
 				} catch (IOException ioe) {
 					throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
 				}
-				if (DebugFile.trace) DebugFile.writeln("Table "+tableName+" created");
 			} catch (IOException ioe) {
 				throw new JDOException(ioe.getClass().getName()+" "+ioe.getMessage(), ioe);
 			}
@@ -145,7 +142,6 @@ public class HBTableDataSource extends HBBaseDataSource implements TableDataSour
 	public HBTable openTable(Record oRec) throws JDOException {
 		HBTable oTbl = null;
 		try {
-			if (DebugFile.trace) DebugFile.writeln("new HBTable(this, new HTable(getConfig(), "+oRec.getTableName()+"))");
 			oTbl = new HBTable(this, getConfig(), oRec);
 			addTable(oTbl);
 			return oTbl;
