@@ -18,13 +18,12 @@ import org.judal.metadata.IndexDef.Using;
 import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
 
+import org.judal.storage.Pair;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.SchemalessIndexableTable;
 import org.judal.storage.table.SchemalessIndexableView;
 import org.judal.storage.table.SchemalessTableDataSource;
 import org.judal.storage.table.SchemalessView;
-
-import com.knowgate.tuples.Pair;
 
 import com.mongodb.MongoException;
 

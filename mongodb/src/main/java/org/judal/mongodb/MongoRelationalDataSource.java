@@ -21,11 +21,11 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.IndexDef.Type;
 import org.judal.metadata.IndexDef.Using;
+import org.judal.storage.Pair;
 import org.judal.storage.relational.RelationalDataSource;
-import org.judal.storage.relational.RelationalView;
+
 import org.judal.storage.table.Record;
 
-import com.knowgate.tuples.Pair;
 import com.mongodb.MongoException;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;

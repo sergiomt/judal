@@ -41,7 +41,8 @@ public class BSONPredicate extends Predicate {
 	@Override
 	@SuppressWarnings("unchecked")
 	public BSONPredicate add(Object... constructorParameters)
-		throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException,
+			IllegalArgumentException {
 
 		if (DebugFile.trace) {
 			StringBuilder paramValues = new StringBuilder();
@@ -66,7 +67,12 @@ public class BSONPredicate extends Predicate {
 			}
 		}
 
-		BSONTerm term = constructor.newInstance(constructorParameters);
+		BSONTerm term = null;
+		try {
+			term = constructor.newInstance(constructorParameters);
+		} catch (InvocationTargetException e) {
+			throw new InstantiationException(e.getMessage());
+		}
 
 		super.addPart(term);
 		

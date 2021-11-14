@@ -12,6 +12,7 @@ import java.util.Map;
 
 import javax.jdo.JDOException;
 import javax.jdo.JDOUserException;
+import javax.jdo.Query;
 
 import org.judal.metadata.JoinType;
 import org.judal.metadata.NameAlias;
@@ -40,7 +41,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
-import com.knowgate.tuples.Pair;
+import org.judal.storage.Pair;
 
 public class TestMongoRelationalTable extends TestMongoBase {
 
@@ -147,7 +148,7 @@ public class TestMongoRelationalTable extends TestMongoBase {
 				Predicate prd = view.newPredicate().and("symbol", Operator.EQ, symbol).and("open", Operator.GTE, 18).and("trade", Operator.GTE, 19.75);
 				assertEquals(1l, view.count(prd).longValue());
 
-				AbstractQuery qry = view.newQuery();
+				AbstractQuery qry = (AbstractQuery) view.newQuery();
 				qry.setFilter(prd);
 
 				assertNotNull(qry.getFilterPredicate());

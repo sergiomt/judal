@@ -31,11 +31,11 @@ import org.judal.metadata.SchemaMetaData;
 import org.judal.metadata.TableDef;
 import org.judal.metadata.ViewDef;
 
+import org.judal.storage.Pair;
 import org.judal.storage.FieldHelper;
 import org.judal.storage.table.Record;
 import org.judal.storage.table.TableDataSource;
 
-import com.knowgate.tuples.Pair;
 import com.mongodb.MongoException;
 
 public class MongoTableDataSource extends MongoSchemalessTableDataSource implements TableDataSource {

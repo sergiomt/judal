@@ -11,9 +11,8 @@ package org.judal.mongodb;
  * KIND, either express or implied.
  */
 
-import java.util.Map;
-
 import javax.jdo.JDOException;
+import javax.jdo.Query;
 import javax.jdo.metadata.PrimaryKeyMetadata;
 
 import org.bson.Document;
@@ -21,8 +20,6 @@ import org.bson.conversions.Bson;
 import org.judal.metadata.IndexDef.Using;
 import org.judal.metadata.TableDef;
 import org.judal.storage.Param;
-import org.judal.storage.keyvalue.Stored;
-import org.judal.storage.query.AbstractQuery;
 import org.judal.storage.query.bson.BSONQuery;
 import org.judal.storage.relational.RelationalTable;
 import org.judal.storage.table.Record;
@@ -30,7 +27,6 @@ import org.judal.storage.table.SchemalessIndexableTable;
 
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.IndexOptions;
 import com.mongodb.client.model.Indexes;
 import com.mongodb.client.model.UpdateOptions;
@@ -151,7 +147,7 @@ public class MongoTable extends MongoView implements RelationalTable, Schemaless
 	}
 
 	@Override
-	public int update(Param[] values, AbstractQuery filter) throws JDOException {
+	public int update(Param[] values, Query filter) throws JDOException {
 		Bson where = ((BSONQuery) filter).source();
 		Document doc =new Document();
 		for (Param p : values)
@@ -161,7 +157,7 @@ public class MongoTable extends MongoView implements RelationalTable, Schemaless
 	}
 
 	@Override
-	public int delete(AbstractQuery filter) throws JDOException {
+	public int delete(Query filter) throws JDOException {
 		Bson where = ((BSONQuery) filter).source();
 		DeleteResult result = getCollection().deleteMany(where);
 		return (int) result.getDeletedCount();

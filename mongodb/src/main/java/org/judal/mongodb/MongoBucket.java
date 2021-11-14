@@ -2,7 +2,7 @@ package org.judal.mongodb;
 
 import java.io.Serializable;
 
-/**
+/*
  * © Copyright 2018 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -45,8 +45,6 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.connection.Cluster;
 import com.mongodb.operation.BatchCursor;
 import com.mongodb.operation.FindOperation;
-
-// import static org.judal.storage.DataSource.URI;
 
 public class MongoBucket implements Bucket {
 

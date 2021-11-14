@@ -1,6 +1,6 @@
 package org.judal.mongodb;
 
-/**
+/*
  * © Copyright 2018 the original author.
  * This file is licensed under the Apache License version 2.0.
  * You may not use this file except in compliance with the license.
@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.jdo.FetchGroup;
 import javax.jdo.JDOException;
+import javax.jdo.Query;
 
 import org.bson.BsonArray;
 import org.bson.BsonBoolean;
@@ -267,7 +268,7 @@ public class MongoView extends MongoBucket implements RelationalView, Schemaless
 		ReadWriteBinding readBinding = new ClusterBinding(getCluster(), readPref, concern);
 		ReadOperation<BatchCursor<Document>> fop;
 		if (pipeline==null) {
-			fop = new FindOperation<Document>(ns,codec);
+			fop = new FindOperation<>(ns,codec);
 		} else {
 			ColumnGroup fetchGroup = new ColumnGroup();
 			for (ColumnDef cdef : tableDef.getColumns())
@@ -481,20 +482,20 @@ public class MongoView extends MongoBucket implements RelationalView, Schemaless
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends Record> RecordSet<R> fetch(AbstractQuery query) throws JDOException {
+	public <R extends Record> RecordSet<R> fetch(Query query) throws JDOException {
 		return (RecordSet<R>) query.execute();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public <R extends Record> R fetchFirst(AbstractQuery query) throws JDOException {
-		if (query.getFilterPredicate()==null)
+	public <R extends Record> R fetchFirst(Query query) throws JDOException {
+		if (((AbstractQuery) query).getFilterPredicate()==null)
 			throw new NullPointerException("Query predicate cannot be null");
 		AbstractQuery query1;
-		if (query.getMaxRows()==1) {
-			query1  = query;
+		if (((AbstractQuery)query).getMaxRows()==1) {
+			query1  = ((AbstractQuery) query);
 		} else {
-			query1 = query.clone();
+			query1 = ((AbstractQuery) query).clone();
 			if (query1.getFilterPredicate()==null)
 				throw new NullPointerException("Query clone predicate cannot be null");
 			if (query1.getRangeToExcl()-query1.getRangeFromIncl()>1) {
@@ -502,7 +503,7 @@ public class MongoView extends MongoBucket implements RelationalView, Schemaless
 			}
 		}
 		RecordSet<R> rst = (RecordSet<R>) query1.execute();
-		return rst.size()>0 ? rst.get(0) : null;
+		return !rst.isEmpty() ? rst.get(0) : null;
 	}
 
 	@Override
