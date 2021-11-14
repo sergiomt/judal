@@ -215,25 +215,7 @@ public class DataSourceTransaction implements AutoCloseable, javax.transaction.T
 	}
 
 	private boolean contains(XAResource res){
-		if (res instanceof TransactionalResource) {
-			TransactionalResource trs = (TransactionalResource) res;
-			for (XAResource xrs : resources) {
-				if (xrs instanceof TransactionalResource) {
-					if (trs.getId().equals(((TransactionalResource) xrs).getId())) {
-						return true;
-					}
-				} else {
-					if (trs.equals(xrs))
-						return true;
-				}
-			}			
-		} else {
-			for (XAResource xrs : resources) {
-				if (res.equals(xrs))
-					return true;
-			}
-		}
-		return false;
+		return resources.contains(res);
 	}
 
 	/**

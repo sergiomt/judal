@@ -12,12 +12,8 @@ package org.judal.transaction;
  * KIND, either express or implied.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static javax.transaction.Status.*;
 import javax.transaction.xa.XAException;
@@ -25,19 +21,17 @@ import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
 /**
- * <p>Implementation of javax.transaction.xa.XAResource interface.</p>
+ * <p>Abstract base of javax.transaction.xa.XAResource interface.</p>
  * @author Sergio Montoro Ten
  * @version 1.0
  */
 public abstract class TransactionalResource implements XAResource {
 
 	private Xid trid;
-	private int flags;
-	private long created;
 	private int timeout;
 	private boolean prepared;
 
-	private static ConcurrentHashMap<Xid,LinkedList<TransactionalResource>> resources = new ConcurrentHashMap<Xid,LinkedList<TransactionalResource>>();
+	private static TransactionalResourcesMap resources = new TransactionalResourcesMap();
 
 	/**
 	 * <p>Constructor.</p>
@@ -56,13 +50,12 @@ public abstract class TransactionalResource implements XAResource {
 		trid = tid;
 		prepared = false;
 		timeout = -1;
-		created = System.currentTimeMillis();
 		LinkedList<TransactionalResource> list;
 		if (resources.containsKey(tid)) {
 			list = resources.get(tid);
 			list.add(this);
 		} else {
-			list = new LinkedList<TransactionalResource>();
+			list = new LinkedList<>();
 			list.add(this);
 			resources.put(tid, list);
 		}
@@ -95,7 +88,7 @@ public abstract class TransactionalResource implements XAResource {
 	 */
 	public List<TransactionalResource> listResourcesForTransaction(Xid tid) throws XAException {
 		if (!resources.containsKey(tid))
-			resources.put(tid, new LinkedList<TransactionalResource>());
+			resources.put(tid, new LinkedList<>());
 		return Collections.unmodifiableList(resources.get(tid));
 	}
 
@@ -237,4 +230,57 @@ public abstract class TransactionalResource implements XAResource {
 		}
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof TransactionalResource && getId().equals(((TransactionalResource) other).getId());
+	}
+
+	@Override
+	public int hashCode() {
+		return getId().hashCode();
+	}
+
+	private static class TransactionalResourcesMap {
+
+		private final Map<Xid,LinkedList<TransactionalResource>> m;
+		final Object mutex;
+
+		TransactionalResourcesMap() {
+			m = new HashMap<>();
+			mutex = this;
+		}
+
+		public int size() {
+			synchronized (mutex) {return m.size();}
+		}
+		public boolean isEmpty() {
+			synchronized (mutex) {return m.isEmpty();}
+		}
+		public boolean containsKey(Xid key) {
+			synchronized (mutex) {return m.containsKey(key);}
+		}
+		public LinkedList<TransactionalResource> get(Xid key) {
+			synchronized (mutex) {return m.get(key);}
+		}
+
+		public void put(Xid key, LinkedList<TransactionalResource> resourceList) {
+			synchronized (mutex) { m.put(key, resourceList);}
+		}
+
+		public void remove(Xid key) {
+			synchronized (mutex) { m.remove(key); }
+		}
+
+		public void clear() {
+			synchronized (mutex) {m.clear();}
+		}
+
+
+		public Set<Map.Entry<Xid,LinkedList<TransactionalResource>>> entrySet() {
+			synchronized (mutex) {
+				return new HashSet<>(m.entrySet());
+			}
+		}
+
+	}
 }
