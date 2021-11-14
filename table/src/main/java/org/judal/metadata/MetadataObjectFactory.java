@@ -18,13 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import javax.jdo.JDOException;
 
 import com.knowgate.debug.DebugFile;
-
-/**
- * <b>Extensible metadata object factory.</p>
- * @author Sergio Montoro Ten
- * @version 1.0
- */
-import com.knowgate.typeutils.ObjectFactory;;
+import com.knowgate.typeutils.ObjectFactory;
 
 /**
 * Factory of metadata objects.
@@ -43,7 +37,7 @@ public class MetadataObjectFactory extends ObjectFactory {
 	 */
 	public static <T extends TableDef> T newTableDef(Class<T> tableDefSubclass, Object... constructorParameters) throws NoSuchMethodException, JDOException {
 		if (DebugFile.trace)
-			DebugFile.writeln("MetadataObjectFactory.newTableDef("+tableDefSubclass.getName()+","+constructorParameters+")");
+			DebugFile.writeln("MetadataObjectFactory.newTableDef("+tableDefSubclass.getName()+"," + constructorParameters + ")");
 		@SuppressWarnings("unchecked")
 		Constructor<T> tableDefConstructor = (Constructor<T>) getConstructor(tableDefSubclass, getParameterClasses(constructorParameters));
 		if (null==tableDefConstructor)
@@ -180,7 +174,7 @@ public class MetadataObjectFactory extends ObjectFactory {
 				retval = triggerDefConstructor.newInstance(filterParameters(triggerDefConstructor.getParameters(), constructorParameters));
 		} catch (InvocationTargetException | InstantiationException | IllegalAccessException | IllegalArgumentException xcpt) {
 			if (DebugFile.trace)
-				DebugFile.writeln(xcpt.getClass().getName()+" "+xcpt.getMessage()+" MetadataObjectFactory.newTriggerDef(Constructor, "+(constructorParameters.length==0 ? "" : constructorParameters)+")");
+				DebugFile.writeln(xcpt.getClass().getName() + " " + xcpt.getMessage() + " MetadataObjectFactory.newTriggerDef(Constructor, " + (constructorParameters.length==0 ? "" : constructorParameters)+")");
 		}
 		return retval;
 	}
