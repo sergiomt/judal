@@ -88,7 +88,7 @@ public abstract class TransactionalResource implements XAResource {
 	 */
 	public List<TransactionalResource> listResourcesForTransaction(Xid tid) throws XAException {
 		if (!resources.containsKey(tid))
-			resources.put(tid, new LinkedList<>());
+			resources.put(tid, new LinkedList<TransactionalResource>());
 		return Collections.unmodifiableList(resources.get(tid));
 	}
 
