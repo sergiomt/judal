@@ -15,8 +15,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.5.1</version>
         <configuration>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>
@@ -164,6 +164,11 @@
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
       <version>2.4.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.judal</groupId>
+        <artifactId>judal-core</artifactId>
+        <version>1.0</version>
     </dependency>
     <dependency>
       <groupId>org.judal</groupId>

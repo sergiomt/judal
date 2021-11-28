@@ -26,7 +26,7 @@ import org.judal.metadata.ViewDef
 
 import org.judal.Using._
 
-import com.knowgate.tuples.Pair.P$
+import org.judal.storage.Pair.P$
 import com.knowgate.dateutils.GregorianCalendarLocalisation.addMonths
 
 import scala.collection.JavaConverters._

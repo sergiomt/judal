@@ -29,7 +29,7 @@ import org.judal.examples.java.model.map.Student;
 import org.judal.examples.java.model.map.StudentCourse;
 import org.judal.examples.java.model.map.StudentPerCourse;
 
-import static com.knowgate.tuples.Pair.P$;
+import static org.judal.storage.Pair.P$;
 import static com.knowgate.dateutils.GregorianCalendarLocalisation.addMonths;
 
 /**
@@ -52,7 +52,7 @@ public class E20_InnerJoinRelationalQuery {
 
 		// Create the inner join on the fly to query students from course 7
 		try (IndexableView v = dts.openJoinView(INNER, s, AS(s,"s"), AS(c,"c"), P$("id_student","id_student"))) {
-			RecordSet<Student> s80 = v.fetch(s.fetchGroup(), "c.id_course", new Integer(7));
+			RecordSet<Student> s80 = v.fetch(s.fetchGroup(), "c.id_course", 7);
 			for (Student t : s80) {
 				int id = t.getId();
 				String firstName = t.getFirstName();

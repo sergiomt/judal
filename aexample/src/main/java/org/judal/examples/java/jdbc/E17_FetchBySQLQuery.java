@@ -53,7 +53,7 @@ public class E17_FetchBySQLQuery {
 		RelationalDataSource dts = EngineFactory.getDefaultRelationalDataSource();
 		
 		try  (RelationalView viw = dts.openRelationalView(new Student())) {
-			AbstractQuery aqr = viw.newQuery();
+			AbstractQuery aqr = (AbstractQuery) viw.newQuery();
 			aqr.setResult("*");
 			aqr.declareParameters("last_name"); // must be called before setFilter()
 			aqr.setFilter("last_name=?");

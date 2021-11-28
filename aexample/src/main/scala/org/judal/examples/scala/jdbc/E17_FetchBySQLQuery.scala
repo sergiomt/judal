@@ -6,6 +6,7 @@ import java.util.Calendar
 
 import org.judal.storage.EngineFactory
 import org.judal.storage.table.Record
+import org.judal.storage.query.AbstractQuery
 import org.judal.storage.relational.RelationalView
 
 import org.judal.storage.scala.RelationalQuery
@@ -59,7 +60,7 @@ class E17_FetchBySQLQuery {
 	  var viw : RelationalView = null
 		using (viw) {
 		  viw = dts.openRelationalView(new Student)
-			val aqr = viw.newQuery
+			val aqr = viw.newQuery.asInstanceOf[AbstractQuery]
 			aqr.setResult("*")
 			aqr.declareParameters("last_name") // must be called before setFilter()
 			aqr.setFilter("last_name=?")
