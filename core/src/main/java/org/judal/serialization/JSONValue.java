@@ -6,10 +6,7 @@ package org.judal.serialization;
  */
 
 import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;

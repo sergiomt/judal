@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.stream.Collectors;
 
 /**
  * A JSON array. JSONObject supports java.util.List interface.
@@ -254,5 +255,9 @@ public class JSONArray extends ArrayList<Object> {
 			out.append("]");
 		}
 	}
-	
+
+	@Override
+	public String toString() {
+		return this.stream().map(Object::toString).collect(Collectors.joining(","));
+	}
 }
